@@ -99,19 +99,17 @@ Rcpp::List f2_binomial_logit_prep_opencl(
 
 
 
-
 // [[Rcpp::export]]
-List f2_binomial_logit_prep_grad_opencl(
-    const NumericMatrix& b,
-    const NumericVector& y,
-    const NumericMatrix& x,
-    const NumericMatrix& mu,
-    const NumericMatrix& P,
-    const NumericVector& alpha,
-    const NumericVector& wt,
+Rcpp::List f2_binomial_logit_prep_grad_opencl(
+    Rcpp::NumericMatrix  b,
+    Rcpp::NumericVector  y,
+    Rcpp::NumericMatrix  x,
+    Rcpp::NumericMatrix  mu,
+    Rcpp::NumericMatrix  P,
+    Rcpp::NumericVector  alpha,
+    Rcpp::NumericVector  wt,
     int                  progbar
 ) {
-  // dimensions
   int l1 = x.nrow(), l2 = x.ncol(), m1 = b.ncol();
   
   // flatten inputs
@@ -125,20 +123,18 @@ List f2_binomial_logit_prep_grad_opencl(
   
   // allocate outputs
   std::vector<double> qf_flat(m1);
-  std::vector<double> xb_flat((size_t)l1 * m1);
-  std::vector<double> grad_flat((size_t)m1 * l2);
-
-
-  NumericMatrix xb(l1, m1);
-  NumericVector qf(m1);
+  std::vector<double> xb_flat(static_cast<size_t>(l1) * m1);
+  std::vector<double> grad_flat(static_cast<size_t>(m1) * l2);
   
-  #ifdef USE_OPENCL
-
-    
+  Rcpp::NumericMatrix xb(l1, m1);
+  Rcpp::NumericVector qf(m1);
+  
+#ifdef USE_OPENCL
+  
   // load & call kernel runner
-  std::string ksrc    = load_kernel_source("src/f2_binomial_logit_prep_grad.cl");
+  std::string ksrc    = load_kernel_source("src/f2_binomial_logit_prep.cl");
   std::string all_src = ksrc;
- 
+  
   f2_binomial_logit_prep_grad_kernel_runner(
     all_src,
     "f2_binomial_logit_prep_grad",
@@ -153,30 +149,29 @@ List f2_binomial_logit_prep_grad_opencl(
   for (int j = 0; j < m1; ++j) {
     qf[j] = qf_flat[j];
     for (int i = 0; i < l1; ++i) {
-      xb(i, j) = xb_flat[(size_t)j * l1 + i];
+      xb(i, j) = xb_flat[static_cast<size_t>(j) * l1 + i];
     }
   }
- 
+  
 #else
- Rcpp::Rcout << "[INFO] OpenCL not available — returning zero vector/matrices.\n";
- 
+  
+  Rcpp::Rcout << "[INFO] OpenCL not available — returning zero vector/matrices.\n";
+  
 #endif
   
   // wrap gradient directly as arma::mat (m1 rows × l2 cols),
-  // no copies, column‐major data matches armadillo & R
+  // no copies, column-major data matches Armadillo & R
   arma::mat grad_arma(
       grad_flat.data(),  // pointer to your flat array
-      m1,                // n_rows
-      l2,                // n_cols
+      m1,                // n_rows - dimensions
+      l2,                // n_cols - grid points
       false,             // don't copy memory
       false              // strict = false
   );
   
-  return List::create(
-    Named("xb")   = xb,
-    Named("qf")   = qf,
-    Named("grad") = grad_arma
+  return Rcpp::List::create(
+    Rcpp::Named("xb")   = xb,
+    Rcpp::Named("qf")   = qf,
+    Rcpp::Named("grad") = grad_arma
   );
 }
-
-

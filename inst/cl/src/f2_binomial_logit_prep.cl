@@ -132,6 +132,7 @@ __kernel void f2_binomial_logit_prep_grad(
 
     // 5) write back gradient row for grid‐point j
     for (int k = 0; k < l2; ++k) {
-        grad[j*l2 + k] = g_loc[k];
+        grad[k * m1 + j] = g_loc[k];  // column-major layout
+        
     }
 }

@@ -21,14 +21,108 @@ else
   IFS=':' read -ra SYSTEM_PATHS <<< "$PATH"
 fi
 
-##echo "System PATH directories:" >> "$LOG_FILE"
-##for d in "${SYSTEM_PATHS[@]}"; do
-##  echo "$d" >> "$LOG_FILE"
-##done
+# Add dynamic PATH-based entries
+SEARCH_PATHS+=("${SYSTEM_PATHS[@]}")
+
+
+echo "🔍 Current SEARCH_PATHS:"
+for p in "${SEARCH_PATHS[@]}"; do
+  echo "   - $p"
+done
+
+# ------------------------------------------------------------
+# 2. Add user-defined environment variables
+# ------------------------------------------------------------
+for var in OPENCL_HOME OPENCL_SDK; do
+  val="${!var}"
+  if [ -n "$val" ]; then
+    echo "🔧 Found $var=$val"
+    for sub in "" "/include" "/include/CL"; do
+      path="$val$sub"
+      if [ -d "$path" ]; then
+        echo "✅ Adding $path from $var"
+        SEARCH_PATHS+=("$path")
+      else
+        echo "❌ Skipping $path — not found"
+      fi
+    done
+  fi
+done
+
+echo "🔍 Current SEARCH_PATHS:"
+for p in "${SEARCH_PATHS[@]}"; do
+  echo "   - $p"
+done
+
+# ------------------------------------------------------------
+# 3. Detect known SDK roots
+# ------------------------------------------------------------
+declare -A SDK_LABELS=(
+  ["C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA"]="NVIDIA CUDA Toolkit"
+  ["C:/Program Files (x86)/IntelSWTools/OpenCL SDK"]="Intel OpenCL SDK"
+  ["C:/Program Files (x86)/AMD APP SDK"]="AMD APP SDK"
+  ["C:/Program Files (x86)/Intel/oneAPI"]="Intel oneAPI Toolkit"
+)
+
+echo "🔎 Checking for known OpenCL SDK installations..."
+for root in "${!SDK_LABELS[@]}"; do
+  if [ -d "$root" ]; then
+    echo "✅ Found ${SDK_LABELS[$root]} at: $root"
+    SEARCH_PATHS+=("$root" "$root/include" "$root/include/CL")
+  else
+    echo "❌ ${SDK_LABELS[$root]} not found at: $root"
+  fi
+done
+
+echo "🔍 Current SEARCH_PATHS:"
+for p in "${SEARCH_PATHS[@]}"; do
+  echo "   - $p"
+done
+
+# ------------------------------------------------------------
+# 4. Dynamically scan CUDA versioned folders
+# ------------------------------------------------------------
+CUDA_ROOT="C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA"
+if [ -d "$CUDA_ROOT" ]; then
+  for subdir in "$CUDA_ROOT"/v*; do
+    if [ -d "$subdir/include/CL" ]; then
+      echo "🔍 Found CUDA subdir: $subdir"
+      SEARCH_PATHS+=("$subdir/include" "$subdir/include/CL")
+    fi
+  done
+fi
+
+echo "🔍 Current SEARCH_PATHS:"
+for p in "${SEARCH_PATHS[@]}"; do
+  echo "   - $p"
+done
+
+# ------------------------------------------------------------
+# 5. Add fallback static paths (optional)
+# ------------------------------------------------------------
+STATIC_PATHS=(
+  "C:/OpenCL-SDK"
+  "C:/opt"
+  "C:/Program Files (x86)"
+)
+
+for path in "${STATIC_PATHS[@]}"; do
+  if [ -d "$path" ]; then
+    echo "📦 Adding static path: $path"
+    SEARCH_PATHS+=("$path")
+  else
+    echo "❌ Static path not found: $path"
+  fi
+done
+
+echo "🔍 Current SEARCH_PATHS:"
+for p in "${SEARCH_PATHS[@]}"; do
+  echo "   - $p"
+done
 
 # Combine static and dynamic search paths
-SEARCH_PATHS=("C:/Program Files (x86)" "C:/OpenCL-SDK" "C:/opt")
-SEARCH_PATHS+=("${SYSTEM_PATHS[@]}")
+#SEARCH_PATHS=("C:/Program Files (x86)" "C:/OpenCL-SDK" "C:/opt")
+##SEARCH_PATHS+=("${SYSTEM_PATHS[@]}")
 
 echo "🔍 Combined SEARCH_PATHS (n=${#SEARCH_PATHS[@]}): ${SEARCH_PATHS[*]}"
 

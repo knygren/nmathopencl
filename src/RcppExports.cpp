@@ -200,18 +200,18 @@ BEGIN_RCPP
 END_RCPP
 }
 // f2_binomial_logit_prep_grad_opencl
-List f2_binomial_logit_prep_grad_opencl(const NumericMatrix& b, const NumericVector& y, const NumericMatrix& x, const NumericMatrix& mu, const NumericMatrix& P, const NumericVector& alpha, const NumericVector& wt, int progbar);
+Rcpp::List f2_binomial_logit_prep_grad_opencl(Rcpp::NumericMatrix b, Rcpp::NumericVector y, Rcpp::NumericMatrix x, Rcpp::NumericMatrix mu, Rcpp::NumericMatrix P, Rcpp::NumericVector alpha, Rcpp::NumericVector wt, int progbar);
 RcppExport SEXP _glmbayes_f2_binomial_logit_prep_grad_opencl(SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP progbarSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type b(bSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type P(PSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type wt(wtSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type b(bSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type P(PSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type wt(wtSEXP);
     Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
     rcpp_result_gen = Rcpp::wrap(f2_binomial_logit_prep_grad_opencl(b, y, x, mu, P, alpha, wt, progbar));
     return rcpp_result_gen;
