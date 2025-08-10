@@ -130,7 +130,7 @@ if(!missing(prior_list)){
   if(!is.null(prior_list$mu)) mu=prior_list$mu
   if(!is.null(prior_list$Sigma)) Sigma=prior_list$Sigma
   if(!is.null(prior_list$P)) P=prior_list$P
-  if(is.null(prior_list$P)) P=solve(prior_list$Sigma)
+  if(is.null(prior_list$P)) P=(solve(prior_list$Sigma)+t(solve(prior_list$Sigma)))/2
   if(!is.null(prior_list$dispersion)) dispersion=prior_list$dispersion
   else dispersion=NULL
   if(!is.null(prior_list$shape)) shape=prior_list$shape

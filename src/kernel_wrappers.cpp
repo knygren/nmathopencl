@@ -7,6 +7,7 @@
 #include "kernel_wrappers.h"
 #include "kernel_runners.h"
 #include <RcppArmadillo.h>
+#include "famfuncs.h"
 using namespace Rcpp;
 
 using namespace OpenCLHelper;
@@ -180,6 +181,8 @@ Rcpp::List f2_binomial_logit_prep_grad_opencl(
 
 
 
+
+
 // [[Rcpp::export]]
 Rcpp::List f2_prep_grad_opencl(
     std::string family,
@@ -234,7 +237,13 @@ Rcpp::List f2_prep_grad_opencl(
     } else {
       Rcpp::stop("Unsupported link function for binomial family: " + link);
     }
-  } else {
+  }
+  if (family =="poisson"){
+    kernel_name = "f2_poisson_prep_grad";
+    kernel_file  = "src/f2_poisson_prep.cl";
+  }
+    
+  else {
     Rcpp::stop("Unsupported family: " + family);
   }
 
@@ -289,3 +298,98 @@ Rcpp::List f2_prep_grad_opencl(
 
 
 
+
+// [[Rcpp::export]]
+Rcpp::NumericVector f2_accum(
+    std::string family,
+    std::string link,
+    Rcpp::NumericMatrix xb,        // n × m matrix of π = P(y=1)
+    Rcpp::NumericVector qf,        // length m: 0.5*(b-μ)'P(b-μ)
+    Rcpp::NumericVector y,         // length n observed {0,1}
+    Rcpp::NumericVector wt,        // length n weights
+    int progbar                    // 0 = no bar, 1 = show bar
+) {
+  int n = xb.nrow();
+  int m = xb.ncol();
+  Rcpp::NumericVector res(m);
+  
+  for (int i = 0; i < m; ++i) {
+    Rcpp::checkUserInterrupt();
+    
+    // extract column i of xb
+    Rcpp::NumericVector xbi = xb(_, i);
+    
+    // dispatch to appropriate likelihood function
+    Rcpp::NumericVector ll;
+    
+    if (family == "binomial") {
+      ll = dbinom_glmb(y, wt, xbi, true);
+    }
+    
+    if (family=="poisson"){
+      
+      
+      // if (i == 1) {
+      //   const int K = std::min(n, 8);  // max rows to print
+      //   Rcpp::Rcout << "\n[DEBUG] f2_accum: i = " << i << " — inputs to dpois_glmb\n";
+      //   Rcpp::Rcout << std::setprecision(17);
+      //   
+      //   double xb_min = xb(0, i), xb_max = xb(0, i);
+      //   for (int j = 1; j < n; ++j) {
+      //     double val = xb(j, i);
+      //     if (val < xb_min) xb_min = val;
+      //     if (val > xb_max) xb_max = val;
+      //   }
+      //   
+      //   Rcpp::Rcout << "  y.length = " << y.size()
+      //               << ", xb.nrow = " << xb.nrow()
+      //               << ", wt.length = " << wt.size() << "\n";
+      //   Rcpp::Rcout << "  xb[:, " << i << "] range: [" << xb_min << ", " << xb_max << "]\n";
+      //   
+      //   Rcpp::Rcout << "  head(y, xb[,i], wt) for first " << K << " records:\n";
+      //   for (int j = 0; j < K; ++j) {
+      //     Rcpp::Rcout << "    j=" << j
+      //                 << "  y=" << y[j]
+      //                 << "  xb=" << xb(j, i)
+      //                 << "  wt=" << wt[j] << "\n";
+      //   }
+      //   
+      //   Rcpp::Rcout << "  qf[" << i << "] = " << qf[i] << "\n";
+      // }  
+      
+      
+      //ll = dbinom_glmb(y, wt, xbi, true);
+      //ll=dpois_glmb(y,xb,true);
+      ll=dpois_glmb(y,xbi,true);
+      
+      // sumxb = std::accumulate(xb.begin(), xb.end(), 0.0);
+      // sumll2 = std::accumulate(ll.begin(), ll.end(), 0.0);
+      
+      for(int j=0;j<n;j++){
+        ll[j]=ll[j]*wt[j];  
+      }
+      
+      
+    }
+    
+    else {
+      Rcpp::stop("Unsupported family: " + family);
+    }
+    
+    // sum of log-likelihoods
+    double sumll = std::accumulate(ll.begin(), ll.end(), 0.0);
+    
+    // total negative log-lik = quadratic form + (− sum log-lik)
+    res[i] = qf[i] - sumll;
+    // 
+    // if (i == 1) {
+    //   Rcpp::Rcout << "  sumxb = " << std::setprecision(17) << sumxb << "\n";
+    //   Rcpp::Rcout << "  sum11_raw = " << std::setprecision(17) << sumll2 << "\n";
+    //   Rcpp::Rcout << "  sum11 = " << std::setprecision(17) << sumll << "\n";
+    //   Rcpp::Rcout << "  res[1] = " << std::setprecision(17) << res(i) << "\n";
+    // }
+    
+  }
+  
+  return res;
+}

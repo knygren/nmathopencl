@@ -29,10 +29,6 @@ f2_binomial_logit_prep_v3 <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
     .Call(`_glmbayes_f2_binomial_logit_prep_v3`, b, y, x, mu, P, alpha, wt, progbar)
 }
 
-f2_accum <- function(family, link, xb, qf, y, wt, progbar) {
-    .Call(`_glmbayes_f2_accum`, family, link, xb, qf, y, wt, progbar)
-}
-
 .RSS <- function(y, x, b, alpha, wt) {
     .Call(`_glmbayes_RSS`, y, x, b, alpha, wt)
 }
@@ -55,6 +51,10 @@ f2_binomial_logit_prep_grad_opencl <- function(b, y, x, mu, P, alpha, wt, progba
 
 f2_prep_grad_opencl <- function(family, link, b, y, x, mu, P, alpha, wt, progbar) {
     .Call(`_glmbayes_f2_prep_grad_opencl`, family, link, b, y, x, mu, P, alpha, wt, progbar)
+}
+
+f2_accum <- function(family, link, xb, qf, y, wt, progbar) {
+    .Call(`_glmbayes_f2_accum`, family, link, xb, qf, y, wt, progbar)
 }
 
 nmath_test_wrapper <- function() {

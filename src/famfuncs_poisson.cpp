@@ -156,6 +156,7 @@ NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,Numer
     // Moving Loop inside the function is key for speed
 
     NumericVector yy(l1);
+    NumericVector yy_alt(l1);
     NumericVector res(m1);
     NumericMatrix bmu(l2,1);
 
@@ -166,13 +167,9 @@ NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,Numer
 
 
     for(int i=0;i<m1;i++){
-//      Rcpp::checkUserInterrupt();
+      Rcpp::checkUserInterrupt();
       
-//      if(progbar==1){ 
-//        progress_bar2(i, m1-1);
-//        if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
-//      };  
-      
+
       
     b2temp=b(Range(0,l2-1),Range(i,i));
     arma::mat b2(b2temp.begin(), l2, 1, false); 
@@ -182,15 +179,19 @@ NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,Numer
         
     res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
     
-    xb2=exp(alpha2+ x2 * b2);
+        xb2=exp(alpha2+ x2 * b2);
 
-    yy=-dpois_glmb(y,xb,true);
+        yy=-dpois_glmb(y,xb,true);
+
 
     for(int j=0;j<l1;j++){
     yy[j]=yy[j]*wt[j];  
     }
 
+
+    
     res(i) =std::accumulate(yy.begin(), yy.end(), res1);
+    
 
     }
     
