@@ -61,3 +61,19 @@ Rcpp::List f2_binomial_logit_prep_grad_opencl(
     Rcpp::NumericVector wt,
     int                  progbar = 0
 );
+
+
+
+
+Rcpp::List f2_prep_grad_opencl(
+    std::string family,
+    std::string link,
+    Rcpp::NumericMatrix  b,
+    Rcpp::NumericVector  y,
+    Rcpp::NumericMatrix  x,
+    Rcpp::NumericMatrix  mu,
+    Rcpp::NumericMatrix  P,
+    Rcpp::NumericVector  alpha,
+    Rcpp::NumericVector  wt,
+    int                  progbar=0
+);

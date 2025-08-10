@@ -354,16 +354,37 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
     // );
     // 
     
+    // if (verbose) {
+      
+    //   Rcpp::Rcout << "Initiating f2_binomial_logit_prep_grad_opencl: "
+    //               << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+    //               << "\n";
+    // }
+    // 
+    // 
+    // // New wrapper: precompute grid info and accumulate gradients in one go
+    // Rcpp::List prepGrad_v1 = f2_binomial_logit_prep_grad_opencl(
+    //   G4,          // NumericMatrix b
+    //   y,           // NumericVector y
+    //   x,           // NumericMatrix x
+    //   mu,          // NumericMatrix mu 
+    //   P,           // NumericMatrix P
+    //   alpha,       // NumericVector alpha
+    //   wt,          // NumericVector wt
+    //   progbar     // int progbar
+    // );
+
     if (verbose) {
       
-      Rcpp::Rcout << "Initiating f2_binomial_logit_prep_grad_opencl: "
+      Rcpp::Rcout << "Initiating f2_prep_grad_opencl: "
                   << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
                   << "\n";
     }
     
     
-    // New wrapper: precompute grid info and accumulate gradients in one go
-    Rcpp::List prepGrad_v1 = f2_binomial_logit_prep_grad_opencl(
+    Rcpp::List prepGrad_v2 = f2_prep_grad_opencl(
+      family,
+      link,
       G4,          // NumericMatrix b
       y,           // NumericVector y
       x,           // NumericMatrix x
@@ -373,12 +394,13 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
       wt,          // NumericVector wt
       progbar     // int progbar
     );
-
     
-    NumericMatrix xb = prepGrad_v1["xb"];
-    NumericVector qf = prepGrad_v1["qf"];
+    
+    
+    NumericMatrix xb = prepGrad_v2["xb"];
+    NumericVector qf = prepGrad_v2["qf"];
 //    cbars2 =prepGrad_v1["grad"];
-    cbars2 = Rcpp::as<arma::mat>(prepGrad_v1["grad"]);
+    cbars2 = Rcpp::as<arma::mat>(prepGrad_v2["grad"]);
 // 
 //     for (arma::uword i = 0; i < std::min((arma::uword)10, cbars2.n_rows); ++i) {
 //       Rcpp::Rcout << "Grid point " << i << ": ";
@@ -498,6 +520,8 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
   }
   
   if(family=="quasibinomial"  && link=="logit"){
+    
+    
     if (verbose) {
       
       Rcpp::Rcout << "Initiating NegLL Calculations: "
@@ -511,6 +535,10 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
                   << "\n";
     }
     cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,progbar);
+    
+    
+    
+    
   }
   if(family=="quasibinomial" && link=="probit"){
     if (verbose) {
