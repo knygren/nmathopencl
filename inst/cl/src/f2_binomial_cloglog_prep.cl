@@ -66,7 +66,7 @@ __kernel void f2_binomial_cloglog_prep_grad(
 
         double resid = ((y[i] * atemp / p1) - ((1.0 - y[i]) * atemp / p2)) * wt[i];
         for (int k = 0; k < l2; ++k) {
-            g_loc[k] += X[k*l1 + i] * resid;
+            g_loc[k] -= X[k*l1 + i] * resid;
         }
     }
 
