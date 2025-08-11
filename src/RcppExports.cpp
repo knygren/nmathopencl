@@ -237,6 +237,26 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// f2_f3_opencl
+Rcpp::List f2_f3_opencl(std::string family, std::string link, Rcpp::NumericMatrix b, Rcpp::NumericVector y, Rcpp::NumericMatrix x, Rcpp::NumericMatrix mu, Rcpp::NumericMatrix P, Rcpp::NumericVector alpha, Rcpp::NumericVector wt, int progbar);
+RcppExport SEXP _glmbayes_f2_f3_opencl(SEXP familySEXP, SEXP linkSEXP, SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP progbarSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
+    Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type b(bSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type P(PSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type wt(wtSEXP);
+    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
+    rcpp_result_gen = Rcpp::wrap(f2_f3_opencl(family, link, b, y, x, mu, P, alpha, wt, progbar));
+    return rcpp_result_gen;
+END_RCPP
+}
 // f2_accum
 Rcpp::NumericVector f2_accum(std::string family, std::string link, Rcpp::NumericMatrix xb, Rcpp::NumericVector qf, Rcpp::NumericVector y, Rcpp::NumericVector wt, int progbar);
 RcppExport SEXP _glmbayes_f2_accum(SEXP familySEXP, SEXP linkSEXP, SEXP xbSEXP, SEXP qfSEXP, SEXP ySEXP, SEXP wtSEXP, SEXP progbarSEXP) {
@@ -527,6 +547,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_f2_binomial_logit_prep_opencl", (DL_FUNC) &_glmbayes_f2_binomial_logit_prep_opencl, 8},
     {"_glmbayes_f2_binomial_logit_prep_grad_opencl", (DL_FUNC) &_glmbayes_f2_binomial_logit_prep_grad_opencl, 8},
     {"_glmbayes_f2_prep_grad_opencl", (DL_FUNC) &_glmbayes_f2_prep_grad_opencl, 10},
+    {"_glmbayes_f2_f3_opencl", (DL_FUNC) &_glmbayes_f2_f3_opencl, 10},
     {"_glmbayes_f2_accum", (DL_FUNC) &_glmbayes_f2_accum, 7},
     {"_glmbayes_nmath_test_wrapper", (DL_FUNC) &_glmbayes_nmath_test_wrapper, 0},
     {"_glmbayes_rindep_norm_gamma_reg_std_cpp", (DL_FUNC) &_glmbayes_rindep_norm_gamma_reg_std_cpp, 12},

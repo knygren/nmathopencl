@@ -53,6 +53,10 @@ f2_prep_grad_opencl <- function(family, link, b, y, x, mu, P, alpha, wt, progbar
     .Call(`_glmbayes_f2_prep_grad_opencl`, family, link, b, y, x, mu, P, alpha, wt, progbar)
 }
 
+f2_f3_opencl <- function(family, link, b, y, x, mu, P, alpha, wt, progbar) {
+    .Call(`_glmbayes_f2_f3_opencl`, family, link, b, y, x, mu, P, alpha, wt, progbar)
+}
+
 f2_accum <- function(family, link, xb, qf, y, wt, progbar) {
     .Call(`_glmbayes_f2_accum`, family, link, xb, qf, y, wt, progbar)
 }

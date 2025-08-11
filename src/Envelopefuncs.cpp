@@ -456,8 +456,8 @@ else{
       link,
       xb      ,
       qf      ,
-      y       = y,
-      wt      = wt,
+      y       ,
+      wt      ,
       progbar = 0
     );
 
@@ -622,8 +622,8 @@ else{
         link,
         xb      ,
         qf      ,
-        y       = y,
-        wt      = wt,
+        y       ,
+        wt      ,
         progbar = 0
       );
       
@@ -797,8 +797,8 @@ else{
         link,
         xb      ,
         qf      ,
-        y       = y,
-        wt      = wt,
+        y       ,
+        wt      ,
         progbar = 0
       );
       
