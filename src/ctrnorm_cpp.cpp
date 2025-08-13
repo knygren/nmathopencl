@@ -26,7 +26,9 @@ using namespace Rcpp;
 
 
 double safe_qnorm_logp(double logp, double mu, double sigma, bool lower_tail) {
-  tbb::mutex::scoped_lock lock(qnorm_mutex);
+#if !defined(__EMSCRIPTEN__) && !defined(__wasm__)
+    tbb::mutex::scoped_lock lock(qnorm_mutex);
+#endif  
   return R::qnorm(logp, mu, sigma, lower_tail, true);  // log.p = TRUE
 }
 
