@@ -145,9 +145,9 @@ Prior_Setup<-function(formula,data=NULL,family=gaussian,pwt=0.05 ,
     Sigma <- ((1 - pwt) / pwt) * V0  
   }
   else {  
-    ## diagonal only prior  
-    sigma2_vec  <- (1 - pwt) / pwt * diag(V0)  
-    Sigma <- diag(sigma2_vec, nrow = nvar, ncol = nvar)  
+    scale_vec <- sqrt((1 - pwt) / pwt)
+    scale_mat <- outer(scale_vec, scale_vec)
+    Sigma <- V0 * scale_mat
   }  
   
   
