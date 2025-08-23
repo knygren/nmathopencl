@@ -264,6 +264,23 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
   dispersion2<-sim$dispersion
 
   famfunc<-sim$famfunc
+
+  
+    
+  # Determine family type for dispersion handling
+  is_gaussian <- fit$family$family == "gaussian"
+  is_quasi <- fit$family$family %in% c("quasipoisson", "quasibinomial")
+  
+  # Scale weights and fix dispersion if needed
+  if (is_gaussian) {
+    wt_scaled <- wtin / dispersion2
+    dispersion_fixed <- 1
+  } else {
+    wt_scaled <- wtin
+    dispersion_fixed <- dispersion2
+  }
+  
+  
   
   Prior<-list(mean=prior_list$mu,Variance=prior_list$Sigma)
   names(Prior$mean)<-colnames(fit$x)
@@ -271,11 +288,11 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
   rownames(Prior$Variance)<-colnames(fit$x)
   
   ### Set dispersion to null for quasi-families to prevent DIC from calculating
-
+  
   if (!is.null(offset)) {
     if(length(dispersion2)==1){
-        #    DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
-       
+      #    DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
+      
       if(fit$family$family=="quasipoisson"||fit$family$family=="quasibinomial"){
         DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/sim$dispersion,dispersion=1)
         res=residuals(summary(sim))
@@ -288,10 +305,10 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
       DICinfo$Deviance=rowSums(res*res)    
       DICinfo$DIC=DICinfo$DIC*sim$dispersion    }
       
-          }
+    }
     
     if(length(dispersion2)>1){
-    #  DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+      #  DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
       DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
     }
     
@@ -300,29 +317,35 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
     if(length(dispersion2)==1){
       if(fit$family$family=="quasipoisson"||fit$family$family=="quasibinomial"){
         DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/sim$dispersion,dispersion=1)
+
         res=residuals(summary(sim))
         DICinfo$Deviance=rowSums(res*res)    
         DICinfo$DIC=DICinfo$DIC*sim$dispersion    
         #  DICinfo$DIC=NULL      
       }
       #else  DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
-      else{ DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/sim$dispersion,dispersion=1)
+      else{
+        DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/sim$dispersion,dispersion=1)
+
+
+        
       res=residuals(summary(sim))
       DICinfo$Deviance=rowSums(res*res)    
-      DICinfo$DIC=DICinfo$DIC*sim$dispersion   } 
+  ##    DICinfo$DIC=DICinfo$DIC*sim$dispersion
+      } 
       
-
-          }
+      
+    }
     
     if(length(dispersion2)>1){
-    #  DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+      #  DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
       DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
     }
     
     linear.predictors<-t(x%*%t(sim$coefficients))
     
   }
-
+  
 
   # Only update this here so that DIC calculation above works
   dispersion2<-sim$dispersion
