@@ -8,7 +8,8 @@ Prior_Setup(
   formula,
   data = NULL,
   family = gaussian(),
-  pwt = 0.05,
+  pwt = 0.01,
+  n_prior = NULL,
   intercept_source = c("full_model", "null_model"),
   effects_source = c("null_effects", "full_model"),
   subset = NULL,
@@ -30,6 +31,8 @@ Prior_Setup(
 \item{family}{a description of the error distribution and linke function to be used in the model.}
 
 \item{pwt}{Weight on the prior relative to the likelihood function at the the maximum likelihood estimate.}
+
+\item{n_prior}{Optional argument with number of prior observations (either a scalar or a vector). When provided, this used together with the number of likelihood observations to compute the pwt.}
 
 \item{intercept_source}{Specifies the method through which the prior mean for the intercept term is set. Options are based on the classical intercept only (null_model) or full_models.}
 

@@ -6,6 +6,7 @@
 #' The \code{factory-fresh} default is \code{na.omit}. Another possible value is \code{NULL}.
 #' @param family a description of the error distribution and linke function to be used in the model.
 #' @param pwt Weight on the prior relative to the likelihood function at the the maximum likelihood estimate.
+#' @param n_prior Optional argument with number of prior observations (either a scalar or a vector). When provided, this used together with the number of likelihood observations to compute the pwt.
 #' @param intercept_source Specifies the method through which the prior mean for the intercept term is set. Options are based on the classical intercept only (null_model) or full_models.  
 #' @param effects_source Specifies the method through which the prior means for the effects terms are set. Options are null_effects (prior means set to zero) or full_model (effect means set to match maximum likelihood estimates).  
 #' @inheritParams stats::model.frame
@@ -25,7 +26,8 @@
 
 ## Note arguments outside of first two are currently not used
 
-Prior_Setup<-function(formula,data=NULL,family=gaussian(),pwt=0.05 ,
+Prior_Setup<-function(formula,data=NULL,family=gaussian(),pwt=0.01 ,
+                      n_prior=NULL,
                       intercept_source = c("full_model", "null_model"),
                       effects_source = c("null_effects", "full_model"),
                       subset = NULL, na.action = na.fail, 
@@ -76,6 +78,20 @@ Prior_Setup<-function(formula,data=NULL,family=gaussian(),pwt=0.05 ,
   glm_full=glm(formula, family = family,data=data)
   V0 <- vcov(glm_full)
   
+  glm_summary=summary(glm_full)
+  
+  n_likelihood <- glm_summary$df.residual + glm_summary$df[1]  # residual df + model rank
+  
+  # Override pwt if n_prior is provided
+  if (!is.null(n_prior)) {
+    if (!is.numeric(n_prior) || length(n_prior) != 1 || n_prior <= 0) {
+      stop("n_prior must be a single positive numeric value")
+    }
+    pwt <- n_prior / (n_prior + n_likelihood)
+    message("Computed pwt = ", round(pwt, 4),
+            " from n_prior = ", n_prior,
+            " and n_likelihood = ", n_likelihood)
+  }
   
   
   ## conditional dispersion
