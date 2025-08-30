@@ -38,11 +38,16 @@ anova.glmb<-function(object,...){
   
   n_obs=nobs(object)
   ff_all=formula(object)
-  mf_all=model.frame(ff_all)  
+  data <- object$data
+  
+
+  mf_all=model.frame(ff_all,data)  
   nvar_all=ncol(mf_all)
-  terms_all=terms(ff_all)
+#  terms_all=terms(ff_all)
+  terms_all=terms(mf_all)
   tl_all=attr(terms_all,"term.labels") ## terms
   nterms_all=length(tl_all)
+  
   
   
   # Set up data frame that will hold all information and popualte with
@@ -70,21 +75,39 @@ anova.glmb<-function(object,...){
   tt2=terms_all
   
   
+  message("Full model formula: ", deparse(formula(object)))  
 
   while(nterms_left>0){
     
     ## Update the formula with one less term
     
-    if(nterms_left>1){
-      tt2=drop.terms(tt2,nterms_left,keep.response=TRUE)
-      newff=formula(tt2)
+    #if(nterms_left>1){
+    #  tt2=drop.terms(tt2,nterms_left,keep.response=TRUE)
+    #  newff=formula(tt2)
+    #}
+    #else{ newff[3]=1}
+    
+    if(nterms_left > 1){
+##      tt2 = drop.terms(tt2, nterms_left, keep.response = TRUE)
+##      newff = formula(tt2)
+      
+      tt2 = drop.terms(tt2, nterms_left, keep.response = TRUE)
+      newff = update(ff_all, paste(". ~", paste(attr(tt2, "term.labels"), collapse = " + ")))
+      
+    } else {
+      newff = update(ff_all, . ~ 1)
     }
-    else{ newff[3]=1}
     
-    ## Update the data and prior with fewer variables 
     
-    mf=model.frame(newff)
-    mm=model.matrix(mf)
+    mf=model.frame(newff,data)
+    
+    terms_noy <- terms(mf)
+    attr(terms_noy, "response") <- 0
+
+    mm <- model.matrix(terms_noy, mf)
+    
+##    mm=model.matrix(mf)
+
     nvar=ncol(mm)
     mu2=matrix(as.matrix(mu[1:nvar,1],ncol=1),ncol=1)
     V2=matrix(V[1:nvar,1:nvar],nrow=nvar,ncol=nvar)
@@ -92,20 +115,31 @@ anova.glmb<-function(object,...){
     # Run glmb model for smaller model
     prior=list(mu=mu2,Sigma=V2)
   
-    
+    message("Running model: ", deparse(newff))
+        
 #    object2<-glmb(n=n,newff, family = obj_family,prior=prior,Gridtype=2)
-    object2<-glmb(n=n,newff, family = obj_family,pfamily=dNormal(mu2,V2,dispersion))
+    object2<-glmb(n=n,newff, family = obj_family,pfamily=dNormal(mu2,V2,dispersion),data=data, Gridtype = 2,
+                  use_parallel = TRUE,
+                  use_opencl = TRUE,
+                  verbose=FALSE)
     
     # Update anova_out table
     
     anova_out[(nterms_left),3]=nobs(object)-object2$pD
-    anova_out[(nterms_left),4]=colMeans(object2$deviance)
+    
+    dev <- object2$deviance
+    dev_mean <- if (is.null(dev)) NA else if (is.vector(dev)) mean(dev) else colMeans(dev)
+    anova_out[nterms_left, 4] <- dev_mean
+    
+##    anova_out[(nterms_left),4]=colMeans(object2$deviance)
     anova_out[(nterms_left),5]=object2$pD
     anova_out[(nterms_left),6]=object2$DIC
     
     # decrement nterms_left by 1
     
     nterms_left=nterms_left-1
+    
+
   }    
   
   # Wrapup by populatibg anova_out matrix
