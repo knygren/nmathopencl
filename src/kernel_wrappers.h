@@ -92,3 +92,8 @@ Rcpp::List f2_f3_opencl(
     Rcpp::NumericVector  wt,
     int                  progbar=0
 );
+
+// Rcpp-exported wrapper that returns the number of detected OpenCL-compatible GPU cores.
+// If OpenCL is not available, returns 1 as a safe fallback.
+// Implementation lives in kernel_wrappers.cpp and wraps detect_num_gpus_internal().
+int get_opencl_core_count();

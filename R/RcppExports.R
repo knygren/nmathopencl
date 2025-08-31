@@ -61,6 +61,10 @@ f2_accum <- function(family, link, xb, qf, y, wt, progbar) {
     .Call(`_glmbayes_f2_accum`, family, link, xb, qf, y, wt, progbar)
 }
 
+get_opencl_core_count <- function() {
+    .Call(`_glmbayes_get_opencl_core_count`)
+}
+
 nmath_test_wrapper <- function() {
     .Call(`_glmbayes_nmath_test_wrapper`)
 }

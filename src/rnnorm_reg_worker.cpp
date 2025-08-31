@@ -105,6 +105,8 @@
       double a1 = 0.0;
       
       while (a1 == 0.0) {
+        
+        
         // 1) slice selection
         //double U  = R::runif(0.0, 1.0)
         double U = safe_runif();
@@ -292,6 +294,13 @@
           double test = LLconst[J]+ testtemp2(0,0) - std::log(U2)- testll2[0];
           
           // 5) Accept/reject logic
+ 
+ //if (std::fmod(draws[i], 100.0) == 0.0) {
+//   if(RcppParallel::RcppParallelInterrupt()){
+//    return; 
+//   }
+ //}
+ 
           
           if (test >= 0.0) {
             

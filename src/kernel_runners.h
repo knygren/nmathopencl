@@ -90,3 +90,8 @@ void f2_f3_kernel_runner(
     std::vector<double>&          grad_flat,
     int                           progbar = 0
 );
+
+
+// Internal-only GPU detection for envelope scaling
+int detect_num_gpus_internal();
+

@@ -605,3 +605,14 @@ Rcpp::NumericVector f2_accum(
   
   return res;
 }
+
+
+
+// [[Rcpp::export]]
+int get_opencl_core_count() {
+#ifdef USE_OPENCL
+  return std::max(1, detect_num_gpus_internal());  // ensure at least 1
+#else
+  return 1;  // fallback when OpenCL is not available
+#endif
+}

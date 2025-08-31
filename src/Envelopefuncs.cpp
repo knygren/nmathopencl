@@ -95,12 +95,29 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
   G1b=xx_1b*arma::trans(bStar_2)+xx_2b*arma::trans(omega);
   Lint=yy_1b*arma::trans(bStar_2)+yy_2b*arma::trans(omega);
   
+  
+  int core_CNT=get_opencl_core_count();
+  
+  if (verbose) {
+    Rcpp::Rcout << "[INFO] OpenCL core count = " << core_CNT << "\n";
+  }
+  
   // Second row in G1b here is the posterior mode
   
   NumericVector gridindex(l1);
   
   if(Gridtype==2){
-    gridindex=EnvelopeOpt(a_2,n);
+    // Temporarily scale n to encourage richer envelopes when GPU parallelism is available
+    int scaled_n = std::max(1, n * core_CNT);
+    
+    if (verbose) {
+      Rcpp::Rcout << "[INFO] Scaling n from " << n << " to " << scaled_n
+                  << " for envelope optimization.\n";
+    }
+    
+    gridindex = EnvelopeOpt(a_2, scaled_n);
+    
+    //gridindex=EnvelopeOpt(a_2,n);
   }
   
   NumericVector Temp1=G1( _, 0);
