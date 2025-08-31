@@ -7,8 +7,10 @@
 #' @param family a description of the error distribution and linke function to be used in the model.
 #' @param pwt Weight on the prior relative to the likelihood function at the the maximum likelihood estimate.
 #' @param n_prior Optional argument with number of prior observations (either a scalar or a vector). When provided, this used together with the number of likelihood observations to compute the pwt.
+#' @param sd Optional vector argument with the prior standard deviations for the coefficients
 #' @param intercept_source Specifies the method through which the prior mean for the intercept term is set. Options are based on the null intercept only model (null_model) or full_models. The default is the null model which is safer if variables are not centered. 
 #' @param effects_source Specifies the method through which the prior means for the effects terms are set. Options are null_effects (prior means set to zero) or full_model (effect means set to match maximum likelihood estimates).  
+#' @param mu Optional vector argument with the prior means for the coefficients
 #' @inheritParams stats::model.frame
 #' @return A list with items related to the prior.
 #' \item{mu}{A prior mean vector}
@@ -27,9 +29,10 @@
 ## Note arguments outside of first two are currently not used
 
 Prior_Setup<-function(formula,data=NULL,family=gaussian(),pwt=0.01 ,
-                      n_prior=NULL,
+                      n_prior=NULL, sd=NULL,
                       intercept_source = c("null_model", "full_model"),
                       effects_source = c("null_effects", "full_model"),
+                      mu=NULL,
                       subset = NULL, na.action = na.fail, 
                          drop.unused.levels = FALSE, xlev = NULL, ...){
 
@@ -40,10 +43,7 @@ Prior_Setup<-function(formula,data=NULL,family=gaussian(),pwt=0.01 ,
   intercept_source <- match.arg(intercept_source)
   effects_source <- match.arg(effects_source)
   
-  
-  
-  
-  
+
   mf<-model.frame(formula,data)
   x<-model.matrix(formula,mf)
   
@@ -72,17 +72,41 @@ Prior_Setup<-function(formula,data=NULL,family=gaussian(),pwt=0.01 ,
   var_names <- colnames(x)
   colnames(x) <- var_names
   #nvar=length(object$coefficients)
-  mu=matrix(0,nrow=nvar,ncol=1, 
-            dimnames = list(var_names, "mu")
-            )
+#  mu=matrix(0,nrow=nvar,ncol=1, 
+#            dimnames = list(var_names, "mu")
+#            )
 
+  mu_internal <- matrix(0, nrow = nvar, ncol = 1, dimnames = list(var_names, "mu"))
+ 
+  
+  
   glm_full=glm(formula, family = family,data=data)
   V0 <- vcov(glm_full)
   
   glm_summary=summary(glm_full)
   
   n_likelihood <- glm_summary$df.residual + glm_summary$df[1]  # residual df + model rank
+
+  # If sd is provided, use it to compute pwt
+if (!is.null(sd)) {
+  if (!is.numeric(sd) || any(is.na(sd))) {
+    stop("sd must be a numeric vector with no missing values.")
+  }
+  if (length(sd) != nvar) {
+    stop("Length of sd must match number of coefficients (", nvar, ").")
+  }
+
+  # Compute pwt from sd and V0
+  V0_diag <- diag(V0)
+  if (any(V0_diag <= 0)) {
+    stop("Diagonal entries of V0 must be positive to compute pwt from sd.")
+  }
+
+  pwt <- V0_diag / (V0_diag + sd^2)
+  message("Computed pwt from user-specified prior standard deviations (sd).")
+}
   
+    
   # Override pwt if n_prior is provided
   if (!is.null(n_prior)) {
     if (!is.numeric(n_prior) || length(n_prior) != 1 || n_prior <= 0) {
@@ -154,7 +178,7 @@ Prior_Setup<-function(formula,data=NULL,family=gaussian(),pwt=0.01 ,
     chosen_int <- switch(intercept_source,
                          null_model = coef(glm_null)[1],
                          full_model = coef(glm_full)[1])
-    mu[1, 1] <- chosen_int
+    mu_internal[1, 1] <- chosen_int
     
     
     
@@ -169,12 +193,37 @@ Prior_Setup<-function(formula,data=NULL,family=gaussian(),pwt=0.01 ,
     effect_names <- var_names[-1]
     if (effects_source == "full_model") {
       coefs <- coef(glm_full)[effect_names]
-      mu[effect_names, 1] <- coefs
+      mu_internal[effect_names, 1] <- coefs
     }
     # else null_effects leaves mu[...] as zero
   }
   
+
+  # Validate user-supplied mu if provided
+  if (!is.null(mu)) {
+    if (!is.numeric(mu)) {
+      stop("mu must be numeric.")
+    }
+    if (is.vector(mu)) {
+      if (length(mu) != nvar) {
+        stop("Length of mu vector must match number of coefficients (", nvar, ").")
+      }
+      mu <- matrix(mu, ncol = 1, dimnames = list(var_names, "mu"))
+    } else if (is.matrix(mu)) {
+      if (!all(dim(mu) == c(nvar, 1))) {
+        stop("mu matrix must have dimensions [", nvar, ", 1].")
+      }
+      rownames(mu) <- var_names
+      colnames(mu) <- "mu"
+    } else {
+      stop("mu must be either a numeric vector or a matrix.")
+    }
+    message("Using user-specified prior mean vector (mu).")
+  } else {
+    mu <- mu_internal
+  }
   
+    
   
 #  Sigma=as.matrix(diag(nvar))
  
@@ -218,6 +267,8 @@ Prior_Setup<-function(formula,data=NULL,family=gaussian(),pwt=0.01 ,
   return(prior_list)
   
 }
+
+
 
 #' @export
 #' @method print PriorSetup

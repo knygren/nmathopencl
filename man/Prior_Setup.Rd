@@ -10,8 +10,10 @@ Prior_Setup(
   family = gaussian(),
   pwt = 0.01,
   n_prior = NULL,
+  sd = NULL,
   intercept_source = c("null_model", "full_model"),
   effects_source = c("null_effects", "full_model"),
+  mu = NULL,
   subset = NULL,
   na.action = na.fail,
   drop.unused.levels = FALSE,
@@ -34,9 +36,13 @@ Prior_Setup(
 
 \item{n_prior}{Optional argument with number of prior observations (either a scalar or a vector). When provided, this used together with the number of likelihood observations to compute the pwt.}
 
+\item{sd}{Optional vector argument with the prior standard deviations for the coefficients}
+
 \item{intercept_source}{Specifies the method through which the prior mean for the intercept term is set. Options are based on the null intercept only model (null_model) or full_models. The default is the null model which is safer if variables are not centered.}
 
 \item{effects_source}{Specifies the method through which the prior means for the effects terms are set. Options are null_effects (prior means set to zero) or full_model (effect means set to match maximum likelihood estimates).}
+
+\item{mu}{Optional vector argument with the prior means for the coefficients}
 
 \item{subset}{a specification of the rows/observations to be used:
     defaults to all. This can be any valid indexing vector (see
