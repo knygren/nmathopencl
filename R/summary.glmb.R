@@ -46,11 +46,9 @@ summary.glmb<-function(object,...){
   #df.r <- length(object$y)-object$pD
   
   dispersion=get_dispersion(object)
-  print("Entering directional_tail")
-  
+
   dir_tail <- directional_tail(object)
-  print("Exiting directional_tail")
-  
+
   #if(!is.null(object$DIC)) DIC=object$DIC
   #else DIC=NA
   #print("Mean Dispersion")
@@ -142,7 +140,21 @@ summary.glmb<-function(object,...){
 print.summary.glmb<-function(x,digits = max(3, getOption("digits") - 3),...){
   cat("Call\n")
   print(x$call)
-  cat("\nExpected Deviance Residuals:\n")
+  primary_class <- class(x)[1]
+  
+  if (primary_class == "lmb") {
+    cat("\nExpected Residuals:\n")
+  } else if (primary_class == "glmb") {
+    fam <- tryCatch(x$family$family, error = function(e) NA)
+    if (!is.na(fam) && fam == "gaussian") {
+      cat("\nExpected Residuals:\n")
+    } else {
+      cat("\nExpected Deviance Residuals:\n")
+    }
+  } else {
+    cat("\nExpected Residuals:\n")  # fallback for unknown class
+  }
+#  cat("\nExpected Deviance Residuals:\n")
   print(x$residuals,digits=digits)
   cat("\nPrior and Maximum Likelihood Estimates with Standard Deviations\n\n")
   printCoefmat(x$coefficients1,digits=digits)

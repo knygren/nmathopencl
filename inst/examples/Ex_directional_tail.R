@@ -31,6 +31,11 @@ disp_ML_null=ps_null$dispersion
 lmb.D9_null=lmb(weight ~ group,dNormal(mu_null,V_null,dispersion=disp_ML_null),data=dat2,n=10000)
 summary(lmb.D9_null)
 
+glmb.D9_default=glmb(weight ~ group,family=gaussian(),pfamily=dNormal(mu_null,V_null,dispersion=disp_ML_null),data=dat2)
+
+summary(glmb.D9_default)
+
+colMeans(residuals(lmb.D9_null))
 
 glm.D9_default=glm(weight ~ group,family=gaussian(),data=dat2)
 

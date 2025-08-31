@@ -41,7 +41,7 @@ This vignette introduces glmbayes, a package for fitting Bayesian generalized li
   Learn how to install and load glmbayes, set up your first Bayesian GLM using `glmb()`, and interpret posterior summaries (means, credible intervals) in an interface that mirrors R’s `glm()`.
 
 - **Chapter 2: Estimating Bayesian Linear Models**  
-  Focus on the Gaussian identity-link case with `rglmb()`. Draw directly from the multivariate normal posterior, compare Bayesian estimates to classical least squares, and explore shrinkage benefits.
+  Focus on the Gaussian identity-link case with `lmb()`. Draw directly from the multivariate normal posterior, compare Bayesian estimates to classical least squares, and explore shrinkage benefits.
 
 - **Chapter 3: Tailoring Priors – Leveraging the Prior_Setup Function**  
   Construct multivariate normal priors via `Prior_Setup()`. Choose prior mean vectors and covariance matrices, then observe how these hyperparameters shape posterior inference.

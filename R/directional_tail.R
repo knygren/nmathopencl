@@ -44,15 +44,7 @@ directional_tail <- function(fit) {
     if (is.null(alpha)) alpha <- 0
     wt     <- fit$prior.weights
     
-    # Debug printout of key inputs
-    cat("Calling f7 with the following inputs:\n")
-    cat("  dim(bstar):", paste(dim(bstar), collapse = " x "), "\n")
-    cat("  dim(y):", paste(dim(y), collapse = " x "), "\n")
-    cat("  dim(x):", paste(dim(x), collapse = " x "), "\n")
-    cat("  dim(P0):", paste(dim(P0), collapse = " x "), "\n")
-    cat("  dim(alpha):", paste(dim(alpha), collapse = " x "), "\n")
-    cat("  dim(wt):", paste(dim(wt), collapse = " x "), "\n")
-    
+
     
     Prec_lik <- f7(bstar, y, x, mu0, P0, alpha, wt)
   } else if (main_class == "lmb") {
