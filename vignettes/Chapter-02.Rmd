@@ -70,10 +70,6 @@ Prior_Setup() returns the prior mean vector (mu), covariance matrix (V), and the
 
 ```{r Plant_Prior}
 ps=Prior_Setup(weight ~ group,family=gaussian())
-mu=ps$mu
-V=ps$Sigma
-disp_ML=ps$dispersion
-
 ```
 
 We now utilize the print function for **Prior_Setup** to understand the default prior specification.
@@ -90,29 +86,14 @@ In the next vignette, we discuss the default prior in more details. We also disc
 
 ### 3.2.2 Calling the lmb function
 
-We pass a dNormal object—combining our prior parameters and the fixed dispersion—to lmb(). Alternative priors (including prior specificiation for dispersion parameters) are covered in later chapters.
+We now call the lmb function under three different prior specification. The first (a dNormal Prior) treats the dispersion as a fixed and known constant (and that specification is the focus of most of this vignette). The others are two are alternative priors that also provide a prior specification for the dispersion. Those priors will be covered in greater details in later chapters but are introduced so that users are aware of the potential need to estimate the dispersion. Many glm models (like the binomial and poisson models) don't have dispersion parameters. For that reason, we focus most of our discussion in this chapter on models with fixed dispersion parameter.
 
-```{r Plant_lmb_call}
-lmb.D9=lmb(weight ~ group,dNormal(mu,V,dispersion=disp_ML))
+```{r Plant_lmb_calls}
+lmb.D9=lmb(weight ~ group,dNormal(mu=ps$mu,Sigma  =ps$Sigma,dispersion=ps$dispersion))
+lmb.D9_v2=lmb(weight ~ group,dNormal_Gamma(mu=ps$mu,Sigma=ps$Sigma,shape=ps$shape,rate=ps$rate))
+lmb.D9_v3=lmb(weight ~ group,dIndependent_Normal_Gamma(mu=ps$mu,Sigma = ps$Sigma,shape=ps$shape,rate=ps$rate))
 summary(lmb.D9)
 ```
-
-```{r Plant_lmb_call2}
-ps=Prior_Setup(weight ~ group,family=gaussian())
-mu=ps$mu
-V=ps$Sigma
-disp_ML=ps$dispersion
-n_prior=ps$PriorSettings$n_prior
-shape=n_prior/2
-rate= disp_ML*shape
-lmb.D9=lmb(weight ~ group,dNormal(mu,V,dispersion=disp_ML))
-lmb.D9_v2=lmb(weight ~ group,dNormal_Gamma(mu,V/disp_ML,shape=shape,rate=rate),n=10000)
-#lmb.D9_v2=lmb(weight ~ group,dNormal_Gamma(mu,V,shape=shape,rate=rate),n=10000)
-n_prior
-disp_ML
--0.3710*0.99
-```
-
 With both models fitted, we’re ready to explore their summaries and compare classical versus Bayesian outputs in the next section.
 
 # 4. Summarizing the output
