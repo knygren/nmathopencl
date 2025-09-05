@@ -130,6 +130,7 @@ group  <- gl(2, 10, 20, labels = c("Ctl", "Trt"))
 weight <- c(ctl, trt)
 
 dat <- data.frame(weight, group)
+set.seed(333)
 ```
 
 
@@ -143,16 +144,16 @@ Now, let’s examine the remaining key arguments that enable the specification o
 
 ```{r Plant_Prior}
 ps = Prior_Setup(
-  weight ~ group, data = dat, family = gaussian(), pwt = 0.01,
+  weight ~ group, data = dat, family = gaussian(), pwt = 0.001,
   n_prior = NULL, sd = NULL,
   intercept_source = c("null_model", "full_model"),
   effects_source = c("null_effects", "full_model"),
   mu = NULL
 )
 
-mu       = ps$mu
-V        = ps$Sigma
-disp_ML  = ps$dispersion
+#mu       = ps$mu
+#V        = ps$Sigma
+#disp_ML  = ps$dispersion
 ```
 
 
@@ -297,24 +298,299 @@ lm.D9 <- lm(weight ~ group)
 sumlm<-summary(lm.D9)
 sumlm$coefficients
 ```
-The groupTrt estimate from the classical model is -0.371 with a two sided p-value of 0.2490 (which implies that the one sided p-value real 0.1245).
-
+The groupTrt estimate from the classical model is -0.371 with a two sided p-value of 0.2490 (which implies that the one sided p-value is 0.1245).
 
 
 ```{r Plant_lmb_call1}
-lmb.D9=lmb(weight ~ group,dNormal(mu,V,dispersion=disp_ML),n=10000)
+lmb.D9=lmb(weight ~ group,dNormal(mu=ps$mu,Sigma=ps$Sigma,dispersion=ps$dispersion),n=1000)
 sumlmb<-summary(lmb.D9)
 sumlmb$coefficients
+```
+We can now see that the corresponding output from the Bayesian run in many ways mirror the output from the classical model. In particular, four out of the columns have outputs analogous to corresponding outputs from the classical  model. The Post.Mode and Post.Mean, both mirrors the Estimate column while the Post.sd column mirrors the Std. Error column. The Pr(tail), meanwhile is close  to half of the value for Pr(>|t|) column in the classical output.
 
-#sumlmb$coefficients1
+In addition to this, we have a column with MC Error which represents the error connected to the estimated Post. mean columns. This reflects the fact that we are using Monte Carlo simulation (in this case based on n=1000 draws) to estimate the mean. In the gaussian() case, the actual Post.Mean is the same as the Post.Mode so if we increase the number of draws, we are increasingly likely to observe a Post.Mean that is close to the Post.Mode column and the MC Error column shrinks (see below).   
+
+Finally, we also have a column SE(tail). This reflects the Standard error connected to the Pr(tail) column. Just like with the MC Error, we can reduce the error associated with this estimate by generating a larger number of draws (again, see below).
+
+
+```{r Plant_lmb_call2}
+lmb.D9=lmb(weight ~ group,dNormal(mu=ps$mu,Sigma=ps$Sigma,dispersion=ps$dispersion),n=100000)
+sumlmb<-summary(lmb.D9)
+sumlmb$coefficients
+```
+For the purposes of this vignette, we simply note that under our default assumptions for the intercept and effects,  the Pr(tail) for slope parameters in Bayesian linear models tend to be similar to the one-sided p-value in the classical models when we combined them with our default value for our **pwt** (i.e., 0.01). While we don't explore it fully here, there are certain aspects in which these become more fully equivalent in the limit as **pwt** is pushed further towards zero. A later vignette provides more details on exactly how these tail probabilities relate to their classical counterparts, while also demonstrating some properties as **pwt**, **n_prior**, and the sample size approach certain limits.
+
+# 3. Adjusting the strength of priors using **pwt**, **n_prior**, and *sd*
+
+
+In setting the strength of priors, **pwt** serves as the default mechanism, blending the prior mean with the maximum likelihood estimates. When **pwt** is a scalar, it uniformly adjusts this blend across parameters. Alternatively, a vector form of **pwt** allows for more nuanced adjustments, deviating from a Zellner g-prior. **n_prior** offers an alternative approach, influencing the strength of priors based on sample size equivalence. Finally, **sd** directly sets the standard deviation, offering another layer of control over the priors' influence. Each of these parameters plays a crucial role in tailoring the prior to reflect the analyst's beliefs and the context of the data.
+
+To illustrate the role of these prior specifications, we will work with a model where the intercept dimension is orthogonal to the predictions as it makes interpretations clearer.
+
+## 3.1 Data Setup and Visualization
+
+
+```{r MTCars Data}
+data(mtcars)
+
+# Create gallons per mile
+mtcars$gpm <- 1 / mtcars$mpg
+```
+
+The mtcars dataset contains fuel efficiency and engine characteristics for 32 vehicles. We begin by preparing the mtcars dataset for modeling. To analyze fuel consumption, we define gallons per mile (gpm) as the reciprocal of miles per gallon (gpm = 1/mpg). This transformation allows us to treat fuel use as a direct cost per unit distance, which aligns more naturally with physical energy expenditure.
+
+```{r MeanCenter}
+# Mean-center predictors
+#mtcars$c_hp <- scale(mtcars$hp, center = TRUE, scale = FALSE)
+#mtcars$c_drat <- scale(mtcars$drat, center = TRUE, scale = FALSE)
+#mtcars$c_qsec <- scale(mtcars$qsec, center = TRUE, scale = FALSE)
+
+mtcars$c_wt  <- as.numeric(scale(mtcars$wt, center = TRUE, scale = FALSE))
+mtcars$c_cyl <- as.numeric(scale(mtcars$cyl, center = TRUE, scale = FALSE))
+```
+
+Next, we mean-center the predictors of interest—vehicle weight (wt) and number of cylinders (cyl)—to improve interpretability and reduce collinearity in the regression model. Mean-centering ensures that the intercept corresponds to the expected fuel consumption for a vehicle with average weight and cylinder count.
+
+
+```{r weight_v_gpm}
+
+# Fit linear model
+fit <- lm(gpm ~ c_wt, data = mtcars)
+
+# Create scatter plot
+plot(mtcars$c_wt, mtcars$gpm,
+     pch = 19, col = "steelblue",
+     xlab = "Mean-Centered Weight (c_wt)",
+     ylab = "Gallons per Mile (gpm)",
+     main = "Fuel Consumption vs. Mean-Centered Weight")
+
+# Add regression line
+abline(fit, col = "darkred", lwd = 2)
+
+# Optional: Add confidence band manually
+x_vals <- seq(min(mtcars$c_wt), max(mtcars$c_wt), length.out = 100)
+pred <- predict(fit, newdata = data.frame(c_wt = x_vals), interval = "confidence")
+
+lines(x_vals, pred[, "lwr"], col = "darkred", lty = 2)
+lines(x_vals, pred[, "upr"], col = "darkred", lty = 2)
+
+```
+
+To assess the plausibility of a linear relationship, we first plot gpm against mean-centered weight (c_wt). The scatter plot reveals a clear positive trend: heavier vehicles tend to consume more fuel per mile. The fitted regression line aligns well with the data, and the symmetric confidence band suggests that linearity and homoscedasticity are reasonable assumptions. This relationship is also physically motivated, as rolling resistance and energy demand scale approximately linearly with mass.
+
+
+```{r cyl_v_gpm}
+# Ensure gpm is defined
+mtcars$gpm <- 1 / mtcars$mpg
+
+# Create boxplot
+boxplot(gpm ~ factor(cyl), data = mtcars,
+        col = "lightblue", border = "darkblue",
+        xlab = "Number of Cylinders",
+        ylab = "Gallons per Mile (gpm)",
+        main = "Fuel Consumption by Number of Cylinders")
+
+# Add jittered points
+set.seed(123)  # for reproducibility
+points(jitter(as.numeric(factor(mtcars$cyl)), amount = 0.2), mtcars$gpm,
+       pch = 19, col = rgb(70/255, 130/255, 180/255, alpha = 0.6))
+
+```
+
+We then examine fuel consumption across cylinder categories using a boxplot. Treating cyl as a factor, we observe that vehicles with more cylinders tend to have higher median fuel consumption, with 8-cylinder cars showing the greatest fuel use. The jittered points reveal the distribution within each group and highlight the presence of outliers and some overlap acorss groups. This plot supports the inclusion of cyl as a categorical or mean-centered numeric predictor, depending on modeling goals.
+
+Together, these visualizations provide both empirical and theoretical justification for modeling gpm as a function of c_wt and c_cyl. The linear trend with weight is physically motivated, while the categorical differences in cylinder count suggest potential predictive value. These insights set the stage for exploring how prior strength influences inference in Bayesian regression
+
+
+## 3.2 Using the pwt argument to adjust the Zellner g-prior
+
+To illustrate the impact of prior strength on marginal predictors, we fit a sequence of Bayesian models using gpm as the response and two mean-centered predictors: c_wt and c_cyl. 
+
+To ensure reproducibility of posterior estimates and tail probabilities, we set a fixed random seed before simulation. This allows consistent interpretation across models and avoids misleading comparisons due to Monte Carlo variability.
+
+```{r Mt_cars_Default_Prior}
+# Use Prior_Setup to illustrate prior strength
+pscars  <- Prior_Setup(formula = gpm ~  c_wt+c_cyl,family=gaussian(),data = mtcars,pwt=0.01) ## pwt=0.01-->n_prior= 32/99
+pscars2 <- Prior_Setup(formula = gpm ~  c_wt+c_cyl,family=gaussian(),data = mtcars,pwt=0.5)  ## pwt=0.5-->n_prior= 32
+pscars3 <- Prior_Setup(formula = gpm ~  c_wt+c_cyl,family=gaussian(),data = mtcars,pwt=0.55) ## pwt=0.55-->n_prior= 39.111
+```
+
+
+```{r print_priors}
+pscars
+```
+
+With pwt = 0.01, the prior exerts minimal influence, resulting in wide prior standard deviations and broad credible intervals. For example, the prior SD for c_wt is approximately 0.0207, yielding a 95% credible interval of ±0.0406 around the prior mean. This reflects substantial uncertainty and allows the posterior to be largely driven by the data. The intercept’s prior interval spans nearly 0.05 units, indicating weak regularization and high flexibility in model fitting
+
+
+```{r print_priors2}
+pscars2
+```
+
+At pwt = 0.50, the prior and likelihood contribute equally to the posterior mean. This results in much tighter prior distributions: the prior SD for c_wt drops to ~0.00208, and its credible interval narrows to ±0.00408. The same pattern holds for c_cyl, whose prior interval shrinks to ±0.00223. These narrower intervals reflect stronger regularization, constraining the posterior estimates toward the prior mean and reducing sensitivity to noisy data.
+
+
+```{r print_priors3}
+pscars3
+```
+
+Increasing pwt slightly to 0.55 further tightens the prior distributions. The prior SD for c_cyl falls to ~0.00103, and its credible interval contracts to ±0.00202. This subtle shift can have meaningful diagnostic consequences—especially for marginal predictors—by reducing posterior variance and potentially pushing tail probabilities above conventional significance thresholds. The intercept’s interval also narrows slightly, reinforcing the model’s confidence in its prior location
+
+
+The prior standard deviations shown here are derived automatically from the specified pwt values, reflecting the degree of shrinkage toward the prior mean. While this default behavior is useful for regularization and empirical calibration, analysts may sometimes prefer to set prior uncertainty explicitly—especially when they have domain knowledge about plausible effect sizes. We explore that approach in a later section using the sd argument, which allows for direct control over the spread of each prior distribution.
+
+
+```{r run_lmb}
+
+set.seed(333)
+
+lmb_cars<- lmb(formula = gpm ~  c_wt+c_cyl,pfamily=dNormal(mu=pscars$mu,Sigma=pscars$Sigma, dispersion = pscars$dispersion),data =mtcars)
+lmb_cars2<-lmb(formula = gpm ~  c_wt+c_cyl,pfamily=dNormal(mu=pscars2$mu,Sigma=pscars2$Sigma, dispersion = pscars2$dispersion),data =mtcars)
+lmb_cars3<-lmb(formula = gpm ~  c_wt+c_cyl,pfamily=dNormal(mu=pscars3$mu,Sigma=pscars3$Sigma, dispersion = pscars3$dispersion),data =mtcars)
+
+
+sum_lmbcars<-summary(lmb_cars)  
+sum_lmbcars2<-summary(lmb_cars2)
+sum_lmbcars3<-summary(lmb_cars3)
+
+```
+
+
+```{r sumlmb_out}
+sum_lmbcars$coefficients
+```
+With minimal prior influence, the posterior closely tracks the classical estimates. Both c_wt and c_cyl show strong directional evidence, with c_cyl clearly significant (Pr(tail) = 0.008), suggesting a meaningful association with fuel consumption.
+
+
+```{r sumlmb_out2}
+sum_lmbcars2$coefficients
+```
+Moderate prior strength visibly shrinks both coefficients. c_wt remains decisively significant, while c_cyl hovers near the one-tailed threshold (Pr(tail) = 0.054), indicating borderline relevance under regularization.
+
+
+```{r sumlmb_out3}
+sum_lmbcars3$coefficients
+```
+
+
+A slight increase in prior weight pushes c_cyl over the edge (Pr(tail) = 0.063), rendering it non-significant. This illustrates how modest prior adjustments can suppress marginal predictors and shift interpretive conclusions.
+
+Across models with increasing pwt, the posterior mean for c_cyl shrinks steadily toward zero, while its posterior standard deviation remains relatively stable. At low prior strength (pwt = 0.01), c_cyl is clearly significant (Pr(tail) = 0.005), closely tracking the classical estimate. As pwt increases to 0.50, the tail probability rises to 0.050—right on the edge of one-tailed significance. At pwt = 0.55, c_cyl crosses the threshold (Pr(tail) = 0.056), demonstrating how modest prior influence can suppress marginal effects. In contrast, c_wt remains robustly significant across all prior settings, with posterior means and tail probabilities consistently indicating strong evidence. This progression highlights the diagnostic sensitivity of Bayesian inference and the interpretive leverage offered by prior calibration, especially when dealing with predictors of borderline relevance.”
+
+## 3.3 Using n_prior as an alternative
+
+An alternative to pwt is the n_prior argument, which allows users to specify the number of prior pseudo-observations. This framing is intuitive when the analyst views the prior as representing a hypothetical dataset. While less direct than pwt in controlling shrinkage, it offers a natural interpretation in terms of prior sample size. We revisit this idea later when splitting the dataset, but for now we illustrate its use and diagnostic implications.
+
+
+```{r Mt_cars_Default_Prior2}
+# Use Prior_Setup to illustrate prior strength
+pscars4 <- Prior_Setup(formula = gpm ~  c_wt+c_cyl,family=gaussian(),data = mtcars,n_prior=1)  ## n_prior=1--> pwt=0.0303
+pscars5 <- Prior_Setup(formula = gpm ~  c_wt+c_cyl,family=gaussian(),data = mtcars,n_prior=10)  ## n_prior=10--> pwt=0.2381
+pscars6 <- Prior_Setup(formula = gpm ~  c_wt+c_cyl,family=gaussian(),data = mtcars,n_prior=32)  ## n_prior=32--> pwt=0.5
+
+set.seed(333)
+
+lmb_cars4<-lmb(formula = gpm ~  c_wt+c_cyl,pfamily=dNormal(mu=pscars4$mu,Sigma=pscars4$Sigma, dispersion = pscars4$dispersion),data =mtcars)
+lmb_cars5<-lmb(formula = gpm ~  c_wt+c_cyl,pfamily=dNormal(mu=pscars5$mu,Sigma=pscars5$Sigma, dispersion = pscars5$dispersion),data =mtcars)
+lmb_cars6<-lmb(formula = gpm ~  c_wt+c_cyl,pfamily=dNormal(mu=pscars6$mu,Sigma=pscars6$Sigma, dispersion = pscars6$dispersion),data =mtcars)
+
+sum_lmbcars4<-summary(lmb_cars4)
+sum_lmbcars5<-summary(lmb_cars5)
+sum_lmbcars6<-summary(lmb_cars6)
+
+```
+
+As we can see from above, we now specify the n_prior argument instead of the pwt argument when calling the Prior_Setup function, everything else essentially remains the same as in the case where we use the pwt argument. The one thing to note is that the call to the Prior_Setup function now triggers a printout to the screen of the pwt argument and the information from which it was derived.
+
+
+```{r sumlmb_out4}
+sum_lmbcars4$coefficients
+```
+
+With a very weak prior (n_prior = 1), the posterior remains close to the MLE. c_cyl retains directional significance, reinforcing its empirical signal when prior influence is minimal.
+
+
+```{r sumlmb_out5}
+sum_lmbcars5$coefficients
+```
+With a moderate prior (n_prior = 10), the posterior mean for c_cyl is visibly shrunk, and its tail probability increases, suggesting reduced confidence in its directional effect
+
+
+```{r sumlmb_out6}
+sum_lmbcars5$coefficients
+```
+
+At n_prior = 32 (equivalent to pwt = 0.5), the results mirror those from the earlier pwt-based model. This confirms the equivalence of the two approaches and reinforces the interpretive leverage offered by prior calibration.
+
+## 3.4 Directly Specifying Prior Standard Deviations with sd
+
+
+The previous examples illustrate how pwt indirectly determines the prior standard deviations by blending the prior mean with the maximum likelihood estimate. As shown in the output from Prior_Setup, increasing pwt results in tighter prior distributions—reflected in smaller Prior.SD values and narrower credible intervals.
+
+In contrast, the sd argument allows the analyst to explicitly set the prior standard deviation for each coefficient. This offers direct control over the spread of the prior distribution, independent of sample size or likelihood curvature. It is especially useful when the analyst has domain knowledge about plausible effect sizes or wants to impose regularization that is not tied to the data-driven scale of the MLE.
+We now illustrate how to use the sd argument to manually specify prior uncertainty and compare its behavior to the pwt-based default.
+
+
+
+```{r Mt_cars_sd_Prior1}
+pscars7 <- Prior_Setup(formula = gpm ~  c_wt+c_cyl,family=gaussian(),data =mtcars,sd=c(0.005,0.010,0.0015))  ## 
+pscars7
+```
+
+To impose differentiated prior strength across model coefficients, we manually specify a vector of prior standard deviations. The intercept and weight coefficients are assigned relatively weak priors (SDs of 0.005 and 0.010), allowing moderate flexibility while still exerting some regularization. In contrast, the cylinder coefficient receives a much tighter prior (SD = 0.0015), reflecting stronger skepticism about its effect size. This yields credible intervals of ±0.0196 for c_wt and ±0.00294 for c_cyl, and corresponds to implied pwt values of approximately 0.041 and 0.366 respectively. The result is a prior structure that allows the data to dominate where signal is strong, while constraining marginal predictors more aggressively. It is worth noting that the same kind of differentiated prior can be generated by passing pwt as a vector instead of as a scalar. This vectorized approach to prior specification offers a flexible alternative to scalar pwt, enabling analysts to encode domain-specific beliefs about relative effect plausibility directly into the prior structure—without relying on sample-size equivalence or uniform shrinkage.
+
+
+For this particular dataset, there are clear theoretical reasons to expect a near-proportional relationship between vehicle weight and fuel consumption. This aligns with physical models of rolling resistance and energy expenditure, which scale linearly with mass. In contrast, the theoretical basis for an effect from cylinder count is less direct. While cylinder number may proxy engine size or complexity, its impact on fuel consumption is mediated by design choices and driving conditions. As such, there is a compelling rationale for applying a more skeptical prior to the cylinder variable—reflecting weaker prior belief in its relevance. We now run the model using differentiated prior standard deviations and display the resulting output.
+
+
+```{r sumlmb_out7}
+
+set.seed(333)
+lmb_cars7<-lmb(formula = gpm ~  c_wt+c_cyl,pfamily=dNormal(mu=pscars7$mu,Sigma=pscars7$Sigma, dispersion = pscars7$dispersion),data =mtcars)
+sum_lmbcars7<-summary(lmb_cars7)
+sum_lmbcars7
+```
+
+The posterior output reflects the impact of our manually specified prior standard deviations, which imposed differentiated regularization across coefficients. The prior for c_cyl was especially tight (SD = 0.0015), resulting in substantial shrinkage: the posterior mean dropped to 0.00050, well below the MLE of 0.00278. Despite this, the posterior standard deviation remained relatively large in proportion, and the tail probability rose to 0.265—clearly non-significant under a one-tailed test. This confirms that the skeptical prior effectively suppressed a marginal signal.
+In contrast, the prior for c_wt was much looser (SD = 0.010), allowing the posterior mean to remain close to the MLE (0.0136 vs. 0.01096) and yielding a highly significant tail probability (<2e-16). This reinforces the robustness of the weight effect, even under moderate regularization.
+The intercept, with a prior SD of 0.005, shows minimal shrinkage and remains centered near its MLE. The Mahalanobis distance (11.35) and directional tail probability (0.0000) indicate substantial prior-posterior conflict: the prior mean lies far from the posterior mean, and posterior draws almost never fall in the direction of the prior. This suggests that the prior structure is strongly contradicted by the data.
+
+This model demonstrates how targeted prior specification can clarify which predictors are robustly supported by the data and which are sensitive to prior skepticism. The differential shrinkage across dimensions is both diagnostically informative and theoretically justified.
+
+# 4. 
+
+
+
+```{r Mt_cars_Default_Prior5}
+# Use Prior_Setup to illustrate prior strength
+ps3 <- Prior_Setup(  formula = gpm ~  c_wt+c_cyl,family=gaussian(),  data = mtcars,  pwt=0.5)
+```
+
+```{r Mt_cars_lmb2}
+# Use Prior_Setup to illustrate prior strength
+lmb_cars<-lmb(formula = gpm ~  c_wt+c_cyl,
+  pfamily=dNormal(mu=ps3$mu,Sigma=ps3$Sigma, dispersion = ps3$dispersion),
+    data = mtcars)
+summary(lmb_cars)
+```
+
+```{r Mt_cars_Default_Prior4}
+# Use Prior_Setup to illustrate prior strength
+ps4 <- Prior_Setup(
+  formula = gpm ~  c_wt+c_cyl,
+  family=gaussian(),
+  data = mtcars,
+  n_prior=1
+##  ,pwt = c(0.1, 0.5),     # Example vector weights
+##  priorsd = c(5, 2),     # Custom SDs for each predictor
+##  priorN = NULL          # Leave NULL to focus on pwt and priorsd
+)
+ps4
 ```
 
 
 
-```{r Likelilihood_mean}
-pnorm(-0.371/0.3114349)
-pt(-0.371/0.3114349,18)
-```
+
 
 ---
 # 3.  The role of the `intercept_source` in setting the prior mean for the intercept

@@ -151,7 +151,7 @@ m=1  ## Used to fix dimension to 1 --> Will eventually do away with
 out1<-matrix(0,nrow=n,ncol=k)
 
 if(m==1){  out2=matrix(0,nrow=n,ncol=1)  }
-if(m>1){  out2<-vector("list", n)}   # Code if we had muliple columns of data (should perhas have m items)
+if(m>1){  out2<-vector("list", n)}   # Code if we had multiple columns of data (should perhaps have m items)
 
 a_prior=shape     ## Should be relationship to shape in Wishart  
 b_prior=rate  ## Should be relationship to scale in Wishart (could also be V/2)

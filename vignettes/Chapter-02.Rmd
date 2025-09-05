@@ -79,19 +79,21 @@ ps
 ```
 The printed output begins by echoing the original function call, confirming the model formula and the specified likelihood family. Next, the setup of a Zellner g-type prior is displayed, where pwt = 0.01 indicates that the prior contributes just 1% of the total information, while the likelihood contributes the remaining 99%. This reflects a weakly informative prior, allowing the data to dominate the posterior. The derived value of g = 99 quantifies the relative weight of the likelihood to the prior (or more precisely how much the Prior Variance-Covariance matrix is scaled up relative to the Likelihood Variance-Covariance matrix). 
 
-The note on n_prior shows how this pseudo-sample size was computed from pwt and the effective sample size of the likelihood (n_likelihood = 20). The summary section includes prior means, standard deviations, and confidence intervals for each coefficient. The prior correlation matrix reveals the structure of dependencies induced by the design matrix—here, a strong negative correlation between the intercept and treatment effect. Finally, the conditional dispersion (0.485) reflects the residual variance under the Gaussian model, consistent with the classical GLM fit.
+The note on n_prior shows how this pseudo-sample size was computed from pwt and the effective sample size of the likelihood (n_likelihood = 20). The summary section includes prior means, standard deviations, and confidence intervals for each coefficient. The prior correlation matrix reveals the structure of dependencies induced by the design matrix—here, a strong negative correlation between the intercept and treatment effect. In addition, the conditional dispersion (0.485) reflects the residual variance under the Gaussian model, consistent with the classical GLM fit.
 
-In the next vignette, we discuss the default prior in more details. We also discuss how users can utilize the options in the Prior_Setup function to get different **g-prior** specifications that rescale the Prior-Variance covariance matrix as well as options for using alternative prior mean specifications. In a later vignette, we dig deeper into the use of differential **pwt** specifications for different dimensions and the use of more informative priors.
+Finally, the printout also contains information related to shape and rate parameters that are used to specify priors for the dispersion. We discuss these extensively in a separate vignette and will not cover here.
+
+In our next vignette, we discuss the default prior in more details. We also discuss how users can utilize the options in the Prior_Setup function to get different **g-prior** specifications that rescale the Prior-Variance covariance matrix as well as options for using alternative prior mean specifications. In a later vignette, we dig deeper into the use of differential **pwt** specifications for different dimensions and the use of more informative priors.
 
 
 ### 3.2.2 Calling the lmb function
 
-We now call the lmb function under three different prior specification. The first (a dNormal Prior) treats the dispersion as a fixed and known constant (and that specification is the focus of most of this vignette). The others are two are alternative priors that also provide a prior specification for the dispersion. Those priors will be covered in greater details in later chapters but are introduced so that users are aware of the potential need to estimate the dispersion. Many glm models (like the binomial and poisson models) don't have dispersion parameters. For that reason, we focus most of our discussion in this chapter on models with fixed dispersion parameter.
+We show hos to call the lmb function under three different prior specification. The first (a dNormal Prior) treats the dispersion as a fixed and known constant (and that specification is the focus of most of this vignette). The others are two are alternative priors that also provide a prior specification for the dispersion. Those priors will be covered in greater details in later chapters but are introduced so that users are aware of the potential need to estimate the dispersion. Many glm models (like the binomial and poisson models) don't have dispersion parameters. For that reason, we focus most of our discussion in this chapter on models with fixed dispersion parameter.
 
 ```{r Plant_lmb_calls}
 lmb.D9=lmb(weight ~ group,dNormal(mu=ps$mu,Sigma  =ps$Sigma,dispersion=ps$dispersion))
-lmb.D9_v2=lmb(weight ~ group,dNormal_Gamma(mu=ps$mu,Sigma=ps$Sigma,shape=ps$shape,rate=ps$rate))
-lmb.D9_v3=lmb(weight ~ group,dIndependent_Normal_Gamma(mu=ps$mu,Sigma = ps$Sigma,shape=ps$shape,rate=ps$rate))
+##lmb.D9_v2=lmb(weight ~ group,dNormal_Gamma(mu=ps$mu,Sigma=ps$Sigma/ps$dispersion,shape=ps$shape,rate=ps$rate))
+##lmb.D9_v3=lmb(weight ~ group,dIndependent_Normal_Gamma(mu=ps$mu,Sigma = ps$Sigma,shape=ps$shape,rate=ps$rate))
 summary(lmb.D9)
 ```
 With both models fitted, we’re ready to explore their summaries and compare classical versus Bayesian outputs in the next section.

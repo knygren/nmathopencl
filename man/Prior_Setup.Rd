@@ -177,10 +177,11 @@ counts <- c(18,17,15,20,10,20,25,13,12)
 outcome <- gl(3,1,9)
 treatment <- gl(3,3)
 print(d.AD <- data.frame(treatment, outcome, counts))
-## Step 1: Set up Prior
+## Set up Prior for Poisson Model
 ps=Prior_Setup(counts ~ outcome + treatment, family=poisson())
 ps
 
+## Normal prior for glm
 glmb.D93<-glmb(counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=ps$mu,Sigma=ps$Sigma))
 
 
@@ -191,6 +192,7 @@ trt <- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
 group <- gl(2, 10, 20, labels = c("Ctl","Trt"))
 weight <- c(ctl, trt)
 
+## Set up prior for gaussian model
 ps2=Prior_Setup(weight ~ group,family=gaussian())
 ps2
 
