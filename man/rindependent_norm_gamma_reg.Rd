@@ -19,7 +19,8 @@ rindependent_norm_gamma_reg(
   use_parallel = TRUE,
   use_opencl = FALSE,
   verbose = FALSE,
-  max_disp_perc = 0.99
+  max_disp_perc = 0.99,
+  progbar = TRUE
 )
 
 rindependent_norm_gamma_reg_v3(
@@ -91,6 +92,8 @@ prior distribution.}
 \item{verbose}{Logical. Whether to print progress messages.}
 
 \item{max_disp_perc}{parameter currently used to control upper bound in accept-reject procedure}
+
+\item{progbar}{Logical. Whether to display a progress base during simulation.}
 }
 \value{
 \code{rindependent_norm_gamma_reg} returns a object of class \code{"rglmb"}.  The function \code{summary} 

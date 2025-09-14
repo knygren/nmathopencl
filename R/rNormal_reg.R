@@ -281,7 +281,7 @@ verbose = verbose)
                             use_opencl = use_opencl,
                             verbose = verbose)
     
-    
+    outlist$call <- match.call()  # overwrite with the rNormal_reg call
     outlist$dispersion=mean(disp_temp)
     
         #print("Mean_residuals")

@@ -185,12 +185,26 @@ rlmb<-function(n=1,y,x,pfamily,offset=rep(0,nobs),weights=NULL)
   }
   
 
+  simfun_args <- list(
+    n = n,
+    y = y,
+    x = x,
+    prior_list = prior_list,
+    offset = offset,
+    weights = weights,
+    family = family
+  )
+  
 
   outlist=simfun(n=n,y=y,x=x,prior_list=prior_list,offset=offset,weights=weights,family=family)
 
+  simfun_call <- outlist$call 
+  
   outlist$call <- match.call()  # overwrite with the rglmb call
-  outlist$pfamily=pfamily
-
+    outlist$pfamily=pfamily
+    outlist$simfun_call <- simfun_call         # simulation call
+    outlist$simfun_args <- simfun_args         # simulation arguments
+    
   class(outlist) <- c("rlmb", "rglmb", "glmb", "glm", "lm")  # <- Add this line
   
   return(outlist)

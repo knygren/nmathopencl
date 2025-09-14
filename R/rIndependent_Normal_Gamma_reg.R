@@ -11,6 +11,7 @@
 #' @param use_parallel Logical. Whether to use parallel processing during simulation.
 #' @param use_opencl Logical. Whether to use OpenCL acceleration during Envelope construction.
 #' @param verbose Logical. Whether to print progress messages.
+#' @param progbar Logical. Whether to display a progress base during simulation.
 #' @return \code{rindependent_norm_gamma_reg} returns a object of class \code{"rglmb"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
@@ -62,7 +63,8 @@
 rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
                                       Gridtype=2,
                                       use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE,
-                                      max_disp_perc=0.99){
+                                      max_disp_perc=0.99,
+                                      progbar=TRUE){
   
   call<-match.call()
   
@@ -377,6 +379,7 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   ## log_P_Diff should no longer be used in the same way!
   
+  print(paste("Interactive status:", interactive()))
   
   ##  ptm <- proc.time()
   
@@ -384,7 +387,7 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
                                               f2=f2, Envelope=Env3, 
                                               gamma_list=gamma_list_new,
                                               UB_list=UB_list_new,
-                                              family="gaussian",link="identity", progbar = as.integer(1))
+                                              family="gaussian",link="identity", progbar =progbar)
   
   
   #proc.time()-ptm

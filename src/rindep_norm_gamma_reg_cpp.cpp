@@ -708,8 +708,15 @@ Rcpp::List  rindep_norm_gamma_reg_std_v4_cpp(int n,NumericVector y,NumericMatrix
                                              Function f2,Rcpp::List  Envelope,
                                              Rcpp::List  gamma_list,
                                              Rcpp::List  UB_list,
-                                             Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
+                                             Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, bool progbar=true)
 {
+  
+  // 1. Grab the base environment
+  Rcpp::Environment base = Rcpp::Environment::base_env();
+  
+  // 2. Pull out the 'interactive' function
+  Rcpp::Function interactive = base["interactive"];
+  
   
   int l1 = mu.nrow();
   int l2 = x.nrow();
@@ -782,19 +789,35 @@ Rcpp::List  rindep_norm_gamma_reg_std_v4_cpp(int n,NumericVector y,NumericMatrix
   NumericMatrix loglt=Envelope["loglt"];
   NumericMatrix logrt=Envelope["logrt"];
 
-  if(progbar==1){ Rcpp::Rcout << "Starting Simulation:" << std::endl;  };
+//  if(progbar==1){ Rcpp::Rcout << "Starting Simulation:" << std::endl;  };
+
+Rcpp::Rcout << "Function checking interactive:" << std::endl;
+
+  if (progbar == 1 && Rcpp::as<bool>(interactive())) {
+    Rcpp::Rcout << "Starting Simulation:" << std::endl;
+  }
   
   
   for(int i=0;i<n;i++){
 
     Rcpp::checkUserInterrupt();
-    if(progbar==1){
-      progress_bar3(i, n-1);
-      if(i==n-1) {Rcpp::Rcout << "" << std::endl;}
+    
+//    if(progbar==1){
+//      progress_bar3(i, n-1);
+//      if(i==n-1) {Rcpp::Rcout << "" << std::endl;}
+//    }
+    
+    // 3. Test progbar *and* interactive()
+
+
+    if (progbar == 1 && Rcpp::as<bool>(interactive())) {
+      progress_bar3(i, n - 1);
+      if (i == n - 1) {
+        Rcpp::Rcout << std::endl;
+      }
     }
     
     
-        
     a1=0;
     iters_out[i]=1;  
     while(a1==0){
@@ -867,7 +890,7 @@ Rcpp::List  rindep_norm_gamma_reg_std_v4_cpp(int n,NumericVector y,NumericMatrix
       
       
       // Block 3: UB3A (adjusts because probabilities of components in grid are different from original grid)
-      // Investigate whether changing probabilities of grid componets for proposal
+      // Investigate whether changing probabilities of grid components for proposal
       // allows us to do away with this term and to thereby improve the acceptance rate
       
       // This is likely time consuming part

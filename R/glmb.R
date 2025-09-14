@@ -405,7 +405,10 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
     iters=sim$iters,
     contrasts=fit$contrasts,	  
     xlevels=fit$xlevels,
-    pfamily=pfamily
+    pfamily=pfamily,
+    simfun_call=sim$simfun_call,
+    simfun_args=sim$simfun_args
+    
   )
   
   outlist$call<-match.call()

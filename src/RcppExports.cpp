@@ -365,7 +365,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // rindep_norm_gamma_reg_std_v4_cpp
-Rcpp::List rindep_norm_gamma_reg_std_v4_cpp(int n, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, Function f2, Rcpp::List Envelope, Rcpp::List gamma_list, Rcpp::List UB_list, Rcpp::CharacterVector family, Rcpp::CharacterVector link, int progbar);
+Rcpp::List rindep_norm_gamma_reg_std_v4_cpp(int n, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, Function f2, Rcpp::List Envelope, Rcpp::List gamma_list, Rcpp::List UB_list, Rcpp::CharacterVector family, Rcpp::CharacterVector link, bool progbar);
 RcppExport SEXP _glmbayes_rindep_norm_gamma_reg_std_v4_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP f2SEXP, SEXP EnvelopeSEXP, SEXP gamma_listSEXP, SEXP UB_listSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP progbarSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -383,7 +383,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::List >::type UB_list(UB_listSEXP);
     Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type family(familySEXP);
     Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type link(linkSEXP);
-    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
+    Rcpp::traits::input_parameter< bool >::type progbar(progbarSEXP);
     rcpp_result_gen = Rcpp::wrap(rindep_norm_gamma_reg_std_v4_cpp(n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar));
     return rcpp_result_gen;
 END_RCPP

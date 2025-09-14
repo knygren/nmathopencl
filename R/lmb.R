@@ -344,7 +344,9 @@ lmb <- function ( formula, pfamily, n=1000,data, subset, weights, na.action,meth
     iters=sim$iters,
     contrasts=z$contrasts,	  
     xlevels=z$xlevels,
-    pfamily=pfamily
+    pfamily=pfamily,
+simfun_call=sim$simfun_call,
+simfun_args=sim$simfun_args
     
   )
   
