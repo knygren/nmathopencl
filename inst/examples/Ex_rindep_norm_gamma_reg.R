@@ -81,14 +81,14 @@ rate=n_prior*RSS/n_data
 
 
 prior_list=list(mu=mu,Sigma=Sigma_prior,dispersion=dispersion,
-                 shape=shape,rate=rate,Precision=solve(Sigma_prior))
+                 shape=shape,rate=rate,Precision=solve(Sigma_prior),max_disp_perc=0.99)
 
 
 set.seed(360)
 
  ptm <- proc.time()
  sim2=rindependent_norm_gamma_reg(n=1000,y,x,prior_list=prior_list,
-offset=NULL,weights=1,max_disp_perc=0.99)
+offset=NULL,weights=1)
  proc.time()-ptm
 
  

@@ -19,6 +19,12 @@
 #' Needs to be provided when the Gamma prior is used for the dispersion. This
 #' specification is typically only used as part of Gibbs sampling where the beta and 
 #' dispersion parameters are updated separately. 
+#' @param max_disp_perc cSpecifies the percentile used to truncate the posterior dispersion 
+#' distribution when constructing the envelope for accept–reject sampling. This determines 
+#' the lower and upper bounds for dispersion (σ²) used in the simulation. A value of 0.99 
+#' corresponds to using the central 98% of the posterior dispersion mass (i.e., excluding 
+#' the outer 1% in each tail). Smaller values yield tighter bounds and may improve acceptance 
+#' rates, while larger values allow broader dispersion support but may increase envelope complexity.
 #' @param x an object, a pfamily function that is to be printed
 #' @param \ldots additional argument(s) for methods.
 #' @details \code{pfamily} is a generic function with methods for classe \code{glmb} and 
@@ -311,8 +317,8 @@ dNormal_Gamma<-function(mu, Sigma,shape, rate){
 #' @rdname pfamily
 #' @order 5
 
-dIndependent_Normal_Gamma<-function(mu, Sigma,shape, rate){
-  
+dIndependent_Normal_Gamma <- function(mu, Sigma, shape, rate, max_disp_perc = 0.99) {
+
   ##############################################################
   
   if(is.numeric(mu)==FALSE||is.numeric(Sigma)==FALSE) stop("non-numeric argument to numeric function")
@@ -322,6 +328,9 @@ dIndependent_Normal_Gamma<-function(mu, Sigma,shape, rate){
   if(length(rate)>1) stop("rate is not of length 1")
   if(shape<=0) stop("shape must be>0")
   if(rate<=0) stop("rate must be>0")
+  if (!is.numeric(max_disp_perc) || length(max_disp_perc) != 1 || max_disp_perc <= 0.5 || max_disp_perc >= 1) {
+    stop("max_disp_perc must be a single number between 0.5 and 1")
+  }
   
   mu=as.matrix(mu,ncol=1) ## Force mu to matrix
   Sigma=as.matrix(Sigma)  ## Force Sigma to matrix 
@@ -356,7 +365,7 @@ dIndependent_Normal_Gamma<-function(mu, Sigma,shape, rate){
   }
   
   
-  prior_list=list(mu=mu,Sigma=Sigma,shape=shape,rate=rate)
+  prior_list <- list(mu = mu, Sigma = Sigma, shape = shape, rate = rate, max_disp_perc = max_disp_perc)
   attr(prior_list,"Prior Type")="dIndependent_Normal_Gamma"  
   outlist=list(pfamily="dIndependent_Normal_Gamma",prior_list=prior_list,
                okfamilies=okfamilies,plinks=plinks,simfun=rindependent_norm_gamma_reg)

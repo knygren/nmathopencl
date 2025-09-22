@@ -22,7 +22,6 @@
 #' @param use_opencl Logical. Whether to use OpenCL acceleration.
 #' @param verbose Logical. Whether to print progress messages.
 #' @param digits Number of significant digits to use for printed output.
-#' @param max_disp_perc parameter currently used to control upper bound in accept-reject procedure 
 #' @param progbar Logical. Whether to display a progress base during simulation.
 #' @param \ldots Additional arguments passed to or from other methods.
 #'
@@ -443,7 +442,7 @@ summary.rGamma_reg<-function(object,...){
 #' @example inst/examples/Ex_rindep_norm_gamma_reg.R
 #' @usage rindependent_norm_gamma_reg(n, y, x, prior_list, offset = NULL, weights = 1,
 #'                              family = gaussian(), Gridtype = 2, use_parallel = TRUE,
-#'                              use_opencl = FALSE, verbose = FALSE, max_disp_perc = 0.99,
+#'                              use_opencl = FALSE, verbose = FALSE, 
 #'                              progbar = TRUE)
 #' @export 
 #' @rdname simfuncs
@@ -454,7 +453,6 @@ summary.rGamma_reg<-function(object,...){
 rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
                                       Gridtype=2,
                                       use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE,
-                                      max_disp_perc=0.99,
                                       progbar=TRUE){
   
   call<-match.call()
@@ -486,6 +484,13 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
     else shape=NULL
     if(!is.null(prior_list$rate)) rate=prior_list$rate
     else rate=NULL
+    if (!is.null(prior_list$max_disp_perc)) {
+      max_disp_perc <- prior_list$max_disp_perc
+    } else {
+      max_disp_perc <- 0.99
+    }
+    
+    
   }
   
 

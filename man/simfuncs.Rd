@@ -22,7 +22,7 @@ rNormal_Gamma_reg(n, y, x, prior_list, offset = NULL, weights = 1, family = gaus
 
 rindependent_norm_gamma_reg(n, y, x, prior_list, offset = NULL, weights = 1,
                              family = gaussian(), Gridtype = 2, use_parallel = TRUE,
-                             use_opencl = FALSE, verbose = FALSE, max_disp_perc = 0.99,
+                             use_opencl = FALSE, verbose = FALSE, 
                              progbar = TRUE)
 
 rGamma_reg(n, y, x, prior_list, offset = NULL, weights = 1, family = gaussian(),
@@ -58,8 +58,6 @@ rGamma_reg(n, y, x, prior_list, offset = NULL, weights = 1, family = gaussian(),
 \item{use_opencl}{Logical. Whether to use OpenCL acceleration.}
 
 \item{verbose}{Logical. Whether to print progress messages.}
-
-\item{max_disp_perc}{parameter currently used to control upper bound in accept-reject procedure}
 
 \item{progbar}{Logical. Whether to display a progress base during simulation.}
 
@@ -279,14 +277,14 @@ rate=n_prior*RSS/n_data
 
 
 prior_list=list(mu=mu,Sigma=Sigma_prior,dispersion=dispersion,
-                 shape=shape,rate=rate,Precision=solve(Sigma_prior))
+                 shape=shape,rate=rate,Precision=solve(Sigma_prior),max_disp_perc=0.99)
 
 
 set.seed(360)
 
  ptm <- proc.time()
  sim2=rindependent_norm_gamma_reg(n=1000,y,x,prior_list=prior_list,
-offset=NULL,weights=1,max_disp_perc=0.99)
+offset=NULL,weights=1)
  proc.time()-ptm
 
  

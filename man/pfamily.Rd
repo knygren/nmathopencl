@@ -17,7 +17,7 @@ dGamma(shape, rate, beta)
 
 dNormal_Gamma(mu, Sigma, shape, rate)
 
-dIndependent_Normal_Gamma(mu, Sigma, shape, rate)
+dIndependent_Normal_Gamma(mu, Sigma, shape, rate, max_disp_perc = 0.99)
 
 \method{print}{pfamily}(x, ...)
 }
@@ -43,6 +43,13 @@ The gamma distribution is used as a prior for the inverse dispersion coefficient
 Needs to be provided when the Gamma prior is used for the dispersion. This
 specification is typically only used as part of Gibbs sampling where the beta and 
 dispersion parameters are updated separately.}
+
+\item{max_disp_perc}{cSpecifies the percentile used to truncate the posterior dispersion 
+distribution when constructing the envelope for accept–reject sampling. This determines 
+the lower and upper bounds for dispersion (σ²) used in the simulation. A value of 0.99 
+corresponds to using the central 98% of the posterior dispersion mass (i.e., excluding 
+the outer 1% in each tail). Smaller values yield tighter bounds and may improve acceptance 
+rates, while larger values allow broader dispersion support but may increase envelope complexity.}
 
 \item{x}{an object, a pfamily function that is to be printed}
 
