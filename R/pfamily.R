@@ -19,11 +19,11 @@
 #' Needs to be provided when the Gamma prior is used for the dispersion. This
 #' specification is typically only used as part of Gibbs sampling where the beta and 
 #' dispersion parameters are updated separately. 
-#' @param max_disp_perc cSpecifies the percentile used to truncate the posterior dispersion 
+#' @param max_disp_perc Specifies the percentile used to truncate the posterior dispersion 
 #' distribution when constructing the envelope for accept–reject sampling. This determines 
-#' the lower and upper bounds for dispersion (σ²) used in the simulation. A value of 0.99 
-#' corresponds to using the central 98% of the posterior dispersion mass (i.e., excluding 
-#' the outer 1% in each tail). Smaller values yield tighter bounds and may improve acceptance 
+#' the lower and upper bounds for the dispersion (σ²) used in the simulation. A value of 0.99 
+#' corresponds to using the central 98 percent of the posterior dispersion mass (i.e., excluding 
+#' the outer 1 percent in each tail). Smaller values yield tighter bounds and may improve acceptance 
 #' rates, while larger values allow broader dispersion support but may increase envelope complexity.
 #' @param x an object, a pfamily function that is to be printed
 #' @param \ldots additional argument(s) for methods.
@@ -80,6 +80,7 @@
 #' - **`dNormal_Gamma()`**: Combines a multivariate normal prior on coefficients with a gamma prior on precision, 
 #'   forming a conjugate structure for Gaussian models with unknown variance. This formulation parallels classical 
 #'   Normal-Gamma models and is compatible with hierarchical extensions \insertCite{Gelman2013,Raiffa1961}{glmbayes}.
+#'   
 #'
 #' - **`dIndependent_Normal_Gamma()`**: Similar to `dNormal_Gamma()`, but assumes independence between the 
 #'   coefficient and precision priors. This structure is useful for models where prior independence is desired 
