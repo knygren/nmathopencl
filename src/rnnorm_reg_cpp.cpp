@@ -597,6 +597,9 @@ List rnnorm_reg_std_cpp_parallel(
 
   // --- runtime estimate based on single-sample pilot ---
   int candidates_used = static_cast<int>(draws[0]);  // from pilot sample
+  
+  
+  
   if (candidates_used > 0 && !Rcpp::NumericVector::is_na(E_draws)) {
     double per_candidate_ms = static_cast<double>(elapsed_ms) / candidates_used;
     double est_total_ms = per_candidate_ms * E_draws * static_cast<double>(n);
@@ -616,9 +619,62 @@ List rnnorm_reg_std_cpp_parallel(
                 << "Note: this phase uses RcppParallel and cannot be safely interrupted.\n";
   }  
   
+  double per_candidate_ms_serial = static_cast<double>(elapsed_ms) / std::max(1, candidates_used);
+  double est_per_draw_ms_serial  = per_candidate_ms_serial * E_draws; // conservative bound per draw
+  double est_total_ms_serial     = est_per_draw_ms_serial * static_cast<double>(n);
 
+  int m1 = std::max(1, (int)std::ceil(0.01 * (double)n));
+  int m2 = std::max(1, (int)std::floor(300000.0 / std::max(1.0, est_per_draw_ms_serial))); // 300k ms = 5 min
+  int m_stage = std::min(m1, m2);  
+  
+  
+  // For now, just print 
+//  Rcpp::Rcout << "[CALIB] m1 (1% of n) = " << m1 << "\n";
+//  Rcpp::Rcout << "[CALIB] m2 (5-minute budget) = " << m2 << "\n";
+//  Rcpp::Rcout << "[CALIB] Selected m_stage = " << m_stage << "\n";
+  
+
+  Rcpp::Rcout << "Calibrating simulation time estimate using " << m_stage
+              << " draws at "
+              << Rcpp::as<std::string>(
+  Rcpp::Function("format")(Rcpp::Function("Sys.time")())
+              )
+    << "\n";
+              
+              
+  // --- calibration run for m_stage draws ---
+  auto t_cal0 = std::chrono::steady_clock::now();
+  RcppParallel::parallelFor(0, m_stage, worker);
+  auto t_cal1 = std::chrono::steady_clock::now();
+  
+  long long cal_elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(t_cal1 - t_cal0).count();
+  double per_draw_ms_parallel = static_cast<double>(cal_elapsed_ms) / static_cast<double>(m_stage);
+  double est_total_ms_parallel = per_draw_ms_parallel * static_cast<double>(n);
+  
+  // pretty-print
+  auto fmt_hms = [](double seconds) {
+    int s = static_cast<int>(std::round(seconds));
+    int h = s / 3600; s %= 3600;
+    int m = s / 60;   s %= 60;
+    std::ostringstream oss;
+    oss << h << "h " << m << "m " << s << "s";
+    return oss.str();
+  };
+  
+  double est_total_sec_parallel = est_total_ms_parallel / 1000.0;
+  Rcpp::Rcout << "[CALIB] Parallel calibration elapsed = " << cal_elapsed_ms << " ms for "
+              << m_stage << " draws ("
+              << per_draw_ms_parallel << " ms/draw).\n";
+  
+  Rcpp::Rcout << "Refined simulation time estimate (" << n << " draws): "
+              << est_total_sec_parallel << " seconds ("
+              << fmt_hms(est_total_sec_parallel) << ").\n"
+              << "Note: estimate is based on parallel calibration and may vary with system load.\n";
+    
+
+    
   // --- yes/no option if estimate exceeds 5 minutes ---
-  if (est_total_sec > 300.0) {
+  if (est_total_sec_parallel > 300.0) {
     Rcpp::Function readline("readline");
     std::string prompt = "Estimated simulation exceeds 5 minutes. Continue? [y/N]: ";
     while (true) {
@@ -637,6 +693,18 @@ List rnnorm_reg_std_cpp_parallel(
       
       if (ans == "y" || ans == "yes" || ans == "1" || ans == "continue") {
         Rcpp::Rcout << "[INFO] User chose to continue full run.\n";
+        
+        // Print system time before launching the full sampler, using R's Sys.time()
+        Rcpp::Rcout << ">>> Running Full parallel sampler: "
+                    << Rcpp::as<std::string>(
+        Rcpp::Function("format")(Rcpp::Function("Sys.time")())
+                    )
+          << "\n";
+                    
+                    
+        
+        
+        
         break; // proceed to parallel simulation
       } else if (ans == "n" || ans == "no" || ans == "2" || ans.empty()) {
         Rcpp::Rcout << "[INFO] User declined. Stopping simulation.\n";
