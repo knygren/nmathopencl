@@ -521,7 +521,7 @@ List rnnorm_reg_std_cpp_parallel(
   
   
   
-  if (p >= 12) {
+  if (p >= 14) {
    
   // Choose a small serial test size (set before use)
   int m_test = 1;                         // or set to std::min(n, default_threads)

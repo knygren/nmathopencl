@@ -562,7 +562,7 @@ List EnvelopeBuild_c(NumericVector bStar,
   
   arma::colvec NegLL_2(NegLL.begin(), NegLL.size(), false);
   
- if(l1>=12){
+ if(l1>=14){
   double est_time = run_opencl_pilot(G4, y, x, mu, P, alpha, wt,
                                      family, link, use_opencl, verbose);
  }
