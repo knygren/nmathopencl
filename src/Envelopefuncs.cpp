@@ -17,6 +17,166 @@ using namespace Rcpp;
 
 
 
+// Internal helper: run OpenCL pilot timing, print diagnostics, and prompt user.
+// Not exported to R.
+double run_opencl_pilot(const Rcpp::NumericMatrix& G4,
+                        const Rcpp::NumericVector& y,
+                        const Rcpp::NumericMatrix& x,
+                        const Rcpp::NumericMatrix& mu,
+                        const Rcpp::NumericMatrix& P,
+                        const Rcpp::NumericVector& alpha,
+                        const Rcpp::NumericVector& wt,
+                        const std::string& family,
+                        const std::string& link,
+                        bool use_opencl,
+                        bool verbose,
+                        double threshold_sec = 300.0) {
+  if (!use_opencl) return NA_REAL;
+  
+  int m1_total = G4.ncol();
+  int y_obs    = y.size();
+  
+  double obs_factor = std::min(1.0, 100.0 / (double)y_obs);
+  double frac_A = 0.01 * obs_factor;
+  double frac_B = 0.02 * obs_factor;
+  
+  int m1_pilot_A = std::max(100, (int)(m1_total * frac_A));
+  int m1_pilot_B = std::max(m1_pilot_A + 100, (int)(m1_total * frac_B));
+  m1_pilot_A = std::min(std::max(1, m1_pilot_A), m1_total);
+  m1_pilot_B = std::min(std::max(1, m1_pilot_B), m1_total);
+  
+  double refined_est_total_sec = NA_REAL;
+  double fixed_cost = 0.0;
+  double per_grid_cost = 0.0;
+  
+  if (m1_total > 50000 && use_opencl) {
+    auto slice_grid = [&](int m1_pilot) {
+      Rcpp::NumericMatrix G4_pilot(G4.nrow(), m1_pilot);
+      for (int j = 0; j < m1_pilot; ++j)
+        for (int i = 0; i < G4.nrow(); ++i)
+          G4_pilot(i, j) = G4(i, j);
+      return G4_pilot;
+    };
+    
+    // Warm-up
+    auto G4_pilot_A = slice_grid(m1_pilot_A);
+    Rcpp::List warmup_A = f2_f3_opencl(family, link, G4_pilot_A, y, x, mu, P, alpha, wt, 0);
+    
+    // Timed pilot A
+    auto t0A = std::chrono::high_resolution_clock::now();
+    Rcpp::List pilot_A = f2_f3_opencl(family, link, G4_pilot_A, y, x, mu, P, alpha, wt, 0);
+    auto t1A = std::chrono::high_resolution_clock::now();
+    double time_A = std::chrono::duration<double>(t1A - t0A).count();
+    
+    // Timed pilot B
+    auto G4_pilot_B = slice_grid(m1_pilot_B);
+    auto t0B = std::chrono::high_resolution_clock::now();
+    Rcpp::List pilot_B = f2_f3_opencl(family, link, G4_pilot_B, y, x, mu, P, alpha, wt, 0);
+    auto t1B = std::chrono::high_resolution_clock::now();
+    double time_B = std::chrono::duration<double>(t1B - t0B).count();
+    
+    // Estimate costs
+    per_grid_cost = (time_B - time_A) / std::max(1.0, (double)(m1_pilot_B - m1_pilot_A));
+    fixed_cost    = time_A - m1_pilot_A * per_grid_cost;
+    
+    if (per_grid_cost <= 0.0) {
+      Rcpp::Rcout << "[WARNING] Negative per-grid cost — falling back to Pilot B average.\n";
+      per_grid_cost = time_B / m1_pilot_B;
+      fixed_cost = 0.0;
+    }
+    if (fixed_cost < 0.0) {
+      Rcpp::Rcout << "[WARNING] Negative fixed cost — overriding to 0 and using Pilot B average.\n";
+      per_grid_cost = time_B / m1_pilot_B;
+      fixed_cost = 0.0;
+    }
+    
+    double est_time_sec = fixed_cost + per_grid_cost * m1_total;
+    
+    int m1_grid = std::max(1, (int)std::ceil(0.01 * (double)m1_total));
+    double est_time_sec_m1 = fixed_cost + per_grid_cost * (double)m1_grid;
+    int m2_grid = std::max(1, (int)std::floor((300.0 - fixed_cost) / std::max(1e-12, per_grid_cost)));
+    int m_stage_grid = std::min(m1_grid, m2_grid);
+    m_stage_grid = std::min(m_stage_grid, m1_total);
+    m_stage_grid = std::max(1, m_stage_grid);
+    
+    if (verbose) {
+      // Optional debug prints (commented in your original)
+      // Rcpp::Rcout << "[GRID EST] m1_grid = " << m1_grid << "\n";
+      // Rcpp::Rcout << "[GRID EST] est_time_sec_m1 = " << est_time_sec_m1 << "\n";
+      // Rcpp::Rcout << "[GRID EST] m2_grid = " << m2_grid << "\n";
+      // Rcpp::Rcout << "[GRID EST] Selected m_stage_grid = " << m_stage_grid << "\n";
+      // Rcpp::Rcout << "[GRID EST] m1_pilot_A = " << m1_pilot_A << "\n";
+      // Rcpp::Rcout << "[GRID EST] m1_pilot_B = " << m1_pilot_B << "\n";
+    }
+    
+    Rcpp::Rcout << "Running timed grid slice of size " << m_stage_grid << "...\n";
+    
+    auto G4_pilot = slice_grid(m_stage_grid);
+    auto t0p = std::chrono::high_resolution_clock::now();
+    Rcpp::List pilot = f2_f3_opencl(family, link, G4_pilot, y, x, mu, P, alpha, wt, 0);
+    auto t1p = std::chrono::high_resolution_clock::now();
+    double time_p = std::chrono::duration<double>(t1p - t0p).count();
+    
+    double per_grid_sec_parallel = time_p / (double)m_stage_grid;
+    refined_est_total_sec = per_grid_sec_parallel * m1_total;
+    
+    auto fmt_hms = [](double seconds) {
+      int s = (int)std::round(seconds);
+      int h = s / 3600; s %= 3600;
+      int m = s / 60;   s %= 60;
+      std::ostringstream oss;
+      oss << h << "h " << m << "m " << s << "s";
+      return oss.str();
+    };
+    
+    Rcpp::Rcout << "[GRID CALIB] Calibration elapsed = " << time_p
+                << " s for " << m_stage_grid
+                << " grid points (" << per_grid_sec_parallel << " s/grid).\n";
+    
+    Rcpp::Rcout << "Refined grid build time estimate: " << refined_est_total_sec
+                << " seconds (" << fmt_hms(refined_est_total_sec) << ").\n";
+    
+    long total = (long)std::round(refined_est_total_sec);
+    long h = total / 3600;
+    long m = (total % 3600) / 60;
+    long s = total % 60;
+    
+    Rcpp::Rcout << "Estimated full f2_f3 evaluation time: "
+                << refined_est_total_sec << " seconds ("
+                << h << "h " << m << "m " << s << "s)"
+                << " (fixed=" << fixed_cost
+                << ", per-grid=" << per_grid_cost << ").\n"
+                << "Note: estimate is approximate and may vary with system load.\n";
+  }
+  
+  if (refined_est_total_sec > threshold_sec) {
+    Rcpp::Rcout << "\nEstimated run time exceeds 5 minutes ("
+                << refined_est_total_sec << " seconds).\n";
+    
+    Rcpp::Function r_interactive("interactive");
+    bool is_interactive = Rcpp::as<bool>(r_interactive());
+    
+    if (is_interactive) {
+      Rcpp::Function readline("readline");
+      std::string response = Rcpp::as<std::string>(
+        readline("Do you want to continue? [y/N]: ")
+      );
+      
+      if (response != "y" && response != "Y") {
+        Rcpp::Rcout << "Aborting full run per user choice.\n";
+        Rcpp::stop("User aborted run due to estimated time exceeding threshold.");
+      } else {
+        Rcpp::Rcout << "Proceeding with full run...\n";
+      }
+    } else {
+      // Non-interactive (e.g. CI/CRAN): auto-approve
+      Rcpp::Rcout << "[NOTE] Non-interactive session: proceeding automatically.\n";
+      Rcpp::Rcout << "Proceeding with full run...\n";
+    }
+  }
+  
+  return refined_est_total_sec;
+}
 /*
  EnvelopeBuild_c — envelope grid construction for models with Gaussian priors
  and log-concave likelihoods
@@ -101,6 +261,10 @@ using namespace Rcpp;
  weighting and acceptance tests under the Gaussian-prior + log-concave
  likelihood assumption.
  */
+
+
+
+
 
 // [[Rcpp::export(".EnvelopeBuild_cpp")]]
 
@@ -398,176 +562,12 @@ List EnvelopeBuild_c(NumericVector bStar,
   
   arma::colvec NegLL_2(NegLL.begin(), NegLL.size(), false);
   
+ if(l1>=12){
+  double est_time = run_opencl_pilot(G4, y, x, mu, P, alpha, wt,
+                                     family, link, use_opencl, verbose);
+ }
+  
 
-  if(use_opencl==1 ){
-    
-  //////////////////  Pilot Phase
-
-  
-  int m1_total = G4.ncol();
-  int y_obs = y.size();  // or however you extract observation count
-  
-  double obs_factor = std::min(1.0, 100.0 / (double)y_obs);  // dampens pilot size for large n
-//  double frac_A = 0.01 * obs_factor;  // base fraction scaled down
-//  double frac_B = 0.02 * obs_factor;
-  
-  double frac_A = 0.01 * obs_factor;  // base fraction scaled down
-  double frac_B = 0.02 * obs_factor;
-  
-  
-    int m1_pilot_A = std::max(100, (int)(m1_total * frac_A));
-  int m1_pilot_B = std::max(m1_pilot_A + 100, (int)(m1_total * frac_B));
-  
-  // --- Cap at m1_total ---
-  m1_pilot_A = std::min(m1_pilot_A, m1_total);
-  m1_pilot_B = std::min(m1_pilot_B, m1_total);
-
-  // And enforce a sensible floor (e.g. at least 1)
-  m1_pilot_A = std::max(1, m1_pilot_A);
-  m1_pilot_B = std::max(1, m1_pilot_B);
-  
-  
-  double est_time_sec = NA_REAL;
-  
-  double refined_est_total_sec;
-  
-  if (m1_total > 50000 && use_opencl) {
-    auto slice_grid = [&](int m1_pilot) {
-      Rcpp::NumericMatrix G4_pilot(G4.nrow(), m1_pilot);
-      for (int j = 0; j < m1_pilot; ++j)
-        for (int i = 0; i < G4.nrow(); ++i)
-          G4_pilot(i, j) = G4(i, j);
-      return G4_pilot;
-    };
-    
-    // Run Pilot A (warm-up, discard timing)
-    auto G4_pilot_A = slice_grid(m1_pilot_A);
-    Rcpp::List warmup_A = f2_f3_opencl(family, link, G4_pilot_A, y, x, mu, P, alpha, wt, 0);
-
-
-    // Run Pilot A again (timed)
-    auto t0A = std::chrono::high_resolution_clock::now();
-    Rcpp::List pilot_A = f2_f3_opencl(family, link, G4_pilot_A, y, x, mu, P, alpha, wt, 0);
-    auto t1A = std::chrono::high_resolution_clock::now();
-    double time_A = std::chrono::duration<double>(t1A - t0A).count();
-    
-    // Run Pilot B (timed)
-    auto G4_pilot_B = slice_grid(m1_pilot_B);
-    
-
-    auto t0B = std::chrono::high_resolution_clock::now();
-    Rcpp::List pilot_B = f2_f3_opencl(family, link, G4_pilot_B, y, x, mu, P, alpha, wt, 0);
-    auto t1B = std::chrono::high_resolution_clock::now();
-    double time_B = std::chrono::duration<double>(t1B - t0B).count();
-    
-    // Estimate per-grid cost and fixed cost
-    double per_grid_cost = (time_B - time_A) / std::max(1.0, (double)(m1_pilot_B - m1_pilot_A));
-    double fixed_cost = time_A - m1_pilot_A * per_grid_cost;
-  
-   
-    
-    if (per_grid_cost <= 0.0) {
-      Rcpp::Rcout << "[WARNING] Negative per-grid cost — falling back to Pilot B average.\n";
-      per_grid_cost = time_B / m1_pilot_B;
-      fixed_cost = 0.0;
-    }
-    
-    
-    // Fallback if intercept is negative
-    if (fixed_cost < 0.0) {
-      Rcpp::Rcout << "[WARNING] Negative fixed cost — overriding to 0 and using Pilot B average.\n";
-      per_grid_cost = time_B / m1_pilot_B;
-      fixed_cost = 0.0;
-    }
-    
-    est_time_sec = fixed_cost + per_grid_cost * m1_total;
-    
-    int m1_grid = std::max(1, (int)std::ceil(0.01 * static_cast<double>(m1_total))); 
-    double est_time_sec_m1 = fixed_cost + per_grid_cost * static_cast<double>(m1_grid);
-    
-    int m2_grid = std::max(1, (int)std::floor((300.0 - fixed_cost) / std::max(1e-12, per_grid_cost)));
-    
-    int m_stage_grid = std::min(m1_grid, m2_grid);
-    
-    // Cap at total grid size
-    m_stage_grid = std::min(m_stage_grid, m1_total);
-    
-    // And enforce a sensible floor (e.g. at least 1)
-    m_stage_grid = std::max(1, m_stage_grid);
-    
-    
-//    Rcpp::Rcout << "[GRID EST] m1_grid (1% of total grid) = " << m1_grid << "\n";
-//    Rcpp::Rcout << "[GRID EST] est_time_sec_m1 = " << est_time_sec_m1 << " seconds\n";
-//    Rcpp::Rcout << "[GRID EST] m2_grid (5-minute budget) = " << m2_grid << "\n";
-//    Rcpp::Rcout << "[GRID EST] Selected m_stage_grid = " << m_stage_grid << "\n";
-//    Rcpp::Rcout << "[GRID EST] m1_pilot_A = " << m1_pilot_A << "\n";
-//    Rcpp::Rcout << "[GRID EST] m1_pilot_B = " << m1_pilot_B << "\n";
-    
-
-    
-    Rcpp::Rcout << "Running timed grid slice of size " << m_stage_grid << "...\n";
-    
-    // Slice the grid
-    auto G4_pilot = slice_grid(m_stage_grid);
-    
-    // Time the evaluation
-    auto t0p = std::chrono::high_resolution_clock::now();
-    Rcpp::List pilot = f2_f3_opencl(family, link, G4_pilot, y, x, mu, P, alpha, wt, 0);
-    auto t1p = std::chrono::high_resolution_clock::now();
-    
-    double time_p = std::chrono::duration<double>(t1p - t0p).count();  // seconds
-    double per_grid_sec_parallel = time_p / static_cast<double>(m_stage_grid);
-    refined_est_total_sec = per_grid_sec_parallel * m1_total;
-    
-    // Pretty print
-    auto fmt_hms = [](double seconds) {
-      int s = static_cast<int>(std::round(seconds));
-      int h = s / 3600; s %= 3600;
-      int m = s / 60;   s %= 60;
-      std::ostringstream oss;
-      oss << h << "h " << m << "m " << s << "s";
-      return oss.str();
-    };
-    
-    Rcpp::Rcout << "[GRID CALIB] Calibration elapsed = " << time_p << " s for "
-                << m_stage_grid << " grid points (" << per_grid_sec_parallel << " s/grid).\n";
-    
-    Rcpp::Rcout << "Refined grid build time estimate: " << refined_est_total_sec << " seconds ("
-                << fmt_hms(refined_est_total_sec) << ").\n";
-        
-    
-    long total = static_cast<long>(std::round(refined_est_total_sec));
-    long h = total / 3600;
-    long m = (total % 3600) / 60;
-    long s = total % 60;
-    
-    Rcpp::Rcout << "Estimated full f2_f3 evaluation time: "
-                << refined_est_total_sec << " seconds ("
-                << h << "h " << m << "m " << s << "s)"
-                << " (fixed=" << fixed_cost
-                << ", per-grid=" << per_grid_cost << ").\n"
-                << "Note: estimate is approximate and may vary with system load.\n";
-    
-  }
-  
-  
-  
-  if (refined_est_total_sec > 300.0) {
-    Rcpp::Rcout << "\nEstimated run time exceeds 5 minutes (" << refined_est_total_sec << " seconds).\n";
-    Rcpp::Rcout << "Do you want to continue? [y/N]: ";
-    Rcpp::Function readline("readline");
-    std::string response = Rcpp::as<std::string>(readline("Do you want to continue? [y/N]: "));
-    
-    if (response != "y" && response != "Y") {
-      Rcpp::Rcout << "Aborting full run per user choice.\n";
-      Rcpp::stop("User aborted run due to estimated time exceeding threshold.");
-    } else {
-      Rcpp::Rcout << "Proceeding with full run...\n";
-    }
-  }
-  
-  }
-  
   //    G4b.print("tangent points");
   
   //  Rcpp::Rcout << "Gridtype is :"  << Gridtype << std::endl;

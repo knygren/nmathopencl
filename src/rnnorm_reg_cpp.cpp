@@ -518,6 +518,11 @@ List rnnorm_reg_std_cpp_parallel(
       -1
   );
   
+  
+  
+  
+  if (p >= 12) {
+   
   // Choose a small serial test size (set before use)
   int m_test = 1;                         // or set to std::min(n, default_threads)
   
@@ -706,50 +711,60 @@ List rnnorm_reg_std_cpp_parallel(
     
     
     
-  // --- yes/no option if estimate exceeds 5 minutes ---
-  if (est_total_sec  > 300.0) {
-    Rcpp::Function readline("readline");
-    std::string prompt = "Estimated simulation exceeds 5 minutes. Continue? [y/N]: ";
-    while (true) {
-      SEXP ans_sexp = readline(Rcpp::wrap(prompt));
-      std::string ans = Rcpp::as<std::string>(ans_sexp);
-      // trim whitespace
-      auto ltrim = [](std::string &s) {
-        s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-                        [](unsigned char ch){ return !std::isspace(ch); }));
-      };
-      auto rtrim = [](std::string &s) {
-        s.erase(std::find_if(s.rbegin(), s.rend(),
-                             [](unsigned char ch){ return !std::isspace(ch); }).base(), s.end());
-      };
-      ltrim(ans); rtrim(ans);
+    // --- yes/no option if estimate exceeds 5 minutes ---
+    if (est_total_sec > 300.0) {
+      std::string prompt = "Estimated simulation exceeds 5 minutes. Continue? [y/N]: ";
       
-      if (ans == "y" || ans == "yes" || ans == "1" || ans == "continue") {
-        Rcpp::Rcout << "[INFO] User chose to continue full run.\n";
-        
-        // Print system time before launching the full sampler, using R's Sys.time()
+      Rcpp::Function r_interactive("interactive");
+      bool is_interactive = Rcpp::as<bool>(r_interactive());
+      
+      
+      if (is_interactive) {
+        Rcpp::Function readline("readline");
+        while (true) {
+          SEXP ans_sexp = readline(Rcpp::wrap(prompt));
+          std::string ans = Rcpp::as<std::string>(ans_sexp);
+          
+          // trim whitespace
+          auto ltrim = [](std::string &s) {
+            s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+                            [](unsigned char ch){ return !std::isspace(ch); }));
+          };
+          auto rtrim = [](std::string &s) {
+            s.erase(std::find_if(s.rbegin(), s.rend(),
+                                 [](unsigned char ch){ return !std::isspace(ch); }).base(), s.end());
+          };
+          ltrim(ans); rtrim(ans);
+          
+          if (ans == "y" || ans == "yes" || ans == "1" || ans == "continue") {
+            Rcpp::Rcout << "[INFO] User chose to continue full run.\n";
+            Rcpp::Rcout << ">>> Running Full parallel sampler: "
+                        << Rcpp::as<std::string>(
+            Rcpp::Function("format")(Rcpp::Function("Sys.time")())
+                        )
+              << "\n";
+                        break; // proceed to parallel simulation
+          } else if (ans == "n" || ans == "no" || ans == "2" || ans.empty()) {
+            Rcpp::Rcout << "[INFO] User declined. Stopping simulation.\n";
+            Rcpp::stop("Simulation stopped by user after time estimate.");
+          } else {
+            Rcpp::Rcout << "Invalid input. Please enter y (continue) or N (stop).\n";
+          }
+        }
+      } else {
+        // Non-interactive session (e.g. CI/CRAN): auto-approve
+        Rcpp::Rcout << "[NOTE] Non-interactive session: proceeding automatically.\n";
+        Rcpp::Rcout << "[INFO] Proceeding with full run.\n";
         Rcpp::Rcout << ">>> Running Full parallel sampler: "
                     << Rcpp::as<std::string>(
         Rcpp::Function("format")(Rcpp::Function("Sys.time")())
                     )
           << "\n";
-                    
-                    
-        
-        
-        
-        break; // proceed to parallel simulation
-      } else if (ans == "n" || ans == "no" || ans == "2" || ans.empty()) {
-        Rcpp::Rcout << "[INFO] User declined. Stopping simulation.\n";
-        Rcpp::stop("Simulation stopped by user after time estimate.");
-      } else {
-        Rcpp::Rcout << "Invalid input. Please enter y (continue) or N (stop).\n";
       }
     }
-  }
 
   
-    
+  }
   
   
   
