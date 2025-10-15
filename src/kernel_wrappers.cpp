@@ -467,10 +467,13 @@ Rcpp::List f2_f3_opencl(
 
     kernel_name = "f2_f3_gamma";
     kernel_file  = "src/f2_f3_gamma.cl";
-    
-        
   }
   
+  else if (family=="gaussian"){
+    
+    kernel_name = "f2_f3_gaussian";
+    kernel_file  = "src/f2_f3_gaussian.cl";
+  }
   
   else {
     Rcpp::stop("Unsupported family: " + family);

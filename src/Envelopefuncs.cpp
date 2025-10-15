@@ -360,11 +360,14 @@ Rcpp::List EnvelopeSize(const arma::vec& a,
                         bool use_opencl = false,
                         bool verbose    = false) 
   {
+  
+
   int l1 = a.size();
   Rcpp::List G2(l1);
   Rcpp::List GIndex1(l1);
   double E_draws = 1.0;
-  
+
+
   // core count for scaling
   int core_CNT = get_opencl_core_count();
   if (verbose) {
@@ -388,7 +391,7 @@ Rcpp::List EnvelopeSize(const arma::vec& a,
   /// If GridType is not equal to 2 then the size of the Grid is determined 
   /// uniquely by that setting
   
-  
+
     
   // EnvelopeOpt is an R function
   Rcpp::Function EnvelopeOpt("EnvelopeOpt");
@@ -401,6 +404,8 @@ Rcpp::List EnvelopeSize(const arma::vec& a,
       gridindex = EnvelopeOpt(a, n_envopt, 1);
     }
   }
+  
+
   
   // Loop over dimensions
   for (int i = 0; i < l1; i++) {
@@ -441,6 +446,7 @@ Rcpp::List EnvelopeSize(const arma::vec& a,
     }
   }
   
+
   return Rcpp::List::create(
     Rcpp::Named("G2")       = G2,
     Rcpp::Named("GIndex1")  = GIndex1,
@@ -479,17 +485,24 @@ Rcpp::List EnvelopeEval(const Rcpp::NumericMatrix& G4,   // grid (parameters × 
   
   // Dispatch to OpenCL or CPU evaluation
   Rcpp::List prepGrad;
-  if (use_opencl && family != "gaussian") {
-    if (verbose) {
+//  if (use_opencl && family != "gaussian") {
+if (use_opencl) {
+  if (verbose) {
+    Rcpp::Rcout << "Initiating f2_f3_opencl: "
+                << Rcpp::as<std::string>(
+    Rcpp::Function("format")(Rcpp::Function("Sys.time")()))
+    << "\n";
+  }
   
-      Rcpp::Rcout << "Initiating f2_f3_opencl: "                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
-                  << "\n";
-    }
-    
-    
-    
-    prepGrad = f2_f3_opencl(family, link, G4, y, x, mu, P, alpha, wt, progbar);
-  } else {
+  prepGrad = f2_f3_opencl(family, link, G4, y, x, mu, P, alpha, wt, progbar);
+  
+  // temporary guard: bail out immediately for gaussian
+  // if (family == "gaussian") {
+  //   Rcpp::stop("OpenCL gaussian path not yet implemented — stopping after prepGrad");
+  // }
+}
+      
+         else {
     if (verbose) {
       
       Rcpp::Rcout << "Initiating f2_f3_non_opencl: "                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
@@ -539,6 +552,7 @@ List EnvelopeBuild_c(NumericVector bStar,
   // (fall back to CPU if requested but not supported)
   
   
+
 #ifdef USE_OPENCL
   // OpenCL support detected at compile time — proceed as requested
 #else
@@ -567,7 +581,7 @@ List EnvelopeBuild_c(NumericVector bStar,
   // Basic setup: dimensions, Armadillo views, and working vectors
   // l1 = number of parameters, k = number of predictors
   
-  
+
   int progbar=0;
   
   int l1 = A.nrow(), k = A.ncol();
@@ -610,6 +624,7 @@ List EnvelopeBuild_c(NumericVector bStar,
   Lint=yy_1b*arma::trans(bStar_2)+yy_2b*arma::trans(omega);
   
   
+  Rcpp::Rcout << "[DEBUG] 3.0" << std::endl;
   
   // Call EnvelopeSize to determine grid structure and expected draws
 
@@ -631,6 +646,7 @@ List EnvelopeBuild_c(NumericVector bStar,
 // Expand grid indices and candidate points (GIndex, G3, G4)
 // l2 = total number of grid combinations
 
+
    NumericMatrix GIndex=asMat(expGrid(GIndex1));
    int l2=GIndex.nrow();
    NumericMatrix G3=asMat(expGrid(G2));
@@ -645,6 +661,7 @@ List EnvelopeBuild_c(NumericVector bStar,
     << "\n";
   }
   
+
   
   arma::mat G3b(G3.begin(), G3.nrow(), G3.ncol(), false);
   arma::mat G4b(G4.begin(), G4.nrow(), G4.ncol(), false);
@@ -677,6 +694,8 @@ List EnvelopeBuild_c(NumericVector bStar,
   
   // Call EnvelopeEval to compute negative log-likelihood and gradients
   // at each grid point
+  
+
 
   Rcpp::List eval_info = EnvelopeEval(G4, y, x, mu, P, alpha, wt,
                                       family, link, use_opencl, verbose);
