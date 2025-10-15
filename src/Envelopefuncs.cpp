@@ -796,7 +796,10 @@ List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar,NumericMatrix A,
                                     std::string link="logit",
                                     int Gridtype=2, 
                                     int n=1,
-                                    bool sortgrid=false
+                                    int n_envopt=-1,
+                                    bool sortgrid=false,
+                                    bool use_opencl    = false,
+                                    bool verbose       = false
 ){
   
   
@@ -939,6 +942,8 @@ List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar,NumericMatrix A,
   //  Rcpp::Rcout << "Number of points in Grid are :"  << l2 << std::endl;
   
   
+  
+  
   if(family=="gaussian" ){
     //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
     
@@ -948,11 +953,29 @@ List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar,NumericMatrix A,
     // (iii) Term from the LL that depends on the dispersion but not beta
     // (iv) Term from the LL that depends on beta and the dispersion (scaled RSS)
     
-    NegLL=f2_gaussian(G4,y, x, mu, P, alpha, wt);  
-    NegLL_slope=f2_gaussian(G4,y, x, mu, 0*P, alpha, wt);  
+    Rcpp::List eval_info = EnvelopeEval(G4, y, x, mu, P, alpha, wt,
+                                        family, link, use_opencl, verbose);
+    
+    
+    // Copy results into cbars/NegLL structures used downstream
+    
+    NegLL = eval_info["NegLL"];
+    cbars2 = Rcpp::as<arma::mat>(eval_info["cbars"]);
+    
+    
+//    NegLL=f2_gaussian(G4,y, x, mu, P, alpha, wt);  
     //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-    cbars2=f3_gaussian(G4,y, x,mu,P,alpha,wt);
-    cbars_slope2=f3_gaussian(G4,y, x,mu,0*P,alpha,wt);
+//    cbars2=f3_gaussian(G4,y, x,mu,P,alpha,wt);
+
+Rcpp::List eval_info2 = EnvelopeEval(G4, y, x, mu,0*P, alpha, wt,
+                                    family, link, use_opencl, verbose);
+
+NegLL_slope = eval_info2["NegLL"];
+cbars_slope2 = Rcpp::as<arma::mat>(eval_info2["cbars"]);
+
+    
+//    NegLL_slope=f2_gaussian(G4,y, x, mu, 0*P, alpha, wt);  
+//    cbars_slope2=f3_gaussian(G4,y, x,mu,0*P,alpha,wt);
     RSS_Out=RSS(y, x,G4,alpha,wt); // Note currenly includes the dispersion in the weight
     
   }

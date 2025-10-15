@@ -1042,7 +1042,11 @@ EnvelopeBuild <- function(
     return(.EnvelopeBuild_Ind_Normal_Gamma(
       bStar, A, y, x, mu, P, alpha, wt,
       family = family, link = link,
-      Gridtype = Gridtype, n = n, sortgrid = sortgrid
+      Gridtype = Gridtype, n = n,    
+      n_envopt  = n_envopt, 
+      sortgrid = sortgrid,
+      use_opencl = use_opencl,
+      verbose    = verbose
     ))
   }
   

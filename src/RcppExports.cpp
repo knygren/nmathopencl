@@ -118,8 +118,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // EnvelopeBuild_Ind_Normal_Gamma
-List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar, NumericMatrix A, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, std::string family, std::string link, int Gridtype, int n, bool sortgrid);
-RcppExport SEXP _glmbayes_EnvelopeBuild_Ind_Normal_Gamma(SEXP bStarSEXP, SEXP ASEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP, SEXP nSEXP, SEXP sortgridSEXP) {
+List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar, NumericMatrix A, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, std::string family, std::string link, int Gridtype, int n, int n_envopt, bool sortgrid, bool use_opencl, bool verbose);
+RcppExport SEXP _glmbayes_EnvelopeBuild_Ind_Normal_Gamma(SEXP bStarSEXP, SEXP ASEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP, SEXP nSEXP, SEXP n_envoptSEXP, SEXP sortgridSEXP, SEXP use_openclSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -135,8 +135,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
     Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP);
     Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< int >::type n_envopt(n_envoptSEXP);
     Rcpp::traits::input_parameter< bool >::type sortgrid(sortgridSEXP);
-    rcpp_result_gen = Rcpp::wrap(EnvelopeBuild_Ind_Normal_Gamma(bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid));
+    Rcpp::traits::input_parameter< bool >::type use_opencl(use_openclSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(EnvelopeBuild_Ind_Normal_Gamma(bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, n_envopt, sortgrid, use_opencl, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -631,7 +634,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_EnvelopeSize", (DL_FUNC) &_glmbayes_EnvelopeSize, 7},
     {"_glmbayes_EnvelopeEval", (DL_FUNC) &_glmbayes_EnvelopeEval, 11},
     {"_glmbayes_EnvelopeBuild_c", (DL_FUNC) &_glmbayes_EnvelopeBuild_c, 16},
-    {"_glmbayes_EnvelopeBuild_Ind_Normal_Gamma", (DL_FUNC) &_glmbayes_EnvelopeBuild_Ind_Normal_Gamma, 13},
+    {"_glmbayes_EnvelopeBuild_Ind_Normal_Gamma", (DL_FUNC) &_glmbayes_EnvelopeBuild_Ind_Normal_Gamma, 16},
     {"_glmbayes_Set_Grid", (DL_FUNC) &_glmbayes_Set_Grid, 3},
     {"_glmbayes_setlogP", (DL_FUNC) &_glmbayes_setlogP, 4},
     {"_glmbayes_arithmetic_test_wrapper", (DL_FUNC) &_glmbayes_arithmetic_test_wrapper, 0},
