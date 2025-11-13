@@ -18,7 +18,8 @@ EnvelopeSort(
   PLSD,
   a1,
   E_draws,
-  lg_prob_factor = NULL
+  lg_prob_factor = NULL,
+  UB2min = NULL
 )
 }
 \arguments{

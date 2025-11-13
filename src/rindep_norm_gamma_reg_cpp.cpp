@@ -163,8 +163,13 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
   NumericMatrix loglt=Envelope["loglt"];
   NumericMatrix logrt=Envelope["logrt"];
   
-
-
+  double RSS_Min=UB_list["RSS_Min"];
+  NumericVector UB2min=UB_list["UB2min"];
+  
+//  NumericVector ub2_min=;
+  
+  
+  
   
   // Build cache once outside the loop
   Rcpp::List cache = Inv_f3_precompute_disp(cbars, y, x, mu, P, alpha, wt);
@@ -266,7 +271,12 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
       
       arma::colvec yxbeta=(y2-alpha2-x2*thetabars_temp2)%sqrt(wt1b); 
       
-      UB2=0.5*(1/dispersion)*(arma::as_scalar(trans(yxbeta)*yxbeta)-RSS_ML);
+//      UB2=0.5*(1/dispersion)*(arma::as_scalar(trans(yxbeta)*yxbeta)-RSS_ML);
+      UB2=0.5*(1/dispersion)*(arma::as_scalar(trans(yxbeta)*yxbeta)-RSS_Min);
+      
+      // Subtract UB2min --> Should improve acceptance
+      
+      UB2=UB2-UB2min[J_out(0)];
       
       
       // Block 3: UB3A (adjusts because probabilities of components in grid are different from original grid)

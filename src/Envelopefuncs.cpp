@@ -1547,6 +1547,7 @@ List EnvelopeDispersionBuild_cpp(
   // Step 9: Mixture weights per face (match original)
   NumericVector New_logP2(gs);
   NumericVector prob_factor(gs);
+  NumericVector prob_factor2(gs);
   for (int j = 0; j < gs; ++j) {
     // cbars_temp is row j (length l1)
     double norm2 = 0.0;
@@ -1559,7 +1560,7 @@ List EnvelopeDispersionBuild_cpp(
     double pf_upp = thetabar_const_upp_apprx[j] - max_upp;
     double pf_low = thetabar_const_low_apprx[j] - max_low;
     prob_factor[j] = (pf_upp > pf_low ? pf_upp : pf_low);
-    
+    prob_factor2[j] =prob_factor[j]-ub2_min[j];
     // Temporary debug print
     if (gs <= 81) {
       Rcout << "[Face " << j << "] prob_factor = " << prob_factor[j] << "\n";
@@ -1572,6 +1573,7 @@ List EnvelopeDispersionBuild_cpp(
   
   // Log-space prob factors (kept separate for UB_list, as in R)
   NumericVector lg_prob_factor = clone(prob_factor);
+  NumericVector lg_prob_factor2 = clone(prob_factor2);
   
   
   
@@ -1579,34 +1581,48 @@ List EnvelopeDispersionBuild_cpp(
   
   // Normalize weights (PLSD)
   NumericVector prob_factor_exp(gs);
-  for (int j = 0; j < gs; ++j) prob_factor_exp[j] = std::exp(New_logP2[j] + prob_factor[j]);
+  NumericVector prob_factor_exp2(gs);
+  for (int j = 0; j < gs; ++j){
+    prob_factor_exp[j] = std::exp(New_logP2[j] + prob_factor[j]);
+    prob_factor_exp2[j] = std::exp(New_logP2[j] + prob_factor2[j]);
+    
+  }
   double sumP = std::accumulate(prob_factor_exp.begin(), prob_factor_exp.end(), 0.0);
-  for (int j = 0; j < gs; ++j) prob_factor_exp[j] /= sumP;
-  
+  double sumP2 = std::accumulate(prob_factor_exp2.begin(), prob_factor_exp2.end(), 0.0);
+  for (int j = 0; j < gs; ++j){
+    prob_factor_exp[j] /= sumP;
+    prob_factor_exp2[j] /= sumP2;
+    
+  }   
   // Step 10: Envelope constants for dispersion and gamma tilt
   double lm_log2 = new_slope * dispstar;
   double lm_log1 = new_int + new_slope * dispstar - new_slope * std::log(dispstar);
   double shape3  = shape2 - lm_log2;
   
   // Step 11: Package outputs
-  Env["PLSD"] = prob_factor_exp;
+//  Env["PLSD"] = prob_factor_exp;
+  Env["PLSD"] = prob_factor_exp2;
   
   List gamma_list = List::create(
     Named("shape3")     = shape3,
-    Named("rate2")      = Rate + RSS_ML / 2.0,  // matches original definition
+//    Named("rate2")      = Rate + RSS_ML / 2.0,  // matches original definition
+    Named("rate2")      = Rate + rss_min_global / 2.0,  // matches original definition
     Named("disp_upper") = upp,
     Named("disp_lower") = low
   );
   
   List UB_list = List::create(
     Named("RSS_ML")         = RSS_ML,               // not RSS_post
+    Named("RSS_Min")        = rss_min_global,       // Minimum across faces
     Named("max_New_LL_UB")  = max_upp,
     Named("max_LL_log_disp")= lm_log1 + lm_log2 * std::log(upp),
     Named("lm_log1")        = lm_log1,
     Named("lm_log2")        = lm_log2,
     Named("lg_prob_factor") = lg_prob_factor,
     Named("lmc1")           = new_int,
-    Named("lmc2")           = new_slope
+    Named("lmc2")           = new_slope,
+    Named("UB2min")           = ub2_min
+  
   );
   
   List diagnostics = List::create(
@@ -1619,7 +1635,9 @@ List EnvelopeDispersionBuild_cpp(
     Named("max_upp")      = max_upp,
     Named("new_slope")    = new_slope,
     Named("new_int")      = new_int,
-    Named("prob_factor")  = prob_factor_exp
+    Named("prob_factor")  = prob_factor_exp,
+    Named("UB2min")           = ub2_min
+//  Named("prob_factor2")  = prob_factor_exp2
   );
   
   if (verbose) {

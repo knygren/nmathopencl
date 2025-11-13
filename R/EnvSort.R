@@ -38,7 +38,8 @@
 EnvelopeSort <- function(l1, l2,
                          GIndex, G3, cbars, logU, logrt, loglt,
                          logP, LLconst, PLSD, a1, E_draws,
-                         lg_prob_factor = NULL) {   # <-- new optional arg
+                         lg_prob_factor = NULL,
+                         UB2min=NULL) {   # <-- new optional arg
   # Order indices by decreasing PLSD
   ord <- order(PLSD, decreasing = TRUE)
   sel <- ord[seq_len(l2)]  # top l2 rows
@@ -58,7 +59,13 @@ EnvelopeSort <- function(l1, l2,
     stopifnot(length(lg_prob_factor) == l2)
     lg_prob_factor <- lg_prob_factor[sel]
   }
+
+  if (!is.null(UB2min)) {
+    stopifnot(length(UB2min) == l2)
+    UB2min <- UB2min[sel]
+  }
   
+    
   # Build output list
   outlist <- list(
     GridIndex = GIndex,
@@ -75,6 +82,9 @@ EnvelopeSort <- function(l1, l2,
   )
   if (!is.null(lg_prob_factor)) {
     outlist$lg_prob_factor <- lg_prob_factor
+  }
+  if (!is.null(UB2min)) {
+    outlist$UB2min <- UB2min
   }
   
   outlist

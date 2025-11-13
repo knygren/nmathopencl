@@ -794,7 +794,8 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
     PLSD    = Env3_raw$PLSD,
     a1      = Env3_raw$a1,
     E_draws = Env3_raw$E_draws,
-    lg_prob_factor = disp_env_out$UB_list$lg_prob_factor
+    lg_prob_factor = disp_env_out$UB_list$lg_prob_factor,
+    UB2min = disp_env_out$UB_list$UB2min
   )
 
   
@@ -824,12 +825,10 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   upp            <- gamma_list_new$disp_upper  
   diagnostics     <- disp_env_out$diagnostics
   
-  ## USE reordered lg_prob factor
+  ## USE reordered lg_prob factor and UB2min
   UB_list_new$lg_prob_factor=Env3$lg_prob_factor
+  UB_list_new$UB2min=Env3$UB2min
   
-  
-
-    
     cat("[DEBUG] disp_lower =", low,
       " disp_upper =", upp, "\n")
   
