@@ -809,24 +809,6 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   )
 
   
-  
-  
-  # cat("[DEBUG] disp_lower =", low,
-  #     " disp_upper =", upp, "\n")
-  # 
-  # cat("[DEBUG] Calling .rindep_norm_gamma_reg_std_V4_cpp \n")
-  
-  # sim_temp <- .rindep_norm_gamma_reg_std_V4_cpp(
-  #   n=n, y=y, x=x2, mu=mu2, P=P2, alpha=alpha, wt,
-  #   f2=f2, Envelope=Env3, 
-  #   gamma_list=gamma_list_new,
-  #   UB_list=UB_list_new,
-  #   family="gaussian", link="identity", progbar=progbar
-  # )
-  
-  
-  
-  
 
   # Env3_temp           <- disp_env_out$Env_out
   gamma_list_new <- disp_env_out$gamma_list
@@ -844,19 +826,43 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
     cat("Calling .rindep_norm_gamma_reg_std_cpp \n")
   }
   
-  
-  sim_temp=.rindep_norm_gamma_reg_std_cpp (n=n, y=y, x=x2, 
-                                              mu=mu2, ## Should be zero vector
-                                              P=P2,  ## Part of prior shifted to the Likelihood
-                                              alpha=alpha, wt,
-                                              f2=f2, Envelope=Env3, 
-                                              gamma_list=gamma_list_new,
-                                              UB_list=UB_list_new,
-                                              family="gaussian",link="identity", progbar =progbar)
 
-  if (verbose) {
-    cat("Exiting .rindep_norm_gamma_reg_std_cpp \n")
+  
+  if (!use_parallel || n == 1) {
+    sim_temp <- .rindep_norm_gamma_reg_std_cpp(
+      n = n, y = y, x = x2,
+      mu = mu2,  # Should be zero vector
+      P = P2,    # Part of prior shifted to the Likelihood
+      alpha = alpha, wt = wt,
+      f2 = f2, Envelope = Env3,
+      gamma_list = gamma_list_new,
+      UB_list = UB_list_new,
+      family = "gaussian", link = "identity",
+      progbar = progbar
+    )
+    
+    if (verbose) {
+      cat("Exiting .rindep_norm_gamma_reg_std_cpp\n")
+    }
+    
+  } else {
+    sim_temp <- .rindep_norm_gamma_reg_std_parallel_cpp(
+      n = n, y = y, x = x2,
+      mu = mu2,  # Should be zero vector
+      P = P2,    # Part of prior shifted to the Likelihood
+      alpha = alpha, wt = wt,
+      f2 = f2, Envelope = Env3,
+      gamma_list = gamma_list_new,
+      UB_list = UB_list_new,
+      family = "gaussian", link = "identity",
+      progbar = progbar
+    )
+    
+    if (verbose) {
+      cat("Exiting .rindep_norm_gamma_reg_std_parallel_cpp\n")
+    }
   }
+  
   
 ##  print(paste("Interactive status:", interactive()))
   
