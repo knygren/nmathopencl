@@ -279,4 +279,29 @@ extern "C" {
 }
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+  
+  // attribute_hidden
+  double pgamma_local(double x, double alph, double scale,
+                      int lower_tail, int log_p);
+  
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+  
+  // attribute_hidden
+  double qgamma_local(double p, double alpha, double scale,
+                      int lower_tail, int log_p);
+  
+#ifdef __cplusplus
+}
+#endif
+
+
 #endif /* MATHLIB_PRIVATE_H */

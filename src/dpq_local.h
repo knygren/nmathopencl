@@ -66,7 +66,7 @@
 #define R_DT_val(x)	(lower_tail ? R_D_val(x)  : R_D_Clog(x))
 #define R_DT_Cval(x)	(lower_tail ? R_D_Clog(x) : R_D_val(x))
 
-#ifndef R_D_qIv
+#ifndef R_DT_qIv
 /*#define R_DT_qIv(p)	R_D_Lval(R_D_qIv(p))		 *  p  in qF ! */
 #define R_DT_qIv(p)	(log_p ? (lower_tail ? exp(p) : - expm1(p)) \
 			       : R_D_Lval(p))
