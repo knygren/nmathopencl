@@ -384,8 +384,7 @@ EnvelopeUB2_parallel <- function(par0, low, upp,
   }
   
   message("[EnvelopeUB2_parallel] Available cores: ", avail_cores,
-          " | Using cores: ", cores,
-          " | Total faces: ", gs)
+          " | Using cores: ", cores)
   
   worker_fun <- function(j) {
     cbars_j <- cbars[j, ]

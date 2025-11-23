@@ -1485,15 +1485,16 @@ List EnvelopeDispersionBuild_cpp(
   
   
   if (verbose) {
+    // Print total number of faces before entering the loop
+    Rcpp::Rcout << "[EnvelopeDispersionBuild] Total faces to process: "
+                << gs << "\n";
+    
     Rcpp::Function fmt("format");
     Rcpp::Function systime("Sys.time");
     Rcpp::CharacterVector now = fmt(systime(), Rcpp::Named("format") = "%H:%M:%S");
     Rcpp::Rcout << "[EnvelopeDispersionBuild] >>> Starting RSS minimization loop at "
                 << Rcpp::as<std::string>(now[0]) << " <<<\n";
     
-    // Print total number of faces before entering the loop
-    Rcpp::Rcout << "[EnvelopeDispersionBuild] Total faces to process: "
-                << gs << "\n";
     
   }
   
@@ -1528,15 +1529,26 @@ List EnvelopeDispersionBuild_cpp(
   int m_elapsed = static_cast<int>((elapsed_parallel - h_elapsed*3600) / 60);
   int s_elapsed = static_cast<int>(elapsed_parallel - h_elapsed*3600 - m_elapsed*60);
   
-  Rcpp::Rcout << "[EnvelopeDispersionBuild] Parallel helper completed in "
-              << h_elapsed << "h " << m_elapsed << "m " << s_elapsed << "s.\n";  
   
   
     // Extract parallel results
     Rcpp::NumericVector disp_min_parallel = parallel_res["disp_min"];
     Rcpp::NumericVector rss_min_parallel  = parallel_res["rss_min"];
   
+
+  if (verbose) {
+    Rcpp::Function fmt("format");
+    Rcpp::Function systime("Sys.time");
+    Rcpp::CharacterVector now = fmt(systime(), Rcpp::Named("format") = "%H:%M:%S");
+    Rcpp::Rcout << "[EnvelopeDispersionBuild] >>> Exiting RSS minimization loop at "
+                << Rcpp::as<std::string>(now[0]) << " <<<\n";
+    Rcpp::Rcout << "[EnvelopeDispersionBuild] RSS Parallel helper completed in "
+                << h_elapsed << "h " << m_elapsed << "m " << s_elapsed << "s.\n";  
+    
+    
+      }
   
+    
     
   // // Right before entering the loop
   // double start_time = Rcpp::as<double>(
@@ -1679,6 +1691,18 @@ List EnvelopeDispersionBuild_cpp(
 
   //////////////////////////////////////
 
+  if (verbose) {
+    Rcpp::Function fmt("format");
+    Rcpp::Function systime("Sys.time");
+    Rcpp::CharacterVector now = fmt(systime(), Rcpp::Named("format") = "%H:%M:%S");
+    Rcpp::Rcout << "[EnvelopeDispersionBuild] >>> Starting UB2 minimization loop at "
+                << Rcpp::as<std::string>(now[0]) << " <<<\n";
+    
+    
+  }
+  
+  
+  
   
     
   // Assume UB2 has been exported as shown earlier
@@ -1716,8 +1740,6 @@ List EnvelopeDispersionBuild_cpp(
   int m_elapsed_ub2 = static_cast<int>((elapsed_ub2 - h_elapsed_ub2*3600) / 60);
   int s_elapsed_ub2 = static_cast<int>(elapsed_ub2 - h_elapsed_ub2*3600 - m_elapsed_ub2*60);
   
-  Rcpp::Rcout << "[EnvelopeDispersionBuild] UB2 parallel helper completed in "
-              << h_elapsed_ub2 << "h " << m_elapsed_ub2 << "m " << s_elapsed_ub2 << "s.\n";
   
   // Extract UB2 parallel results
   Rcpp::NumericVector disp_min_ub2 = ub2_parallel_res["disp_min"];
@@ -1814,7 +1836,10 @@ List EnvelopeDispersionBuild_cpp(
     Rcpp::CharacterVector now = fmt(systime(), Rcpp::Named("format") = "%H:%M:%S");
     Rcpp::Rcout << "[EnvelopeDispersionBuild] >>> Exiting UB2 minimization loop at "
                 << Rcpp::as<std::string>(now[0]) << " <<<\n";
-  }
+    Rcpp::Rcout << "[EnvelopeDispersionBuild] UB2 parallel helper completed in "
+                << h_elapsed_ub2 << "h " << m_elapsed_ub2 << "m " << s_elapsed_ub2 << "s.\n";
+    
+      }
   
   
   

@@ -596,6 +596,13 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   ## Step 3: Iterative Dispersion Anchoring (Finds good value for the dispersion)
   
+  if (verbose) {
+    start_anchor <- as.numeric(Sys.time())
+    cat("[DispersionAnchoring] >>> Entering iterative dispersion anchoring at",
+        format(Sys.time(), "%H:%M:%S"), "<<<\n")
+  }
+  
+  
   for(j in 1:10){
     glmb_out1=glmb(y~x-1,family=gaussian(),
                    dNormal(mu=mu,Sigma=Sigma,dispersion=dispersion2),weights=wt,offset=offset2)
@@ -618,6 +625,19 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
     
   }
   
+  
+  if (verbose) {
+    end_anchor <- as.numeric(Sys.time())
+    elapsed <- end_anchor - start_anchor
+    h <- as.integer(elapsed / 3600)
+    m <- as.integer((elapsed - h*3600) / 60)
+    s <- as.integer(elapsed - h*3600 - m*60)
+    
+    cat("[DispersionAnchoring] >>> Exiting iterative dispersion anchoring at",
+        format(Sys.time(), "%H:%M:%S"), "<<<\n")
+    cat("[DispersionAnchoring] Dispersion anchoring completed in:",
+        h, "h ", m, "m ", s, "s.\n")
+  }
   
   
   ## Step 4: Standardized Model 
@@ -669,6 +689,13 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   # This step only used to get posterior precision it seems
   # Since normal case, can likely be computed instead
   
+  if (verbose) {
+    start_optim <- as.numeric(Sys.time())
+    cat("[PosteriorMode] >>> Entering optim() call at",
+        format(Sys.time(), "%H:%M:%S"), "<<<\n")
+  }
+  
+  
   opt_out=optim(parin,f2,f3,y=as.vector(y),x=as.matrix(x2),mu=as.vector(mu2),
                 P=as.matrix(P),alpha=as.vector(alpha),wt=as.vector(wt2),
                 method="BFGS",hessian=TRUE
@@ -682,6 +709,20 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   #  bstar
   #  bstar+as.vector(mu)  # mode for actual model
   A1=opt_out$hessian # Approximate Precision at mode
+  
+  
+  if (verbose) {
+    end_optim <- as.numeric(Sys.time())
+    elapsed <- end_optim - start_optim
+    h <- as.integer(elapsed / 3600)
+    m <- as.integer((elapsed - h*3600) / 60)
+    s <- as.integer(elapsed - h*3600 - m*60)
+    
+    cat("[PosteriorMode] >>> Exiting optim() call at",
+        format(Sys.time(), "%H:%M:%S"), "<<<\n")
+    cat("[PosteriorMode] optim() completed in:",
+        h, "h ", m, "m ", s, "s.\n")
+  }
   
   
   Standard_Mod=glmb_Standardize_Model(y=as.vector(y), x=as.matrix(x2),
@@ -707,6 +748,13 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   ## Pull the initial Envelope based on optimized values above
   
+  if (verbose) {
+    start_envbuild <- as.numeric(Sys.time())
+    cat("[EnvelopeBuild] >>> Entering EnvelopeBuild at",
+        format(Sys.time(), "%H:%M:%S"), "<<<\n")
+  }
+  
+  
   Env2=EnvelopeBuild(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
                      as.matrix(mu2,ncol=1),as.matrix(P2),as.vector(alpha),
                      as.vector(wt2),
@@ -716,35 +764,31 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
                      sortgrid=TRUE,use_opencl = use_opencl,verbose = verbose)
   
   if (verbose) {
-    cat("EnvelopeBuild returned\n")
-    }
-  
+    end_envbuild <- as.numeric(Sys.time())
+    elapsed <- end_envbuild - start_envbuild
+    h <- as.integer(elapsed / 3600)
+    m <- as.integer((elapsed - h*3600) / 60)
+    s <- as.integer(elapsed - h*3600 - m*60)
+    
+    cat("[EnvelopeBuild] >>> Exiting EnvelopeBuild at",
+        format(Sys.time(), "%H:%M:%S"), "<<<\n")
+    cat("[EnvelopeBuild] EnvelopeBuild completed in:",
+        h, "h ", m, "m ", s, "s.\n")
+  }
   
   
   
   ###  Call new function to build shared envelope
 
   if (verbose) {
-    cat("Entering EnvelopeDispersionBuild \n")
+
+    start_dispbuild <- as.numeric(Sys.time())
+    
+    cat("[EnvelopeDispersionBuild] >>> Entering EnvelopeDispersionBuild at",
+        format(Sys.time(), "%H:%M:%S"), "<<<\n")
   }
   
   
-  
-  # disp_env_out_old <- EnvelopeDispersionBuild(
-  #   Env        = Env2,
-  #   Shape      = shape,
-  #   Rate       = rate,
-  #   P          = P2,
-  #   y=y,
-  #   x          = x2,
-  #   alpha      =as.vector(alpha),
-  #   n_obs      = n_obs,
-  #   RSS_post   = RSS_Post2,
-  #   RSS_ML     =RSS_ML,
-  #   max_disp_perc = max_disp_perc,
-  #   disp_lower=disp_lower,
-  #   disp_upper=disp_upper
-  # )
   
   disp_env_out <- EnvelopeDispersionBuild_cpp(
     Env        = Env2,
@@ -768,7 +812,16 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   
   if (verbose) {
-    cat("Exiting EnvelopeDispersionBuild \n")
+    end_dispbuild <- as.numeric(Sys.time())
+    elapsed <- end_dispbuild - start_dispbuild
+    h <- as.integer(elapsed / 3600)
+    m <- as.integer((elapsed - h*3600) / 60)
+    s <- as.integer(elapsed - h*3600 - m*60)
+    
+    cat("[EnvelopeDispersionBuild] >>> Exiting EnvelopeDispersionBuild at",
+        format(Sys.time(), "%H:%M:%S"), "<<<\n")
+    cat("[EnvelopeDispersionBuild] EnvelopeDispersionBuild completed in:",
+        h, "h ", m, "m ", s, "s.\n")
   }
   
   
@@ -827,7 +880,10 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   if (!use_parallel || n == 1) {
     if (verbose) {
-      cat("Calling .rindep_norm_gamma_reg_std_cpp \n")
+      start_sim <- as.numeric(Sys.time())
+      
+      cat("[Simulation] >>> Calling .rindep_norm_gamma_reg_std_cpp at",
+          format(Sys.time(), "%H:%M:%S"), "<<<\n")
     }
     
     sim_temp <- .rindep_norm_gamma_reg_std_cpp(
@@ -843,13 +899,28 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
     )
     
     if (verbose) {
-      cat("Exiting .rindep_norm_gamma_reg_std_cpp\n")
+      end_sim <- as.numeric(Sys.time())
+      elapsed <- end_sim - start_sim
+      h <- as.integer(elapsed / 3600)
+      m <- as.integer((elapsed - h*3600) / 60)
+      s <- as.integer(elapsed - h*3600 - m*60)
+      
+
+      cat("[Simulation] >>> Exiting .rindep_norm_gamma_reg_std_cpp at",
+          format(Sys.time(), "%H:%M:%S"), "<<<\n")
+      cat("[Simulation] Simulation completed in: ",
+          h, "h ", m, "m ", s, "s.\n")
+      
+            
     }
     
   } else {
     
     if (verbose) {
-      cat("Calling .rindep_norm_gamma_reg_std_parallel_cpp \n")
+      start_sim <- as.numeric(Sys.time())
+      
+      cat("[Simulation] >>> Calling .rindep_norm_gamma_reg_std_parallel_cpp at",
+          format(Sys.time(), "%H:%M:%S"), "<<<\n")
     }
     
     sim_temp <- .rindep_norm_gamma_reg_std_parallel_cpp(
@@ -865,7 +936,20 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
     )
     
     if (verbose) {
-      cat("Exiting .rindep_norm_gamma_reg_std_parallel_cpp\n")
+      end_sim <- as.numeric(Sys.time())
+      elapsed <- end_sim - start_sim
+      h <- as.integer(elapsed / 3600)
+      m <- as.integer((elapsed - h*3600) / 60)
+      s <- as.integer(elapsed - h*3600 - m*60)
+      
+    
+
+      cat("[Simulation] >>> Exiting .rindep_norm_gamma_reg_std_parallel_cpp at",
+          format(Sys.time(), "%H:%M:%S"), "<<<\n")
+      cat("[Simulation] Simulation completed in: ",
+          h, "h ", m, "m ", s, "s.\n")
+      
+        
     }
   }
   
