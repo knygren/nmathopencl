@@ -8,6 +8,9 @@
 \alias{Inv_f3_with_disp}
 \alias{UB2}
 \alias{rss_face_at_disp}
+\alias{drss_ddisp}
+\alias{EnvelopeDispersionBuild_parallel}
+\alias{EnvelopeUB2_parallel}
 \title{Builds Dispersion-Aware Envelope for Simulation}
 \usage{
 EnvelopeDispersionBuild(Env, Shape, Rate, P, y, x, alpha, n_obs, RSS_post, RSS_ML, 
@@ -22,6 +25,12 @@ Inv_f3_with_disp(cache, dispersion, cbars_small)
 UB2(dispersion, cache, cbars_j, y, x, alpha, wt, rss_min_global)
 
 rss_face_at_disp(dispersion, cache, cbars_j, y, x, alpha, wt)
+
+drss_ddisp(dispersion, cache, cbars_j, y, x, alpha, wt)
+
+EnvelopeDispersionBuild_parallel(par0, low, upp, cache, cbars, y, x, alpha, wt, cores)
+
+EnvelopeUB2_parallel(par0, low, upp, cache, cbars, y, x, alpha, wt, rss_min_global, cores)
 }
 \arguments{
 \item{Env}{Envelope object from \code{\link{EnvelopeBuild}}, containing tangency points and gradients}
@@ -77,6 +86,14 @@ rss_face_at_disp(dispersion, cache, cbars_j, y, x, alpha, wt)
 \item{cbars_j}{gradient vector for standarized negative log-likelihood function}
 
 \item{rss_min_global}{Minimum RSS across the face tangencies over the range defined by disp_lower and disp_upper}
+
+\item{par0}{Dispersion parameter}
+
+\item{low}{Dispersion parameter}
+
+\item{upp}{Dispersion parameter}
+
+\item{cores}{Dispersion parameter}
 }
 \value{
 \describe{

@@ -1173,3 +1173,89 @@ Note: The central tangency point is typically at the posterior mode.  If the pri
 
 
 Note: UB2A is likely to be much smaller than UB2 for most faces. $\mathrm{UB2}^{*}_{j}$ can be shifed to the mixture weight (PLSD).
+
+
+
+# Derivation of the dispersion gradient
+
+We consider the weighted residual sum of squares (RSS) at dispersion parameter \(d\):
+
+\[
+\mathrm{RSS}(d) = (y - \alpha - X\beta(d))^\top W (y - \alpha - X\beta(d)),
+\]
+
+where:
+- \(X \in \mathbb{R}^{n \times p}\) is the design matrix,
+- \(W = \mathrm{diag}(w_1,\dots,w_n)\) are observation weights,
+- \(y\) is the response vector,
+- \(\alpha\) is the offset vector,
+- \(\beta(d)\) is the coefficient vector depending on dispersion \(d\).
+
+---
+
+## Normal equations and implicit derivative
+
+The tangency point \(\beta(d)\) satisfies the perturbed normal equations:
+
+\[
+A(d)\,\beta(d) = \frac{1}{d}\,\mathrm{base\_B0} + \text{face terms},
+\]
+
+with
+\[
+A(d) = P + \frac{\mathrm{base\_A}}{d}, \quad
+\mathrm{base\_A} = X^\top W X, \quad
+\mathrm{base\_B0} = X^\top W (y-\alpha).
+\]
+
+Differentiating implicitly gives:
+
+\[
+\beta'(d) = \frac{1}{d^2}\,A(d)^{-1}\Big(\mathrm{base\_A}\,\beta(d) - \mathrm{base\_B0}\Big).
+\]
+
+---
+
+## Gradient of RSS
+
+Differentiating \(\mathrm{RSS}(d)\):
+
+\[
+\frac{d}{dd}\,\mathrm{RSS}(d)
+= 2\,\mathrm{resid}(d)^\top W \frac{d}{dd}\,\mathrm{resid}(d),
+\]
+
+with \(\mathrm{resid}(d) = y - \alpha - X\beta(d)\).
+
+Since \(\frac{d}{dd}\,\mathrm{resid}(d) = -X\beta'(d)\), we obtain:
+
+\[
+\frac{d}{dd}\,\mathrm{RSS}(d)
+= -2\,\mathrm{resid}(d)^\top W X \beta'(d).
+\]
+
+Substitute \(\beta'(d)\):
+
+\[
+\frac{d}{dd}\,\mathrm{RSS}(d)
+= \frac{2}{d^2}\,\mathrm{resid}(d)^\top W X A(d)^{-1}\Big(\mathrm{base\_A}\,\beta(d) - \mathrm{base\_B0}\Big).
+\]
+
+---
+
+## Alignment with C++ implementation
+
+In the C++ function `drss_ddisp`:
+
+- `resid` = \(y - \alpha - X\beta\)
+- `rhs` = \(\mathrm{base\_A}\beta - \mathrm{base\_B0}\)
+- `solve_rhs` = \(A^{-1}\,\mathrm{rhs}\)
+- `WXsolve` = \((X \cdot \mathrm{solve\_rhs}) \odot w = W X A^{-1}\mathrm{rhs}\)
+- `grad` = \((2.0 / d^2) \cdot \mathrm{resid}^\top \mathrm{WXsolve}\)
+
+Thus the analytic gradient matches the implementation:
+
+\[
+\boxed{\;\frac{d}{dd}\,\mathrm{RSS}(d)
+= \frac{2}{d^2}\,\mathrm{resid}(d)^\top W X A(d)^{-1}\Big(\mathrm{base\_A}\,\beta(d) - \mathrm{base\_B0}\Big)\;}
+\]

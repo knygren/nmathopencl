@@ -100,6 +100,11 @@
 #' @param wt          weight vector
 #' @param rss_min_global Minimum RSS across the face tangencies over the range defined by disp_lower and disp_upper
 #' @param dispersion  Dispersion parameter
+#' @param par0  Dispersion parameter
+#' @param low  Dispersion parameter
+#' @param upp  Dispersion parameter
+#' @param cores  Dispersion parameter
+#'
 #'
 #' @return
 #' \describe{
@@ -295,4 +300,119 @@ UB2 <- function(dispersion, cache, cbars_j, y, x, alpha, wt, rss_min_global) {
 
 rss_face_at_disp<- function(dispersion, cache, cbars_j, y, x, alpha, wt) {
   .Call(`_glmbayes_rss_face_at_disp`, dispersion, cache, cbars_j, y, x, alpha, wt)
+}
+
+
+
+#' @usage drss_ddisp(dispersion, cache, cbars_j, y, x, alpha, wt)
+#' @export
+#' @rdname dispenvelopes
+#' @order 7
+
+drss_ddisp <- function(dispersion, cache, cbars_j, y, x, alpha, wt) {
+  .Call(`_glmbayes_drss_ddisp`, dispersion, cache, cbars_j, y, x, alpha, wt)
+}
+
+#' @usage EnvelopeDispersionBuild_parallel(par0, low, upp, cache, cbars, y, x, alpha, wt, cores)
+#' @export
+#' @rdname dispenvelopes
+#' @order 8
+
+EnvelopeDispersionBuild_parallel <- function(par0, low, upp,
+                                             cache, cbars, y, x, alpha, wt,
+                                             cores = parallel::detectCores(logical = FALSE)) {
+  gs <- nrow(cbars)
+  avail_cores <- parallel::detectCores(logical = FALSE)
+  
+  # Respect CRAN check limit
+  if (Sys.getenv("_R_CHECK_LIMIT_CORES_", "") == "TRUE") {
+    cores <- min(cores, 2L)
+  } else {
+    cores <- min(cores, avail_cores, gs)
+  }
+  
+  message("[EnvelopeDispersionBuild_parallel] Available cores: ", avail_cores,
+          " | Using cores: ", cores)
+  
+  worker_fun <- function(j) {
+    cbars_j <- cbars[j, ]
+    optim(par0,
+          fn = rss_face_at_disp,
+          method = "L-BFGS-B",
+          lower = low,
+          upper = upp,
+          cache = cache,
+          cbars_j = cbars_j,
+          y = y,
+          x = x,
+          alpha = alpha,
+          wt = wt)
+  }
+  
+  if (.Platform$OS.type == "windows") {
+    cl <- parallel::makeCluster(cores)
+    on.exit(parallel::stopCluster(cl))
+    results <- parallel::parLapply(cl, seq_len(gs), worker_fun)
+  } else {
+    results <- parallel::mclapply(seq_len(gs), worker_fun, mc.cores = cores)
+  }
+  
+  disp_min <- vapply(results, function(res) res$par, numeric(1))
+  rss_min  <- vapply(results, function(res) res$value, numeric(1))
+  
+  list(disp_min = disp_min, rss_min = rss_min)
+}
+
+
+#' @usage EnvelopeUB2_parallel(par0, low, upp, cache, cbars, y, x, alpha, wt, rss_min_global, cores)
+#' @export
+#' @rdname dispenvelopes
+#' @order 9
+#' 
+EnvelopeUB2_parallel <- function(par0, low, upp,
+                                 cache, cbars, y, x, alpha, wt,
+                                 rss_min_global,
+                                 cores = parallel::detectCores(logical = FALSE)) {
+  gs <- nrow(cbars)
+  avail_cores <- parallel::detectCores(logical = FALSE)
+  
+  # Respect CRAN check limit
+  if (Sys.getenv("_R_CHECK_LIMIT_CORES_", "") == "TRUE") {
+    cores <- min(cores, 2L)
+  } else {
+    cores <- min(cores, avail_cores, gs)
+  }
+  
+  message("[EnvelopeUB2_parallel] Available cores: ", avail_cores,
+          " | Using cores: ", cores,
+          " | Total faces: ", gs)
+  
+  worker_fun <- function(j) {
+    cbars_j <- cbars[j, ]
+    optim(par0,
+          fn = UB2,                 # UB2 objective function
+          method = "L-BFGS-B",
+          lower = low,
+          upper = upp,
+          cache = cache,
+          cbars_j = cbars_j,
+          y = y,
+          x = x,
+          alpha = alpha,
+          wt = wt,
+          rss_min_global = rss_min_global)
+  }
+  
+  if (.Platform$OS.type == "windows") {
+    cl <- parallel::makeCluster(cores)
+    on.exit(parallel::stopCluster(cl))
+    results <- parallel::parLapply(cl, seq_len(gs), worker_fun)
+  } else {
+    results <- parallel::mclapply(seq_len(gs), worker_fun, mc.cores = cores)
+  }
+  
+  disp_min_ub2 <- vapply(results, function(res) res$par, numeric(1))
+  ub2_min      <- vapply(results, function(res) res$value, numeric(1))
+  
+  list(disp_min = disp_min_ub2, ub2_min = ub2_min)
 }
