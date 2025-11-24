@@ -35,6 +35,8 @@
 
 summary.rglmb<-function(object,...){
 
+
+  
   ### Pull in information needed to compute linear.predictors, 
   ## fitted.values, and DICInfo  
 
@@ -50,7 +52,9 @@ summary.rglmb<-function(object,...){
 
 
   ##############################################
-  
+
+
+    
   if (!is.null(offset)) {
     if(length(dispersion2)==1){
       
@@ -87,8 +91,15 @@ summary.rglmb<-function(object,...){
   percentiles<-matrix(0,nrow=l1,ncol=7)
   se<-sqrt(diag(var(object$coefficients)))
   mc<-se/sqrt(n)
-  Priorwt<-(se/sqrt(diag(solve(object$Prior$Precision))))^2
-  priorrank<-matrix(0,nrow=l1,ncol=1)
+  
+
+  R <- chol(object$Prior$Precision)
+  Prec_inv <- chol2inv(R)
+  Prec_inv <- 0.5 * (Prec_inv + t(Prec_inv))   # enforce symmetry
+  
+  Priorwt <- (se / sqrt(diag(Prec_inv)))^2
+
+    priorrank<-matrix(0,nrow=l1,ncol=1)
   pval1<-matrix(0,nrow=l1,ncol=1)
   pval2<-matrix(0,nrow=l1,ncol=1)
   
@@ -108,11 +119,18 @@ summary.rglmb<-function(object,...){
   ml<-coef(glm_mle) 
   se1<-sqrt(diag(vcov(glm_mle)))
     
-      Tab1<-cbind("Prior Mean"=as.numeric(object$Prior$mean),
-              "Prior.sd"=as.numeric(sqrt(diag(solve(object$Prior$Precision)))),
-              "Max Like."= as.numeric(ml),
-              "Like.sd"= as.numeric(se1)
-              )
+
+  R <- chol(object$Prior$Precision)
+  Prec_inv <- chol2inv(R)
+  Prec_inv <- 0.5 * (Prec_inv + t(Prec_inv))   # enforce symmetry
+  
+  Tab1 <- cbind(
+    "Prior Mean" = as.numeric(object$Prior$mean),
+    "Prior.sd"   = as.numeric(sqrt(diag(Prec_inv))),
+    "Max Like."  = as.numeric(ml),
+    "Like.sd"    = as.numeric(se1)
+  )
+      
   TAB<-cbind("Post.Mode"=as.numeric(object$coef.mode),
              "Post.Mean"=as.numeric(colMeans(coef(object))),
              "Post.Sd"=se,"MC Error"=as.numeric(mc),

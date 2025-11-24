@@ -213,6 +213,10 @@ lmb <- function ( formula, pfamily, n=1000,data, subset, weights, na.action,meth
     z$y <- y
   if (!qr) z$qr <- NULL
   
+  if (!is.null(x)) {
+    z$assign <- attr(x, "assign")
+  }
+  
   ######   End of lm function
   # Verify inputs and Initialize
   
@@ -225,16 +229,21 @@ lmb <- function ( formula, pfamily, n=1000,data, subset, weights, na.action,meth
   x<-z$x
   b<-z$coefficients
   mu<-as.matrix(as.vector(prior_list$mu))
-  Sigma<-as.matrix(prior_list$Sigma)    
-  dispersion=prior_list$dispersion
-  P<-solve(prior_list$Sigma) 
+  Sigma <- as.matrix(prior_list$Sigma)
+  dispersion <- prior_list$dispersion
   
+  R <- chol(Sigma)
+  P <- chol2inv(R)
+  P <- 0.5 * (P + t(P))
+  
+
   if(is.null(z$weights))     wtin<-rep(1,length(y))
   else wtin=z$weights	
+
   
+
   sim<-rlmb(n=n,y=y,x=x,pfamily=pfamily,weights=wtin,
             offset=offset)
-  
   
   
   dispersion2<-sim$dispersion

@@ -264,8 +264,13 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
   
   mu<-as.matrix(as.vector(prior_list$mu))
   Sigma<-as.matrix(prior_list$Sigma)    
-  P<-solve(prior_list$Sigma) 
-  wtin<-fit$prior.weights	
+
+  R <- chol(Sigma)
+  P <- chol2inv(R)
+  P <- 0.5 * (P + t(P))
+  
+  
+    wtin<-fit$prior.weights	
   
   # NEW: normalize n_envopt (default to n, ensure integer >= 1)
   if (is.null(n_envopt)) n_envopt <- n
@@ -279,13 +284,12 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
   #           start=b,Gridtype=Gridtype)
   
   
-  
-  sim<-rglmb(n=n,y=y,x=x,family=family,pfamily=pfamily,offset=offset,
+    sim<-rglmb(n=n,y=y,x=x,family=family,pfamily=pfamily,offset=offset,
              weights=wtin,
              Gridtype=Gridtype,      n_envopt = n_envopt,     # NEW: pass through
              use_parallel = use_parallel, use_opencl = use_opencl, verbose = verbose)
   
-  
+
   #dispersion2<-dispersion
   dispersion2<-sim$dispersion
 
@@ -311,7 +315,7 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
   }
   
   
-  
+    
   Prior<-list(mean=prior_list$mu,Variance=prior_list$Sigma)
   names(Prior$mean)<-colnames(fit$x)
   colnames(Prior$Variance)<-colnames(fit$x)
@@ -319,7 +323,8 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
   
   
   ### Set dispersion to null for quasi-families to prevent DIC from calculating
-  
+
+
   if (!is.null(offset)) {
     if(length(dispersion2)==1){
       #    DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
@@ -347,8 +352,14 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
     }
     
     linear.predictors<-t(offset+x%*%t(sim$coefficients))}
+  
+
+  
   if (is.null(offset)) {
+    
+
     if(length(dispersion2)==1){
+      
       if(fit$family$family=="quasipoisson"||fit$family$family=="quasibinomial"){
         DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/sim$dispersion,dispersion=1)
 
@@ -360,11 +371,14 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
       }
       #else  DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
       else{
+        
+
         DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/sim$dispersion,dispersion=1)
 
 
-        
       res=residuals(summary(sim))
+      
+
       DICinfo$Deviance=rowSums(res*res)    
 
   ##    DICinfo$DIC=DICinfo$DIC*sim$dispersion
@@ -372,6 +386,8 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
       
       
     }
+    
+
     
     if(length(dispersion2)>1){
       #  DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
@@ -383,6 +399,7 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
   }
   
 
+  
   # Only update this here so that DIC calculation above works
   dispersion2<-sim$dispersion
   

@@ -52,8 +52,13 @@ directional_tail <- function(fit, mu0 = NULL) {
     
     Prec_lik <- f7(bstar, y, x, mu0, P0, alpha, wt)
   } else if (main_class == "lmb") {
-    Prec_lik <- solve(vcov(fit$lm))
-  } else {
+    
+    
+    R <- chol(vcov(fit$lm))
+    Prec_lik <- chol2inv(R)
+    Prec_lik <- 0.5 * (Prec_lik + t(Prec_lik))   # enforce symmetry
+    
+      } else {
     stop("Unsupported model class")
   }
   

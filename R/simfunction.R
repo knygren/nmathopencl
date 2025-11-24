@@ -604,6 +604,7 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   
   for(j in 1:10){
+    
     glmb_out1=glmb(y~x-1,family=gaussian(),
                    dNormal(mu=mu,Sigma=Sigma,dispersion=dispersion2),weights=wt,offset=offset2)
     
@@ -663,7 +664,10 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   start <- mu
   
   if(is.null(offset2))  offset2=rep(as.numeric(0.0),length(y))
-  P=solve(Sigma)
+
+  R <- chol(Sigma)
+  P <- chol2inv(R)
+  P <- 0.5 * (P + t(P))   # enforce symmetry
   
   ###### Adjust weight for dispersion
   
@@ -976,13 +980,18 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   famfunc=glmbfamfunc(gaussian())  
   f1=famfunc$f1
   
+  R <- chol(Sigma)
+  Prec <- chol2inv(R)
+  Prec <- 0.5 * (Prec + t(Prec))   # enforce symmetry
+  
+  
   outlist=list(
     coefficients=t(out), 
     coef.mode=betastar,  ## For now, use the conditional mode (not universal)
     dispersion=disp_out,
     ## For now, name items in list like this-eventually make format/names
     ## consistent with true prior (current names needed by summary function)
-    Prior=list(mean=mu,Sigma=Sigma,shape=shape,rate=rate,Precision=solve(Sigma)), 
+    Prior=list(mean=mu,Sigma=Sigma,shape=shape,rate=rate,Precision=Prec), 
     family=gaussian(),
     prior.weights=wt,
     y=y,
@@ -1105,9 +1114,9 @@ rNormal_Gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussi
     }
     
     if (is.null(prior_list$P)) {
-      P <- solve(prior_list$Sigma)
-      # enforce symmetry on the computed precision
-      P <- 0.5 * (P + t(P))
+      R <- chol(prior_list$Sigma)
+      P <- chol2inv(R)
+      P <- 0.5 * (P + t(P))   # enforce symmetry
     }
     if(!is.null(prior_list$dispersion)) dispersion=prior_list$dispersion
     else dispersion=NULL
@@ -1256,7 +1265,13 @@ rNormal_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
     if(!is.null(prior_list$mu)) mu=prior_list$mu
     if(!is.null(prior_list$Sigma)) Sigma=prior_list$Sigma
     if(!is.null(prior_list$P)) P=prior_list$P
-    if(is.null(prior_list$P)) P=(solve(prior_list$Sigma)+t(solve(prior_list$Sigma)))/2
+
+    if (is.null(prior_list$P)) {
+      R <- chol(prior_list$Sigma)
+      Pinv <- chol2inv(R)
+      P <- 0.5 * (Pinv + t(Pinv))   # enforce symmetry
+    }
+
     if(!is.null(prior_list$dispersion)) dispersion=prior_list$dispersion
     else dispersion=NULL
     if(!is.null(prior_list$shape)) shape=prior_list$shape

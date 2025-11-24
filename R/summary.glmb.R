@@ -41,7 +41,10 @@
 
 summary.glmb<-function(object,...){
   
+
+  message(">>> Entering Summary.glmb  <<<")
   
+    
   #est.disp <- FALSE
   
   #res<-residuals(object)
@@ -57,23 +60,27 @@ summary.glmb<-function(object,...){
   dir_tail <- directional_tail(object)
   
   
-  
+
   #if(!is.null(object$DIC)) DIC=object$DIC
   #else DIC=NA
   #print("Mean Dispersion")
   mres<-colMeans(residuals(object))
   
-  
+
   # Ensure null_est is a full-length vector matching Prior$mean
   coef_names <- names(object$Prior$mean)
   null_est_full <- numeric(length(coef_names))
   names(null_est_full) <- coef_names
   
   
+
+  
   l1<-length(object$coef.means)
   n<-length(object$coefficients[,1])
   percentiles<-matrix(0,nrow=l1,ncol=7)
+
   se<-sqrt(diag(var(object$coefficients)))
+
   #  if(object$family$family=="quasipoisson") se=se*sqrt(mean(dispersion))
   #  mc<-se/sqrt(object$n)
   mc<-se/sqrt(n)
@@ -88,7 +95,7 @@ summary.glmb<-function(object,...){
   ## Could break calls to this function from other classes
 
   
-  
+
   if(!is.null(object$glm)){
     
     glmsummary<-summary(object$glm)
@@ -113,26 +120,39 @@ summary.glmb<-function(object,...){
     
 
   } 
-  
+
+
+    
   ##
   
-  if(!is.null(object$lm)){
+
+  if (!is.null(object$lm)) {
+    lm_summary <- try(summary.lm(object$lm), silent = TRUE)
     
-    lm_summary=summary.lm(object$lm)
-    se1=lm_summary$coefficients[,2]
-    ml=lm_summary$coefficients[,1]
-    
-    original_formula <- eval(object$lm$call$formula)
-    
-    response_var <- all.vars(eval(object$lm$call$formula))[1]
-    null_formula <- reformulate("1", response = response_var)
-    null_lm <- lm(formula = null_formula, data = object$lm$model)
-    
-    
-    null_est <- coef(null_lm)
-    
-  } 
-  
+    if (inherits(lm_summary, "try-error")) {
+      warning("summary.lm failed due to singular covariance; coefficients set to NA")
+      
+      se1 <- rep(NA_real_, length(coef(object$lm)))
+      ml  <- coef(object$lm)
+      
+      # still build a null model if you want
+      response_var <- all.vars(eval(object$lm$call$formula))[1]
+      null_formula <- reformulate("1", response = response_var)
+      null_lm <- lm(formula = null_formula, data = object$lm$model)
+      null_est <- coef(null_lm)
+      
+    } else {
+      se1 <- lm_summary$coefficients[, 2]
+      ml  <- lm_summary$coefficients[, 1]
+      
+      response_var <- all.vars(eval(object$lm$call$formula))[1]
+      null_formula <- reformulate("1", response = response_var)
+      null_lm <- lm(formula = null_formula, data = object$lm$model)
+      null_est <- coef(null_lm)
+    }
+  }
+
+
   # Fill intercept from null model, others set to 0
   intercept_name <- "(Intercept)"
   if (intercept_name %in% names(null_est)) {
