@@ -104,6 +104,7 @@
 #' @param low  Dispersion parameter
 #' @param upp  Dispersion parameter
 #' @param cores  Dispersion parameter
+#' @param use_parallel Logical. Whether to use parallel processing.
 #'
 #' @return
 #' \describe{
@@ -320,7 +321,8 @@ drss_ddisp <- function(dispersion, cache, cbars_j, y, x, alpha, wt) {
 
 EnvelopeDispersionBuild_parallel_internal <- function(par0, low, upp,
                                                       cache, cbars, y, x, alpha, wt,
-                                                      cores = parallel::detectCores(logical = FALSE)) {
+                                                      cores = parallel::detectCores(logical = FALSE),
+                                                      use_parallel = TRUE) {
   gs <- nrow(cbars)
   avail_cores <- parallel::detectCores(logical = FALSE)
   
@@ -332,29 +334,34 @@ EnvelopeDispersionBuild_parallel_internal <- function(par0, low, upp,
   }
   
   message("[EnvelopeDispersionBuild_parallel_internal] Available cores: ", avail_cores,
-          " | Using cores: ", cores)
+          " | Using cores: ", if (use_parallel) cores else 1L)
   
   worker_fun <- function(j) {
     cbars_j <- cbars[j, ]
     optim(par0,
-          fn = rss_face_at_disp,
+          fn     = rss_face_at_disp,
           method = "L-BFGS-B",
-          lower = low,
-          upper = upp,
-          cache = cache,
+          lower  = low,
+          upper  = upp,
+          cache  = cache,
           cbars_j = cbars_j,
-          y = y,
-          x = x,
-          alpha = alpha,
-          wt = wt)
+          y      = y,
+          x      = x,
+          alpha  = alpha,
+          wt     = wt)
   }
   
-  if (.Platform$OS.type == "windows") {
-    cl <- parallel::makeCluster(cores)
-    on.exit(parallel::stopCluster(cl))
-    results <- parallel::parLapply(cl, seq_len(gs), worker_fun)
+  if (use_parallel) {
+    if (.Platform$OS.type == "windows") {
+      cl <- parallel::makeCluster(cores)
+      on.exit(parallel::stopCluster(cl))
+      results <- parallel::parLapply(cl, seq_len(gs), worker_fun)
+    } else {
+      results <- parallel::mclapply(seq_len(gs), worker_fun, mc.cores = cores)
+    }
   } else {
-    results <- parallel::mclapply(seq_len(gs), worker_fun, mc.cores = cores)
+    # Serial fallback: just loop over indices
+    results <- lapply(seq_len(gs), worker_fun)
   }
   
   disp_min <- vapply(results, function(res) res$par, numeric(1))
@@ -365,16 +372,17 @@ EnvelopeDispersionBuild_parallel_internal <- function(par0, low, upp,
 
 #' Safe parallel dispersion builder
 #'
-#' @usage EnvelopeDispersionBuild_parallel(par0, low, upp, cache, cbars, y, x, alpha, wt, cores)
+#' @usage EnvelopeDispersionBuild_parallel(par0, low, upp, cache, cbars, y, x, alpha, wt, cores,use_parallel=TRUE)
 #' @export
 #' @rdname dispenvelopes
 #' @order 8
 
 EnvelopeDispersionBuild_parallel <- function(par0, low, upp,
                                              cache, cbars, y, x, alpha, wt,
-                                             cores = parallel::detectCores(logical = FALSE)) {
+                                             cores = parallel::detectCores(logical = FALSE),
+                                             use_parallel = TRUE) {
   tryCatch(
-    EnvelopeDispersionBuild_parallel_internal(par0, low, upp, cache, cbars, y, x, alpha, wt, cores),
+    EnvelopeDispersionBuild_parallel_internal(par0, low, upp, cache, cbars, y, x, alpha, wt, cores,use_parallel),
     error = function(e) {
       message("[EnvelopeDispersionBuild_parallel] Failed gracefully: ", e$message)
       list(disp_min = NULL, rss_min = NULL, error = TRUE)
@@ -391,7 +399,8 @@ EnvelopeDispersionBuild_parallel <- function(par0, low, upp,
 EnvelopeUB2_parallel_internal <- function(par0, low, upp,
                                           cache, cbars, y, x, alpha, wt,
                                           rss_min_global,
-                                          cores = parallel::detectCores(logical = FALSE)) {
+                                          cores = parallel::detectCores(logical = FALSE),
+                                          use_parallel = TRUE) {
   gs <- nrow(cbars)
   avail_cores <- parallel::detectCores(logical = FALSE)
   
@@ -403,30 +412,35 @@ EnvelopeUB2_parallel_internal <- function(par0, low, upp,
   }
   
   message("[EnvelopeUB2_parallel_internal] Available cores: ", avail_cores,
-          " | Using cores: ", cores)
+          " | Using cores: ", if (use_parallel) cores else 1L)
   
   worker_fun <- function(j) {
     cbars_j <- cbars[j, ]
     optim(par0,
-          fn = UB2,                 # UB2 objective function
+          fn     = UB2,                 # UB2 objective function
           method = "L-BFGS-B",
-          lower = low,
-          upper = upp,
-          cache = cache,
+          lower  = low,
+          upper  = upp,
+          cache  = cache,
           cbars_j = cbars_j,
-          y = y,
-          x = x,
-          alpha = alpha,
-          wt = wt,
+          y      = y,
+          x      = x,
+          alpha  = alpha,
+          wt     = wt,
           rss_min_global = rss_min_global)
   }
   
-  if (.Platform$OS.type == "windows") {
-    cl <- parallel::makeCluster(cores)
-    on.exit(parallel::stopCluster(cl))
-    results <- parallel::parLapply(cl, seq_len(gs), worker_fun)
+  if (use_parallel) {
+    if (.Platform$OS.type == "windows") {
+      cl <- parallel::makeCluster(cores)
+      on.exit(parallel::stopCluster(cl))
+      results <- parallel::parLapply(cl, seq_len(gs), worker_fun)
+    } else {
+      results <- parallel::mclapply(seq_len(gs), worker_fun, mc.cores = cores)
+    }
   } else {
-    results <- parallel::mclapply(seq_len(gs), worker_fun, mc.cores = cores)
+    # Serial fallback: run optim sequentially
+    results <- lapply(seq_len(gs), worker_fun)
   }
   
   disp_min_ub2 <- vapply(results, function(res) res$par, numeric(1))
@@ -437,7 +451,7 @@ EnvelopeUB2_parallel_internal <- function(par0, low, upp,
 
 #' Safe UB2 parallel dispersion builder
 #'
-#' @usage EnvelopeUB2_parallel(par0, low, upp, cache, cbars, y, x, alpha, wt, rss_min_global, cores)
+#' @usage EnvelopeUB2_parallel(par0, low, upp, cache, cbars, y, x, alpha, wt, rss_min_global, cores,use_parallel = TRUE)
 #' @export
 #' @rdname dispenvelopes
 #' @order 9
@@ -445,7 +459,8 @@ EnvelopeUB2_parallel_internal <- function(par0, low, upp,
 EnvelopeUB2_parallel <- function(par0, low, upp,
                                  cache, cbars, y, x, alpha, wt,
                                  rss_min_global,
-                                 cores = parallel::detectCores(logical = FALSE)) {
+                                 cores = parallel::detectCores(logical = FALSE),
+                                 use_parallel = TRUE) {
   tryCatch(
     EnvelopeUB2_parallel_internal(par0, low, upp, cache, cbars, y, x, alpha, wt,
                                   rss_min_global, cores),

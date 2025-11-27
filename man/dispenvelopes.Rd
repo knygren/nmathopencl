@@ -30,9 +30,9 @@ rss_face_at_disp(dispersion, cache, cbars_j, y, x, alpha, wt)
 
 drss_ddisp(dispersion, cache, cbars_j, y, x, alpha, wt)
 
-EnvelopeDispersionBuild_parallel(par0, low, upp, cache, cbars, y, x, alpha, wt, cores)
+EnvelopeDispersionBuild_parallel(par0, low, upp, cache, cbars, y, x, alpha, wt, cores,use_parallel=TRUE)
 
-EnvelopeUB2_parallel(par0, low, upp, cache, cbars, y, x, alpha, wt, rss_min_global, cores)
+EnvelopeUB2_parallel(par0, low, upp, cache, cbars, y, x, alpha, wt, rss_min_global, cores,use_parallel = TRUE)
 
 EnvelopeDispersionBuild_parallel_internal(
   par0,
@@ -44,7 +44,8 @@ EnvelopeDispersionBuild_parallel_internal(
   x,
   alpha,
   wt,
-  cores = parallel::detectCores(logical = FALSE)
+  cores = parallel::detectCores(logical = FALSE),
+  use_parallel = TRUE
 )
 
 EnvelopeUB2_parallel_internal(
@@ -58,7 +59,8 @@ EnvelopeUB2_parallel_internal(
   alpha,
   wt,
   rss_min_global,
-  cores = parallel::detectCores(logical = FALSE)
+  cores = parallel::detectCores(logical = FALSE),
+  use_parallel = TRUE
 )
 }
 \arguments{
@@ -123,6 +125,8 @@ EnvelopeUB2_parallel_internal(
 \item{upp}{Dispersion parameter}
 
 \item{cores}{Dispersion parameter}
+
+\item{use_parallel}{Logical. Whether to use parallel processing.}
 }
 \value{
 \describe{
