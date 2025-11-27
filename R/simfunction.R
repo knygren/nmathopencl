@@ -811,7 +811,8 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
     max_disp_perc = max_disp_perc,
     disp_lower = disp_lower,
     disp_upper = disp_upper,
-    verbose    = verbose   # optional, matches the C++ signature
+    verbose    = verbose,   # optional, matches the C++ signature
+    use_parallel=use_parallel
   )
   
   
