@@ -276,6 +276,41 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
       
       
       arma::colvec yxbeta=(y2-alpha2-x2*thetabars_temp2)%sqrt(wt1b); 
+
+      
+      // Extract the current cbars row as a NumericVector
+      NumericVector cbars_j = cbars(J_out(0), _);
+      
+      // Call rss_face_at_disp with current dispersion and other parameters
+//      double rss_val = rss_face_at_disp(dispersion, cache, cbars_j, y, x, alpha, wt);
+      
+      // Print or log both RSS values for comparison
+//      Rcpp::Rcout << "rss_face_at_disp: " << rss_val << ", inline RSS: " << arma::as_scalar(trans(yxbeta)*yxbeta) << std::endl;
+      
+
+      
+
+      // Call the UB2 function with current dispersion and other parameters
+  //    double ub2_val = UB2_Fun(dispersion, cache, cbars_j, y, x, alpha, wt, RSS_Min);
+
+      
+  //    Rcpp::Rcout << "Weights (wt): "; for (int i = 0; i < wt.size(); ++i) { Rcpp::Rcout << wt[i] << " "; } Rcpp::Rcout << std::endl;
+      
+      
+  //    double ub2_val_alt = UB2_Fun(0.271233, cache, cbars_j, y, x, alpha, wt, RSS_Min);
+      
+      
+      
+      // Continue with existing UB2 calculation without modification
+      UB2 = 0.5 * (1.0 / dispersion) * (arma::as_scalar(trans(yxbeta)*yxbeta) - RSS_Min);
+      
+      // Print or log both UB2 values for comparison
+//      Rcpp::Rcout << "UB2 function: " << ub2_val << ", inline UB2: " << UB2 << std::endl;
+      
+      // Print or log both UB2 values for comparison
+//      Rcpp::Rcout << "UB2_alt function: " << ub2_val_alt << ", inline UB2: " << UB2 << std::endl;
+      
+//      Rcpp::Rcout << "Index: " << J_out(0) << ", UB2min value: " << UB2min[J_out(0)] << std::endl;
       
 //      UB2=0.5*(1/dispersion)*(arma::as_scalar(trans(yxbeta)*yxbeta)-RSS_ML);
       UB2=0.5*(1/dispersion)*(arma::as_scalar(trans(yxbeta)*yxbeta)-RSS_Min);
@@ -325,6 +360,44 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
       
 
       test = test - log_U2;
+      
+      
+      // Sanity checks: all must satisfy their sign constraints
+      bool bad = false;
+      std::ostringstream msg;
+      
+      if (test1 > 0.0) {
+        bad = true;
+        msg << "Sign violation: test1 = " << test1 << " > 0\n";
+      }
+      if (UB2 < 0.0) {
+        bad = true;
+        msg << "Sign violation: UB2 = " << UB2 << " < 0\n";
+      }
+      if (UB3A < 0.0) {
+        bad = true;
+        msg << "Sign violation: UB3A = " << UB3A << " < 0\n";
+      }
+      if (UB3B < 0.0) {
+        bad = true;
+        msg << "Sign violation: UB3B = " << UB3B << " < 0\n";
+      }
+      
+      if (bad) {
+        // Provide context for debugging
+        msg << "Dispersion=" << dispersion
+            << " LL_Test=" << LL_Test[0]
+            << " UB1=" << UB1
+            << " UB2=" << UB2
+            << " UB3A=" << UB3A
+            << " UB3B=" << UB3B
+            << " test=" << test;
+        // Stop execution with informative error
+        throw std::runtime_error(msg.str());
+        
+      }
+      
+      
       
       disp_out[i] = dispersion;
       beta_out(i, _) = out(0, _);
@@ -715,6 +788,9 @@ void rindep_loop_classic(
         double scaled = resid * sqrt_wt1b[r];
         quad_sum += scaled * scaled;
       }
+      
+
+      
       double UB2 = 0.5 * (1.0 / dispersion) * (quad_sum - RSS_Min);
       UB2 -= UB2min[J_idx];
       
@@ -959,13 +1035,42 @@ Rcpp::List rindep_norm_gamma_reg_std_parallel_cpp(
     }
   }  
   
+  // if (verbose) {
+    Rcpp::Function fmt("format");
+    Rcpp::Function systime("Sys.time");
+    Rcpp::CharacterVector now = fmt(systime(), Rcpp::Named("format") = "%H:%M:%S");
+    Rcpp::Rcout << "[Simulation] >>> Starting full run at "
+                << Rcpp::as<std::string>(now[0]) << " <<<\n";
+  // }
+  
+  // --- Capture start time ---
+  double sim_start = Rcpp::as<double>(
+    Rcpp::Function("as.numeric")(Rcpp::Function("Sys.time")())
+  );
+  
   // Parallel loop
   RcppParallel::parallelFor(0, n, worker);
-//    worker(0,n);
+  // worker(0,n);
   
-  Rcout << "Exiting Parallel Worker"  << std::endl;
+  Rcpp::Rcout << "Exiting Parallel Worker" << std::endl;
   
+  // --- Capture end time ---
+  double sim_end = Rcpp::as<double>(
+    Rcpp::Function("as.numeric")(Rcpp::Function("Sys.time")())
+  );
   
+  double sim_elapsed = sim_end - sim_start;
+  int h_elapsed = static_cast<int>(sim_elapsed / 3600);
+  int m_elapsed = static_cast<int>((sim_elapsed - h_elapsed*3600) / 60);
+  int s_elapsed = static_cast<int>(sim_elapsed - h_elapsed*3600 - m_elapsed*60);
+  
+  // if (verbose) {
+    now = fmt(systime(), Rcpp::Named("format") = "%H:%M:%S");
+    Rcpp::Rcout << "[Simulation] >>> Exiting full run at "
+                << Rcpp::as<std::string>(now[0]) << " <<<\n";
+    Rcpp::Rcout << "[Simulation] Simulation completed in: "
+                << h_elapsed << " h  " << m_elapsed << " m  " << s_elapsed << " s.\n";
+  // }  
 
 
 

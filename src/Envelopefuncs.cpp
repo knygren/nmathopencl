@@ -1299,12 +1299,30 @@ double UB2(double dispersion,
   double rss_val = rss_face_at_disp(dispersion, cache, cbars_j, y, x, alpha, wt);
   
   // Compute UB2
-  double UB2_val = (1.0 / dispersion) * (rss_val - rss_min_global);
+  double UB2_val = (0.5 / dispersion) * (rss_val - rss_min_global);
   
   return UB2_val;
 }
 
 
+// [[Rcpp::export]]
+double UB2_Fun(double dispersion,
+           Rcpp::List cache,
+           Rcpp::NumericVector cbars_j,
+           Rcpp::NumericVector y,
+           Rcpp::NumericMatrix x,
+           Rcpp::NumericVector alpha,
+           Rcpp::NumericVector wt,
+           double rss_min_global) {
+  
+  // Call the existing RSS function
+  double rss_val = rss_face_at_disp(dispersion, cache, cbars_j, y, x, alpha, wt);
+  
+  // Compute UB2
+  double UB2_val = (0.5 / dispersion) * (rss_val - rss_min_global);
+  
+  return UB2_val;
+}
 
 // Utility: safe max for NumericVector
 static inline double max_vec(const NumericVector& v) {
@@ -1649,6 +1667,15 @@ List EnvelopeDispersionBuild_cpp(
   
 )
   {
+  
+  
+  // --- NEW: selector for RSS source ---
+  // 1 = use minimization (default)
+  // 2 = use RSS_ML (skip minimization)
+  int RSS_Min_Type = 1;  // change manually for testing
+  int UB2_Min_Type = 1;  // change manually for testing
+  
+  
   // Step 1: Posterior Gamma parameters (precision prior)
   double shape2 = Shape + static_cast<double>(n_obs) / 2.0;
   double rate3  = Rate  + RSS_post / 2.0;
@@ -1690,6 +1717,7 @@ List EnvelopeDispersionBuild_cpp(
   
   /// Step 3B: Precompute elements for finding inverse function for cbars
   
+  
   Rcpp::List cache = Inv_f3_precompute_disp(cbars, y, x, mu, P, alpha, wt);
   
   // Step 3C: Minimize RSS over dispersion for each face (optional diagnostics / UB2 prep)
@@ -1701,6 +1729,18 @@ List EnvelopeDispersionBuild_cpp(
   Rcpp::Function rss_fn("rss_face_at_disp");
 //  Rcpp::Function grad_fn("drss_ddisp");   // exported gradient
   
+  
+  
+  // Optionally: keep the best across faces
+  double rss_min_global = R_PosInf;
+  double disp_min_global = NA_REAL;
+  int j_best = -1;
+  // Extract parallel results
+  Rcpp::NumericVector disp_min_parallel(gs);
+  Rcpp::NumericVector rss_min_parallel(gs); 
+  
+    
+  if(RSS_Min_Type==1){
   
   if (verbose) {
     // Print total number of faces before entering the loop
@@ -1715,7 +1755,11 @@ List EnvelopeDispersionBuild_cpp(
     
     
   }
+
   
+  
+  
+    
   // --- NEW: Call parallel helper and time it ---
   Rcpp::Function parallel_fn("EnvelopeDispersionBuild_parallel");
 
@@ -1751,131 +1795,6 @@ List EnvelopeDispersionBuild_cpp(
          
 
    }  
-  
-
-  
-  // // --- Three-stage pilot using fractional sizes of total faces ---
-  // if (verbose && gs > 0) {
-  //   // Warm-up remains fixed
-  //   int k1 = std::min(gs, 500);
-  //   
-  //   // Fractional pilots: k2 ≈ 0.5%, k3 ≈ 1.0% of total faces
-  //   // Floors/ceilings ensure usefulness without being excessive
-  //   auto frac_round = [](double v) { return static_cast<int>(std::round(v)); };
-  //   int k2_target = frac_round(0.005 * static_cast<double>(gs));   // ~0.5%
-  //   int k3_target = frac_round(0.010 * static_cast<double>(gs));   // ~1.0%
-  //   
-  //   // Apply floors (so they’re not too small) and caps (so they stay quick)
-  //   int floor_k2 = 3000;   // minimum for mid pilot
-  //   int floor_k3 = 6000;   // minimum for large pilot
-  //   int cap_k2   = 50000;  // keep pilot quick
-  //   int cap_k3   = 100000; // keep pilot quick
-  //   
-  //   int k2 = std::min(gs, std::max(floor_k2, std::min(k2_target, cap_k2)));
-  //   int k3 = std::min(gs, std::max(floor_k3, std::min(k3_target, cap_k3)));
-  //   
-  //   // Ensure strict ordering: k1 < k2 < k3
-  //   if (k2 <= k1) k2 = std::min(gs, std::max(k1 + 1, floor_k2));
-  //   if (k3 <= k2) k3 = std::min(gs, std::max(k2 + 1, floor_k3));
-  //   
-  //   auto make_slice = [&](int k) {
-  //     Rcpp::NumericMatrix cbars_slice(k, l1);
-  //     for (int i = 0; i < k; ++i)
-  //       for (int j = 0; j < l1; ++j)
-  //         cbars_slice(i, j) = cbars(i, j);
-  //     return cbars_slice;
-  //   };
-  //   
-  //   auto now_num = []() {
-  //     return Rcpp::as<double>(
-  //       Rcpp::Function("as.numeric")(Rcpp::Function("Sys.time")())
-  //     );
-  //   };
-  //   
-  //   // First pilot (warm-up k1)
-  //   double t0 = now_num();
-  //   Rcpp::List p1 = parallel_fn(
-  //     Rcpp::Named("par0")   = 0.5 * (low + upp),
-  //     Rcpp::Named("low")    = low,
-  //     Rcpp::Named("upp")    = upp,
-  //     Rcpp::Named("cache")  = cache,
-  //     Rcpp::Named("cbars")  = make_slice(k1),
-  //     Rcpp::Named("y")      = y,
-  //     Rcpp::Named("x")      = x,
-  //     Rcpp::Named("alpha")  = alpha,
-  //     Rcpp::Named("wt")     = wt,
-  //     Rcpp::Named("use_parallel")     = use_parallel
-  //   );
-  //   double t1 = now_num();
-  //   double elapsed1 = t1 - t0;
-  //   
-  //   // Second pilot (~0.5%)
-  //   double t2 = now_num();
-  //   Rcpp::List p2 = parallel_fn(
-  //     Rcpp::Named("par0")   = 0.5 * (low + upp),
-  //     Rcpp::Named("low")    = low,
-  //     Rcpp::Named("upp")    = upp,
-  //     Rcpp::Named("cache")  = cache,
-  //     Rcpp::Named("cbars")  = make_slice(k2),
-  //     Rcpp::Named("y")      = y,
-  //     Rcpp::Named("x")      = x,
-  //     Rcpp::Named("alpha")  = alpha,
-  //     Rcpp::Named("wt")     = wt
-  //   );
-  //   double t3 = now_num();
-  //   double elapsed2 = t3 - t2;
-  //   
-  //   // Third pilot (~1.0%)
-  //   double t4 = now_num();
-  //   Rcpp::List p3 = parallel_fn(
-  //     Rcpp::Named("par0")   = 0.5 * (low + upp),
-  //     Rcpp::Named("low")    = low,
-  //     Rcpp::Named("upp")    = upp,
-  //     Rcpp::Named("cache")  = cache,
-  //     Rcpp::Named("cbars")  = make_slice(k3),
-  //     Rcpp::Named("y")      = y,
-  //     Rcpp::Named("x")      = x,
-  //     Rcpp::Named("alpha")  = alpha,
-  //     Rcpp::Named("wt")     = wt
-  //   );
-  //   double t5 = now_num();
-  //   double elapsed3 = t5 - t4;
-  //   
-  //   // Per-face slope from k2→k3 (both large enough to amortize fixed costs)
-  //   double denom = static_cast<double>(k3 - k2);
-  //   double t_face = (elapsed3 - elapsed2) / std::max(1.0, denom);
-  //   
-  //   // Fixed component from warm-up
-  //   double t_fixed = elapsed1;
-  //   
-  //   // Estimate full grid time
-  //   est_total = t_fixed + static_cast<double>(gs) * t_face;
-  //   
-  //   auto fmt_hms = [](double seconds) {
-  //     int s = static_cast<int>(std::round(seconds));
-  //     int h = s / 3600; s %= 3600;
-  //     int m = s / 60;   s %= 60;
-  //     std::ostringstream oss;
-  //     if (h) oss << h << "h ";
-  //     if (h || m) oss << m << "m ";
-  //     oss << s << "s";
-  //     return oss.str();
-  //   };
-  //   
-  //   Rcpp::Rcout << "[EnvelopeDispersionBuild:RSS:Pilot] k1=" << k1
-  //               << " (" << (100.0 * k1 / gs) << "%) elapsed=" << elapsed1 << "s; "
-  //               << "k2=" << k2 << " (" << (100.0 * k2 / gs) << "%) elapsed=" << elapsed2 << "s; "
-  //               << "k3=" << k3 << " (" << (100.0 * k3 / gs) << "%) elapsed=" << elapsed3 << "s.\n";
-  //   
-  //   Rcpp::Rcout << "[EnvelopeDispersionBuild:RSS:Pilot] t_fixed=" << t_fixed
-  //               << "s, t_face=" << t_face << "s/face.\n";
-  //   
-  //   Rcpp::Rcout << "[EnvelopeDispersionBuild:RSS:Pilot] Estimated full run = "
-  //               << fmt_hms(est_total) << " (" << est_total << "s).\n";
-  // }  
-  
-  
-  
   
     // --- After computing est_total ---
      double est_total_sec = est_total;  // from pilot estimate
@@ -1958,8 +1877,8 @@ List EnvelopeDispersionBuild_cpp(
   
   
     // Extract parallel results
-    Rcpp::NumericVector disp_min_parallel = parallel_res["disp_min"];
-    Rcpp::NumericVector rss_min_parallel  = parallel_res["rss_min"];
+     disp_min_parallel = parallel_res["disp_min"];
+     rss_min_parallel  = parallel_res["rss_min"];
   
 
   if (verbose) {
@@ -1973,15 +1892,7 @@ List EnvelopeDispersionBuild_cpp(
     
     
       }
-  
-    
-    
 
-  
-  // Optionally: keep the best across faces
-  double rss_min_global = R_PosInf;
-  double disp_min_global = NA_REAL;
-  int j_best = -1;
   for (int j = 0; j < gs; ++j) {
     if (rss_min_parallel[j] < rss_min_global) {
       rss_min_global = rss_min_parallel[j];
@@ -1989,7 +1900,27 @@ List EnvelopeDispersionBuild_cpp(
       j_best = j;
     }
   }  
+  if (verbose) {
+    Rcpp::Rcout << "[EnvelopeDispersionBuild] RSS source = MIN (optimized)\n";
+  }
   
+  
+  }
+  else { // RSS_Min_Type == 2
+    rss_min_global = RSS_ML;
+    disp_min_global = 0.5*(low+upp);
+    j_best = -1;
+    if (verbose) {
+      Rcpp::Rcout << "[EnvelopeDispersionBuild] RSS source = ML (skip minimization)\n";
+      Rcpp::Rcout << "[EnvelopeDispersionBuild] RSS_ML = " << RSS_ML << "\n";
+    }
+  }
+  
+  
+  
+  
+///   (1/low)*(rss_min_parallel[j]-rss_min_global))
+
 
   //////////////////////////////////////
 
@@ -2008,6 +1939,13 @@ List EnvelopeDispersionBuild_cpp(
   // Assume UB2 has been exported as shown earlier
   Rcpp::Function ub2_fn("UB2");
 
+  
+  // Preallocate to gs faces
+  Rcpp::NumericVector disp_min_ub2(gs);
+  Rcpp::NumericVector ub2_min(gs);
+  
+  if(UB2_Min_Type==1){
+    
   
   // --- NEW: Call UB2 parallel helper and time it ---
   Rcpp::Function ub2_parallel_fn("EnvelopeUB2_parallel");
@@ -2041,122 +1979,6 @@ List EnvelopeDispersionBuild_cpp(
   }
   
   
-  // --- NEW: Call UB2 parallel helper and time it ---
-  //Rcpp::Function ub2_parallel_fn("EnvelopeUB2_parallel");
-  
-  // --- UB2 minimization pilot and interrupt safeguard ---
-  
-  //double est_total_ub2 = 0.0;  // declare before pilot block
-  
-  // if (verbose && gs > 0) {
-  //   int k1 = std::min(gs, 500);
-  //   auto frac_round = [](double v) { return static_cast<int>(std::round(v)); };
-  //   int k2_target = frac_round(0.005 * static_cast<double>(gs));   // ~0.5%
-  //   int k3_target = frac_round(0.010 * static_cast<double>(gs));   // ~1.0%
-  //   
-  //   int floor_k2 = 3000, floor_k3 = 6000;
-  //   int cap_k2 = 50000, cap_k3 = 100000;
-  //   
-  //   int k2 = std::min(gs, std::max(floor_k2, std::min(k2_target, cap_k2)));
-  //   int k3 = std::min(gs, std::max(floor_k3, std::min(k3_target, cap_k3)));
-  //   if (k2 <= k1) k2 = std::min(gs, std::max(k1 + 1, floor_k2));
-  //   if (k3 <= k2) k3 = std::min(gs, std::max(k2 + 1, floor_k3));
-  //   
-  //   auto make_slice = [&](int k) {
-  //     Rcpp::NumericMatrix cbars_slice(k, l1);
-  //     for (int i = 0; i < k; ++i)
-  //       for (int j = 0; j < l1; ++j)
-  //         cbars_slice(i, j) = cbars(i, j);
-  //     return cbars_slice;
-  //   };
-  //   
-  //   auto now_num = []() {
-  //     return Rcpp::as<double>(
-  //       Rcpp::Function("as.numeric")(Rcpp::Function("Sys.time")())
-  //     );
-  //   };
-  //   
-  //   // Warm-up pilot
-  //   double t0 = now_num();
-  //   Rcpp::List p1 = ub2_parallel_fn(
-  //     Rcpp::Named("par0")   = 0.5 * (low + upp),
-  //     Rcpp::Named("low")    = low,
-  //     Rcpp::Named("upp")    = upp,
-  //     Rcpp::Named("cache")  = cache,
-  //     Rcpp::Named("cbars")  = make_slice(k1),
-  //     Rcpp::Named("y")      = y,
-  //     Rcpp::Named("x")      = x,
-  //     Rcpp::Named("alpha")  = alpha,
-  //     Rcpp::Named("wt")     = wt,
-  //     Rcpp::Named("rss_min_global") = rss_min_global
-  //   );
-  //   double t1 = now_num();
-  //   double elapsed1 = t1 - t0;
-  //   
-  //   // Second pilot (~0.5%)
-  //   double t2 = now_num();
-  //   Rcpp::List p2 = ub2_parallel_fn(
-  //     Rcpp::Named("par0")   = 0.5 * (low + upp),
-  //     Rcpp::Named("low")    = low,
-  //     Rcpp::Named("upp")    = upp,
-  //     Rcpp::Named("cache")  = cache,
-  //     Rcpp::Named("cbars")  = make_slice(k2),
-  //     Rcpp::Named("y")      = y,
-  //     Rcpp::Named("x")      = x,
-  //     Rcpp::Named("alpha")  = alpha,
-  //     Rcpp::Named("wt")     = wt,
-  //     Rcpp::Named("rss_min_global") = rss_min_global
-  //   );
-  //   double t3 = now_num();
-  //   double elapsed2 = t3 - t2;
-  //   
-  //   // Third pilot (~1.0%)
-  //   double t4 = now_num();
-  //   Rcpp::List p3 = ub2_parallel_fn(
-  //     Rcpp::Named("par0")   = 0.5 * (low + upp),
-  //     Rcpp::Named("low")    = low,
-  //     Rcpp::Named("upp")    = upp,
-  //     Rcpp::Named("cache")  = cache,
-  //     Rcpp::Named("cbars")  = make_slice(k3),
-  //     Rcpp::Named("y")      = y,
-  //     Rcpp::Named("x")      = x,
-  //     Rcpp::Named("alpha")  = alpha,
-  //     Rcpp::Named("wt")     = wt,
-  //     Rcpp::Named("rss_min_global") = rss_min_global
-  //   );
-  //   double t5 = now_num();
-  //   double elapsed3 = t5 - t4;
-  //   
-  //   // Estimate per-face slope
-  //   double denom = static_cast<double>(k3 - k2);
-  //   double t_face = (elapsed3 - elapsed2) / std::max(1.0, denom);
-  //   double t_fixed = elapsed1;
-  //   est_total_ub2 = t_fixed + static_cast<double>(gs) * t_face;
-  //   
-  //   auto fmt_hms = [](double seconds) {
-  //     int s = static_cast<int>(std::round(seconds));
-  //     int h = s / 3600; s %= 3600;
-  //     int m = s / 60;   s %= 60;
-  //     std::ostringstream oss;
-  //     if (h) oss << h << "h ";
-  //     if (h || m) oss << m << "m ";
-  //     oss << s << "s";
-  //     return oss.str();
-  //   };
-  //   
-  //   Rcpp::Rcout << "[EnvelopeDispersionBuild:UB2:Pilot] k1=" << k1
-  //               << " (" << (100.0 * k1 / gs) << "%) elapsed=" << elapsed1 << "s; "
-  //               << "k2=" << k2 << " (" << (100.0 * k2 / gs) << "%) elapsed=" << elapsed2 << "s; "
-  //               << "k3=" << k3 << " (" << (100.0 * k3 / gs) << "%) elapsed=" << elapsed3 << "s.\n";
-  //   
-  //   Rcpp::Rcout << "[EnvelopeDispersionBuild:UB2:Pilot] t_fixed=" << t_fixed
-  //               << "s, t_face=" << t_face << "s/face.\n";
-  //   
-  //   Rcpp::Rcout << "[EnvelopeDispersionBuild:UB2:Pilot] Estimated full run = "
-  //               << fmt_hms(est_total_ub2) << " (" << est_total_ub2 << "s).\n";
-  // }
-  // 
-  // --- Interrupt safeguard for UB2 ---
 
   
     if (est_total_ub2 > 300.0) {
@@ -2202,6 +2024,13 @@ List EnvelopeDispersionBuild_cpp(
   );
   
   
+  // --- Print rss_min_global before UB2 minimization call ---
+  if (verbose) {
+    Rcpp::Rcout << "[EnvelopeDispersionBuild] rss_min_global_used in optimization is: "
+                << rss_min_global << "\n";
+  }
+  
+  
   Rcpp::List ub2_parallel_res = ub2_parallel_fn(
     Rcpp::Named("par0")   = 0.5 * (low + upp),
     Rcpp::Named("low")    = low,
@@ -2228,10 +2057,20 @@ List EnvelopeDispersionBuild_cpp(
   
   
   // Extract UB2 parallel results
-  Rcpp::NumericVector disp_min_ub2 = ub2_parallel_res["disp_min"];
-  Rcpp::NumericVector ub2_min      = ub2_parallel_res["ub2_min"];
-  
+   disp_min_ub2 = ub2_parallel_res["disp_min"];
+   ub2_min      = ub2_parallel_res["ub2_min"];
 
+   for (int j = 0; j < gs; ++j) {
+     
+   NumericVector cbars_j = cbars(j, _);
+  
+   double ub2_val_alt = UB2_Fun(0.271233, cache, cbars_j, y, x, alpha, wt, rss_min_global);
+  
+  Rcpp::Rcout << "UB2_alt function: " << ub2_val_alt << ", disp_alt: " << 0.271233 << std::endl;
+  
+  
+   }
+  
   if (verbose) {
     Rcpp::Function fmt("format");
     Rcpp::Function systime("Sys.time");
@@ -2248,7 +2087,10 @@ List EnvelopeDispersionBuild_cpp(
   double ub2_min_global = R_PosInf;
   double disp_min_global_ub2 = NA_REAL;
   int j_best_ub2 = -1;
+
+  
   for (int j = 0; j < gs; ++j) {
+    Rcpp::Rcout << "Index j: " << j << ", ub2_min[j]: " << ub2_min[j] << ", disp_min_ub2[j]: " << disp_min_ub2[j] << std::endl;
     if (ub2_min[j] < ub2_min_global) {
       ub2_min_global = ub2_min[j];
       disp_min_global_ub2 = disp_min_ub2[j];
@@ -2256,8 +2098,32 @@ List EnvelopeDispersionBuild_cpp(
     }
   }
   
-
   
+
+  }
+  else { // UB2_Min_Type == 2
+    if (RSS_Min_Type == 1) {
+      // RSS minimized, UB2 skipped: derive ub2_min from rss_min_parallel
+      for (int j = 0; j < gs; ++j) {
+        ub2_min[j]      = (0.5 / upp) * (rss_min_parallel[j] - rss_min_global);
+        disp_min_ub2[j] = upp;  // enforce upper bound anchor
+      }
+      if (verbose) {
+        Rcpp::Rcout << "[EnvelopeDispersionBuild] UB2 source = derived from RSS_min (skip UB2)\n";
+      }
+      
+    } else if (RSS_Min_Type == 2) {
+      // RSS minimized, UB2 skipped: derive ub2_min from rss_min_parallel
+      for (int j = 0; j < gs; ++j) {
+        ub2_min[j]      = 0;
+        disp_min_ub2[j] = upp;  // enforce upper bound anchor
+      }
+      if (verbose) {
+        Rcpp::Rcout << "[EnvelopeDispersionBuild] UB2 source = Set to 0 (skip RSS_Min and UB2 Min)\n";
+      }
+      
+    }
+  }
   
   
   

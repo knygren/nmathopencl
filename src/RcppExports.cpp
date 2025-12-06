@@ -212,6 +212,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// UB2_Fun
+double UB2_Fun(double dispersion, Rcpp::List cache, Rcpp::NumericVector cbars_j, Rcpp::NumericVector y, Rcpp::NumericMatrix x, Rcpp::NumericVector alpha, Rcpp::NumericVector wt, double rss_min_global);
+RcppExport SEXP _glmbayes_UB2_Fun(SEXP dispersionSEXP, SEXP cacheSEXP, SEXP cbars_jSEXP, SEXP ySEXP, SEXP xSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP rss_min_globalSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type dispersion(dispersionSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type cache(cacheSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type cbars_j(cbars_jSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type wt(wtSEXP);
+    Rcpp::traits::input_parameter< double >::type rss_min_global(rss_min_globalSEXP);
+    rcpp_result_gen = Rcpp::wrap(UB2_Fun(dispersion, cache, cbars_j, y, x, alpha, wt, rss_min_global));
+    return rcpp_result_gen;
+END_RCPP
+}
 // EnvelopeDispersionBuild_cpp
 List EnvelopeDispersionBuild_cpp(List Env, double Shape, double Rate, NumericMatrix P, NumericVector y, NumericMatrix x, NumericVector alpha, int n_obs, double RSS_post, double RSS_ML, NumericMatrix mu, NumericVector wt, double max_disp_perc, Nullable<double> disp_lower, Nullable<double> disp_upper, bool verbose, bool use_parallel);
 RcppExport SEXP _glmbayes_EnvelopeDispersionBuild_cpp(SEXP EnvSEXP, SEXP ShapeSEXP, SEXP RateSEXP, SEXP PSEXP, SEXP ySEXP, SEXP xSEXP, SEXP alphaSEXP, SEXP n_obsSEXP, SEXP RSS_postSEXP, SEXP RSS_MLSEXP, SEXP muSEXP, SEXP wtSEXP, SEXP max_disp_percSEXP, SEXP disp_lowerSEXP, SEXP disp_upperSEXP, SEXP verboseSEXP, SEXP use_parallelSEXP) {
@@ -678,6 +696,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_rss_face_at_disp", (DL_FUNC) &_glmbayes_rss_face_at_disp, 7},
     {"_glmbayes_drss_ddisp", (DL_FUNC) &_glmbayes_drss_ddisp, 7},
     {"_glmbayes_UB2", (DL_FUNC) &_glmbayes_UB2, 8},
+    {"_glmbayes_UB2_Fun", (DL_FUNC) &_glmbayes_UB2_Fun, 8},
     {"_glmbayes_EnvelopeDispersionBuild_cpp", (DL_FUNC) &_glmbayes_EnvelopeDispersionBuild_cpp, 17},
     {"_glmbayes_Set_Grid", (DL_FUNC) &_glmbayes_Set_Grid, 3},
     {"_glmbayes_setlogP", (DL_FUNC) &_glmbayes_setlogP, 4},
