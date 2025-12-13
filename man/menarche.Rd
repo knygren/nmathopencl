@@ -27,4 +27,5 @@ MASS package (find more details).
 \examples{
 data(menarche2)
 }
-\keyword{datasets, Bayesian Binomial Regression}
+\keyword{datasets}
+\concept{Bayesian Binomial Regression}

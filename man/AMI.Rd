@@ -29,4 +29,5 @@ UVA Example - Add Reference Here.
 \examples{
 data(menarche2)
 }
-\keyword{datasets, Bayesian Binomial Regression}
+\keyword{datasets}
+\concept{Bayesian Binomial Regression}

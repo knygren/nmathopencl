@@ -3,8 +3,12 @@
 \docType{package}
 \name{glmbayes-package}
 \alias{glmbayes-package}
-\title{glmbayes: Bayesian Generalized Linear Models (iid Samples)}
+\title{glmbayes: Bayesian Generalized Linear Models (IID Samples)}
 \description{
 Generates iid samples for Bayesian Generalized Linear Models.
+}
+\author{
+\strong{Maintainer}: Kjell Nygren \email{kjell.a.nygren@gmail.com}
+
 }
 \keyword{internal}

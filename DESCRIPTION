@@ -1,10 +1,12 @@
 Package: glmbayes
 Type: Package
-Title: Bayesian Generalized Linear Models (iid Samples)
+Title: Bayesian Generalized Linear Models (IID Samples)
 Version: 0.1.0
-Date: 2025-07-24
-Author: Kjell Nygren
-Maintainer: Kjell Nygren <kjell.a.nygren@gmail.com>
+Date: 2025-12-13
+Authors@R: person(given = "Kjell",
+                  family= "Nygren",
+                  role = c("aut","cre"),
+                  email = "kjell.a.nygren@gmail.com")
 Description: Generates iid samples for Bayesian Generalized Linear Models.
 License: GPL-2
 Imports:

@@ -1,10 +1,21 @@
-## ----include = FALSE----------------------------------------------------------
+Yaml
+
+---
+title: "Chapter 3: Tailoring Priors"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Chapter 2: Tailoring Priors}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
-  df_print = "default"
+  comment = "#>"
 )
-
+```
+  
 
 ## ----setup,echo = FALSE-------------------------------------------------------
 library(glmbayes)
@@ -806,4 +817,6 @@ lmb.D9_default=lmb(weight ~ group,dNormal(mu_default,V_default,dispersion=disp_M
 
 ## ----Plant_lmb_summary_default------------------------------------------------
 summary(lmb.D9_default)
+
+
 

@@ -42,4 +42,6 @@ That site also contains classical Poisson and Gamma regression examples.
 data(carinsca)
 ## maybe str(carinsca) ; plot(carinsca) ...
 }
-\keyword{datasets, Bayesian Poisson Regression, Bayesian Gamma Regression}
+\keyword{datasets}
+\concept{Bayesian Poisson Regression}
+\concept{Bayesian Gamma Regression}
