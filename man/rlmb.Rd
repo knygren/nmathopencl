@@ -116,26 +116,31 @@ ps <- Prior_Setup(weight ~ group)
 x  <- ps$x
 mu <- ps$mu
 V  <- ps$Sigma
-mu[1, 1] <- mean(weight)
+#mu[1, 1] <- mean(weight)
 
-Prior_Check(
-  weight ~ group,
-  family  = gaussian(),
-  pfamily = dNormal(mu = mu, Sigma = V)
-)
+# Prior_Check(
+#   weight ~ group,
+#   family  = gaussian(),
+#   pfamily = dNormal(mu = mu, Sigma = V)
+# )
 
 lm.D9 <- lm(weight ~ group, x = TRUE, y = TRUE)
 y <- lm.D9$y
 
+#ps$dispersion
+
 ## Dispersion for maximum likelihood estimate
-disp_ML  <- sigma(lm.D9)^2
-n_prior  <- 2
-shape    <- n_prior / 2
-rate     <- disp_ML * shape
+# disp_ML  <- sigma(lm.D9)^2
+# n_prior  <- 2
+# shape    <- n_prior / 2
+# rate     <- disp_ML * shape
+
+shape    <- ps$shape
+rate     <- ps$rate
 
 ## Two-Block Gibbs sampler
 set.seed(180)
-dispersion2 <- disp_ML
+dispersion2 <- ps$dispersion
 
 ## Run 1000 burn-in iterations
 for (i in 1:1000) {
@@ -179,14 +184,44 @@ lmb.D9_v3 <- glmb(
   pfamily = dIndependent_Normal_Gamma(
     ps$mu, ps$Sigma,
     shape = ps$shape,
-    rate  = ps$rate,
-    disp_lower = 0.2711,
-    disp_upper = 1.0422
+    rate  = ps$rate
+    # ,disp_lower = 0.2711,
+    # disp_upper = 1.0422
   )
   # use_opencl = TRUE,
   # verbose    = TRUE
 )
 summary(lmb.D9_v3)
+
+lmb.D9_v3$pfamily$prior_list
+
+
+lmb.D9_v4 <- glmb(
+  n       = 10000,
+  weight  ~ group,
+  family  = gaussian(),
+  pfamily = dIndependent_Normal_Gamma(
+    ps$mu, ps$Sigma,
+    shape = ps$shape,
+    rate  = ps$rate)
+)
+summary(lmb.D9_v4)
+
+
+lmb.D9_v4 <- lmb(
+  n       = 10000,
+  weight  ~ group,
+#  family  = gaussian(),
+  pfamily = dIndependent_Normal_Gamma(
+    ps$mu, ps$Sigma,
+    shape = ps$shape,
+    rate  = ps$rate)
+)
+summary(lmb.D9_v4)
+
+
+
+lmb.D9_v4$pfamily$prior_list
 }
 \references{
 \insertAllCited{}

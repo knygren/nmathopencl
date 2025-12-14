@@ -1051,7 +1051,7 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   Prec <- chol2inv(R)
   Prec <- 0.5 * (Prec + t(Prec))   # enforce symmetry
   
-  
+
   outlist=list(
     coefficients=t(out), 
     coef.mode=betastar,  ## For now, use the conditional mode (not universal)

@@ -196,6 +196,23 @@ rlmb<-function(n=1,y,x,pfamily,offset=rep(0,nobs),weights=NULL)
 
   outlist=simfun(n=n,y=y,x=x,prior_list=prior_list,offset=offset,weights=weights,family=family)
 
+  
+  if (pfamily$pfamily == "dIndependent_Normal_Gamma") {
+    if (!is.null(outlist$sim_bounds)) {
+#      cat("simbounds$low:\n")
+#      print(outlist$sim_bounds$low)
+#      cat("simbounds$upp:\n")
+#      print(outlist$sim_bounds$upp)
+      pfamily$prior_list$disp_lower=outlist$sim_bounds$low
+      pfamily$prior_list$disp_upper=outlist$sim_bounds$upp
+#      cat("pfamily prior list-inside rlmb:\n")
+#      print(pfamily$prior_list)
+      
+    } else {
+      cat("No simbounds returned in outlist.\n")
+    }
+  }  
+
   simfun_call <- outlist$call 
   
   outlist$call <- match.call()  # overwrite with the rglmb call
@@ -207,8 +224,6 @@ rlmb<-function(n=1,y,x,pfamily,offset=rep(0,nobs),weights=NULL)
   
   return(outlist)
   
-
-
 }
 
 #' @rdname rlmb

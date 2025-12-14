@@ -246,6 +246,16 @@ lmb <- function ( formula, pfamily, n=1000,data, subset, weights, na.action,meth
             offset=offset)
   
   
+  if (pfamily$pfamily == "dIndependent_Normal_Gamma") {
+    if (!is.null(sim$sim_bounds)) {
+      pfamily$prior_list$disp_lower=sim$sim_bounds$low
+      pfamily$prior_list$disp_upper=sim$sim_bounds$upp
+    } else {
+      cat("No simbounds returned in sim.\n")
+    }
+  }
+    
+  
   dispersion2<-sim$dispersion
   
   

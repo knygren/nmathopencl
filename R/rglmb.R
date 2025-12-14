@@ -175,6 +175,24 @@ rglmb<-function(n=1,y,x,family=gaussian(),pfamily,offset=NULL,
                    Gridtype=Gridtype,n_envopt = n_envopt,   # pass through
                    use_parallel = use_parallel, use_opencl = use_opencl, verbose = verbose)
 
+  if (pfamily$pfamily == "dIndependent_Normal_Gamma") {
+    if (!is.null(outlist$sim_bounds)) {
+      # cat("simbounds$low:\n")
+      # print(outlist$sim_bounds$low)
+      # cat("simbounds$upp:\n")
+      # print(outlist$sim_bounds$upp)
+      pfamily$prior_list$disp_lower=outlist$sim_bounds$low
+      pfamily$prior_list$disp_upper=outlist$sim_bounds$upp
+      # cat("pfamily prior list-inside rglmb:\n")
+      # print(pfamily$prior_list)
+      
+    } else {
+      cat("No simbounds returned in outlist.\n")
+    }
+  }  
+  
+  
+  
   outlist$simfun_call <- outlist$call 
 
   outlist$call <- match.call()  # overwrite with the rglmb call
