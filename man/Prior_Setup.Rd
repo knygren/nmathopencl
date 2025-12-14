@@ -116,7 +116,8 @@ The function returns a list containing:
 \item \code{shape}: the shape parameter for Normal-Gamma priors (if applicable)
 \item \code{rate}: the rate parameter for Normal-Gamma priors (if applicable)
 \item \code{model}: the model frame used to construct the design matrix
-\item \code{x}: the design matrix
+\item \code{x}: the model matrix used
+\item \code{y}: the response used
 \item \code{call}: the matched call to \code{Prior_Setup()}
 \item \code{PriorSettings}: a list of metadata including:
 \itemize{

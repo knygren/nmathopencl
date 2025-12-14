@@ -116,27 +116,10 @@ ps <- Prior_Setup(weight ~ group)
 x  <- ps$x
 mu <- ps$mu
 V  <- ps$Sigma
-#mu[1, 1] <- mean(weight)
-
-# Prior_Check(
-#   weight ~ group,
-#   family  = gaussian(),
-#   pfamily = dNormal(mu = mu, Sigma = V)
-# )
-
-lm.D9 <- lm(weight ~ group, x = TRUE, y = TRUE)
-y <- lm.D9$y
-
-#ps$dispersion
-
-## Dispersion for maximum likelihood estimate
-# disp_ML  <- sigma(lm.D9)^2
-# n_prior  <- 2
-# shape    <- n_prior / 2
-# rate     <- disp_ML * shape
-
+y <- ps$y
 shape    <- ps$shape
 rate     <- ps$rate
+
 
 ## Two-Block Gibbs sampler
 set.seed(180)
@@ -152,7 +135,7 @@ for (i in 1:1000) {
     n = 1, y = y, x = x,
     pfamily = dGamma(shape = shape, rate = rate, beta = out1$coefficients[1, ])
   )
-  dispersions <- out2$dispersion
+  dispersion2 <- out2$dispersion
 }
 
 ## Run 1000 additional iterations and store output
@@ -173,8 +156,30 @@ for (i in 1:1000) {
   disp_out[i]      <- out2$dispersion
 }
 
+## Review output
+
 colMeans(beta_out)
 mean(disp_out)
+
+
+
+lmb.D9_v4 <- lmb(
+  n       = 10000,
+  weight  ~ group,
+  #  family  = gaussian(),
+  pfamily = dIndependent_Normal_Gamma(
+    ps$mu, ps$Sigma,
+    shape = ps$shape,
+    rate  = ps$rate)
+)
+summary(lmb.D9_v4)
+
+
+
+lmb.D9_v4$pfamily$prior_list
+
+
+
 
 ## Independent_Normal_Gamma_Prior
 lmb.D9_v3 <- glmb(
@@ -208,20 +213,32 @@ lmb.D9_v4 <- glmb(
 summary(lmb.D9_v4)
 
 
-lmb.D9_v4 <- lmb(
-  n       = 10000,
-  weight  ~ group,
-#  family  = gaussian(),
-  pfamily = dIndependent_Normal_Gamma(
-    ps$mu, ps$Sigma,
-    shape = ps$shape,
-    rate  = ps$rate)
-)
-summary(lmb.D9_v4)
 
 
+# ps$y
+# 
+# ps$mf
+# 
+# 
+# 
+# #mu[1, 1] <- mean(weight)
+# 
+# # Prior_Check(
+# #   weight ~ group,
+# #   family  = gaussian(),
+# #   pfamily = dNormal(mu = mu, Sigma = V)
+# # )
+# 
+# lm.D9 <- lm(weight ~ group, x = TRUE, y = TRUE)
+# y <- lm.D9$y
 
-lmb.D9_v4$pfamily$prior_list
+#ps$dispersion
+
+## Dispersion for maximum likelihood estimate
+# disp_ML  <- sigma(lm.D9)^2
+# n_prior  <- 2
+# shape    <- n_prior / 2
+# rate     <- disp_ML * shape
 }
 \references{
 \insertAllCited{}

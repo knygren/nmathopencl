@@ -35,7 +35,8 @@
 #' * `shape`: the shape parameter for Normal-Gamma priors (if applicable)
 #' * `rate`: the rate parameter for Normal-Gamma priors (if applicable)
 #' * `model`: the model frame used to construct the design matrix
-#' * `x`: the design matrix
+#' * `x`: the model matrix used
+#' * `y`: the response used
 #' * `call`: the matched call to `Prior_Setup()`
 #' * `PriorSettings`: a list of metadata including:
 #'   - `pwt`: prior weight (scalar or vector)
@@ -501,6 +502,7 @@ if (!is.null(sd)) {
     rate=rate,
     model = mf,
     x = x,
+    y=Y,
     call=call,
     PriorSettings = list(
       pwt = pwt,
