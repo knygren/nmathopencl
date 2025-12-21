@@ -62,10 +62,30 @@ double run_opencl_pilot(const Rcpp::NumericMatrix& G4,
       return G4_pilot;
     };
     
+    
+    
     // Warm-up
     auto G4_pilot_A = slice_grid(m1_pilot_A);
-    Rcpp::List warmup_A = f2_f3_opencl(family, link, G4_pilot_A, y, x, mu, P, alpha, wt, 0);
     
+    if (verbose) {
+      
+      Rcpp::Rcout << "Entering f2_F3_opencl warmup: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
+    
+    
+    Rcpp::List warmup_A = f2_f3_opencl(family, link, G4_pilot_A, y, x, mu, P, alpha, wt, 0);
+
+    if (verbose) {
+      
+      Rcpp::Rcout << "Exiting f2_F3_opencl warmup: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
+    
+    
+        
     // Timed pilot A
     auto t0A = std::chrono::high_resolution_clock::now();
     Rcpp::List pilot_A = f2_f3_opencl(family, link, G4_pilot_A, y, x, mu, P, alpha, wt, 0);
@@ -514,6 +534,15 @@ Rcpp::List EnvelopeEval(const Rcpp::NumericMatrix& G4,   // grid (parameters × 
   // --- Pilot timing ---
   if (G4.ncol() >= 14) {
     Timer t_pilot; if (verbose) t_pilot.begin();
+    
+    if (verbose) {
+      
+      Rcpp::Rcout << "Entering Run_opencl_pilor: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
+    
+    
     double est_time = run_opencl_pilot(G4, y, x, mu, P, alpha, wt,
                                        family, link, use_opencl, verbose);
     if (verbose) {
@@ -731,10 +760,26 @@ List EnvelopeBuild_c(NumericVector bStar,
   
 
 
+  if (verbose) {
+    
+    Rcpp::Rcout << "Entering Envelope Eval: "
+                << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                << "\n";
+  }
+  
+  
   Rcpp::List eval_info = EnvelopeEval(G4, y, x, mu, P, alpha, wt,
                                       family, link, use_opencl, verbose);
   
 
+  if (verbose) {
+    
+    Rcpp::Rcout << "Exiting Envelope Eval: "
+                << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                << "\n";
+  }
+  
+  
   // Copy results into cbars/NegLL structures used downstream
   
   NegLL = eval_info["NegLL"];
