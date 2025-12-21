@@ -70,7 +70,7 @@ t_opencl <- system.time({
     Gridtype     = 2,
     use_parallel = TRUE,
     use_opencl   = TRUE,
-    verbose      = FALSE
+    verbose      = TRUE
   )
 })
 
