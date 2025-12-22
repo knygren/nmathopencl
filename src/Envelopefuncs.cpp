@@ -537,7 +537,7 @@ Rcpp::List EnvelopeEval(const Rcpp::NumericMatrix& G4,   // grid (parameters × 
     
     if (verbose) {
       
-      Rcpp::Rcout << "Entering Run_opencl_pilor: "
+      Rcpp::Rcout << "Entering Run_opencl_pilot: "
                   << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
                   << "\n";
     }
