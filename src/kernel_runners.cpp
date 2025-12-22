@@ -296,22 +296,21 @@ void f2_binomial_logit_prep_grad_kernel_runner(
 #ifdef USE_OPENCL
 
 void f2_f3_kernel_runner(
-    const std::string&        kernel_source,  // your .cl contents
-    const char*               kernel_name,    // "f2_binomial_logit_prep_grad"
-    int                       l1,             // nobs
-    int                       l2,             // ncoef
-    int                       m1,             // ngrids
-    const std::vector<double>& X_flat,        // length = l1*l2
-    const std::vector<double>& B_flat,        // length = m1*l2
-    const std::vector<double>& mu_flat,       // length = l2
-    const std::vector<double>& P_flat,        // length = l2*l2
-    const std::vector<double>& alpha_flat,    // length = l1
-    const std::vector<double>& y_flat,        // length = l1
-    const std::vector<double>& wt_flat,       // length = l1
-    std::vector<double>&       qf_flat,       // OUT: length = m1
-    // std::vector<double>&       xb_flat,       // OUT: length = m1*l1
-    std::vector<double>&       grad_flat,     // OUT: length = m1*l2
-    int                        progbar 
+    const std::string&        kernel_source,
+    const char*               kernel_name,
+    int                       l1,
+    int                       l2,
+    int                       m1,
+    const std::vector<double>& X_flat,
+    const std::vector<double>& B_flat,
+    const std::vector<double>& mu_flat,
+    const std::vector<double>& P_flat,
+    const std::vector<double>& alpha_flat,
+    const std::vector<double>& y_flat,
+    const std::vector<double>& wt_flat,
+    std::vector<double>&       qf_flat,
+    std::vector<double>&       grad_flat,
+    int                        progbar
 ) {
   // 0) Sanity-check sizes
   if ((int)X_flat.size()    != l1*l2 ||
@@ -325,30 +324,45 @@ void f2_f3_kernel_runner(
   }
   
   // 1) Initialize output buffers
-  qf_flat.assign(m1,           0.0);
-  // xb_flat.assign((size_t)l1*m1, 0.0);
+  qf_flat.assign(m1, 0.0);
   grad_flat.assign((size_t)l2*m1, 0.0);
   
-  cl_int status;
+  cl_int status = 0;
   
   // 2) Platform & Device
+  Rcpp::Rcout << "[runner] P0: before clGetPlatformIDs\n";
   cl_platform_id platform;
   cl_device_id   device;
   status  = clGetPlatformIDs(1, &platform, nullptr);
-  status |= clGetDeviceIDs  (platform, CL_DEVICE_TYPE_DEFAULT, 1, &device, nullptr);
+  Rcpp::Rcout << "[runner] P1: after clGetPlatformIDs, status=" << status << "\n";
+  
+  status |= clGetDeviceIDs(platform, CL_DEVICE_TYPE_DEFAULT, 1, &device, nullptr);
+  Rcpp::Rcout << "[runner] P2: after clGetDeviceIDs, status=" << status << "\n";
   
   // 3) Context & Queue
+  Rcpp::Rcout << "[runner] P3: before clCreateContext\n";
   cl_context context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &status);
+  Rcpp::Rcout << "[runner] P4: after clCreateContext, status=" << status << "\n";
+  
   cl_queue_properties props[] = {0};
+  Rcpp::Rcout << "[runner] P5: before clCreateCommandQueueWithProperties\n";
   cl_command_queue queue = clCreateCommandQueueWithProperties(context, device, props, &status);
+  Rcpp::Rcout << "[runner] P6: after clCreateCommandQueueWithProperties, status=" << status << "\n";
   
   // 4) Program & Kernel
   const char* src_ptr = kernel_source.c_str();
   size_t      src_len = kernel_source.size();
+  Rcpp::Rcout << "[runner] P7: before clCreateProgramWithSource, src_len=" << src_len << "\n";
   cl_program  program = clCreateProgramWithSource(context, 1, &src_ptr, &src_len, &status);
-  status |= clBuildProgram   (program, 0, nullptr, nullptr, nullptr, nullptr);
+  Rcpp::Rcout << "[runner] P8: after clCreateProgramWithSource, status=" << status << "\n";
   
+  Rcpp::Rcout << "[runner] P9: before clBuildProgram\n";
+  status |= clBuildProgram(program, 0, nullptr, nullptr, nullptr, nullptr);
+  Rcpp::Rcout << "[runner] P10: after clBuildProgram, status=" << status << "\n";
+  
+  Rcpp::Rcout << "[runner] P11: before clCreateKernel\n";
   cl_kernel kernel = clCreateKernel(program, kernel_name, &status);
+  Rcpp::Rcout << "[runner] P12: after clCreateKernel, status=" << status << "\n";
   
   // 5) Device Buffers
   Rcpp::Rcout << "[runner] A: before buffer creation\n";
@@ -370,14 +384,12 @@ void f2_f3_kernel_runner(
   
   cl_mem bufQF   = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
                                   sizeof(double)*qf_flat.size(),   nullptr, &status);
-  // cl_mem bufXB   = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
-  //                                 sizeof(double)*xb_flat.size(),   nullptr, &status);
   cl_mem bufGrad = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
                                   sizeof(double)*grad_flat.size(), nullptr, &status);
   
   Rcpp::Rcout << "[runner] B: after buffer creation\n";
   
-  // 6) Set Kernel Args (must match the .cl signature exactly)
+  // 6) Set Kernel Args
   int arg = 0;
   clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufX);
   clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufB);
@@ -387,7 +399,6 @@ void f2_f3_kernel_runner(
   clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufY);
   clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufW);
   clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufQF);
-  // clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufXB);
   clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufGrad);
   clSetKernelArg(kernel, arg++, sizeof(int),    &l1);
   clSetKernelArg(kernel, arg++, sizeof(int),    &l2);
@@ -405,10 +416,6 @@ void f2_f3_kernel_runner(
                                sizeof(double)*qf_flat.size(),   qf_flat.data(),
                                0, nullptr, nullptr);
   Rcpp::Rcout << "[runner] F: after read qf\n";
-  
-  // status = clEnqueueReadBuffer(queue, bufXB,   CL_TRUE, 0,
-  //                              sizeof(double)*xb_flat.size(),   xb_flat.data(),
-  //                              0, nullptr, nullptr);
   
   Rcpp::Rcout << "[runner] G: before read grad\n";
   status = clEnqueueReadBuffer(queue, bufGrad, CL_TRUE, 0,
@@ -435,14 +442,10 @@ void f2_f3_kernel_runner(
     }
   }
   
-  // --- Begin modified cleanup section ---
-  // 9a) Drain any pending commands
   clFlush(queue);
   clFinish(queue);
   
-  // 9b) Release buffers (inverse creation order)
   clReleaseMemObject(bufGrad);
-  // clReleaseMemObject(bufXB);
   clReleaseMemObject(bufQF);
   clReleaseMemObject(bufW);
   clReleaseMemObject(bufY);
@@ -452,15 +455,14 @@ void f2_f3_kernel_runner(
   clReleaseMemObject(bufB);
   clReleaseMemObject(bufX);
   
-  // 9c) Release kernel, program, queue, context
   clReleaseKernel       (kernel);
   clReleaseProgram      (program);
   clReleaseCommandQueue (queue);
   clReleaseContext      (context);
-  // --- End modified cleanup section ---
 }
 
 #endif
+
 #ifdef USE_OPENCL
 
 int detect_num_gpus_internal() {
