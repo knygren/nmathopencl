@@ -2,6 +2,7 @@
 #ifdef USE_OPENCL
 #ifndef CONFIGURE_OPENCL_H
 #define CONFIGURE_OPENCL_H
+#define CL_TARGET_OPENCL_VERSION 300
 
 #include <CL/cl.h>
 #include <string>

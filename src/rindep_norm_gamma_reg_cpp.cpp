@@ -109,7 +109,7 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
   double rate2 =gamma_list["rate2"];
   double disp_upper =gamma_list["disp_upper"];
   double disp_lower =gamma_list["disp_lower"];
-  double RSS_ML =UB_list["RSS_ML"];
+  // double RSS_ML =UB_list["RSS_ML"];
   double max_New_LL_UB =UB_list["max_New_LL_UB"];
   double max_LL_log_disp =UB_list["max_LL_log_disp"];
   double lm_log1 =UB_list["lm_log1"];
@@ -705,7 +705,7 @@ void rindep_loop_classic(
   
   
   // Declare storage before the for-loop
-  int J_idx_first = -1;
+  // int J_idx_first = -1;
   
 
   for (int i = 0; i < n; ++i) {
@@ -744,10 +744,9 @@ void rindep_loop_classic(
       arma::mat theta2 = Inv_f3_with_disp(cache, dispersion, Rcpp::transpose(cbars_small));
 
 
-      
       Rcpp::NumericMatrix thetabars_new(1, l1);
       // Fill using theta2 exactly as returned (must be 1 × l1 row)
-      if (!(theta2.n_rows == 1 && theta2.n_cols == l1)) {
+      if (!(theta2.n_rows == 1 && theta2.n_cols == arma::uword(l1))) {
         Rcpp::stop("Inv_f3_with_disp must return 1×l1 row; got " +
           std::to_string(theta2.n_rows) + "x" + std::to_string(theta2.n_cols) +
           ", expected 1×l1 (l1=" + std::to_string(l1) + ")");
@@ -865,14 +864,14 @@ Rcpp::List rindep_norm_gamma_reg_std_parallel_cpp(
   Rcpp::Function interactive = base["interactive"];
 
   const int l1 = mu.nrow();
-  const int l2 = x.nrow();
+  // const int l2 = x.nrow();
 
   // Scalars from lists
   double shape3          = gamma_list["shape3"];
   double rate2           = gamma_list["rate2"];
   double disp_upper      = gamma_list["disp_upper"];
   double disp_lower      = gamma_list["disp_lower"];
-  double RSS_ML          = UB_list["RSS_ML"];
+  // double RSS_ML          = UB_list["RSS_ML"];
   double max_New_LL_UB   = UB_list["max_New_LL_UB"];
   double max_LL_log_disp = UB_list["max_LL_log_disp"];
   double lm_log1         = UB_list["lm_log1"];

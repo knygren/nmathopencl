@@ -27,7 +27,7 @@ void f2_binomial_logit_prep_kernel_proxy(
               << "  m1=" << m1 << "\n";
   
   // show first 3 entries of each flat buffer  
-  int K = std::min(3, m1);  
+  // int K = std::min(3, m1);  
   Rcpp::Rcout << "X_flat[0..2]: ";  
   for (int i = 0; i < std::min(3, (int)X_flat.size()); ++i)  
     Rcpp::Rcout << X_flat[i] << " ";  

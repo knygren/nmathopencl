@@ -524,7 +524,7 @@ Rcpp::List run_rcppparallel_pilot(
   // --- conservative calibration sizing based on serial bound ---
   double per_candidate_ms_serial = static_cast<double>(elapsed_ms) / std::max(1, candidates_used);
   double est_per_draw_ms_serial  = per_candidate_ms_serial * E_draws; // conservative bound per draw
-  double est_total_ms_serial     = est_per_draw_ms_serial * static_cast<double>(n); // optional
+  // double est_total_ms_serial     = est_per_draw_ms_serial * static_cast<double>(n); // optional
   
   int m1 = std::max(1, (int)std::ceil(0.01 * (double)n));
   int m2 = std::max(1, (int)std::floor(300000.0 / std::max(1.0, est_per_draw_ms_serial))); // 300k ms = ~5 minutes
@@ -670,11 +670,11 @@ List rnnorm_reg_std_cpp_parallel(
 ) {
   
   // local debug toggle (temporary)
-  const bool debug = true;
+  // const bool debug = true;
   
-  auto mb = [](double bytes) {
-    return bytes / (1024.0 * 1024.0);
-  };
+  // auto mb = [](double bytes) {
+  //   return bytes / (1024.0 * 1024.0);
+  // };
   
   // 0) allocate output buffers (always a big one)
   int p = mu.nrow();

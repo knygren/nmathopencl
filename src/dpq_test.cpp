@@ -1,5 +1,7 @@
 #ifdef USE_OPENCL
 #include "kernel_loader.h"
+#define CL_TARGET_OPENCL_VERSION 300
+
 #include <CL/cl.h>
 // #include <iostream>   // removed: avoid std::cout / std::cerr
 #include <vector>

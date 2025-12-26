@@ -1,0 +1,1 @@
+utils::globalVariables(c("_glmbayes_gpu_names"))

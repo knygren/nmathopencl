@@ -114,10 +114,10 @@ double run_opencl_pilot(const Rcpp::NumericMatrix& G4,
       fixed_cost = 0.0;
     }
     
-    double est_time_sec = fixed_cost + per_grid_cost * m1_total;
+    // double est_time_sec = fixed_cost + per_grid_cost * m1_total;
     
     int m1_grid = std::max(1, (int)std::ceil(0.01 * (double)m1_total));
-    double est_time_sec_m1 = fixed_cost + per_grid_cost * (double)m1_grid;
+    // double est_time_sec_m1 = fixed_cost + per_grid_cost * (double)m1_grid;
     int m2_grid = std::max(1, (int)std::floor((300.0 - fixed_cost) / std::max(1e-12, per_grid_cost)));
     int m_stage_grid = std::min(m1_grid, m2_grid);
     m_stage_grid = std::min(m_stage_grid, m1_total);
@@ -647,7 +647,7 @@ List EnvelopeBuild_c(NumericVector bStar,
   // l1 = number of parameters, k = number of predictors
   
 
-  int progbar=0;
+  // int progbar=0;
   
   int l1 = A.nrow(), k = A.ncol();
   arma::mat A2(A.begin(), l1, k, false);
@@ -677,7 +677,7 @@ List EnvelopeBuild_c(NumericVector bStar,
   Rcpp::Function asMat("as.matrix");
   Rcpp::Function EnvSort("EnvelopeSort");
   
-  int i;  
+  // int i;  
   
   
   // Construct per-dimension tangent points (G1) and linear intercepts (Lint)
@@ -1457,7 +1457,7 @@ Rcpp::List run_rss_pilot_block(const Rcpp::Function& parallel_fn,
                                bool use_parallel,
                                bool verbose) {
   double est_total = 0.0;
-  const int pilot_threshold = static_cast<int>(std::pow(3, 10)); // 59,049 faces
+  // const int pilot_threshold = static_cast<int>(std::pow(3, 10)); // 59,049 faces
   
     // --- Warm-up pilot size ---
     int k1 = std::min(gs, 500);
@@ -1581,7 +1581,7 @@ Rcpp::List run_ub2_pilot_block(const Rcpp::Function& ub2_parallel_fn,
                                double rss_min_global,
                                bool verbose) {
   double est_total = 0.0;
-  const int pilot_threshold = static_cast<int>(std::pow(3, 10)); // 59,049 faces
+  // const int pilot_threshold = static_cast<int>(std::pow(3, 10)); // 59,049 faces
   
   // --- Warm-up pilot size ---
   int k1 = std::min(gs, 500);
@@ -1777,9 +1777,9 @@ List EnvelopeDispersionBuild_cpp(
   
   
   // Optionally: keep the best across faces
-  double rss_min_global = R_PosInf;
-  double disp_min_global = NA_REAL;
-  int j_best = -1;
+   double rss_min_global = R_PosInf;
+   [[maybe_unused]] double disp_min_global = NA_REAL;
+   [[maybe_unused]] int j_best = -1;
   // Extract parallel results
   Rcpp::NumericVector disp_min_parallel(gs);
   Rcpp::NumericVector rss_min_parallel(gs); 
@@ -2129,9 +2129,9 @@ List EnvelopeDispersionBuild_cpp(
   
 
   // Find global UB2 minimum
-  double ub2_min_global = R_PosInf;
-  double disp_min_global_ub2 = NA_REAL;
-  int j_best_ub2 = -1;
+  [[maybe_unused]] double ub2_min_global = R_PosInf;
+  [[maybe_unused]] double disp_min_global_ub2 = NA_REAL;
+  [[maybe_unused]]  int j_best_ub2 = -1;
 
   
   for (int j = 0; j < gs; ++j) {

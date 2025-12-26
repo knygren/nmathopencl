@@ -1,5 +1,4 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
-#pragma once
 // we only include RcppArmadillo.h which pulls Rcpp.h in for us
 #include <cmath>
 #include "RcppArmadillo.h"
@@ -1675,7 +1674,7 @@ NumericVector f2_binomial_logit_accum(
     NumericVector wt,        // length n weights
     int progbar          // 0 = no bar, 1 = show bar
 ) {
-  int n = xb.nrow();
+  // int n = xb.nrow();
   int m = xb.ncol();
   NumericVector res(m);
   

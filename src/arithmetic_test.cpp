@@ -3,8 +3,10 @@
 
 #ifdef USE_DIRECT_CLH
 // we passed “-I…/include/CL -DUSE_DIRECT_CLH”
+#define CL_TARGET_OPENCL_VERSION 300
 #include <CL/cl.h>
 #else
+#define CL_TARGET_OPENCL_VERSION 300
 // normal case on Linux/macOS/Windows
 #include <CL/cl.h>
 #endif
