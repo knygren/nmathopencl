@@ -1,12 +1,12 @@
 Yaml
 
 ---
-title: "Chapter 4: Reviewing Model Predictions, Deviance Residuals and Model Statistics"
+title: "Chapter 04: Reviewing Model Predictions, Deviance Residuals and Model Statistics"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 4: Reviewing Model Predictions, Deviance Residuals and Model Statistics}
+  %\VignetteIndexEntry{Chapter 04: Reviewing Model Predictions, Deviance Residuals and Model Statistics}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -1,12 +1,12 @@
 Yaml
 
 ---
-title: "Chapter 5: Foundations of GLMs – Families, Links, and Log-Concave Likelihoods"
+title: "Chapter 05: Foundations of GLMs – Families, Links, and Log-Concave Likelihoods"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 5: Foundations of GLMs – Families, Links, and Log-Concave Likelihoods}
+  %\VignetteIndexEntry{Chapter 05: Foundations of GLMs – Families, Links, and Log-Concave Likelihoods}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

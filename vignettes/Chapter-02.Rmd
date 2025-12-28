@@ -1,10 +1,10 @@
 Yaml
 
 ---
-title: "Chapter 2: Estimating Bayesian Linear Models"
+title: "Chapter 02: Estimating Bayesian Linear Models"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 2: Estimating Bayesian Linear Models}
+  %\VignetteIndexEntry{Chapter 02: Estimating Bayesian Linear Models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

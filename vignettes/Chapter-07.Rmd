@@ -1,10 +1,10 @@
 Yaml
 
 ---
-title: "Chapter 7: Models for the Binomial Family"
+title: "Chapter 07: Models for the Binomial Family"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 7: Models for the Binomial Family}
+  %\VignetteIndexEntry{Chapter 07: Models for the Binomial Family}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
