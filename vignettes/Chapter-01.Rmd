@@ -8,15 +8,23 @@ output:
   rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Chapter 01: Getting started with glmbayes}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{knitr::rmarkdown_notangle}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
+# Prevent knitr from generating tangled .R files
+knitr::opts_knit$set(tangle = FALSE)
+
+# Prevent rmarkdown/knitr from keeping .md or .Rmd intermediates
+knitr::opts_knit$set(keep_md = FALSE, keep_rmd = FALSE)
+
+# Your existing chunk options
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+
 ```
 
 ```{r setup,echo = FALSE}
