@@ -334,7 +334,7 @@ void f2_f3_kernel_runner(
   cl_int status = 0;
   
   // 2) Platform & Device
-  Rcpp::Rcout << "[runner] P0: before clGetPlatformIDs\n";
+  // Rcpp::Rcout << "[runner] P0: before clGetPlatformIDs\n";
   
   cl_platform_id platform = nullptr;
   cl_device_id   device   = nullptr;
@@ -372,32 +372,32 @@ void f2_f3_kernel_runner(
   }
   
   // 3) Context & Queue
-  Rcpp::Rcout << "[runner] P3: before clCreateContext\n";
+  // Rcpp::Rcout << "[runner] P3: before clCreateContext\n";
   cl_context context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &status);
-  Rcpp::Rcout << "[runner] P4: after clCreateContext, status=" << status << "\n";
+  // Rcpp::Rcout << "[runner] P4: after clCreateContext, status=" << status << "\n";
   
   cl_queue_properties props[] = {0};
-  Rcpp::Rcout << "[runner] P5: before clCreateCommandQueueWithProperties\n";
+  // Rcpp::Rcout << "[runner] P5: before clCreateCommandQueueWithProperties\n";
   cl_command_queue queue = clCreateCommandQueueWithProperties(context, device, props, &status);
-  Rcpp::Rcout << "[runner] P6: after clCreateCommandQueueWithProperties, status=" << status << "\n";
+  // Rcpp::Rcout << "[runner] P6: after clCreateCommandQueueWithProperties, status=" << status << "\n";
   
   // 4) Program & Kernel
   const char* src_ptr = kernel_source.c_str();
   size_t      src_len = kernel_source.size();
-  Rcpp::Rcout << "[runner] P7: before clCreateProgramWithSource, src_len=" << src_len << "\n";
+  // Rcpp::Rcout << "[runner] P7: before clCreateProgramWithSource, src_len=" << src_len << "\n";
   cl_program  program = clCreateProgramWithSource(context, 1, &src_ptr, &src_len, &status);
-  Rcpp::Rcout << "[runner] P8: after clCreateProgramWithSource, status=" << status << "\n";
+  // Rcpp::Rcout << "[runner] P8: after clCreateProgramWithSource, status=" << status << "\n";
   
-  Rcpp::Rcout << "[runner] P9: before clBuildProgram\n";
+  // Rcpp::Rcout << "[runner] P9: before clBuildProgram\n";
   status |= clBuildProgram(program, 0, nullptr, nullptr, nullptr, nullptr);
-  Rcpp::Rcout << "[runner] P10: after clBuildProgram, status=" << status << "\n";
+  // Rcpp::Rcout << "[runner] P10: after clBuildProgram, status=" << status << "\n";
   
-  Rcpp::Rcout << "[runner] P11: before clCreateKernel\n";
+  // Rcpp::Rcout << "[runner] P11: before clCreateKernel\n";
   cl_kernel kernel = clCreateKernel(program, kernel_name, &status);
-  Rcpp::Rcout << "[runner] P12: after clCreateKernel, status=" << status << "\n";
+  // Rcpp::Rcout << "[runner] P12: after clCreateKernel, status=" << status << "\n";
   
   // 5) Device Buffers
-  Rcpp::Rcout << "[runner] A: before buffer creation\n";
+  // Rcpp::Rcout << "[runner] A: before buffer creation\n";
   
   cl_mem bufX    = clCreateBuffer(context, CL_MEM_READ_ONLY  | CL_MEM_COPY_HOST_PTR,
                                   sizeof(double)*X_flat.size(),   (void*)X_flat.data(),   &status);
@@ -419,7 +419,7 @@ void f2_f3_kernel_runner(
   cl_mem bufGrad = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
                                   sizeof(double)*grad_flat.size(), nullptr, &status);
   
-  Rcpp::Rcout << "[runner] B: after buffer creation\n";
+  // Rcpp::Rcout << "[runner] B: after buffer creation\n";
   
   // 6) Set Kernel Args
   int arg = 0;
@@ -438,22 +438,22 @@ void f2_f3_kernel_runner(
   
   // 7) Launch
   size_t global = (size_t)m1;
-  Rcpp::Rcout << "[runner] C: before enqueue\n";
+  // Rcpp::Rcout << "[runner] C: before enqueue\n";
   status = clEnqueueNDRangeKernel(queue, kernel, 1, nullptr, &global, nullptr, 0, nullptr, nullptr);
-  Rcpp::Rcout << "[runner] D: after enqueue\n";
+  // Rcpp::Rcout << "[runner] D: after enqueue\n";
   
   // 8) Read back outputs
-  Rcpp::Rcout << "[runner] E: before read qf\n";
+  // Rcpp::Rcout << "[runner] E: before read qf\n";
   status = clEnqueueReadBuffer(queue, bufQF,   CL_TRUE, 0,
                                sizeof(double)*qf_flat.size(),   qf_flat.data(),
                                0, nullptr, nullptr);
-  Rcpp::Rcout << "[runner] F: after read qf\n";
+  // Rcpp::Rcout << "[runner] F: after read qf\n";
   
-  Rcpp::Rcout << "[runner] G: before read grad\n";
+  // Rcpp::Rcout << "[runner] G: before read grad\n";
   status = clEnqueueReadBuffer(queue, bufGrad, CL_TRUE, 0,
                                sizeof(double)*grad_flat.size(), grad_flat.data(),
                                0, nullptr, nullptr);
-  Rcpp::Rcout << "[runner] H: after read grad\n";
+  // Rcpp::Rcout << "[runner] H: after read grad\n";
   
   // 8a) Sanity-check: error out if both outputs are all zeros
   {
