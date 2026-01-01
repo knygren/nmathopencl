@@ -39,12 +39,14 @@ The dataset contains counts of subjects classified by treatment group and outcom
 We reproduce Dobson’s example exactly.  
 The data consist of 9 observations: three outcome levels crossed with three treatment groups.
 
+```{r dobson}
     ## Dobson (1990) Page 93: Randomized Controlled Trial :
     set.seed(333)
     counts <- c(18,17,15,20,10,20,25,13,12)
     outcome <- gl(3,1,9)
     treatment <- gl(3,3)
     print(d.AD <- data.frame(treatment, outcome, counts))
+```
 
 The table shows the observed counts for each treatment–outcome combination.
 
@@ -52,9 +54,12 @@ The table shows the observed counts for each treatment–outcome combination.
 
 The classical glm() call uses the Poisson family with the canonical log link:
 
+```{r glm_call}
+
     glm.D93 <- glm(counts ~ outcome + treatment,
                    family = poisson(link = "log"))
     summary(glm.D93)
+```
 
 ### 3.1 Interpretation of the Classical Output
 
@@ -77,11 +82,14 @@ The recommended workflow uses Prior_Setup(), which constructs a Zellner‑type g
 
 ### 4.1 Setting the Prior
 
+```{r Prior_Setup}
+
     ps <- Prior_Setup(counts ~ outcome + treatment,
                       family = poisson())
     mu <- ps$mu
     V  <- ps$Sigma
-
+```
+    
 The printed Prior_Setup() output shows:
 
 - prior means (intercept from null model, effects centered at 0)  
@@ -92,16 +100,21 @@ With the default pwt = 0.01, the prior is weakly informative.
 
 ### 4.2 Calling glmb()
 
+```{r Call_glmb}
+
     glmb.D93 <- glmb(counts ~ outcome + treatment,
                      family = poisson(),
                      pfamily = dNormal(mu = mu, Sigma = V))
+```
 
 This call mirrors glm() but adds the pfamily argument.
 
 ## 5. Printing and Summarizing the Bayesian Output
 
+```{r summary_glmb}
     print(glmb.D93)
     summary(glmb.D93)
+```
 
 The summary includes:
 
