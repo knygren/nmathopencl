@@ -235,4 +235,12 @@ Together, these vignettes form a comprehensive reference that supports users at 
 
 ## Future Plans
 
-- Full CRAN submission and expanded vignette documentation
+- Full CRAN submission 
+- Make Gamma regression for dGamma prior consistent with gamma.dispersion() function
+- Update proofs
+   - Vignette A6 to reflect similar approach as gamma.dispersion
+   - Vignette A7 to reflect latest update to algorithm (with optimized bounds)
+- Draft and Modify additional Vignettes
+   - Chapter-10: Informative Priors: Centering and Priors with differentiated prior weights
+   - Appendix Section: Restructure and Improve
+- Improve References for Vignettes and Select Functions

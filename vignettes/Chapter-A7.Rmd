@@ -5,6 +5,7 @@ title: "Chapter A7: Accept–Reject Sampling for gaussian Regression models with
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
+bibliography: REFERENCES.bib
 vignette: >
   %\VignetteIndexEntry{Chapter A7: Accept–Reject Sampling for gaussian Regression models with independent normal-gamma priors}
   %\VignetteEngine{knitr::rmarkdown}
@@ -16,6 +17,14 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+```
+
+As shown in @Nygren2006, the mixture weights follow the same structure.
+
+```{r}
+file.exists("../inst/REFERENCES.bib")
+
+
 ```
 
 # Envelope construction with independent Normal–Gamma prior (Gaussian regression)
@@ -175,7 +184,7 @@ $$
      \right)
      }
      \]
-     This expression mirrors the mixture weights \(\tilde{p}_j\) in Claim 1 of Nygren and Nygren
+     This expression mirrors the mixture weights \(\tilde{p}_j\) in Claim 1 of @Nygren2006
      
    - Compute and store a set of constants (e.g., `lg_prob_factor`, `lmc1`, `lmc2`) that are used in the accept/reject test and in adjusting the probabilities with which grid components are selected. Specifically, these constants are built so that UB3A(.) and UB3B(.) in the proposition below are always non-negative bounding functions.
 
@@ -1393,3 +1402,4 @@ Thus the analytic gradient matches the implementation:
 = \frac{2}{d^2}\,\mathrm{resid}(d)^\top W X A(d)^{-1}\Big(\mathrm{base\_A}\,\beta(d) - \mathrm{base\_B0}\Big)\;}
 \]
 
+# References

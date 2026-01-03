@@ -1,5 +1,3 @@
-Yaml
-
 ---
 title: "Chapter 04: Reviewing Model Predictions, Deviance Residuals and Model Statistics"
 author: "Kjell Nygren"

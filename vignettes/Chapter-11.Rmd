@@ -12,7 +12,9 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning= FALSE,
+  message=FALSE
 )
 ```
 
@@ -381,7 +383,7 @@ so that \( \beta \) and \( \tau \) are a priori independent.
 
 This prior is implemented in glmbayes using the below specification (but where a truncated gamma replaces the full gamma).
 
-```{r Indendent_normal_gamma_prior}
+```{r Independent_normal_gamma_prior}
 lmb.D9_v3 <- lmb(n=10000,
   weight ~ group,
   dIndependent_Normal_Gamma(
@@ -415,7 +417,7 @@ If iid sampling is not desired, or if the user wants to inspect mixing behavior,
 Example:
 
 
-```{r two-block Gibbs sampler}
+```{r two_block_Gibbs_sampler}
 
 set.seed(180)
 
@@ -538,7 +540,7 @@ A prior for the precision (inverse dispersion)\( \tau = 1/\phi \) is
 
 
 
-```{r glm_call_gamma_prior}
+```{r glm_call_gamma_prior2}
 ## Call to glm
 glm.carinsca <- glm(Cost/Claims~Merit+Class,family=Gamma(link="log"),weights=Claims,x=TRUE)
 
@@ -574,6 +576,8 @@ so that \( \beta \) and \( \tau \) are a priori independent.
 
 ```{r Block_Gibbs_gamma_Regression}
 
+suppressWarnings(
+  suppressMessages(
 for(i in 1:1000){
 
   ## --- Block 1: Regression coefficients ---
@@ -593,34 +597,42 @@ for(i in 1:1000){
     weights = Claims
   )
 
-  ## --- SCALE dispersion for the next β-update ---
+  ## --- SCALE dispersion for the next beta update ---
   ## Convert quasi  (from out2) to MLE for consistency
   dispersion2 <- out2$dispersion * ((m - p)/m)
 
 }
 
+)
+)
+
 ## Run 1000 additional iterations and store output
 beta_out <- matrix(0, nrow = 1000, ncol = 8)
 disp_out <- rep(0, 1000)
 
-for (i in 1:1000) {
-  out1 <- rglmb(
-    n = 1, y = y, x = x,
-    family  =Gamma(link="log"),
-    pfamily = dNormal(mu = mu, Sigma = V, dispersion = dispersion2),
-weights = Claims)
 
-  out2 <- rglmb(
-    n = 1, y = y, x = x,
-    family  =Gamma(link="log"),
-    pfamily = dGamma(shape = shape, rate = rate,
-                     beta = out1$coefficients[1,]),
-weights = Claims
+suppressWarnings(
+  suppressMessages(
+    for (i in 1:1000) {
+      out1 <- rglmb(
+        n = 1, y = y, x = x,
+        family = Gamma(link="log"),
+        pfamily = dNormal(mu = mu, Sigma = V, dispersion = dispersion2),
+        weights = Claims
+      )
+      out2 <- rglmb(
+        n = 1, y = y, x = x,
+        family = Gamma(link="log"),
+        pfamily = dGamma(shape = shape, rate = rate,
+                         beta = out1$coefficients[1,]),
+        weights = Claims
+      )
+      dispersion2 <- out2$dispersion * ((m - p) / m)
+      beta_out[i, 1:8] <- out1$coefficients[1, 1:8]
+      disp_out[i] <- out2$dispersion * ((m - p) / m)
+    }
   )
-  dispersion2 <- out2$dispersion * ((m - p)/m)
-  beta_out[i, 1:8] <- out1$coefficients[1, 1:8]
-  disp_out[i]      <- out2$dispersion * ((m - p)/m)
-}
+)
 
 ## Review output
 

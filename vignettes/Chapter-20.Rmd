@@ -1,0 +1,25 @@
+Yaml
+
+---
+title: "Chapter 20: Test References Vignette"
+author: "Kjell Nygren"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+bibliography: REFERENCES.bib
+vignette: >
+  %\VignetteIndexEntry{Chapter 20: Test References Vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This is a test of the citation
+
+The @Nygren2006 paper is foundational
+
+```{r}
+getwd()
+list.files()
+file.exists("REFERENCES.bib")
+```
+
+# References

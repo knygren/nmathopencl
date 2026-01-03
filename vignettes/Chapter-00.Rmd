@@ -3,6 +3,7 @@ Yaml
 ---
 title: "Chapter 00: Introduction"
 output: rmarkdown::html_vignette
+bibliography: ../inst/References.bib
 vignette: >
   %\VignetteIndexEntry{Chapter 00: Introduction}
   %\VignetteEngine{knitr::rmarkdown}
