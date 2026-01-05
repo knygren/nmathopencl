@@ -296,32 +296,62 @@ ctrgamma <- function(nn, shape, rate, lower_prec = NULL, upper_prec = NULL) {
 
 
 
-rGamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
-                     Gridtype=2,n_envopt = NULL,
-                     use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE
-){
-  
+rGamma_reg <- function(
+    n,
+    y,
+    x,
+    prior_list,
+    offset = NULL,
+    weights = 1,
+    family = gaussian(),
+    Gridtype = 2,
+    n_envopt = NULL,
+    use_parallel = TRUE,
+    use_opencl = FALSE,
+    verbose = FALSE
+) {
   call <- match.call()
   
-
   ## Argument renaming and prior
-  
-  ## Argument renaming and prior
-  
   wt    <- weights
   alpha <- offset
   
-  # Ensure alpha is numeric; if no offset is provided, set to 0
+  ## Basic checks on y and x
+  n1 <- length(y)
+  if (!is.matrix(x)) x <- as.matrix(x)
+  if (nrow(x) != n1)
+    stop("Number of rows in x must match length of y.")
+  
+  ## 1) Validate and normalize offset (alpha)
   if (is.null(alpha)) {
-    alpha <- 0
-  } else if (!is.numeric(alpha)) {
-    stop("offset (alpha) must be numeric if supplied.")
+    alpha <- rep(0, n1)
+  } else {
+    if (!is.numeric(alpha))
+      stop("offset (alpha) must be numeric if supplied.")
+    if (length(alpha) == 1L) {
+      alpha <- rep(alpha, n1)
+    } else if (length(alpha) != n1) {
+      stop("offset (alpha) must be scalar or have length equal to length(y).")
+    }
   }
+  
+  ## 2) Validate and normalize weights (wt)
+  if (!is.numeric(wt))
+    stop("weights must be numeric.")
+  
+  if (length(wt) == 1L) {
+    wt <- rep(wt, n1)
+  } else if (length(wt) != n1) {
+    stop("weights must be either a scalar or have length equal to length(y).")
+  }
+  
+  if (any(wt < 0))
+    stop("weights must be nonnegative.")
   
   b     <- prior_list$beta
   shape <- prior_list$shape
   rate  <- prior_list$rate
-
+  
   ## New: extract optional low/upp from prior_list
   if (!is.null(prior_list$disp_lower))  disp_lower <- prior_list$disp_lower  else disp_lower <- NULL
   if (!is.null(prior_list$disp_upper))  disp_upper <- prior_list$disp_upper  else disp_upper <- NULL
@@ -339,182 +369,168 @@ rGamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
     }
   }
   
-
-  
-    
-  if (is.character(family)) 
+  ## Family handling
+  if (is.character(family))
     family <- get(family, mode = "function", envir = parent.frame())
-  if (is.function(family)) 
+  if (is.function(family))
     family <- family()
   if (is.null(family$family)) {
     print(family)
     stop("'family' not recognized")
   }
   
-  okfamilies <- c("gaussian","Gamma")
-  if(family$family %in% okfamilies){
-    if(family$family=="gaussian") oklinks<-c("identity")
-    if(family$family=="Gamma") oklinks<-c("log")		
-    if(family$link %in% oklinks)  {}
-    else{stop(gettextf("link \"%s\" not available for selected family; available links are %s", 
-                       family$link , paste(sQuote(oklinks), collapse = ", ")), 
-              domain = NA)
+  okfamilies <- c("gaussian", "Gamma")
+  if (family$family %in% okfamilies) {
+    if (family$family == "gaussian") oklinks <- c("identity")
+    if (family$family == "Gamma")    oklinks <- c("log")
+    if (!(family$link %in% oklinks)) {
+      stop(gettextf(
+        "link \"%s\" not available for selected family; available links are %s",
+        family$link, paste(sQuote(oklinks), collapse = ", ")
+      ), domain = NA)
     }
+  } else {
+    stop(gettextf(
+      "family \"%s\" not available in glmbdisp; available families are %s",
+      family$family, paste(sQuote(okfamilies), collapse = ", ")
+    ), domain = NA)
   }
   
-  else{
-    stop(gettextf("family \"%s\" not available in glmbdisp; available families are %s", 
-                  family$family , paste(sQuote(okfamilies), collapse = ", ")), 
-         domain = NA)
+  ## ----------------------
+  ## Gaussian case (updated)
+  ## ----------------------
+  if (family$family == "gaussian") {
+    ## Center y by offset
+    y1 <- as.numeric(y) - alpha
     
-  }
-  
-  n1<-length(y)
-  
-  if(family$family=="gaussian"){
-    y1<-as.matrix(y)-alpha
-    xb<-x%*%b
-    res<-y1-xb
-    SS<-res*res
+    ## Fixed linear predictor and residuals
+    xb   <- drop(x %*% b)
+    res  <- y1 - xb
+    SS   <- res * res      # unweighted squared residuals
     
-    a1<-shape+n1/2
-    b1<-rate+sum(SS)/2
+    ## Weighted posterior parameters for precision tau = 1/phi
+    ## a1 = shape + 0.5 * sum(w_i)
+    ## b1 = rate  + 0.5 * sum(w_i * res_i^2)
+    sum_wt <- sum(wt)
+    a1     <- shape + sum_wt / 2
+    b1     <- rate  + sum(wt * SS) / 2
     
-
     if (is.null(disp_lower) && is.null(disp_upper)) {
-      # Original unconstrained sampler
+      ## Unconstrained sampler: sample precision then invert to dispersion
       out <- 1 / rgamma(n, shape = a1, rate = b1)
     } else {
-      # Constrained sampler on precision
-      prec <- ctrgamma(n, shape = a1, rate = b1,
-                       lower_prec = if (!is.null(disp_upper)) 1/disp_upper else NULL,
-                       upper_prec = if (!is.null(disp_lower)) 1/disp_lower else NULL)
+      ## Constrained sampler on precision
+      prec <- ctrgamma(
+        n,
+        shape = a1,
+        rate  = b1,
+        lower_prec = if (!is.null(disp_upper)) 1 / disp_upper else NULL,
+        upper_prec = if (!is.null(disp_lower)) 1 / disp_lower else NULL
+      )
       out <- 1 / prec
     }
-    
-    
-    
-    
   }
   
-  if (family$family=="Gamma") {
+  ## ----------------------
+  ## Gamma case (unchanged)
+  ## ----------------------
+  if (family$family == "Gamma") {
     
     ## Compute mu1 using the fixed coefficients
     mu1 <- t(exp(alpha + x %*% b))
     
-    ## testfunc is part of the log-likelihood (excluding a constant and the part included in the 
-    ## ) 
-    
-    testfunc<-function(v,wt){  
-      -sum(lgamma(wt*v)+0.5*log(wt*v)+wt*v-wt*v*log(wt*v))
+    ## testfunc is part of the log-likelihood (excluding a constant and the part included in the prior)
+    testfunc <- function(v, wt) {
+      -sum(lgamma(wt * v) + 0.5 * log(wt * v) + wt * v - wt * v * log(wt * v))
     }
     
     ## Update the shape and rate using the fitted values from the likelihood
-
-    # shape2=shape + 0.5 *n1
-    # Consistent withg glm function
-    rate1=rate +sum(wt*((y/mu1)-log(y/mu1)-1))
-
-
-    ## Changes 1/2/2026 - Proposed by copilot  
-    ## Potentially Consistent with gamma.dispersion
+    # shape2 = shape + 0.5 * n1
+    # Consistent with glm function
+    rate1 <- rate + sum(wt * ((y / mu1) - log(y / mu1) - 1))
+    
+    ## Changes 1/2/2026 - Proposed by copilot
+    ## Potentially consistent with gamma.dispersion
     shape2 <- shape + 0.5 * n1
-    #rate1  <- rate + sum(wt * ( (y / mu1) - log(y / mu1) ))
+    # rate1  <- rate + sum(wt * ( (y / mu1) - log(y / mu1) ))
     
     ## Initialize vstar1 to the ratio (i.e., posterior mode)
-    
-    vstar1<-shape2/rate1
+    vstar1 <- shape2 / rate1
     
     ## Use Newton method to update vstar1 and to solve for posterior mode
-    
-    vout<-function(v){
-      vstar1-(v/rate1)*sum((wt*digamma(wt*v) -wt*log(wt*v) + 0.5/v) )  
+    vout <- function(v) {
+      vstar1 - (v / rate1) * sum((wt * digamma(wt * v) - wt * log(wt * v) + 0.5 / v))
     }
     
     # Initialize vstar2
-    vstar<-vstar1
+    vstar <- vstar1
     
-    ## Optimize vstar?
-    for(j in 1:20){
-      vstar<-vout(vstar)
+    ## Optimize vstar
+    for (j in 1:20) {
+      vstar <- vout(vstar)
     }
     
     ## Find value of testfunc at the posterior mode
     ## and the negative of the gradient of the testfunc at vstar
-        
-    testbar<-testfunc(vstar,wt)
-    cbar<--sum((wt*digamma(wt*vstar) -wt*log(wt*vstar) + 0.5/vstar))
+    testbar <- testfunc(vstar, wt)
+    cbar    <- -sum((wt * digamma(wt * vstar) - wt * log(wt * vstar) + 0.5 / vstar))
     
-    ## Set the rate to correspond to the posterior mode (this mught be quasi based)
+    ## Set the rate to correspond to the posterior mode
     ## Consistent with dispersion reported by glm
-        
-    rate2=  rate +sum(wt*((y/mu1)-log(y/mu1)-1))-sum((wt*digamma(wt*vstar) -wt*log(wt*vstar) + 0.5/vstar) )
-
-
-    ## Potental future Change 1/2/26 - Proposed by copilot for exact base 
-    ## Might be consistent with gamma.dispersion output
-    #rate2 <- rate + sum(wt * ( (y / mu1) - log(y / mu1) )) -  sum(wt * digamma(wt * vstar) - wt * log(wt * vstar) + 0.5 / vstar)
+    rate2 <- rate + sum(wt * ((y / mu1) - log(y / mu1) - 1)) -
+      sum((wt * digamma(wt * vstar) - wt * log(wt * vstar) + 0.5 / vstar))
     
-    out<-matrix(0,n)
-    test<-matrix(0,n)
-    a<-matrix(0,n)
+    out  <- matrix(0, n)
+    test <- matrix(0, n)
+    a    <- matrix(0, n)
     
     ## Implements rejection sampling for dispersion (likelihood subgradient approach)
-    ## Likely should have a short paper with this derivation
-    ## Not sure if approach extends to other densities besides gamma
-    
-    for(i in 1:n)
-    {
-      while(a[i]==0){
+    for (i in 1:n) {
+      while (a[i] == 0) {
         
         if (is.null(disp_lower) && is.null(disp_upper)) {
           # Original unconstrained proposal
           cand_prec <- rgamma(1, shape = shape2, rate = rate2)
         } else {
           # Constrained proposal
-          cand_prec <- ctrgamma(1, shape = shape2, rate = rate2,
-                                lower_prec = if (!is.null(disp_upper)) 1/disp_upper else NULL,
-                                upper_prec = if (!is.null(disp_lower)) 1/disp_lower else NULL)
+          cand_prec <- ctrgamma(
+            1,
+            shape = shape2,
+            rate  = rate2,
+            lower_prec = if (!is.null(disp_upper)) 1 / disp_upper else NULL,
+            upper_prec = if (!is.null(disp_lower)) 1 / disp_lower else NULL
+          )
         }
         out[i] <- cand_prec
         
-        
-        ##out[i]<-rgamma(1,shape=shape2,rate=rate2)
-        
-      
-        
-        test[i]<-testfunc(out[i],wt)-(testbar+cbar*(out[i]-vstar))-log(runif(1,0,1))
-        if(test[i]>0) a[i]<-1
+        test[i] <- testfunc(out[i], wt) - (testbar + cbar * (out[i] - vstar)) -
+          log(runif(1, 0, 1))
+        if (test[i] > 0) a[i] <- 1
       }
     }
     
     ## Convert "Precision" to dispersion
-    out<-1/out
-    
+    out <- 1 / out
   }
   
-  outlist=list(
-    coefficients=matrix(b,nrow=1,ncol=length(b)),
-    coef.mode=NULL,
-    dispersion=out,
-    Prior=list(shape=shape,rate=rate),
-    prior.weights=weights,
-    y=y,
-    x=x,
-    famfunc=glmbfamfunc(family),
-    iters=rep(1,n),
-    Envelope=NULL
+  outlist <- list(
+    coefficients   = matrix(b, nrow = 1, ncol = length(b)),
+    coef.mode      = NULL,
+    dispersion     = out,
+    Prior          = list(shape = shape, rate = rate),
+    prior.weights  = wt,
+    y              = y,
+    x              = x,
+    famfunc        = glmbfamfunc(family),
+    iters          = rep(1, n),
+    Envelope       = NULL
   )
   
-  
-  outlist$call<-match.call()
-  
-  class(outlist)<-c(outlist$class,"rGamma_reg")
+  outlist$call <- call
+  class(outlist) <- c(outlist$class, "rGamma_reg")
   
   return(outlist)
-  
 }
-
 
 #' @export
 #' @rdname simfuncs

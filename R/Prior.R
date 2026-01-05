@@ -200,11 +200,60 @@ Prior_Setup <- function(
 ##  X <- if (!is.empty.model(mt)) model.matrix(mt, mf, contrasts) else matrix(, NROW(Y), 0L)
   X <- if (!is.empty.model(mt)) model.matrix(mt, mf, ...) else matrix(, NROW(Y), 0L)
   
-  weights <- as.vector(model.weights(mf))
-  if (!is.null(weights) && !is.numeric(weights)) 
-    stop("'weights' must be a numeric vector")
-  if (!is.null(weights) && any(weights < 0)) 
-    stop("negative weights not allowed")
+  ## --- WEIGHT HANDLING -------------------------------------------------------
+  
+  # Extract raw weights from the model frame (may be NULL)
+  raw_wt <- model.weights(mf)
+  
+  # Number of observations (always correct)
+  n_obs <- nrow(X)
+  
+  # Case 1: User supplied scalar weight (e.g., weights = 4)
+  # model.frame() cannot accept scalar weights, so we expand them *after* mf is built
+  if (!is.null(raw_wt) && length(raw_wt) == 1L) {
+    weights <- rep(raw_wt, n_obs)
+  }
+  
+  # Case 2: User supplied a full-length weight vector
+  else if (!is.null(raw_wt)) {
+    
+    if (!is.numeric(raw_wt))
+      stop("'weights' must be numeric")
+    
+    if (any(raw_wt < 0))
+      stop("negative weights not allowed")
+    
+    if (length(raw_wt) != n_obs)
+      stop("weights must be either a scalar or have length equal to number of observations")
+    
+    weights <- raw_wt
+  }
+  
+  # Case 3: No weights supplied → default depends on family
+  else {
+    
+    if (family$family %in% c("gaussian", "Gamma")) {
+      # Gaussian/Gamma treat weights as replication weights → default = 1
+      weights <- rep(1, n_obs)
+    } else {
+      # Binomial/Poisson: GLM semantics require weights = NULL
+      weights <- NULL
+    }
+  }
+  
+  # Compute effective sample size
+  if (is.null(weights)) {
+    n_effective <- n_obs
+  } else {
+    n_effective <- sum(weights)
+  }
+  
+  
+  #######################################33
+  
+  
+  
+  
   
   
   offset <- as.vector(model.offset(mf))
@@ -279,8 +328,9 @@ Prior_Setup <- function(
   
   glm_summary=summary(glm_full)
   
-  n_likelihood <- glm_summary$df.residual + glm_summary$df[1]  # residual df + model rank
-
+  ##n_likelihood <- glm_summary$df.residual + glm_summary$df[1]  # residual df + model rank
+  n_likelihood <- n_effective
+  
   # If sd is provided, use it to compute pwt
 if (!is.null(sd)) {
   if (!is.numeric(sd) || any(is.na(sd))) {
@@ -306,42 +356,52 @@ if (!is.null(sd)) {
     if (!is.numeric(n_prior) || length(n_prior) != 1 || n_prior <= 0) {
       stop("n_prior must be a single positive numeric value")
     }
-    pwt <- n_prior / (n_prior + n_likelihood)
+##    pwt <- n_prior / (n_prior + n_likelihood)
+    pwt <- n_prior / (n_prior + n_effective)
     message("Computed pwt = ", round(pwt, 4),
             " from n_prior = ", n_prior,
-            " and n_likelihood = ", n_likelihood)
+            " and n_effective = ", n_effective)
   }
   
   # Compute n_prior if not supplied and pwt is scalar
   if (is.null(n_prior) && length(pwt) == 1L) {
-    n_prior <- (pwt/(1-pwt)) * n_likelihood
+    n_prior <- (pwt/(1-pwt)) * n_effective
   #  message("Computed n_prior = ", round(n_prior, 4),
   #          " from pwt = ", round(pwt, 4),
   #          " and n_likelihood = ", n_likelihood)
   }
   
   
+  ## --- CONDITIONAL DISPERSION (CORRECT MLE-BASED VERSION) ---------------------
   
-  ## conditional dispersion
   if (family$family == "gaussian") {
-    dispersion <- summary(glm_full)$dispersion
+    
+    ## The summary.glmdispersion is not the MLE dispersion
+    # dispersion <- summary(glm_full)$dispersion
+    # True likelihood MLE dispersion:
+    #   phi_MLE = sum(w_i * r_i^2) / sum(w_i)
+    res <- residuals(glm_full, type = "response")
+    w   <- glm_full$prior.weights
+    dispersion <- sum(w * res^2) / sum(w)
+    
   } else if (family$family == "Gamma") {
-    ## for now, use glm dispersion as prior
-    ## Current implemented sampler may be a quasi-likelihood based sampler
-    ## Sampler may need algorithmic adjustmenst to make it 
-    ## Consisent with the gamma.dispersion values
-  ##  dispersion <- summary(glm_full)$dispersion   # <-- revert to GLM dispersion
+    
+    # MASS::gamma.dispersion() already returns the correct quasi-likelihood
+    # dispersion estimate for Gamma GLMs.
     dispersion <- MASS::gamma.dispersion(glm_full)
+    
   } else {
+    
     dispersion <- NULL
   }
   
   
   ## Compute shape and rate if n_prior is not null and n_prior is scalar
   if (!is.null(n_prior)&& length(n_prior) == 1L&&!is.null(dispersion) ) {
-    shape<-n_prior/2
-    rate<- dispersion*shape
-  }
+    ## n_prior is interpreted as effective prior sample size, on the same scale as sum(weights).
+    shape <- n_prior / 2
+    rate  <- dispersion * shape
+    }
   
   else{
     shape<-NULL
@@ -467,7 +527,9 @@ if (!is.null(sd)) {
       n_prior = n_prior,
       intercept_source = intercept_source,
       effects_source = effects_source,
-      n_likelihood=n_likelihood
+      ## For now retain n_likeligood for backward compatibility
+      n_likelihood=n_likelihood,
+      n_effective=n_effective
     )
   )
   
