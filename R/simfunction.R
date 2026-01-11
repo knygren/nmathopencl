@@ -378,6 +378,14 @@ rGamma_reg <- function(
 #    stop("The inverse-gamma prior on dispersion has no finite mean unless shape > 1. 
 #       Please supply a prior_list$shape value greater than 1.")
 #  }
+
+    
+  if (!is.null(prior_list$max_disp_perc)) {
+    max_disp_perc <- prior_list$max_disp_perc
+  } else {
+    max_disp_perc <- 0.99
+  }
+  
   
   
   ## New: extract optional low/upp from prior_list
@@ -586,9 +594,23 @@ rGamma_reg <- function(
     
     v_mean <- alpha_bar / beta_bar
     
-    v_min <- qgamma(0.01, shape = alpha_bar, rate = beta_bar)
-    v_max <- qgamma(0.99, shape = alpha_bar, rate = beta_bar)
+    v_min <- qgamma(1-max_disp_perc, shape = alpha_bar, rate = beta_bar)
+    v_max <- qgamma(max_disp_perc, shape = alpha_bar, rate = beta_bar)
+
     
+    ## New: extract optional low/upp from prior_list when available
+    if (!is.null(prior_list$disp_lower))  disp_lower <- prior_list$disp_lower  else disp_lower <- 1/v_max
+    if (!is.null(prior_list$disp_upper))  disp_upper <- prior_list$disp_upper  else disp_upper <- 1/v_min
+    
+    # After computing disp_lower and disp_upper (including defaults)
+    if (disp_lower >= disp_upper) {
+      stop("Final dispersion bounds invalid: disp_lower must be < disp_upper.")
+    }
+    
+    v_min=1/disp_upper
+    v_max=1/disp_lower
+    
+        
     ## Optional diagnostics on the surrogate posterior for v
     
 #    cat("\nApproximate posterior Gamma surrogate (precision v):\n")
@@ -651,8 +673,9 @@ rGamma_reg <- function(
       stop("Gamma proposal rate_prop <= 0; check v_tangent and curvature diagnostics.")
     }
     
-#    cat("  shape_Proposal =", shape_prop, "\n")
-#    cat("  rate_Proposal  =", rate_prop,  "\n")
+    
+    #    cat("  shape_Proposal =", shape_prop, "\n")
+    #    cat("  rate_Proposal  =", rate_prop,  "\n")
     
     ## Proposal distribution diagnostics
     prop_mean <- shape_prop / rate_prop
