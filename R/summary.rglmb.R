@@ -36,6 +36,13 @@
 summary.rglmb<-function(object,...){
 
 
+  ## Detect prior type
+  prior_type <- attr(object$pfamily, "Prior Type")
+  
+  
+  if (prior_type=="dGamma") {
+    return(summary(object$dispersion))
+  }
   
   ### Pull in information needed to compute linear.predictors, 
   ## fitted.values, and DICInfo  

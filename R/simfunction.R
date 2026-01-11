@@ -270,17 +270,39 @@ print.simfunction <- function(x, ...) {
 
 ## Constrained truncated gamma sampler on precision scale
 ctrgamma <- function(nn, shape, rate, lower_prec = NULL, upper_prec = NULL) {
+  
+  # Case: no truncation at all
   if (is.null(lower_prec) && is.null(upper_prec)) {
     return(stats::rgamma(nn, shape = shape, rate = rate))
   }
+  
+  # Compute CDF bounds
   a <- if (!is.null(lower_prec)) stats::pgamma(lower_prec, shape = shape, rate = rate) else 0
   b <- if (!is.null(upper_prec)) stats::pgamma(upper_prec, shape = shape, rate = rate) else 1
-  if (!(a < b)) {
-    stop(sprintf("Invalid truncated gamma interval on precision: CDF(lower)=%.6g, CDF(upper)=%.6g", a, b))
+  
+  # Extract numeric bounds (for uniform fallback)
+  L <- if (!is.null(lower_prec)) lower_prec else -Inf
+  U <- if (!is.null(upper_prec)) upper_prec else  Inf
+  
+  # ---- Case 3: exact numeric degeneracy ----
+  if (!is.null(lower_prec) && !is.null(upper_prec) && lower_prec == upper_prec) {
+    return(rep(lower_prec, nn))
   }
+  
+  # ---- Case 2: CDF interval collapsed but numeric interval valid ----
+  # (i.e., proposal has zero mass between L and U in floating point)
+  if (abs(b - a) < 1e-15) {
+    # Draw uniformly on [L, U]
+    u <- stats::runif(nn)
+    return(L + u * (U - L))
+  }
+  
+  # ---- Case 1: normal truncated Gamma ----
   u <- stats::runif(nn, min = a, max = b)
   stats::qgamma(u, shape = shape, rate = rate)
 }
+
+
 
 
 #' @family simfuncs 
@@ -352,6 +374,12 @@ rGamma_reg <- function(
   shape <- prior_list$shape
   rate  <- prior_list$rate
   
+#  if (shape <= 1) {
+#    stop("The inverse-gamma prior on dispersion has no finite mean unless shape > 1. 
+#       Please supply a prior_list$shape value greater than 1.")
+#  }
+  
+  
   ## New: extract optional low/upp from prior_list
   if (!is.null(prior_list$disp_lower))  disp_lower <- prior_list$disp_lower  else disp_lower <- NULL
   if (!is.null(prior_list$disp_upper))  disp_upper <- prior_list$disp_upper  else disp_upper <- NULL
@@ -414,7 +442,10 @@ rGamma_reg <- function(
     sum_wt <- sum(wt)
     a1     <- shape + sum_wt / 2
     b1     <- rate  + sum(wt * SS) / 2
+
+    draws <- integer(n)+1
     
+        
     if (is.null(disp_lower) && is.null(disp_upper)) {
       ## Unconstrained sampler: sample precision then invert to dispersion
       out <- 1 / rgamma(n, shape = a1, rate = b1)
@@ -439,93 +470,250 @@ rGamma_reg <- function(
     ## Compute mu1 using the fixed coefficients
     mu1 <- t(exp(alpha + x %*% b))
     
-    ## testfunc: remainder in v (EXCLUDING the 0.5 * log v term)
-    ## Original had: + 0.5 * log(wt * v)
-    ## We now drop that to restore concavity of the remainder.
-    testfunc <- function(v, wt) {
-      -sum(
-        lgamma(wt * v) +
-          wt * v -
-          wt * v * log(wt * v)
+    ## To build effective envelopes for the Gamma family with a Gamma prior
+    ## for the precision, it is important to be able to center the proposal
+    ## close to the center of the posterior. To enable this, we proceed in two steps
+    ## 
+    ## Step 1: We build an equivalent "proxy model" with the following three key properties
+    ##
+    ## (i)  shape_prop = shape_prior + (sum_i wt_i) / 2
+    ## (ii) ll*(v)     = ll(v) - (sum_i wt_i / 2) * log v
+    ## (iii) ll*(.) still retains the concavity of the log-likelihood
+    ## 
+    ## Step 2: We pick one or more tangency points and for each component of the grid
+    ##         (if more than one), we shift a linear term from the new proxy model
+    ##         to the rate. In the case of a single tangency, it is best to use a
+    ##         tangency point at the posterior mean. Generally denote by cbar(v)
+    ##         a gradient for -ll(v) at v. Then we build a proposal and a bounding
+    ##         function log_h(.) as follows:
+    ##
+    ## (i)  A Gamma proposal with
+    ##      (a) shape_prop = shape_prior + (sum_i wt_i) / 2
+    ##      (b) rate_prop  = rate_prior - cbar(v_tangent)
+    ##
+    ##      where -cbar(v_tangent) =
+    ##          sum_i wt_i [log(v_tangent) + 1 - log(mu_i) + log(y_i)
+    ##                       - digamma(v_tangent) - y_i / mu_i]
+    ##
+    ##       Note: Remove this from cbar - Moves proposal too far from the posterior 
+    ##                       
+    ##          - (sum_i wt_i) / (2 v_tangent)
+    ##
+    ## (ii) A bounding function log_h(.) defined by
+    ##
+    ##      log_h(v) = ll(v) - [ll(v_tangent) + ll'(v_tangent)(v - v_tangent)] -[(sum_i wt_i) / 2] *(log v/v_min)]
+    ##               = ll(v) - [ll*(v_tangent) - cbar(v_tangent)(v - v_tangent)]-[(sum_i wt_i) / 2] *(log v/v_min)]
+    ##      where cbar(v_tangent) = -ll'(v_tangent).
+    ##
+    ##  To implement the sampler, we proceed as follows:
+    ##
+    ##  (i)   Find the posterior mode (v_star)
+    ##  (ii)  Use curvature at v_star to approximate the posterior mean v_mean
+    ##  (iii) Build the proposal and bounding functions using v_tangent = v_mean
+    ##  (iv)  Sample as follows:
+    ##        (a) Generate a sample from the proposal Gamma(shape_prop, rate_prop)
+    ##        (b) Draw u ~ Uniform(0,1)
+    ##        (c) Accept if lg_h(cand) - log(u) > 0
+    
+    ## ----------------------------------------------------------------------
+    ## 1. Setup: means, weights, and convenience quantities
+    ## ----------------------------------------------------------------------
+    
+    mu_vec <- as.numeric(mu1)
+    W_sum  <- sum(wt)
+    
+    ## 2. Original log-likelihood and proxy log-likelihood ll*(v)
+    
+    loglik <- function(v) {
+      sum(
+        wt * (
+          v * log(v) -
+            v * log(mu_vec) +
+            (v - 1) * log(y) -
+            lgamma(v) -
+            v * y / mu_vec
+        )
       )
     }
     
-    ## Update the rate using the fitted values from the likelihood
-    ## (unchanged)
+    ## ll*(v) = ll(v) - 0.5 * sum_i wt_i * log(v)
+    loglik_star <- function(v) {
+      loglik(v) - 0.5 * W_sum * log(v)
+    }
+    
+    ## 3. Prior: v ~ Gamma(shape, rate)
+    ##    rate1: deviance-based piece used below in an approximate mode iteration
+    
     rate1 <- rate + sum(wt * ((y / mu1) - log(y / mu1) - 1))
     
-    ## OLD: shape2 <- shape + 0.5 * n1
-    ## This implicitly assumed an extra 0.5 * sum_i log(v) in the log-density.
-    ## NEW: keep shape2 purely from the prior shape, consistent with the
-    ## actual posterior decomposition.
-    shape2 <- shape
+    ## ----------------------------------------------------------------------
+    ## 4. Posterior mode finder (v_star) via a Gamma-surrogate fixed-point step
+    ## ----------------------------------------------------------------------
+    ## We use a Gamma-like surrogate with "shape2_mode" and rate1 to locate
+    ## an approximate posterior mode v_star, then refine the posterior mean
+    ## using curvature at v_star.
     
-    ## Initialize vstar1 to the ratio (i.e., prior/posterior "Gamma" center)
-    vstar1 <- shape2 / rate1
+    shape2_mode <- shape
+    vstar1      <- shape2_mode / rate1
     
-    ## Newton-like fixed-point iteration for the mode in v
-    ## Original vout had + 0.5 / v term (from 0.5 * log v); we drop it.
-    vout <- function(v) {
-      vstar1 - (v / rate1) * sum(
-        wt * digamma(wt * v) - wt * log(wt * v)
+    vout_mode <- function(v) {
+      vstar1 - (v / rate1) *
+        sum(wt * digamma(wt * v) - wt * log(wt * v))
+    }
+    
+    vstar <- vstar1
+    for (j in 1:20) {
+      vstar <- vout_mode(vstar)
+    }
+    v_mode <- vstar
+    
+    ## 5. Exact second derivative f''(v) of the log-posterior for curvature
+    ##    f(v) = loglik(v) + (shape - 1) log v - rate v
+    
+    f2_exact <- function(v) {
+      term1 <- W_sum * (1 / v)       # sum_i w_i * 1/v   from log v terms
+      term2 <- -W_sum * trigamma(v)  # - sum_i w_i * psi1(v) from -lgamma(v)
+      term3 <- -(shape - 1) / (v^2)  # prior curvature
+      term1 + term2 + term3
+    }
+    
+    f2_vstar  <- f2_exact(vstar)
+    
+    ## 6. Gamma approximation to posterior: v | y ~ approx Gamma(alpha_bar, beta_bar)
+    
+    alpha_bar <- 1 - f2_vstar * vstar^2
+    beta_bar  <- -f2_vstar * vstar
+    
+    v_mean <- alpha_bar / beta_bar
+    
+    v_min <- qgamma(0.01, shape = alpha_bar, rate = beta_bar)
+    v_max <- qgamma(0.99, shape = alpha_bar, rate = beta_bar)
+    
+    ## Optional diagnostics on the surrogate posterior for v
+    
+#    cat("\nApproximate posterior Gamma surrogate (precision v):\n")
+#    cat("  shape_bar          =", alpha_bar, "\n")
+#    cat("  rate_bar           =", beta_bar,  "\n")
+#    cat("  v_mode (precision) =", v_mode,    "\n")
+#    cat("  v_mean (precision) =", v_mean,    "\n\n")
+#    cat("  v_min (precision)  =", v_min,     "\n\n")
+    
+    ## 7. Tangency point at approximate posterior mean (A6-optimal anchor)
+    
+    v_tangent <- v_mean
+    
+    ## 8. Proxy log-likelihood at the tangent point
+    
+    ll_star_v0 <- loglik_star(v_tangent)
+    ll_v0      <- loglik(v_tangent)
+    
+#    cat("  ll_v0        =", ll_v0,      "\n")
+#    cat("  ll_star_v0   =", ll_star_v0, "\n")
+    
+    ## 9. Gradient of -ll*(v) at v_tangent: cbar(v_tangent)
+    ##
+    ##    ll'(v) = sum_i w_i [log v + 1 - log mu_i + log y_i - digamma(v) - y_i / mu_i]
+    ##    ll*'(v) = ll'(v) - 0.5 * sum_i wt_i * 1/v
+    
+    ell_prime_at <- function(v) {
+      sum(
+        wt * (
+          log(v) + 1 -
+            log(mu_vec) +
+            log(y) -
+            digamma(v) -
+            y / mu_vec
+        )
       )
     }
     
-    # Initialize vstar
-    vstar <- vstar1
+    ## Temporarily remove adjustment term
     
-    ## Optimize vstar
-    for (j in 1:20) {
-      vstar <- vout(vstar)
+    ell_star_prime_at <- function(v) {
+      ell_prime_at(v) #- 0.5 * W_sum / v
     }
     
-    ## Value of testfunc at the posterior mode
-    testbar <- testfunc(vstar, wt)
+#    cat("  ell_prime_tangent      =", ell_prime_at(v_tangent),      "\n")
+#    cat("  ell_star_shape_shift   =", -0.5 * W_sum / v_tangent,     "\n")
+#    cat("  ell_star_prime_tangent =", ell_star_prime_at(v_tangent), "\n")
     
-    ## Negative gradient of testfunc at vstar
-    ## Original had: + 0.5 / vstar in the sum; we remove it.
-    cbar <- -sum(
-      wt * digamma(wt * vstar) - wt * log(wt * vstar)
-    )
+    ## cbar is the gradient of -ll*(v) at v_tangent
+    cbar <- -ell_star_prime_at(v_tangent)
     
-    ## Set the rate so that the Gamma envelope has mode at vstar
-    ## Original had + 0.5 / vstar inside the sum; we remove that term.
-    rate2 <- rate +
-      sum(wt * ((y / mu1) - log(y / mu1) - 1)) -
-      sum(wt * digamma(wt * vstar) - wt * log(wt * vstar))
+    ## 10. Proposal Gamma(shape_prop, rate_prop)
+    ##     (i)  shape_prop = shape + 0.5 * sum_i wt_i
+    ##     (ii) rate_prop  = rate - cbar(v_tangent)
     
-    out  <- matrix(0, n)
-    test <- matrix(0, n)
-    a    <- matrix(0, n)
+    shape_prop <- shape + 0.5 * W_sum
+    rate_prop  <- rate - cbar
     
-    ## Rejection sampling for dispersion (precision in v)
+    if (rate_prop <= 0) {
+      stop("Gamma proposal rate_prop <= 0; check v_tangent and curvature diagnostics.")
+    }
+    
+#    cat("  shape_Proposal =", shape_prop, "\n")
+#    cat("  rate_Proposal  =", rate_prop,  "\n")
+    
+    ## Proposal distribution diagnostics
+    prop_mean <- shape_prop / rate_prop
+    prop_mode <- if (shape_prop > 1) (shape_prop - 1) / rate_prop else NA
+    
+#    cat("  Proposal mean (precision) =", prop_mean, "\n")
+#    cat("  Proposal mode (precision) =", prop_mode, "\n\n")
+    
+    ## 11. log_h(v) based on the concave ll*(v)
+    ##
+    ## Concavity of ll* implies:
+    ##   ll*(v) <= ll*(v0) + ll*'(v0)(v - v0)
+    ## With cbar = -ll*'(v0), the remainder is:
+    ##   log h(v) = ll*(v) - (ll*(v0) - cbar (v - v0) ) <= 0.
+    
+    lg_h <- function(v) {
+      loglik_star(v) - (ll_star_v0 - cbar * (v - v_tangent))-  0.5 * W_sum * log(v / v_min)
+    }
+    
+    ## 12. Rejection sampling for precision v
+    
+    out   <- numeric(n)
+    test  <- numeric(n)
+    a     <- numeric(n)
+    draws <- integer(n)
+    
     for (i in 1:n) {
+      draws[i] <- 1
       while (a[i] == 0) {
         
         if (is.null(disp_lower) && is.null(disp_upper)) {
-          # Unconstrained proposal
-          cand_prec <- rgamma(1, shape = shape2, rate = rate2)
+#          cand_prec <- rgamma(1, shape = shape_prop, rate = rate_prop)
+          cand_prec <- ctrgamma(1, shape = shape_prop, rate = rate_prop,lower_prec=v_min,upper_prec=v_max)
+          
+          
         } else {
-          # Constrained proposal
           cand_prec <- ctrgamma(
             1,
-            shape = shape2,
-            rate  = rate2,
+            shape = shape_prop,
+            rate  = rate_prop,
             lower_prec = if (!is.null(disp_upper)) 1 / disp_upper else NULL,
             upper_prec = if (!is.null(disp_lower)) 1 / disp_lower else NULL
           )
         }
         out[i] <- cand_prec
         
-        ## Same envelope test, with the updated testfunc and cbar
-        test[i] <- testfunc(out[i], wt) -
-          (testbar + cbar * (out[i] - vstar)) -
-          log(runif(1, 0, 1))
-        if (test[i] > 0) a[i] <- 1
+        ## Accept–reject based on log_h with additional v_min penalty:
+        ##   - (W_sum / 2) * log(v / v_min)
+        test[i] <- lg_h(out[i]) - log(runif(1, 0, 1))
+
+#          0.5 * W_sum * log(out[i] / v_min) -
+        
+        if (test[i] > 0) {
+          a[i] <- 1
+        } else {
+          draws[i] <- draws[i] + 1
+        }
       }
     }
     
-    ## Convert "Precision" to dispersion
+    ## Convert precision to dispersion
     out <- 1 / out
   }
   
@@ -538,7 +726,7 @@ rGamma_reg <- function(
     y              = y,
     x              = x,
     famfunc        = glmbfamfunc(family),
-    iters          = rep(1, n),
+    iters          = draws,
     Envelope       = NULL
   )
   
@@ -547,6 +735,7 @@ rGamma_reg <- function(
   
   return(outlist)
 }
+
 
 #' @export
 #' @rdname simfuncs
@@ -589,10 +778,38 @@ summary.rGamma_reg<-function(object,...){
   pval1<-priorrank/(n+1)
   pval2<-min(pval1,1-pval1)
   
+  shape <- object$Prior$shape
+  rate  <- object$Prior$rate
   
-  Tab1<-cbind("Prior.Mean"=object$Prior$shape/object$Prior$rate,"Prior.Sd"=sqrt(object$Prior$shape)/object$Prior$rate
-              ,"Approx.Prior.wt"=Priorwt
+  # Prior mean of dispersion
+  if (shape > 1) {
+    prior_mean_disp <- rate / (shape - 1)
+  } else {
+    prior_mean_disp <- NA
+  }
+  
+  # Prior SD of dispersion
+  if (shape > 2) {
+    prior_sd_disp <- rate / ((shape - 1) * sqrt(shape - 2))
+  } else {
+    prior_sd_disp <- NA
+  }
+  
+  Tab1 <- cbind(
+    "Prior.Mean" = prior_mean_disp,
+    "Prior.Sd"   = prior_sd_disp,
+    "Approx.Prior.wt" = Priorwt
   )
+  
+  rownames(Tab1) <- "dispersion"
+  colnames(Tab1) <- c("Prior.Mean", "Prior.Sd", "Approx.Prior.wt")
+  
+  
+  
+  
+#  Tab1<-cbind("Prior.Mean"=object$Prior$shape/object$Prior$rate,"Prior.Sd"=sqrt(object$Prior$shape)/object$Prior$rate
+#              ,"Approx.Prior.wt"=Priorwt  )
+
   TAB<-cbind(
     #"Post.Mode"=as.numeric(object$PostMode),
     "Post.Mean"=me,
@@ -606,6 +823,9 @@ summary.rGamma_reg<-function(object,...){
   rownames(Tab1)=c("dispersion")
   rownames(TAB2)=c("dispersion")
   
+  colnames(Tab1) <- c("Prior.Mean", "Prior.Sd", "Approx.Prior.wt")
+  colnames(TAB) <- c("Post.Mean", "Post.Sd", "MC.Error", "Pr(tail)")
+  
   res<-list(call=object$call,
             n=n,
             coefficients1=Tab1,
@@ -615,13 +835,62 @@ summary.rGamma_reg<-function(object,...){
   
   # Reuse summary.rglmb class
   
-  class(res)<-"summary.rglmb"
-  
+  class(res) <- "summary.rGamma_reg"  
   res
   
 }
 
 
+#' @export
+#' @rdname simfuncs
+#' @order 9
+#' @method print summary.rGamma_reg
+
+
+print.summary.rGamma_reg <- function(x, digits = max(3, getOption("digits") - 3), ...) {
+  
+  ## --- Call ---
+  cat("Call\n")
+  print(x$call)
+  cat("\n")
+  
+  ## --- Prior Estimates ---
+  cat("Prior Estimates with Standard Deviations\n\n")
+  print(round(x$coefficients1, digits))
+  cat("\n")
+  
+  ## --- Posterior Estimates ---
+  cat("Bayesian Estimates Based on", x$n, "iid draws\n\n")
+  
+  # Extract posterior table
+  TAB <- round(x$coefficients, digits)
+  
+  # Compute significance stars
+  pvals <- x$coefficients[, "Pr(tail)"]
+  stars <- ifelse(pvals < 0.001, "***",
+                  ifelse(pvals < 0.01,  "**",
+                         ifelse(pvals < 0.05,  "*",
+                                ifelse(pvals < 0.1,   ".", " "))))
+  
+  # Build final table with stars
+  TAB2 <- cbind(TAB, Signif = stars)
+  
+  print(TAB2)
+  cat("---\n")
+  cat("Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\n")
+  
+  ## --- Percentiles ---
+  cat("Distribution Percentiles\n\n")
+  print(round(x$Percentiles, digits))
+  cat("\n")
+  
+  ## --- Dispersion summary ---
+  disp.mean <- x$coefficients["dispersion", "Post.Mean"]
+  cat("Expected Mean dispersion:", round(disp.mean, digits), "\n")
+  cat("Sq.root of Expected Mean dispersion:", round(sqrt(disp.mean), digits), "\n\n")
+  
+  invisible(x)
+}
 
 
 #' @family simfuncs 
