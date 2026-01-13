@@ -22,6 +22,293 @@ knitr::opts_chunk$set(
 library(glmbayes)
 ```
 
+
+# Chapter A1: Simulation Functions for Bayesian Generalized Linear Models
+
+Kjell Nygren  
+2026-01-XX
+
+This chapter provides an overview of the simulation functions ("simfunctions") that form the computational
+core of the glmbayes package. These functions generate independent and identically distributed (iid) samples
+from posterior distributions for Bayesian generalized linear models (GLMs). They are lower-level, high-performance
+building blocks used internally by the higher-level modeling functions `glmb()` and `lmb()`, and they are
+also suitable for use in Gibbs samplers, block samplers, and other custom simulation-based inference methods.
+
+The simfunctions implement both classical conjugate sampling procedures and the envelope-based accept-reject
+methods developed in Nygren and Nygren (2006). The envelope-based methods are documented in detail in
+Appendix A5 (coefficient samplers), Appendix A6 (Gamma-family dispersion sampler), and Appendix A7
+(joint sampling for Gaussian regression with independent Normal-Gamma priors).
+
+All functions described here are implemented in the file `simfunctions.R`, and many call optimized C or C++
+routines for envelope construction and sampling. These routines include:
+
+- `EnvelopeBuild` and `EnvelopeBuild_c.cpp`
+- `EnvelopeDispersionBuild_cpp`
+- `.rnnorm_reg_cpp`
+- `.rindep_norm_gamma_reg_std_cpp`
+- `.rindep_norm_gamma_reg_std_parallel_cpp`
+- `.rnorm_reg_cpp`
+- The numerically robust truncated-Gamma sampler `ctrgamma`
+
+The purpose of this chapter is to describe how these functions fit together, how they map to families and
+pfamilies, and how they relate to the theoretical results in the JASA paper and the appendix chapters.
+
+
+## 1. What the Simulation Functions Do
+
+The simulation functions provide a unified interface for generating posterior samples for:
+
+1. Regression coefficients beta
+2. Dispersion or precision parameters phi or tau
+3. Joint sampling of (beta, phi) when required by the prior structure
+
+They are designed to:
+
+- Produce iid samples (not MCMC chains)
+- Use conjugate sampling when available
+- Use envelope-based accept-reject sampling when conjugacy is not available
+- Provide minimal overhead for use inside Gibbs samplers or custom algorithms
+- Expose internal quantities such as posterior modes, envelopes, iteration counts, and standardized models
+
+The higher-level functions `glmb()` and `lmb()` wrap these simfunctions with additional overhead:
+model frames, formulas, fitted objects, diagnostics, and S3 methods. The simfunctions avoid this overhead
+and are therefore preferred when building custom samplers or when performance is critical.
+
+
+## 2. Mapping Families and Pfamilies to Simulation Functions
+
+The table below summarizes how likelihood families, link functions, and pfamilies map to the
+simulation functions in `simfunctions.R`. It also indicates whether the sampling is conjugate or
+envelope-based, and lists the C or C++ routines used when applicable.
+
++----------------------+----------------------+------------------------------+------------------------------+---------------------------+-------------------------------------------+
+| Likelihood Family    | Link                 | Pfamily                      | Simfunction                  | Method                    | Backend R / C++ Routines                  |
++----------------------+----------------------+------------------------------+------------------------------+---------------------------+-------------------------------------------+
+| Gaussian             | identity             | dNormal                      | rNormal_reg                  | Conjugate MVN             | .rnorm_reg_cpp                            |
+| Gaussian             | identity             | dNormal_Gamma                | rNormal_Gamma_reg            | Conjugate Normal-Gamma    | Pure R                                    |
+| Gaussian             | identity             | dIndependent_Normal_Gamma    | rindependent_norm_gamma_reg  | Envelope-based joint       | .rindep_norm_gamma_reg_std_cpp            |
+|                      |                      |                              |                              | sampler for (beta,phi)    | EnvelopeDispersionBuild_cpp               |
++----------------------+----------------------+------------------------------+------------------------------+---------------------------+-------------------------------------------+
+| Poisson              | log                  | dNormal                      | rNormal_reg                  | Envelope-based             | .rnnorm_reg_cpp, EnvelopeBuild            |
+| Quasi-Poisson        | log                  | dNormal                      | rNormal_reg                  | Envelope-based             | .rnnorm_reg_cpp, EnvelopeBuild            |
++----------------------+----------------------+------------------------------+------------------------------+---------------------------+-------------------------------------------+
+| Binomial             | logit, probit,       | dNormal                      | rNormal_reg                  | Envelope-based             | .rnnorm_reg_cpp, EnvelopeBuild            |
+|                      | cloglog              |                              |                              |                           |                                           |
++----------------------+----------------------+------------------------------+------------------------------+---------------------------+-------------------------------------------+
+| Gamma                | log                  | dNormal                      | rNormal_reg                  | Envelope-based             | .rnnorm_reg_cpp, EnvelopeBuild            |
+| Gamma                | log                  | dGamma                       | rGamma_reg                   | Conjugate or A6 envelope  | ctrgamma, A6 routines                     |
++----------------------+----------------------+------------------------------+------------------------------+---------------------------+-------------------------------------------+
+
+This table provides the "at a glance" map for determining which simulation function is used for a
+given model. Conjugate cases use direct sampling from known posterior distributions. All other
+cases rely on the likelihood-subgradient envelope methods described in Nygren and Nygren (2006)
+and in Appendices A5, A6, and A7.
+
+## 3. Conjugate vs. Envelope-Based Sampling
+
+### 3.1 Conjugate Cases
+
+Several combinations of likelihood family and prior lead to closed-form posterior distributions:
+
+- Gaussian likelihood with Normal prior on beta
+- Gaussian likelihood with Normal-Gamma prior on (beta, tau)
+- Gaussian likelihood with Gamma prior on tau
+- Gamma likelihood with Gamma prior on tau (conjugate path)
+
+In these cases, the simfunctions use direct sampling from multivariate normal or gamma distributions.
+No envelope construction is required.
+
+### 3.2 Envelope-Based Cases
+
+When the posterior is not available in closed form, the simfunctions use the likelihood subgradient
+approach of Nygren and Nygren (2006). These cases include:
+
+- All non-Gaussian GLMs with Normal priors
+- Gaussian regression with independent Normal-Gamma priors
+- Gamma regression with Gamma prior on precision (non-conjugate path)
+
+The envelope-based samplers rely on:
+
+- Likelihood subgradient densities (JASA 2006)
+- Mixture envelopes (Appendix A5)
+- Dispersion envelopes (Appendix A6)
+- Joint envelopes for (beta,phi) (Appendix A7)
+
+These methods guarantee iid sampling even in high dimensions and for non-conjugate models.
+
+
+## 4. Theoretical Foundations and Cross-References
+
+The simulation functions are grounded in the following theoretical results:
+
+- Nygren and Nygren (2006), "Likelihood Subgradient Densities", Journal of the American Statistical Association.
+  This paper introduces the likelihood-subgradient approach and proves bounds on acceptance rates.
+
+- Appendix A5: Technical report for likelihood-subgradient based samplers.
+  Details the envelope construction for regression coefficients.
+
+- Appendix A6: Accept-reject sampling for dispersion in Gamma regression.
+  Provides the theory behind the dispersion sampler used in `rGamma_reg`.
+
+- Appendix A7: Accept-reject sampling for Gaussian regression with independent Normal-Gamma priors.
+  Provides the theory behind the joint sampler used in `rindependent_norm_gamma_reg`.
+
+These references provide the mathematical justification for the envelope-based methods implemented in the simfunctions.
+
+
+## 5. Overview of Each Simulation Function
+
+### 5.1 rNormal_reg
+
+**Purpose:**  
+Generates iid samples of regression coefficients beta for GLMs with Normal priors.
+
+**Conjugate case:**  
+Gaussian likelihood with Normal prior.  
+Sampling uses direct multivariate normal draws via `.rnorm_reg_cpp`.
+
+**Envelope-based case:**  
+All non-Gaussian GLMs.  
+Uses `.rnnorm_reg_cpp` and `EnvelopeBuild` to construct a likelihood-subgradient envelope.
+
+**Implementation sketch:**  
+1. Compute posterior mode using `optim` (non-Gaussian) or `lm.fit` (Gaussian).  
+2. Standardize model using `glmb_Standardize_Model`.  
+3. Build envelope using `EnvelopeBuild`.  
+4. Generate iid samples using accept-reject sampling.
+
+**References:**  
+JASA 2006, Appendix A5.
+
+
+### 5.2 rNormal_Gamma_reg
+
+**Purpose:**  
+Conjugate Normal-Gamma regression for Gaussian likelihoods.
+
+**Method:**  
+Closed-form posterior for (beta, tau).  
+Draw tau from Gamma, then draw beta from conditional Normal.
+
+**Implementation sketch:**  
+1. Fit weighted least squares to obtain Btilde, IR, and S.  
+2. Compute posterior Gamma parameters for tau.  
+3. Draw tau and then beta = Btilde + IR %*% rnorm * sqrt(dispersion).
+
+**References:**  
+Classical Normal-Gamma theory.
+
+
+### 5.3 rindependent_norm_gamma_reg
+
+**Purpose:**  
+Joint sampling of (beta, phi) for Gaussian regression with independent Normal-Gamma priors.
+
+**Method:**  
+Envelope-based joint sampler using a shared envelope over beta and dispersion bounds.
+
+**Backend:**  
+- `.rindep_norm_gamma_reg_std_cpp`  
+- `EnvelopeDispersionBuild_cpp`  
+- `EnvelopeBuild`
+
+**Implementation sketch:**  
+1. Iteratively anchor dispersion using repeated Gaussian fits.  
+2. Standardize model and compute posterior mode.  
+3. Build coefficient envelope (EnvelopeBuild).  
+4. Build dispersion envelope (EnvelopeDispersionBuild_cpp).  
+5. Sample jointly from the standardized model.  
+6. Transform back to original scale.
+
+**References:**  
+Appendix A7.
+
+
+### 5.4 rGamma_reg
+
+**Purpose:**  
+Simulates dispersion parameters for Gaussian and Gamma families.
+
+**Gaussian case:**  
+Conjugate Gamma posterior for precision tau.  
+Uses direct sampling or truncated sampling via `ctrgamma`.
+
+**Gamma family case:**  
+Non-conjugate.  
+Uses the A6 envelope-based sampler with a tangent envelope for the precision.
+
+**Backend:**  
+- `ctrgamma`  
+- A6 routines  
+- log-space utilities `logdiffexp`
+
+**Implementation sketch:**  
+1. Compute posterior mode for precision.  
+2. Build Gamma surrogate and tangency point.  
+3. Construct bounding function log_h.  
+4. Accept-reject sampling for precision.  
+5. Transform to dispersion.
+
+**References:**  
+Appendix A6.
+
+
+## 6. Use in Gibbs Samplers and Custom Algorithms
+
+The simfunctions are designed to be lightweight and fast. They avoid the overhead of:
+
+- Model frames
+- Formulas
+- S3 objects
+- Diagnostic structures
+
+This makes them ideal for:
+
+- Gibbs sampling
+- Blocked MCMC
+- Variational approximations
+- Simulation studies
+- Algorithm prototyping
+
+They return only the essential components needed for further computation:
+coefficients, dispersion draws, posterior modes, envelopes, and iteration counts.
+
+
+## 7. Source Code and File Structure
+
+The simfunctions are implemented in:
+
+- `simfunctions.R`
+
+They call supporting routines in:
+
+- `rnnorm_reg_cpp.cpp`
+- `rnorm_reg_cpp.cpp`
+- `rindep_norm_gamma_reg_std_cpp.cpp`
+- `EnvelopeBuild_c.cpp`
+- `EnvelopeDispersionBuild_cpp.cpp`
+- `glmb_Standardize_Model.R`
+
+Utility functions include:
+
+- `ctrgamma` (truncated Gamma sampler)
+- `logdiffexp` (stable log difference)
+- `p_inv_gamma`, `q_inv_gamma`, `r_invgamma` (inverse-Gamma utilities)
+
+
+## 8. Summary
+
+The simulation functions described in this chapter form the computational backbone of the glmbayes package.
+They implement both classical conjugate sampling and modern envelope-based iid sampling. They are the
+recommended interface for custom samplers, Gibbs sampling, and research applications requiring direct access
+to the underlying algorithms.
+
+For further details, see the JASA paper and Appendices A5, A6, and A7.
+
+
+
+
+
 ## General Discussion
 
 The estimation procedures implemented in this package can divided into the following four distinct categories:

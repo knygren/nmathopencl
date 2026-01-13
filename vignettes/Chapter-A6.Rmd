@@ -143,10 +143,15 @@ distribution and associated bounding function and establish a key claims.
 
 ## 2.1 Proposal Distribution
 
-Let \( \bar{c}(v_{\text{tangent}}) \) be a gradient for \( -\ell(.)\) at $v_{\text{tangent}}$. We then defined a gamma proposal distribution by:
+Let \( \bar{c}(v_{\text{tangent}}) \) denote the gradient of \(-\ell(v)\) evaluated at the tangency point:
+\[
+\bar{c}(v_{\text{tangent}}) = -\ell'(v_{\text{tangent}}).
+\]
+
+We then define a gamma proposal distribution by:
 
 \[
-v \sim \mathrm{Gamma}_{prop}(a_0+  \frac{1}{2}\sum_i w_i, b_0 - \bar{c}(v_{\text{tangent}}))\
+v \sim \mathrm{Gamma}_{\text{prop}}\!\left(a_0 + \tfrac{1}{2}\sum_i w_i,\; b_0 - \bar{c}(v_{\text{tangent}})\right).
 \]
 
 where the log of the proposal distribution specifically takes the form
@@ -158,6 +163,10 @@ where the log of the proposal distribution specifically takes the form
 \end{aligned}
 \]
 ---
+
+In the implementation, this proposal is used in truncated form on the interval 
+\([v_{\min}, v_{\max}]\), with \(v_{\min}, v_{\max}\) derived from a curvature-based 
+Gamma surrogate and optional dispersion bounds.
 
 ## 2.2 Bounding function
 
@@ -176,12 +185,14 @@ Let $v_{\min}$ be lower bound for the precision $v$. We can then define a boundi
 \]
 
 
-It follows from the concavity of the function $\ell(.)$ and the definition of a lower bound that for all $v \geq v_{\min}$, 
-$\log h(v) \leq 0$.
-
+It follows from the concavity of \(\ell(\cdot)\) and the fact that 
+\(\log(v/v_{\min}) \ge 0\) for \(v \ge v_{\min}\) that 
+\(\log h(v) \le 0\) for all \(v \ge v_{\min}\).
 
 ## 2.3 Equivalence Claim
 
+Throughout this section, all densities are understood on the truncated domain 
+\(v \in [v_{\min}, v_{\max}]\), with normalizing constants absorbed into \(C_1\) and \(C_2\).
 
 **Claim 1:**  
 
@@ -192,7 +203,7 @@ The posterior log density $f(.)$ satisfies the property that
 where \[\begin{aligned}
 C_{2} 
 & = \Bigl( -  \log (C_{1}) \\[4pt]
-& - [(a_0+  \frac{1}{2}\sum_i w_i )\log [ b_0 - \bar{c}(v_{\text{tangent}})] \;-\; \log\Gamma(a_0+  \frac{1}{2}\sum_i w_i )] \\[4pt]
+& - [(a_0+  \frac{1}{2}\sum_i w_i ) \log\!\left(b_0 - \bar{c}(v_{\text{tangent}})\right) \;-\; \log\Gamma(a_0+  \frac{1}{2}\sum_i w_i )] \\[4pt]
 & + [a_0 \log b_0 \;-\; \log\Gamma(a_0) ] \\[4pt]
 & +[\ell(v_{\text{tangent}})+\bar{c}(v_{\text{tangent}})v_{\text{tangent}} ]\\[4pt]
 & - [\frac{1}{2}\sum_i w_i] \log v_{\text{min}}\Bigr)\end{aligned}
