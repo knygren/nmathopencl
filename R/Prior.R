@@ -22,6 +22,7 @@
 #' @param intercept_source Specifies the method through which the prior mean for the intercept term is set. Options are based on the null intercept only model (null_model) or full_models. The default is the null model which is safer if variables are not centered. 
 #' @param effects_source Specifies the method through which the prior means for the effects terms are set. Options are null_effects (prior means set to zero) or full_model (effect means set to match maximum likelihood estimates).  
 #' @param mu Optional vector argument with the prior means for the coefficients
+#' @param x An object of class \code{"PriorSetup"}
 #' @inheritParams stats::glm
 #' @inheritParams stats::model.frame
 #' @details
