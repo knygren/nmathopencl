@@ -1,4 +1,3 @@
-
 #' Directional Tail Diagnostic
 #'
 #' Computes the directional tail probability based on posterior draws and prior mean,
@@ -6,6 +5,7 @@
 #' This diagnostic identifies directional disagreement between posterior and prior,
 #' and is especially useful for visualizing rejection regions in whitened space.
 #'
+#' @name directional_tail
 #' @param fit A fitted model object of class 'glmb' or 'lmb'
 #' @param mu0 An optional argument containing a reference vector relative to which the directional tail is computed. Defaults to the prior mean.
 #' @return An object of class 'directional_tail' containing:
@@ -104,6 +104,7 @@ directional_tail <- function(fit, mu0 = NULL) {
   return(out)
 }
 
+#' @rdname directional_tail
 #' @method print directional_tail
 #' @export
 

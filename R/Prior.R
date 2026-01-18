@@ -1,6 +1,7 @@
 #' Setup Prior Objects
 #' 
 #' Helper function to facilitate the Setup of Prior Distributions for glm models.
+#' @name Prior_Setup
 #' @param na.action how \code{NAs} are treated. The default is first, any \code{\link{na.action}} attribute of 
 #' data, second a \code{na.action} setting of \link{options}, and third \code{na.fail} if that is unset. 
 #' The \code{factory-fresh} default is \code{na.omit}. Another possible value is \code{NULL}.
@@ -542,6 +543,7 @@ if (!is.null(sd)) {
 
 #' @export
 #' @method print PriorSetup
+#' @rdname Prior_Setup
 
 print.PriorSetup <- function(x, ...) {
 
