@@ -3,8 +3,7 @@
 #' Distribution function and random generation for the center (between a lower and an upper bound)
 #' of the normal distribution with mean equal to mu and standard deviation equal to sigma.
 #' 
-#' @name 
-#' Normal_ct
+#' @name Normal_ct
 #' @aliases
 #' Normal_ct
 #' pnorm_ct

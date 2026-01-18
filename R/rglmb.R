@@ -4,6 +4,7 @@
 #' The model is specified by providing a data vector, a design matrix, 
 #' the family (determining the likelihood function) and the pfamily (determining the 
 #' prior distribution).
+#' @name rglmb
 #' @param y a vector of observations of length \code{m}.
 #' @param x for \code{rglmb} a design matrix of dimension \code{m * p} and for \code{print.rglmb} the object to be printed. 
 #' @inheritParams glmb

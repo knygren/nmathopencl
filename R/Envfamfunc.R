@@ -4,8 +4,7 @@
 #' set of functions that are used during simulation and summarization of models 
 #' using the \code{\link{glmb}}, and \code{\link{rglmb}} functions.
 #' 
-#' @name 
-#' glmbfamfunc
+#' @name glmbfamfunc
 #' @aliases
 #' glmbfamfunc
 #' print.glmbfamfunc

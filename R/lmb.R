@@ -2,6 +2,7 @@
 #'
 #' \code{lmb} is used to fit Bayesian linear models, specified by giving a symbolic descriptions of the linear 
 #' predictor and the prior distribution.
+#' @name lmb
 #' @aliases
 #' lmb
 #' print.lmb
@@ -142,7 +143,7 @@
 #'
 #' @example inst/examples/Ex_lmb.R
 #' 
-#' @export lmb
+#' @export
 # #' @exportClass lmb  # temporarily disabled  - no current exportclass
 
 

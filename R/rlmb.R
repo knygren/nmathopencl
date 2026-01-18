@@ -3,8 +3,7 @@
 #' \code{rlmb} is used to generate iid samples from Bayesian Linear Models with multivariate normal priors. 
 #' The model is specified by providing a data vector, a design matrix, and a pfamily (determining the 
 #' prior distribution).
-#' @name 
-#' rlmb
+#' @name rlmb
 #' @aliases
 #' rlmb
 #' rlmb.print

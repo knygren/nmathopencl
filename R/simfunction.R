@@ -1,4 +1,3 @@
-#' @name simfuncs 
 #' @title 
 #' Simulation Functions for Bayesian Generalized Linear Models
 #'
@@ -7,7 +6,7 @@
 #'  These functions are typically used within model fitting routines such as \code{\link{rglmb}} and \code{\link{rlmb}}, and 
 #'  are also suitable for use im Block Gibbs sampling and other simulation-based inference techniques.
 #'
-#'
+#' @name simfuncs 
 #' @param object A fitted model object containing a \code{pfamily} component. The generic function \code{simfunction()} accesses the simulation metadata stored within such objects.
 #' @param x An object of class \code{"simfunction"} or \code{"rGamma_reg"} to be printed.
 #' @param n Number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
@@ -169,7 +168,7 @@
 
 
 #' @usage simfunction(object, ...)
-#' @export simfunction
+#' @export
 #' @rdname simfuncs
 #' @order 1
 

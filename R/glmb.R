@@ -2,6 +2,7 @@
 #'
 #' \code{glmb} is used to fit Bayesian generalized linear models, specified by giving a symbolic descriptions of 
 #' the linear predictor,  the error distribution, and the prior distribution.
+#' @name glmb
 #' @aliases
 #' glmb
 #' print.glmb
@@ -156,7 +157,7 @@
 #' @importFrom Rdpack reprompt
 #' @example inst/examples/Ex_glmb.R
 #' 
-#' @export glmb
+#' @export
 # #' @exportClass glmb # temporarily disabled - no current exportclass
 
 

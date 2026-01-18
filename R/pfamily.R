@@ -4,6 +4,7 @@
 #' used by functions such as \code{\link{glmb}}. See the documentations for \code{\link{lmb}},
 #' \code{\link{glmb}}, \code{\link{glmb}}, and \code{\link{rglmb}} for the details of how such model fitting 
 #' takes place.
+#' @name pfamily
 #' @param object the function \code{pfamily} accesses the \code{pfamily} objects which
 #' are stored within objects created by modelling functions (e.g., \code{glmb}).
 #' @param mu a prior mean vector for the the modeling coefficients used in several pfamilies
