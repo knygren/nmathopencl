@@ -41,5 +41,6 @@
 #' @importFrom Rcpp evalCpp
 #' @importFrom MASS mvrnorm
 #' @importFrom Rdpack reprompt
+#' @importFrom RcppParallel RcppParallelLibs
 #' @useDynLib glmbayes, .registration = TRUE
 "_PACKAGE"

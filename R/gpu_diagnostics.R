@@ -1,0 +1,78 @@
+#' GPU and OpenCL Diagnostics for glmbayes
+#'
+#' @description
+#' A collection of tools for detecting GPU hardware, verifying OpenCL
+#' availability, checking driver installation, validating environment
+#' configuration, and diagnosing whether \pkg{glmbayes} can use GPU
+#' acceleration. These functions provide both high‑level diagnostic
+#' summaries and low‑level checks of system components such as PATH,
+#' library directories, OpenCL headers, and the ICD loader.
+#'
+#' The diagnostic workflow is centered around
+#' \code{diagnose_glmbayes()}, which orchestrates all other checks and
+#' prints a detailed, human‑readable report. Lower‑level helpers can be
+#' called individually for programmatic inspection or automated testing.
+#'
+#' @section High‑level diagnostic:
+#' \itemize{
+#'   \item \code{diagnose_glmbayes()} — full GPU/OpenCL diagnostic report.
+#' }
+#'
+#' @section Environment and hardware detection:
+#' \itemize{
+#'   \item \code{detect_environment_and_gpus()} — detect OS and GPU vendor.
+#'   \item \code{gpu_names()} — enumerate available GPU device names.
+#'   \item \code{detect_compute_runtimes()} — detect CUDA/OpenCL runtimes.
+#' }
+#'
+#' @section OpenCL availability and runtime checks:
+#' \itemize{
+#'   \item \code{has_opencl()} — quick check for OpenCL support.
+#'   \item \code{verify_opencl_runtime()} — probe OpenCL platform/device availability.
+#'   \item \code{check_runtime_env()} — validate PATH and library directories.
+#' }
+#'
+#' @section Driver installation helpers:
+#' \itemize{
+#'   \item \code{detect_or_install_gpu_drivers()} — detect driver presence and issues.
+#' }
+#'
+#' @section PATH and library path utilities:
+#' These are optional helpers used by the diagnostic pipeline.
+#' \itemize{
+#'   \item \code{add_to_path_windows()}
+#'   \item \code{add_to_path_linux()}
+#'   \item \code{add_to_libpath_linux()}
+#' }
+#'
+#' @details
+#' GPU acceleration in \pkg{glmbayes} relies on OpenCL. A complete OpenCL
+#' environment requires:
+#' \enumerate{
+#'   \item OpenCL headers (e.g., \code{CL/cl.h}) at compile time,
+#'   \item the OpenCL ICD loader (e.g., \code{libOpenCL.so.1}) at runtime,
+#'   \item correct PATH and library search paths,
+#'   \item a functional OpenCL platform and device.
+#' }
+#'
+#' The diagnostic functions check each of these components. On Linux and
+#' WSL, \code{verify_opencl_runtime()} attempts to create an OpenCL
+#' platform, device, context, and command queue, and to compile a minimal
+#' kernel. On Windows, this probe is skipped because platform creation
+#' failures are not informative.
+#'
+#' @return
+#' Most functions return structured lists describing detected hardware,
+#' drivers, runtimes, or environment issues. \code{diagnose_glmbayes()}
+#' prints a formatted report and invisibly returns a named list containing
+#' all intermediate diagnostic results.
+#'
+#' @seealso
+#' \code{\link{diagnose_glmbayes}},
+#' \code{\link{detect_environment_and_gpus}},
+#' \code{\link{detect_compute_runtimes}},
+#' \code{\link{verify_opencl_runtime}}
+#'
+#' @keywords diagnostics gpu opencl environment
+#' @name gpu_diagnostics
+NULL
