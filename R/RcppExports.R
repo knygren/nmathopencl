@@ -61,10 +61,6 @@ has_opencl <- function() {
     .Call(`_glmbayes_setlogP`, logP, NegLL, cbars, G3)
 }
 
-arithmetic_test_wrapper <- function() {
-    .Call(`_glmbayes_arithmetic_test_wrapper`)
-}
-
 gpu_names <- function() {
     .Call(`_glmbayes_gpu_names`)
 }
@@ -93,24 +89,8 @@ Inv_f3_with_disp <- function(cache, dispersion, cbars_small) {
     .Call(`_glmbayes_Inv_f3_with_disp`, cache, dispersion, cbars_small)
 }
 
-f2_binomial_logit_prep_opencl <- function(b, y, x, mu, P, alpha, wt, progbar) {
-    .Call(`_glmbayes_f2_binomial_logit_prep_opencl`, b, y, x, mu, P, alpha, wt, progbar)
-}
-
-f2_binomial_logit_prep_grad_opencl <- function(b, y, x, mu, P, alpha, wt, progbar) {
-    .Call(`_glmbayes_f2_binomial_logit_prep_grad_opencl`, b, y, x, mu, P, alpha, wt, progbar)
-}
-
-f2_prep_grad_opencl <- function(family, link, b, y, x, mu, P, alpha, wt, progbar) {
-    .Call(`_glmbayes_f2_prep_grad_opencl`, family, link, b, y, x, mu, P, alpha, wt, progbar)
-}
-
 f2_f3_opencl <- function(family, link, b, y, x, mu, P, alpha, wt, progbar) {
     .Call(`_glmbayes_f2_f3_opencl`, family, link, b, y, x, mu, P, alpha, wt, progbar)
-}
-
-f2_accum <- function(family, link, xb, qf, y, wt, progbar) {
-    .Call(`_glmbayes_f2_accum`, family, link, xb, qf, y, wt, progbar)
 }
 
 load_kernel_source_wrapper <- function(relative_path, package = "glmbayes") {
@@ -125,20 +105,12 @@ get_opencl_core_count <- function() {
     .Call(`_glmbayes_get_opencl_core_count`)
 }
 
-nmath_test_wrapper <- function() {
-    .Call(`_glmbayes_nmath_test_wrapper`)
-}
-
 .rindep_norm_gamma_reg_std_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar = TRUE, verbose = FALSE) {
     .Call(`_glmbayes_rindep_norm_gamma_reg_std_cpp`, n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar, verbose)
 }
 
 .rindep_norm_gamma_reg_std_parallel_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar = TRUE, verbose = FALSE) {
     .Call(`_glmbayes_rindep_norm_gamma_reg_std_parallel_cpp`, n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar, verbose)
-}
-
-rmath_test_wrapper <- function() {
-    .Call(`_glmbayes_rmath_test_wrapper`)
 }
 
 .glmb_Standardize_Model_cpp <- function(y, x, P, bstar, A1) {
@@ -159,9 +131,5 @@ test_all_args <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link,
 
 .rnorm_reg_cpp <- function(n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family = "gaussian", link = "identity", Gridtype = 2L) {
     .Call(`_glmbayes_rnorm_reg_cpp`, n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family, link, Gridtype)
-}
-
-stirlerr_test_wrapper <- function() {
-    .Call(`_glmbayes_stirlerr_test_wrapper`)
 }
 

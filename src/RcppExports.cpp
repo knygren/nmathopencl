@@ -294,16 +294,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// arithmetic_test_wrapper
-Rcpp::NumericVector arithmetic_test_wrapper();
-RcppExport SEXP _glmbayes_arithmetic_test_wrapper() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(arithmetic_test_wrapper());
-    return rcpp_result_gen;
-END_RCPP
-}
 // gpu_names
 CharacterVector gpu_names();
 RcppExport SEXP _glmbayes_gpu_names() {
@@ -412,62 +402,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// f2_binomial_logit_prep_opencl
-Rcpp::List f2_binomial_logit_prep_opencl(Rcpp::NumericMatrix b, Rcpp::NumericVector y, Rcpp::NumericMatrix x, Rcpp::NumericMatrix mu, Rcpp::NumericMatrix P, Rcpp::NumericVector alpha, Rcpp::NumericVector wt, int progbar);
-RcppExport SEXP _glmbayes_f2_binomial_logit_prep_opencl(SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP progbarSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type b(bSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type P(PSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type wt(wtSEXP);
-    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
-    rcpp_result_gen = Rcpp::wrap(f2_binomial_logit_prep_opencl(b, y, x, mu, P, alpha, wt, progbar));
-    return rcpp_result_gen;
-END_RCPP
-}
-// f2_binomial_logit_prep_grad_opencl
-Rcpp::List f2_binomial_logit_prep_grad_opencl(Rcpp::NumericMatrix b, Rcpp::NumericVector y, Rcpp::NumericMatrix x, Rcpp::NumericMatrix mu, Rcpp::NumericMatrix P, Rcpp::NumericVector alpha, Rcpp::NumericVector wt, int progbar);
-RcppExport SEXP _glmbayes_f2_binomial_logit_prep_grad_opencl(SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP progbarSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type b(bSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type P(PSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type wt(wtSEXP);
-    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
-    rcpp_result_gen = Rcpp::wrap(f2_binomial_logit_prep_grad_opencl(b, y, x, mu, P, alpha, wt, progbar));
-    return rcpp_result_gen;
-END_RCPP
-}
-// f2_prep_grad_opencl
-Rcpp::List f2_prep_grad_opencl(std::string family, std::string link, Rcpp::NumericMatrix b, Rcpp::NumericVector y, Rcpp::NumericMatrix x, Rcpp::NumericMatrix mu, Rcpp::NumericMatrix P, Rcpp::NumericVector alpha, Rcpp::NumericVector wt, int progbar);
-RcppExport SEXP _glmbayes_f2_prep_grad_opencl(SEXP familySEXP, SEXP linkSEXP, SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP progbarSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
-    Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type b(bSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type P(PSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type wt(wtSEXP);
-    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
-    rcpp_result_gen = Rcpp::wrap(f2_prep_grad_opencl(family, link, b, y, x, mu, P, alpha, wt, progbar));
-    return rcpp_result_gen;
-END_RCPP
-}
 // f2_f3_opencl
 Rcpp::List f2_f3_opencl(std::string family, std::string link, Rcpp::NumericMatrix b, Rcpp::NumericVector y, Rcpp::NumericMatrix x, Rcpp::NumericMatrix mu, Rcpp::NumericMatrix P, Rcpp::NumericVector alpha, Rcpp::NumericVector wt, int progbar);
 RcppExport SEXP _glmbayes_f2_f3_opencl(SEXP familySEXP, SEXP linkSEXP, SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP progbarSEXP) {
@@ -485,23 +419,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type wt(wtSEXP);
     Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
     rcpp_result_gen = Rcpp::wrap(f2_f3_opencl(family, link, b, y, x, mu, P, alpha, wt, progbar));
-    return rcpp_result_gen;
-END_RCPP
-}
-// f2_accum
-Rcpp::NumericVector f2_accum(std::string family, std::string link, Rcpp::NumericMatrix xb, Rcpp::NumericVector qf, Rcpp::NumericVector y, Rcpp::NumericVector wt, int progbar);
-RcppExport SEXP _glmbayes_f2_accum(SEXP familySEXP, SEXP linkSEXP, SEXP xbSEXP, SEXP qfSEXP, SEXP ySEXP, SEXP wtSEXP, SEXP progbarSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
-    Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type xb(xbSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type qf(qfSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type wt(wtSEXP);
-    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
-    rcpp_result_gen = Rcpp::wrap(f2_accum(family, link, xb, qf, y, wt, progbar));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -537,16 +454,6 @@ BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     rcpp_result_gen = Rcpp::wrap(get_opencl_core_count());
-    return rcpp_result_gen;
-END_RCPP
-}
-// nmath_test_wrapper
-Rcpp::NumericVector nmath_test_wrapper();
-RcppExport SEXP _glmbayes_nmath_test_wrapper() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(nmath_test_wrapper());
     return rcpp_result_gen;
 END_RCPP
 }
@@ -597,16 +504,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type progbar(progbarSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
     rcpp_result_gen = Rcpp::wrap(rindep_norm_gamma_reg_std_parallel_cpp(n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar, verbose));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rmath_test_wrapper
-Rcpp::NumericVector rmath_test_wrapper();
-RcppExport SEXP _glmbayes_rmath_test_wrapper() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(rmath_test_wrapper());
     return rcpp_result_gen;
 END_RCPP
 }
@@ -723,16 +620,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// stirlerr_test_wrapper
-Rcpp::NumericVector stirlerr_test_wrapper();
-RcppExport SEXP _glmbayes_stirlerr_test_wrapper() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(stirlerr_test_wrapper());
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_run_opencl_pilot", (DL_FUNC) &_glmbayes_run_opencl_pilot, 12},
@@ -750,7 +637,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_has_opencl", (DL_FUNC) &_glmbayes_has_opencl, 0},
     {"_glmbayes_Set_Grid", (DL_FUNC) &_glmbayes_Set_Grid, 3},
     {"_glmbayes_setlogP", (DL_FUNC) &_glmbayes_setlogP, 4},
-    {"_glmbayes_arithmetic_test_wrapper", (DL_FUNC) &_glmbayes_arithmetic_test_wrapper, 0},
     {"_glmbayes_gpu_names", (DL_FUNC) &_glmbayes_gpu_names, 0},
     {"_glmbayes_f2_binomial_logit_prep", (DL_FUNC) &_glmbayes_f2_binomial_logit_prep, 8},
     {"_glmbayes_f2_binomial_logit_prep_v3", (DL_FUNC) &_glmbayes_f2_binomial_logit_prep_v3, 8},
@@ -758,24 +644,17 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_f2_gaussian", (DL_FUNC) &_glmbayes_f2_gaussian, 7},
     {"_glmbayes_Inv_f3_gaussian", (DL_FUNC) &_glmbayes_Inv_f3_gaussian, 7},
     {"_glmbayes_Inv_f3_with_disp", (DL_FUNC) &_glmbayes_Inv_f3_with_disp, 3},
-    {"_glmbayes_f2_binomial_logit_prep_opencl", (DL_FUNC) &_glmbayes_f2_binomial_logit_prep_opencl, 8},
-    {"_glmbayes_f2_binomial_logit_prep_grad_opencl", (DL_FUNC) &_glmbayes_f2_binomial_logit_prep_grad_opencl, 8},
-    {"_glmbayes_f2_prep_grad_opencl", (DL_FUNC) &_glmbayes_f2_prep_grad_opencl, 10},
     {"_glmbayes_f2_f3_opencl", (DL_FUNC) &_glmbayes_f2_f3_opencl, 10},
-    {"_glmbayes_f2_accum", (DL_FUNC) &_glmbayes_f2_accum, 7},
     {"_glmbayes_load_kernel_source_wrapper", (DL_FUNC) &_glmbayes_load_kernel_source_wrapper, 2},
     {"_glmbayes_load_kernel_library_wrapper", (DL_FUNC) &_glmbayes_load_kernel_library_wrapper, 3},
     {"_glmbayes_get_opencl_core_count", (DL_FUNC) &_glmbayes_get_opencl_core_count, 0},
-    {"_glmbayes_nmath_test_wrapper", (DL_FUNC) &_glmbayes_nmath_test_wrapper, 0},
     {"_glmbayes_rindep_norm_gamma_reg_std_cpp", (DL_FUNC) &_glmbayes_rindep_norm_gamma_reg_std_cpp, 15},
     {"_glmbayes_rindep_norm_gamma_reg_std_parallel_cpp", (DL_FUNC) &_glmbayes_rindep_norm_gamma_reg_std_parallel_cpp, 15},
-    {"_glmbayes_rmath_test_wrapper", (DL_FUNC) &_glmbayes_rmath_test_wrapper, 0},
     {"_glmbayes_glmb_Standardize_Model", (DL_FUNC) &_glmbayes_glmb_Standardize_Model, 5},
     {"_glmbayes_rnnorm_reg_std_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_std_cpp, 13},
     {"_glmbayes_rnnorm_reg_std_cpp_parallel", (DL_FUNC) &_glmbayes_rnnorm_reg_std_cpp_parallel, 13},
     {"_glmbayes_rnnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_cpp, 18},
     {"_glmbayes_rnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnorm_reg_cpp, 14},
-    {"_glmbayes_stirlerr_test_wrapper", (DL_FUNC) &_glmbayes_stirlerr_test_wrapper, 0},
     {NULL, NULL, 0}
 };
 
