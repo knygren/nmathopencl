@@ -179,3 +179,17 @@
         use_opencl, verbose, threshold_sec)
 }
 
+
+#' @noRd
+#' @keywords internal
+.load_kernel_source_wrapper <- function(relative_path, package = "glmbayes") {
+  .Call(`_glmbayes_load_kernel_source_wrapper`, relative_path, package)
+}
+
+
+#' @noRd
+#' @keywords internal
+.load_kernel_library_wrapper <- function(subdir, package = "glmbayes", verbose = FALSE) {
+  .Call(`_glmbayes_load_kernel_library_wrapper`, subdir, package, verbose)
+}
+
