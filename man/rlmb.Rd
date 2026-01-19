@@ -2,7 +2,6 @@
 % Please edit documentation in R/rlmb.R
 \name{rlmb}
 \alias{rlmb}
-\alias{rlmb.print}
 \alias{print.rlmb}
 \title{The Bayesian Linear Model Distribution}
 \usage{

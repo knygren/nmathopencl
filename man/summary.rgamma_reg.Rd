@@ -2,8 +2,6 @@
 % Please edit documentation in R/summary.rgamma_reg.R
 \name{summary.rGamma_reg}
 \alias{summary.rGamma_reg}
-\alias{summary.rgamma_reg}
-\alias{print.summary.rgamma_reg}
 \alias{print.summary.rGamma_reg}
 \title{Summarizing Bayesian gamma_reg Distribution Functions}
 \usage{
@@ -12,10 +10,10 @@
 \method{print}{summary.rGamma_reg}(x, digits = max(3, getOption("digits") - 3), ...)
 }
 \arguments{
-\item{object}{an object of class \code{"rgamma_reg"} for which a
+\item{object}{an object of class \code{"rGamma_reg"} for which a
 summary is desired.}
 
-\item{x}{an object of class \code{"summary.rgamma_reg"} for which a printed output is desired.}
+\item{x}{an object of class \code{"summary.rGamma_reg"} for which a printed output is desired.}
 
 \item{digits}{the number of significant digits to use when printing.}
 

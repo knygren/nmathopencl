@@ -3,11 +3,11 @@
 #' These functions are all \code{\link{methods}} for class \code{rgamna_reg} or \code{summary.rgamma_reg} objects.
 #' 
 #' @aliases 
-#' summary.rgamma_reg
-#' print.summary.rgamma_reg
-#' @param object an object of class \code{"rgamma_reg"} for which a 
+#' summary.rGamma_reg
+#' print.summary.rGamma_reg
+#' @param object an object of class \code{"rGamma_reg"} for which a 
 #' summary is desired.
-#' @param x an object of class \code{"summary.rgamma_reg"} for which a printed output is desired.
+#' @param x an object of class \code{"summary.rGamma_reg"} for which a printed output is desired.
 #' @param digits the number of significant digits to use when printing.
 #' @param \ldots Additional optional arguments
 #' @export

@@ -113,6 +113,14 @@ f2_accum <- function(family, link, xb, qf, y, wt, progbar) {
     .Call(`_glmbayes_f2_accum`, family, link, xb, qf, y, wt, progbar)
 }
 
+load_kernel_source_wrapper <- function(relative_path, package = "glmbayes") {
+    .Call(`_glmbayes_load_kernel_source_wrapper`, relative_path, package)
+}
+
+load_kernel_library_wrapper <- function(subdir, package = "glmbayes", verbose = FALSE) {
+    .Call(`_glmbayes_load_kernel_library_wrapper`, subdir, package, verbose)
+}
+
 get_opencl_core_count <- function() {
     .Call(`_glmbayes_get_opencl_core_count`)
 }

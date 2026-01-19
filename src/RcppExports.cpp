@@ -505,6 +505,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// load_kernel_source_wrapper
+std::string load_kernel_source_wrapper(std::string relative_path, std::string package);
+RcppExport SEXP _glmbayes_load_kernel_source_wrapper(SEXP relative_pathSEXP, SEXP packageSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type relative_path(relative_pathSEXP);
+    Rcpp::traits::input_parameter< std::string >::type package(packageSEXP);
+    rcpp_result_gen = Rcpp::wrap(load_kernel_source_wrapper(relative_path, package));
+    return rcpp_result_gen;
+END_RCPP
+}
+// load_kernel_library_wrapper
+std::string load_kernel_library_wrapper(std::string subdir, std::string package, bool verbose);
+RcppExport SEXP _glmbayes_load_kernel_library_wrapper(SEXP subdirSEXP, SEXP packageSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type subdir(subdirSEXP);
+    Rcpp::traits::input_parameter< std::string >::type package(packageSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(load_kernel_library_wrapper(subdir, package, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // get_opencl_core_count
 int get_opencl_core_count();
 RcppExport SEXP _glmbayes_get_opencl_core_count() {
@@ -738,6 +763,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_f2_prep_grad_opencl", (DL_FUNC) &_glmbayes_f2_prep_grad_opencl, 10},
     {"_glmbayes_f2_f3_opencl", (DL_FUNC) &_glmbayes_f2_f3_opencl, 10},
     {"_glmbayes_f2_accum", (DL_FUNC) &_glmbayes_f2_accum, 7},
+    {"_glmbayes_load_kernel_source_wrapper", (DL_FUNC) &_glmbayes_load_kernel_source_wrapper, 2},
+    {"_glmbayes_load_kernel_library_wrapper", (DL_FUNC) &_glmbayes_load_kernel_library_wrapper, 3},
     {"_glmbayes_get_opencl_core_count", (DL_FUNC) &_glmbayes_get_opencl_core_count, 0},
     {"_glmbayes_nmath_test_wrapper", (DL_FUNC) &_glmbayes_nmath_test_wrapper, 0},
     {"_glmbayes_rindep_norm_gamma_reg_std_cpp", (DL_FUNC) &_glmbayes_rindep_norm_gamma_reg_std_cpp, 15},

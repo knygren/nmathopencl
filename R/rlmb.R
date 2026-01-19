@@ -6,7 +6,7 @@
 #' @name rlmb
 #' @aliases
 #' rlmb
-#' rlmb.print
+#' print.rlmb
 #' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
 #' @param y a vector of observations of length \code{m}.
 #' @param x for \code{rlmb} a design matrix of dimension \code{m * p} and for 

@@ -261,106 +261,6 @@ print.simfunction <- function(x, ...) {
 
 
 
-# Constrained truncated gamma sampler on precision scale (numerically robust)
-ctrgamma <- function(nn, shape, rate, lower_prec = NULL, upper_prec = NULL) {
-  # ---- Case 0: no truncation ----
-  if (is.null(lower_prec) && is.null(upper_prec)) {
-    return(stats::rgamma(nn, shape = shape, rate = rate))
-  }
-  
-  # ---- Extract numeric bounds (support-aware) ----
-  # Gamma support is [0, infinity), so clamp at 0 if lower is NULL
-  L <- if (!is.null(lower_prec)) lower_prec else 0
-  U <- if (!is.null(upper_prec)) upper_prec else Inf
-  
-  # ---- Exact numeric degeneracy in the bounds ----
-  if (is.finite(L) && is.finite(U) && L == U) {
-    # Interval truly collapsed
-    return(rep(L, nn))
-  }
-  
-  # ---- One-sided truncation: lower only ----
-  if (!is.null(lower_prec) && is.null(upper_prec)) {
-    # Sample from Gamma conditioned on X >= L.
-    # Work on the upper-tail CDF: T(x) = P(X >= x) = 1 - F(x)
-    log_tail_L <- stats::pgamma(L, shape = shape, rate = rate,
-                                lower.tail = FALSE, log.p = TRUE)
-    # U ~ Unif(0,1), target tail probability: T_star = U * T(L)
-    u      <- stats::runif(nn)
-    log_u  <- log(u)
-    log_T  <- log_u + log_tail_L  # log T_star
-    
-    # Invert using qgamma on the upper tail with log.p
-    out <- stats::qgamma(p = log_T, shape = shape, rate = rate,
-                         lower.tail = FALSE, log.p = TRUE)
-    return(out)
-  }
-  
-  # ---- One-sided truncation: upper only ----
-  if (is.null(lower_prec) && !is.null(upper_prec)) {
-    # Sample from Gamma conditioned on X <= U.
-    # Work on the lower-tail CDF: F(x) = P(X <= x)
-    log_F_U <- stats::pgamma(U, shape = shape, rate = rate,
-                             lower.tail = TRUE, log.p = TRUE)
-    
-    u      <- stats::runif(nn)
-    log_u  <- log(u)
-    log_F  <- log_u + log_F_U  # log F_star
-    
-    out <- stats::qgamma(p = log_F, shape = shape, rate = rate,
-                         lower.tail = TRUE, log.p = TRUE)
-    return(out)
-  }
-  
-  # ---- Two-sided truncation: L and U both finite ----
-  # Now both lower_prec and upper_prec are non-NULL, and L < U (checked above).
-  
-  # Work on the lower-tail CDF: F(x) = P(X <= x)
-  log_F_L <- stats::pgamma(L, shape = shape, rate = rate,
-                           lower.tail = TRUE, log.p = TRUE)
-  log_F_U <- stats::pgamma(U, shape = shape, rate = rate,
-                           lower.tail = TRUE, log.p = TRUE)
-  
-  # Enforce ordering (should normally hold, but guard anyway)
-  if (log_F_U < log_F_L) {
-    tmp      <- log_F_L
-    log_F_L  <- log_F_U
-    log_F_U  <- tmp
-    tmp      <- L
-    L        <- U
-    U        <- tmp
-  }
-  
-  # If pgamma collapses the CDF in floating point, the conditional law
-  # is essentially degenerate at L. We do not use an arbitrary epsilon;
-  # we only test exact equality on the log scale.
-  if (log_F_U == log_F_L) {
-    return(rep(L, nn))
-  }
-  
-  # Mass of the interval (L, U] on the CDF scale, in log:
-  # delta = F(U) - F(L), log_delta = logdiffexp(log_F_L, log_F_U)
-  log_delta <- logdiffexp(log_F_L, log_F_U)
-  
-  # U ~ Unif(0,1), target unconditional CDF value:
-  # F_star = F(L) + U * (F(U) - F(L))
-  # Work in log-space via log-sum-exp of two terms:
-  #   term1 = log_F_L
-  #   term2 = log(U) + log_delta
-  u      <- stats::runif(nn)
-  log_u  <- log(u)
-  t1     <- log_F_L
-  t2     <- log_u + log_delta
-  
-  m      <- pmax(t1, t2)
-  log_F  <- m + log(exp(t1 - m) + exp(t2 - m))  # log(F_star)
-  
-  # Invert using qgamma on the lower tail with log.p
-  out <- stats::qgamma(p = log_F, shape = shape, rate = rate,
-                       lower.tail = TRUE, log.p = TRUE)
-  out
-}
-
 
 
 
@@ -519,7 +419,7 @@ rGamma_reg <- function(
       out <- 1 / rgamma(n, shape = a1, rate = b1)
     } else {
       ## Constrained sampler on precision
-      prec <- ctrgamma(
+      prec <- rgamma_ct(
         n,
         shape = a1,
         rate  = b1,
@@ -768,11 +668,11 @@ rGamma_reg <- function(
         
         if (is.null(disp_lower) && is.null(disp_upper)) {
 #          cand_prec <- rgamma(1, shape = shape_prop, rate = rate_prop)
-          cand_prec <- ctrgamma(1, shape = shape_prop, rate = rate_prop,lower_prec=v_min,upper_prec=v_max)
+          cand_prec <- rgamma_ct(1, shape = shape_prop, rate = rate_prop,lower_prec=v_min,upper_prec=v_max)
           
           
         } else {
-          cand_prec <- ctrgamma(
+          cand_prec <- rgamma_ct(
             1,
             shape = shape_prop,
             rate  = rate_prop,
@@ -1767,6 +1667,104 @@ rNormal_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
 
 
 
+#' Fitter Function for Bayesian Linear Models
+#'
+#' Basic computing engine called to find the posterior mode and a UL decomposition
+#' @param mu Prior mean vector of length \code{p}.
+#' @param P Prior precision matrix of dimension \code{p * p}.
+#' @inheritParams stats::lm.wfit
+#' @return a \code{\link{list}} wih components:
+#' @example inst/examples/Ex_confint.glmb.R
+#' @export 
+
+rNormal_reg.wfit<-function(x,y,P,mu, w,offset=NULL,method="qr",tol=1e-7,singular.ok=TRUE,...){
+  
+  ## Handle all four cases of offset and wt here 
+  ## Should determine where validity of input checking should be done.
+  ## Seems like the lm.wfit function itself has some of this, so not all of these checks are necessary
+  
+  if(!is.null(offset)&!is.null(w)){  
+    Y=matrix((y-offset)*sqrt(w),nrow=length(y))
+    X=x*sqrt(w)  }
+  
+  if(!is.null(offset)&is.null(w)){  
+    Y=matrix((y-offset),nrow=length(y))
+    X=x  }
+  
+  if(is.null(offset)&!is.null(w)){  
+    Y=matrix(y*sqrt(w),nrow=length(y))
+    X=x*sqrt(w)  }
+  
+  if(is.null(offset)&is.null(w)){  
+    Y=matrix(y,nrow=length(y))
+    X=x}
+  
+  ## For now rename these (modify below to avoid)
+  Bbar=mu
+  A=P
+  
+  ### Do dimension checks (may want to do outside of this function)
+  
+  l0=length(Y)
+  Ytemp=matrix(Y,ncol=1)
+  
+  l1=nrow(Ytemp)
+  if(l0>l1) stop("Dimensions of y not correct")
+  
+  m=1
+  
+  k=ncol(X)
+  l2=nrow(X)
+  
+  if(l2!=l1) stop("Dimensions of X and Y are inconsistent")
+  
+  k1=dim(A)[1]
+  k2=dim(A)[2]
+  k3=length(Bbar)
+  
+  if(k1!=k) stop("dimensions of X and A are inconsistent")
+  if(k2!=k) stop("dimensions of X and A are inconsistent")
+  if(k3!=k) stop("dimensions of X and Bbar are inconsistent")
+  
+  ## Do cholesky decomposition - Might be inaccurate/inefficient
+  
+  RA=chol(A)
+  
+  # Create modifed design matrix x and modifed observed y matrix
+  
+  W=rbind(X,RA)    # W should be modified design matrix !
+  Z=rbind(Ytemp,matrix(RA%*%Bbar,ncol=1)) ## Z Should be the modified y vector!
+  
+  ## Call lm.fit
+  
+  lmf=lm.fit (W, Z,    offset = NULL, method = "qr", tol = 1e-7,
+              singular.ok = TRUE)
+  
+  ## Also do the IR Decomposition needed by the posterior simulation
+  ## might be able to reuse qr output (TBD)
+  
+  #   note:  Y,X,A,Bbar must be matrices!
+  lmf$IR=backsolve(chol(crossprod(W)),diag(k))
+  #                      W'W = R'R  &  (W'W)^-1 = IRIR'  -- this is the UL decomp!
+  
+  
+  lmf$k=k
+  lmf$Btilde=matrix(lmf$coefficients,ncol=1)
+  
+  #                      E'E
+  lmf$S=crossprod(Z-W%*%lmf$Btilde)  # This part likely is used for the Gamma or Wishart simulation - Essentially RSS
+  
+  # Assign the "lm" class for now to allow the method functions for influence measures to work
+  
+  class(lmf)="lm"
+  
+  
+  return(lmf)
+  
+  
+}
+
+
 
 # Helpers --------------------------------------------------------------------
 
@@ -1775,22 +1773,22 @@ rNormal_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
 
 ################################## Utility functions used by the above  #################
 
-p_inv_gamma<-function(dispersion,shape,rate){
-  1-pgamma(1/dispersion,shape=shape,rate=rate)
-}
-
-q_inv_gamma<-function(p,shape,rate,disp_upper,disp_lower){
-  p_upp=p_inv_gamma(disp_upper,shape=shape,rate=rate)
-  p_low=p_inv_gamma(disp_lower,shape=shape,rate=rate)
-  p1=p_low+p*(p_upp-p_low)
-  p2=1-p1
-  1/qgamma(p2,shape,rate)
-}
-
-r_invgamma<-function(n,shape,rate,disp_upper,disp_lower){
-  p=runif(n)
-  q_inv_gamma(p=p,shape=shape,rate=rate,disp_upper=disp_upper,disp_lower)
-}
+# p_inv_gamma<-function(dispersion,shape,rate){
+#   1-pgamma(1/dispersion,shape=shape,rate=rate)
+# }
+# 
+# q_inv_gamma<-function(p,shape,rate,disp_upper,disp_lower){
+#   p_upp=p_inv_gamma(disp_upper,shape=shape,rate=rate)
+#   p_low=p_inv_gamma(disp_lower,shape=shape,rate=rate)
+#   p1=p_low+p*(p_upp-p_low)
+#   p2=1-p1
+#   1/qgamma(p2,shape,rate)
+# }
+# 
+# r_invgamma<-function(n,shape,rate,disp_upper,disp_lower){
+#   p=runif(n)
+#   q_inv_gamma(p=p,shape=shape,rate=rate,disp_upper=disp_upper,disp_lower)
+# }
 
 
 
@@ -1802,5 +1800,7 @@ logdiffexp <- function(a, b) {
   # so log(...) = b + log(1 - exp(a - b))
   b + log(-expm1(a - b))
 }
+
+
 
 

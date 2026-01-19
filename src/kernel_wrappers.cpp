@@ -627,6 +627,26 @@ Rcpp::NumericVector f2_accum(
 }
 
 
+// [[Rcpp::export]]
+std::string load_kernel_source_wrapper(std::string relative_path,
+                                   std::string package = "glmbayes") {
+#ifdef USE_OPENCL
+  return load_kernel_source(relative_path, package);
+#else
+  Rcpp::stop("OpenCL support is not available in this build of glmbayes.");
+#endif
+}
+
+// [[Rcpp::export]]
+std::string load_kernel_library_wrapper(std::string subdir,
+                                    std::string package = "glmbayes",
+                                    bool verbose = false) {
+#ifdef USE_OPENCL
+  return load_kernel_library(subdir, package, verbose);
+#else
+  Rcpp::stop("OpenCL support is not available in this build of glmbayes.");
+#endif
+}
 
 // [[Rcpp::export]]
 int get_opencl_core_count() {
