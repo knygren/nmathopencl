@@ -2432,9 +2432,9 @@ rss_face_at_disp<- function(dispersion, cache, cbars_j, y, x, alpha, wt) {
 
 #' @noRd
 
-drss_ddisp <- function(dispersion, cache, cbars_j, y, x, alpha, wt) {
-  .Call(`_glmbayes_drss_ddisp`, dispersion, cache, cbars_j, y, x, alpha, wt)
-}
+# drss_ddisp <- function(dispersion, cache, cbars_j, y, x, alpha, wt) {
+#   .Call(`_glmbayes_drss_ddisp`, dispersion, cache, cbars_j, y, x, alpha, wt)
+# }
 
 #' @noRd
 

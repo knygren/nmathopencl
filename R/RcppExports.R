@@ -25,10 +25,6 @@ EnvelopeEval <- function(G4, y, x, mu, P, alpha, wt, family, link, use_opencl = 
     .Call(`_glmbayes_EnvelopeBuild_Ind_Normal_Gamma`, bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, n_envopt, sortgrid, use_opencl, verbose)
 }
 
-Inv_f3_precompute_disp <- function(cbars, y, x, mu, P, alpha, wt) {
-    .Call(`_glmbayes_Inv_f3_precompute_disp`, cbars, y, x, mu, P, alpha, wt)
-}
-
 rss_face_at_disp <- function(dispersion, cache, cbars_j, y, x, alpha, wt) {
     .Call(`_glmbayes_rss_face_at_disp`, dispersion, cache, cbars_j, y, x, alpha, wt)
 }
@@ -39,10 +35,6 @@ drss_ddisp <- function(dispersion, cache, cbars_j, y, x, alpha, wt) {
 
 UB2 <- function(dispersion, cache, cbars_j, y, x, alpha, wt, rss_min_global) {
     .Call(`_glmbayes_UB2`, dispersion, cache, cbars_j, y, x, alpha, wt, rss_min_global)
-}
-
-UB2_Fun <- function(dispersion, cache, cbars_j, y, x, alpha, wt, rss_min_global) {
-    .Call(`_glmbayes_UB2_Fun`, dispersion, cache, cbars_j, y, x, alpha, wt, rss_min_global)
 }
 
 EnvelopeDispersionBuild_cpp <- function(Env, Shape, Rate, P, y, x, alpha, n_obs, RSS_post, RSS_ML, mu, wt, max_disp_perc = 0.99, disp_lower = NULL, disp_upper = NULL, verbose = FALSE, use_parallel = TRUE) {
@@ -63,18 +55,6 @@ has_opencl <- function() {
 
 gpu_names <- function() {
     .Call(`_glmbayes_gpu_names`)
-}
-
-.RSS <- function(y, x, b, alpha, wt) {
-    .Call(`_glmbayes_RSS`, y, x, b, alpha, wt)
-}
-
-.f2_gaussian_vector <- function(b, y, x, mu, P, alpha, wt) {
-    .Call(`_glmbayes_f2_gaussian`, b, y, x, mu, P, alpha, wt)
-}
-
-Inv_f3_gaussian <- function(cbars, y, x, mu, P, alpha, wt) {
-    .Call(`_glmbayes_Inv_f3_gaussian`, cbars, y, x, mu, P, alpha, wt)
 }
 
 Inv_f3_with_disp <- function(cache, dispersion, cbars_small) {
@@ -111,10 +91,6 @@ get_opencl_core_count <- function() {
 
 .rnnorm_reg_std_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar = 1L, verbose = FALSE) {
     .Call(`_glmbayes_rnnorm_reg_std_cpp`, n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar, verbose)
-}
-
-test_all_args <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar = 1L, verbose = FALSE) {
-    .Call(`_glmbayes_rnnorm_reg_std_cpp_parallel`, n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar, verbose)
 }
 
 .rnnorm_reg_cpp <- function(n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L, n_envopt = -1L, use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE) {

@@ -241,10 +241,6 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
       thetabarsb_new = theta2;
       
 
-      // theta2 =Inv_f3_gaussian(transpose(cbars_small), y,x, mu, P, alpha, wt2);  
-      // thetabarsb_new=theta2;
-      
-
       // Recompoute LL at the new gradient point
       NumericVector LL_New2=-f2_gaussian(transpose(thetabars_new),  y, x, mu, P, alpha, wt2);  
       
@@ -294,13 +290,11 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
       
 
       // Call the UB2 function with current dispersion and other parameters
-  //    double ub2_val = UB2_Fun(dispersion, cache, cbars_j, y, x, alpha, wt, RSS_Min);
-
+  
       
   //    Rcpp::Rcout << "Weights (wt): "; for (int i = 0; i < wt.size(); ++i) { Rcpp::Rcout << wt[i] << " "; } Rcpp::Rcout << std::endl;
       
       
-  //    double ub2_val_alt = UB2_Fun(0.271233, cache, cbars_j, y, x, alpha, wt, RSS_Min);
       
       
       

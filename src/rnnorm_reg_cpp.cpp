@@ -648,10 +648,6 @@ Rcpp::List run_rcppparallel_pilot(
 }
 
 
-//-----------------------------------------------------------------------------
-// test_all_args: wrapper matching rnnorm_reg_std_cpp signature
-//-----------------------------------------------------------------------------
-// [[Rcpp::export("test_all_args")]]
 List rnnorm_reg_std_cpp_parallel(
     int                   n,
     NumericVector         y,

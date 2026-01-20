@@ -61,8 +61,6 @@ NumericVector dnorm_glmb( NumericVector x, NumericVector means, NumericVector sd
 }
 
 
-// [[Rcpp::export(".RSS")]]
-
 
 NumericVector RSS(NumericVector y, NumericMatrix x,NumericMatrix b,NumericVector alpha,NumericVector wt)
 {
@@ -169,8 +167,6 @@ NumericVector  f1_gaussian(NumericMatrix b,NumericVector y,NumericMatrix x,Numer
   return res;      
 }
 
-
-// [[Rcpp::export(".f2_gaussian_vector")]]
 
 
 NumericVector  f2_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
@@ -506,70 +502,6 @@ arma::mat  f3_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,NumericM
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
 using namespace Rcpp;
-
-// cbars: p x m (each column is a cbars vector)
-// x: n x p
-// mu: p x 1
-// P:  p x p
-// y, alpha, wt: length n
-
-// [[Rcpp::export]]
-
-arma::mat Inv_f3_gaussian(NumericMatrix cbars,
-                          NumericVector y,
-                          NumericMatrix x,
-                          NumericMatrix mu,
-                          NumericMatrix P,
-                          NumericVector alpha,
-                          NumericVector wt)
-{
-  int n = x.nrow();
-  int p = x.ncol();
-  int m = cbars.ncol();
-  
-  // Map inputs
-  arma::mat X(x.begin(), n, p, false);
-  arma::vec yv(y.begin(), n, false);
-  arma::vec alphav(alpha.begin(), n, false);
-  arma::vec wv(wt.begin(), n, false);
-  arma::mat Mu(mu.begin(), p, 1, false);
-  arma::mat Pmat(P.begin(), p, p, false);
-  arma::mat C(cbars.begin(), p, m, false); // cbars as p x m
-  
-  // Symmetrize P
-  Pmat = 0.5 * (Pmat + Pmat.t());
-  
-  // Build diagonal weight matrix
-  arma::mat W = arma::diagmat(wv);
-  
-  // Common pieces
-  arma::vec xb = alphav - yv;
-  arma::vec B0 = X.t() * (W * xb) + Pmat * Mu; // p x 1
-  
-  arma::mat A = Pmat + X.t() * (W * X);
-  A = 0.5 * (A + A.t()); // enforce symmetry
-  
-  // Factor once
-  arma::mat R = arma::chol(A); // will throw if not SPD
-  
-  // Prepare output
-  arma::mat Out(p, m);
-  
-  for (int i = 0; i < m; i++) {
-    arma::vec cbars_i(C.colptr(i), p, false);
-    arma::vec b = -cbars_i + B0;
-    
-    // Solve A * sol = b using Cholesky factors
-    arma::vec ytmp = arma::solve(arma::trimatl(R.t()), b);
-    arma::vec sol  = arma::solve(arma::trimatu(R), ytmp);
-    
-    Out.col(i) = -sol;
-  }
-  
-  return Out.t(); // m x p
-}
-
-
 
 
 // [[Rcpp::export("Inv_f3_with_disp")]]

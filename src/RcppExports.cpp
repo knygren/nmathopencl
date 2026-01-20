@@ -143,23 +143,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// Inv_f3_precompute_disp
-Rcpp::List Inv_f3_precompute_disp(NumericMatrix cbars, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt);
-RcppExport SEXP _glmbayes_Inv_f3_precompute_disp(SEXP cbarsSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type cbars(cbarsSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
-    rcpp_result_gen = Rcpp::wrap(Inv_f3_precompute_disp(cbars, y, x, mu, P, alpha, wt));
-    return rcpp_result_gen;
-END_RCPP
-}
 // rss_face_at_disp
 double rss_face_at_disp(double dispersion, Rcpp::List cache, Rcpp::NumericVector cbars_j, Rcpp::NumericVector y, Rcpp::NumericMatrix x, Rcpp::NumericVector alpha, Rcpp::NumericVector wt);
 RcppExport SEXP _glmbayes_rss_face_at_disp(SEXP dispersionSEXP, SEXP cacheSEXP, SEXP cbars_jSEXP, SEXP ySEXP, SEXP xSEXP, SEXP alphaSEXP, SEXP wtSEXP) {
@@ -209,24 +192,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type wt(wtSEXP);
     Rcpp::traits::input_parameter< double >::type rss_min_global(rss_min_globalSEXP);
     rcpp_result_gen = Rcpp::wrap(UB2(dispersion, cache, cbars_j, y, x, alpha, wt, rss_min_global));
-    return rcpp_result_gen;
-END_RCPP
-}
-// UB2_Fun
-double UB2_Fun(double dispersion, Rcpp::List cache, Rcpp::NumericVector cbars_j, Rcpp::NumericVector y, Rcpp::NumericMatrix x, Rcpp::NumericVector alpha, Rcpp::NumericVector wt, double rss_min_global);
-RcppExport SEXP _glmbayes_UB2_Fun(SEXP dispersionSEXP, SEXP cacheSEXP, SEXP cbars_jSEXP, SEXP ySEXP, SEXP xSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP rss_min_globalSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type dispersion(dispersionSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type cache(cacheSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type cbars_j(cbars_jSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type wt(wtSEXP);
-    Rcpp::traits::input_parameter< double >::type rss_min_global(rss_min_globalSEXP);
-    rcpp_result_gen = Rcpp::wrap(UB2_Fun(dispersion, cache, cbars_j, y, x, alpha, wt, rss_min_global));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -301,55 +266,6 @@ BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     rcpp_result_gen = Rcpp::wrap(gpu_names());
-    return rcpp_result_gen;
-END_RCPP
-}
-// RSS
-NumericVector RSS(NumericVector y, NumericMatrix x, NumericMatrix b, NumericVector alpha, NumericVector wt);
-RcppExport SEXP _glmbayes_RSS(SEXP ySEXP, SEXP xSEXP, SEXP bSEXP, SEXP alphaSEXP, SEXP wtSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type b(bSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
-    rcpp_result_gen = Rcpp::wrap(RSS(y, x, b, alpha, wt));
-    return rcpp_result_gen;
-END_RCPP
-}
-// f2_gaussian
-NumericVector f2_gaussian(NumericMatrix b, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt);
-RcppExport SEXP _glmbayes_f2_gaussian(SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type b(bSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
-    rcpp_result_gen = Rcpp::wrap(f2_gaussian(b, y, x, mu, P, alpha, wt));
-    return rcpp_result_gen;
-END_RCPP
-}
-// Inv_f3_gaussian
-arma::mat Inv_f3_gaussian(NumericMatrix cbars, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt);
-RcppExport SEXP _glmbayes_Inv_f3_gaussian(SEXP cbarsSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type cbars(cbarsSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
-    rcpp_result_gen = Rcpp::wrap(Inv_f3_gaussian(cbars, y, x, mu, P, alpha, wt));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -509,29 +425,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rnnorm_reg_std_cpp_parallel
-List rnnorm_reg_std_cpp_parallel(int n, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, Function f2, List Envelope, CharacterVector family, CharacterVector link, int progbar, bool verbose);
-RcppExport SEXP _glmbayes_rnnorm_reg_std_cpp_parallel(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP f2SEXP, SEXP EnvelopeSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP progbarSEXP, SEXP verboseSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
-    Rcpp::traits::input_parameter< Function >::type f2(f2SEXP);
-    Rcpp::traits::input_parameter< List >::type Envelope(EnvelopeSEXP);
-    Rcpp::traits::input_parameter< CharacterVector >::type family(familySEXP);
-    Rcpp::traits::input_parameter< CharacterVector >::type link(linkSEXP);
-    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(rnnorm_reg_std_cpp_parallel(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar, verbose));
-    return rcpp_result_gen;
-END_RCPP
-}
 // rnnorm_reg_cpp
 Rcpp::List rnnorm_reg_cpp(int n, NumericVector y, NumericMatrix x, NumericVector mu, NumericMatrix P, NumericVector offset, NumericVector wt, double dispersion, Function f2, Function f3, NumericVector start, std::string family, std::string link, int Gridtype, int n_envopt, bool use_parallel, bool use_opencl, bool verbose);
 RcppExport SEXP _glmbayes_rnnorm_reg_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP offsetSEXP, SEXP wtSEXP, SEXP dispersionSEXP, SEXP f2SEXP, SEXP f3SEXP, SEXP startSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP, SEXP n_envoptSEXP, SEXP use_parallelSEXP, SEXP use_openclSEXP, SEXP verboseSEXP) {
@@ -592,19 +485,14 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_EnvelopeEval", (DL_FUNC) &_glmbayes_EnvelopeEval, 11},
     {"_glmbayes_EnvelopeBuild_cpp", (DL_FUNC) &_glmbayes_EnvelopeBuild_cpp, 16},
     {"_glmbayes_EnvelopeBuild_Ind_Normal_Gamma", (DL_FUNC) &_glmbayes_EnvelopeBuild_Ind_Normal_Gamma, 16},
-    {"_glmbayes_Inv_f3_precompute_disp", (DL_FUNC) &_glmbayes_Inv_f3_precompute_disp, 7},
     {"_glmbayes_rss_face_at_disp", (DL_FUNC) &_glmbayes_rss_face_at_disp, 7},
     {"_glmbayes_drss_ddisp", (DL_FUNC) &_glmbayes_drss_ddisp, 7},
     {"_glmbayes_UB2", (DL_FUNC) &_glmbayes_UB2, 8},
-    {"_glmbayes_UB2_Fun", (DL_FUNC) &_glmbayes_UB2_Fun, 8},
     {"_glmbayes_EnvelopeDispersionBuild_cpp", (DL_FUNC) &_glmbayes_EnvelopeDispersionBuild_cpp, 17},
     {"_glmbayes_has_opencl", (DL_FUNC) &_glmbayes_has_opencl, 0},
     {"_glmbayes_Set_Grid", (DL_FUNC) &_glmbayes_Set_Grid, 3},
     {"_glmbayes_setlogP", (DL_FUNC) &_glmbayes_setlogP, 4},
     {"_glmbayes_gpu_names", (DL_FUNC) &_glmbayes_gpu_names, 0},
-    {"_glmbayes_RSS", (DL_FUNC) &_glmbayes_RSS, 5},
-    {"_glmbayes_f2_gaussian", (DL_FUNC) &_glmbayes_f2_gaussian, 7},
-    {"_glmbayes_Inv_f3_gaussian", (DL_FUNC) &_glmbayes_Inv_f3_gaussian, 7},
     {"_glmbayes_Inv_f3_with_disp", (DL_FUNC) &_glmbayes_Inv_f3_with_disp, 3},
     {"_glmbayes_f2_f3_opencl", (DL_FUNC) &_glmbayes_f2_f3_opencl, 10},
     {"_glmbayes_load_kernel_source_wrapper", (DL_FUNC) &_glmbayes_load_kernel_source_wrapper, 2},
@@ -614,7 +502,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_rindep_norm_gamma_reg_std_parallel_cpp", (DL_FUNC) &_glmbayes_rindep_norm_gamma_reg_std_parallel_cpp, 15},
     {"_glmbayes_glmb_Standardize_Model", (DL_FUNC) &_glmbayes_glmb_Standardize_Model, 5},
     {"_glmbayes_rnnorm_reg_std_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_std_cpp, 13},
-    {"_glmbayes_rnnorm_reg_std_cpp_parallel", (DL_FUNC) &_glmbayes_rnnorm_reg_std_cpp_parallel, 13},
     {"_glmbayes_rnnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_cpp, 18},
     {"_glmbayes_rnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnorm_reg_cpp, 14},
     {NULL, NULL, 0}

@@ -172,9 +172,6 @@ arma::vec f2_gaussian_rmat_mat(const RcppParallel::RMatrix<double>& b,   // cand
 
 arma::mat  f3_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
 NumericVector RSS(NumericVector y, NumericMatrix x,NumericMatrix b,NumericVector alpha,NumericVector wt);
-arma::mat  Inv_f3_gaussian(NumericMatrix cbars,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
-
-
 
 
 RcppParallel::RMatrix<double> Inv_f3_with_disp_rmat(

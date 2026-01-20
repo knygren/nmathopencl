@@ -1185,7 +1185,7 @@ List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar,NumericMatrix A,
 
 
 
-// [[Rcpp::export]]
+
 Rcpp::List Inv_f3_precompute_disp(NumericMatrix cbars,
                                   NumericVector y,
                                   NumericMatrix x,
@@ -1349,25 +1349,6 @@ double UB2(double dispersion,
   return UB2_val;
 }
 
-
-// [[Rcpp::export]]
-double UB2_Fun(double dispersion,
-           Rcpp::List cache,
-           Rcpp::NumericVector cbars_j,
-           Rcpp::NumericVector y,
-           Rcpp::NumericMatrix x,
-           Rcpp::NumericVector alpha,
-           Rcpp::NumericVector wt,
-           double rss_min_global) {
-  
-  // Call the existing RSS function
-  double rss_val = rss_face_at_disp(dispersion, cache, cbars_j, y, x, alpha, wt);
-  
-  // Compute UB2
-  double UB2_val = (0.5 / dispersion) * (rss_val - rss_min_global);
-  
-  return UB2_val;
-}
 
 // Utility: safe max for NumericVector
 static inline double max_vec(const NumericVector& v) {
@@ -2118,11 +2099,6 @@ List EnvelopeDispersionBuild_cpp(
    for (int j = 0; j < gs; ++j) {
      
    NumericVector cbars_j = cbars(j, _);
-  
-//   double ub2_val_alt = UB2_Fun(0.271233, cache, cbars_j, y, x, alpha, wt, rss_min_global);
-  
-//  Rcpp::Rcout << "UB2_alt function: " << ub2_val_alt << ", disp_alt: " << 0.271233 << std::endl;
-  
   
    }
   

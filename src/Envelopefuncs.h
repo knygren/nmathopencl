@@ -5,8 +5,6 @@
 
 using namespace Rcpp;
 
-
-
 List EnvelopeBuild_cpp(NumericVector bStar,
                      NumericMatrix A,
                      NumericVector y,
@@ -26,8 +24,6 @@ List EnvelopeBuild_cpp(NumericVector bStar,
 );
 
 
-
-
 // Dispersion-aware envelope solver
 arma::mat Inv_f3_with_disp(Rcpp::List cache,
                            double dispersion,
@@ -41,12 +37,3 @@ double rss_face_at_disp(double dispersion,
                         Rcpp::NumericMatrix x,
                         Rcpp::NumericVector alpha,
                         Rcpp::NumericVector wt) ;
-
-double UB2_Fun(double dispersion,
-           Rcpp::List cache,
-           Rcpp::NumericVector cbars_j,
-           Rcpp::NumericVector y,
-           Rcpp::NumericMatrix x,
-           Rcpp::NumericVector alpha,
-           Rcpp::NumericVector wt,
-           double rss_min_global);
