@@ -4,7 +4,6 @@
 \alias{EnvelopeEval}
 \alias{f2_f3_non_opencl}
 \alias{f2_f3_opencl}
-\alias{run_opencl_pilot}
 \title{Evaluate Negative Log-Likelihood and Gradients}
 \usage{
 EnvelopeEval(G4, y, x, mu, P, alpha, wt,
@@ -14,11 +13,6 @@ EnvelopeEval(G4, y, x, mu, P, alpha, wt,
 f2_f3_non_opencl(family, link, b, y, x, mu, P, alpha, wt, progbar)
 
 f2_f3_opencl(family, link, b, y, x, mu, P, alpha, wt, progbar)
-
-run_opencl_pilot(G4, y, x, mu, P, alpha, wt,
-                        family, link,
-                        use_opencl, verbose,
-                        threshold_sec = 300)
 }
 \arguments{
 \item{G4}{Numeric matrix of parameter values (parameters * grid points).}
@@ -47,9 +41,6 @@ shifted into the likelihood.}
 \item{b}{Numeric matrix of parameter values (parameters * grid points).}
 
 \item{progbar}{Integer flag for progress bar control (internal use).}
-
-\item{threshold_sec}{Threshold seconds for run_opencl_pilot. If second exceeds this, a prompt for users is
-triggered allowing users to interrupt the run.}
 }
 \value{
 \describe{

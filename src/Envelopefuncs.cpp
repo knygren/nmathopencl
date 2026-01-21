@@ -21,7 +21,7 @@ using namespace Rcpp;
 
 // Internal helper: run OpenCL pilot timing, print diagnostics, and prompt user.
 // Not exported to R.
-// [[Rcpp::export]]
+
 
 double run_opencl_pilot(const Rcpp::NumericMatrix& G4,
                         const Rcpp::NumericVector& y,

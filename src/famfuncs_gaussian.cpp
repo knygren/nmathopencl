@@ -504,7 +504,6 @@ arma::mat  f3_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,NumericM
 using namespace Rcpp;
 
 
-// [[Rcpp::export("Inv_f3_with_disp")]]
 arma::mat Inv_f3_with_disp(Rcpp::List cache,
                            double dispersion,
                            Rcpp::NumericMatrix cbars_small) {

@@ -11,28 +11,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// run_opencl_pilot
-double run_opencl_pilot(const Rcpp::NumericMatrix& G4, const Rcpp::NumericVector& y, const Rcpp::NumericMatrix& x, const Rcpp::NumericMatrix& mu, const Rcpp::NumericMatrix& P, const Rcpp::NumericVector& alpha, const Rcpp::NumericVector& wt, const std::string& family, const std::string& link, bool use_opencl, bool verbose, double threshold_sec);
-RcppExport SEXP _glmbayes_run_opencl_pilot(SEXP G4SEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP use_openclSEXP, SEXP verboseSEXP, SEXP threshold_secSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type G4(G4SEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type P(PSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type wt(wtSEXP);
-    Rcpp::traits::input_parameter< const std::string& >::type family(familySEXP);
-    Rcpp::traits::input_parameter< const std::string& >::type link(linkSEXP);
-    Rcpp::traits::input_parameter< bool >::type use_opencl(use_openclSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    Rcpp::traits::input_parameter< double >::type threshold_sec(threshold_secSEXP);
-    rcpp_result_gen = Rcpp::wrap(run_opencl_pilot(G4, y, x, mu, P, alpha, wt, family, link, use_opencl, verbose, threshold_sec));
-    return rcpp_result_gen;
-END_RCPP
-}
 // f2_f3_non_opencl
 Rcpp::List f2_f3_non_opencl(std::string family, std::string link, Rcpp::NumericMatrix b, Rcpp::NumericVector y, Rcpp::NumericMatrix x, Rcpp::NumericMatrix mu, Rcpp::NumericMatrix P, Rcpp::NumericVector alpha, Rcpp::NumericVector wt, int progbar);
 RcppExport SEXP _glmbayes_f2_f3_non_opencl(SEXP familySEXP, SEXP linkSEXP, SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP progbarSEXP) {
@@ -252,19 +230,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// Inv_f3_with_disp
-arma::mat Inv_f3_with_disp(Rcpp::List cache, double dispersion, Rcpp::NumericMatrix cbars_small);
-RcppExport SEXP _glmbayes_Inv_f3_with_disp(SEXP cacheSEXP, SEXP dispersionSEXP, SEXP cbars_smallSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::List >::type cache(cacheSEXP);
-    Rcpp::traits::input_parameter< double >::type dispersion(dispersionSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type cbars_small(cbars_smallSEXP);
-    rcpp_result_gen = Rcpp::wrap(Inv_f3_with_disp(cache, dispersion, cbars_small));
-    return rcpp_result_gen;
-END_RCPP
-}
 // f2_f3_opencl
 Rcpp::List f2_f3_opencl(std::string family, std::string link, Rcpp::NumericMatrix b, Rcpp::NumericVector y, Rcpp::NumericMatrix x, Rcpp::NumericMatrix mu, Rcpp::NumericMatrix P, Rcpp::NumericVector alpha, Rcpp::NumericVector wt, int progbar);
 RcppExport SEXP _glmbayes_f2_f3_opencl(SEXP familySEXP, SEXP linkSEXP, SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP progbarSEXP) {
@@ -462,7 +427,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_glmbayes_run_opencl_pilot", (DL_FUNC) &_glmbayes_run_opencl_pilot, 12},
     {"_glmbayes_f2_f3_non_opencl", (DL_FUNC) &_glmbayes_f2_f3_non_opencl, 10},
     {"_glmbayes_EnvelopeSize", (DL_FUNC) &_glmbayes_EnvelopeSize, 7},
     {"_glmbayes_EnvelopeEval", (DL_FUNC) &_glmbayes_EnvelopeEval, 11},
@@ -475,7 +439,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_Set_Grid", (DL_FUNC) &_glmbayes_Set_Grid, 3},
     {"_glmbayes_setlogP", (DL_FUNC) &_glmbayes_setlogP, 4},
     {"_glmbayes_gpu_names", (DL_FUNC) &_glmbayes_gpu_names, 0},
-    {"_glmbayes_Inv_f3_with_disp", (DL_FUNC) &_glmbayes_Inv_f3_with_disp, 3},
     {"_glmbayes_f2_f3_opencl", (DL_FUNC) &_glmbayes_f2_f3_opencl, 10},
     {"_glmbayes_load_kernel_source_wrapper", (DL_FUNC) &_glmbayes_load_kernel_source_wrapper, 2},
     {"_glmbayes_load_kernel_library_wrapper", (DL_FUNC) &_glmbayes_load_kernel_library_wrapper, 3},

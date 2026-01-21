@@ -165,20 +165,6 @@
         family, link, b, y, x, mu, P, alpha, wt, progbar)
 }
 
-#' @noRd
-#' @keywords internal
-
-.run_opencl_pilot <- function(G4, y, x, mu, P, alpha, wt,
-                              family, link,
-                              use_opencl,
-                              verbose,
-                              threshold_sec = 300.0) {
-  .Call(`_glmbayes_run_opencl_pilot`,
-        G4, y, x, mu, P, alpha, wt,
-        family, link,
-        use_opencl, verbose, threshold_sec)
-}
-
 
 #' @noRd
 #' @keywords internal

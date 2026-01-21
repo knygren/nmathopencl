@@ -1795,8 +1795,6 @@ setlogP <- function(logP, NegLL, cbars, G3) {
 #' @param verbose Logical; if \code{TRUE}, print diagnostic output.
 #' @param progbar Integer flag for progress bar control (internal use).
 #' @param b Numeric matrix of parameter values (parameters * grid points).
-#' @param threshold_sec Threshold seconds for run_opencl_pilot. If second exceeds this, a prompt for users is 
-#' triggered allowing users to interrupt the run.
 #' @details
 #' The evaluation workflow has several layers:
 #' **1. High-level dispatch (`EnvelopeEval`)**
@@ -1952,23 +1950,6 @@ f2_f3_non_opencl <- function(family, link, b, y, x, mu, P, alpha, wt, progbar = 
 
 f2_f3_opencl <- function(family, link, b, y, x, mu, P, alpha, wt, progbar = 0L) {
   .f2_f3_opencl(family, link, b, y, x, mu, P, alpha, wt, progbar)
-}
-
-#' @rdname EnvelopeEval
-#' @export
-#' @usage run_opencl_pilot(G4, y, x, mu, P, alpha, wt,
-#'                         family, link,
-#'                         use_opencl, verbose,
-#'                         threshold_sec = 300)
-
-
-run_opencl_pilot <- function(G4, y, x, mu, P, alpha, wt,
-                             family, link,
-                             use_opencl = FALSE,
-                             verbose = FALSE,
-                             threshold_sec = 300) {
-  .run_opencl_pilot(G4, y, x, mu, P, alpha, wt,
-                   family, link, use_opencl, verbose, threshold_sec)
 }
 
 
@@ -2407,20 +2388,6 @@ thetabar_const<-function(P,cbars,thetabar){
   return(thetaconst)
 }
 
-
-#' @noRd
-
-Inv_f3_with_disp <- function(cache, dispersion, cbars_small) {
-  .Call(`_glmbayes_Inv_f3_with_disp`, cache, dispersion, cbars_small)
-}
-
-
-
-#' #' @noRd
-
-# drss_ddisp <- function(dispersion, cache, cbars_j, y, x, alpha, wt) {
-#   .Call(`_glmbayes_drss_ddisp`, dispersion, cache, cbars_j, y, x, alpha, wt)
-# }
 
 #' @noRd
 
