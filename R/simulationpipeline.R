@@ -441,6 +441,7 @@ glmbfamfunc<-function(family){
 #' @rdname glmbfamfunc
 #' @order 2
 #' @method print glmbfamfunc
+#' @export
 
 
 print.glmbfamfunc<-function(x,...)
@@ -2314,59 +2315,6 @@ dpois2<-function(x,lambda,log=TRUE){
   } 
   
   return(dpois(x,lambda,log=TRUE))
-}
-
-#' @noRd
-
-EnvBuildLinBound<-function(thetabars,cbars,y,x2,P2,alpha,dispstar){
-  
-  # gs=nrow(cbars)
-  # n_vars=ncol(cbars)
-  # 
-  # New_LL_Slope_test2=c(1:gs)
-  # New_LL_Slope_test3=c(1:gs)
-  
-  XtX   <- crossprod(x2)
-  rhs   <- crossprod(x2, y - alpha)
-  M     <- XtX + dispstar * P2
-  # Replace solve(M) with Cholesky inversion
-  R    <- chol(M)
-  Minv <- chol2inv(R)
-  Minv <- 0.5 * (Minv + t(Minv))   # enforce symmetry
-  H1    <- -Minv %*% P2 %*% Minv
-  
-  V <- -(thetabars %*% P2) + cbars          # gs x p
-  Minv_cbars <- t(Minv %*% t(cbars))        # gs x p
-  term1 <- rowSums(V * Minv_cbars)
-  
-  # replicate rhs across gs columns
-  rhs_mat <- matrix(rhs, nrow = length(rhs), ncol = nrow(cbars))
-  H1_rhs  <- t(H1 %*% (rhs_mat + dispstar * t(cbars)))  # gs * p
-  
-  term2 <- rowSums(V * H1_rhs)
-  
-  New_LL_Slope <- term1 + term2
-  
-  return(New_LL_Slope)
-  
-}
-
-#' @noRd
-
-thetabar_const<-function(P,cbars,thetabar){
-  
-  gs=nrow(cbars)
-  thetaconst=c(1:gs)
-  n_var=nrow(P)
-  
-  for(j in 1:gs){
-    theta_temp=as.matrix(thetabar[j,1:n_var],ncol=1)
-    cbars_temp=as.matrix(cbars[j,1:n_var],ncol=1)
-    thetaconst[j]=-0.5*t(theta_temp)%*%P%*%theta_temp+t(cbars_temp)%*% theta_temp
-    
-  }
-  
-  return(thetaconst)
 }
 
 
