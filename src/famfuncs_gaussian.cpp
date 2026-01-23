@@ -30,22 +30,22 @@ void neg_dnorm_glmb_rmat(const RcppParallel::RVector<double>& x,         // obse
 }
 
 
-void neg_dnorm_glmb_rmat_old(const RcppParallel::RVector<double>& x,         // observed values
-                         const RcppParallel::RVector<double>& means,     // normal means
-                         const RcppParallel::RVector<double>& sds,       // standard deviations
-                         RcppParallel::RVector<double>& res,             // output buffer
-                         const int lg)                                   // log=TRUE?
-{
-  std::size_t n = x.length();
-  
-  for (std::size_t i = 0; i < n; ++i) {
-    double mu    = means[i];   // mean parameter
-    double sigma = sds[i];     // standard deviation
-    //res[i] = -R::dnorm(x[i], mu, sigma, lg);  // R-native normal density
-    res[i] = -dnorm4_local(x[i], mu, sigma, lg);  // Mathlib-native normal density
-    
-      }
-}
+// void neg_dnorm_glmb_rmat_old(const RcppParallel::RVector<double>& x,         // observed values
+//                          const RcppParallel::RVector<double>& means,     // normal means
+//                          const RcppParallel::RVector<double>& sds,       // standard deviations
+//                          RcppParallel::RVector<double>& res,             // output buffer
+//                          const int lg)                                   // log=TRUE?
+// {
+//   std::size_t n = x.length();
+//   
+//   for (std::size_t i = 0; i < n; ++i) {
+//     double mu    = means[i];   // mean parameter
+//     double sigma = sds[i];     // standard deviation
+//     //res[i] = -R::dnorm(x[i], mu, sigma, lg);  // R-native normal density
+//     res[i] = -dnorm4_local(x[i], mu, sigma, lg);  // Mathlib-native normal density
+//     
+//       }
+// }
 
 
 
@@ -542,49 +542,49 @@ arma::mat Inv_f3_with_disp(Rcpp::List cache,
 
 
 // Internal: rmat-in/rmat-out, uses Armadillo for chol/solve inside.
-RcppParallel::RMatrix<double> Inv_f3_with_disp_rmat(
-    const RcppParallel::RMatrix<double>& Pmat_r,
-    const RcppParallel::RMatrix<double>& Pmu_r,
-    const RcppParallel::RVector<double>& base_B0_r,
-    const RcppParallel::RMatrix<double>& base_A_r,
-    double dispersion,
-    const RcppParallel::RMatrix<double>& cbars_r // p × m
-) {
-  const int p = Pmat_r.nrow();
-  const int m = cbars_r.ncol();
-  
-  arma::vec B0(p);
-  for (int i = 0; i < p; ++i) {
-    B0[i] = base_B0_r[i] / dispersion + Pmu_r(i, 0);
-  }
-  
-  arma::mat A(p, p);
-  for (int r = 0; r < p; ++r) {
-    for (int c = 0; c < p; ++c) {
-      double val = Pmat_r(r, c) + base_A_r(r, c) / dispersion;
-      double sym = 0.5 * (val + (Pmat_r(c, r) + base_A_r(c, r) / dispersion));
-      A(r, c) = sym;
-    }
-  }
-  
-  arma::mat R = arma::chol(A);
-  
-  Rcpp::NumericMatrix Out_nm(m, p);
-  RcppParallel::RMatrix<double> Out_r(Out_nm);
-  
-  for (int j = 0; j < m; ++j) {
-    arma::vec cbars_i(p);
-    for (int r = 0; r < p; ++r) cbars_i[r] = cbars_r(r, j);
-    
-    arma::vec b = -cbars_i + B0;
-    arma::vec ytmp = arma::solve(arma::trimatl(R.t()), b);
-    arma::vec sol  = arma::solve(arma::trimatu(R), ytmp);
-    
-    for (int r = 0; r < p; ++r) Out_r(j, r) = -sol[r];
-  }
-  
-  return Out_r;
-}
+// RcppParallel::RMatrix<double> Inv_f3_with_disp_rmat(
+//     const RcppParallel::RMatrix<double>& Pmat_r,
+//     const RcppParallel::RMatrix<double>& Pmu_r,
+//     const RcppParallel::RVector<double>& base_B0_r,
+//     const RcppParallel::RMatrix<double>& base_A_r,
+//     double dispersion,
+//     const RcppParallel::RMatrix<double>& cbars_r // p × m
+// ) {
+//   const int p = Pmat_r.nrow();
+//   const int m = cbars_r.ncol();
+//   
+//   arma::vec B0(p);
+//   for (int i = 0; i < p; ++i) {
+//     B0[i] = base_B0_r[i] / dispersion + Pmu_r(i, 0);
+//   }
+//   
+//   arma::mat A(p, p);
+//   for (int r = 0; r < p; ++r) {
+//     for (int c = 0; c < p; ++c) {
+//       double val = Pmat_r(r, c) + base_A_r(r, c) / dispersion;
+//       double sym = 0.5 * (val + (Pmat_r(c, r) + base_A_r(c, r) / dispersion));
+//       A(r, c) = sym;
+//     }
+//   }
+//   
+//   arma::mat R = arma::chol(A);
+//   
+//   Rcpp::NumericMatrix Out_nm(m, p);
+//   RcppParallel::RMatrix<double> Out_r(Out_nm);
+//   
+//   for (int j = 0; j < m; ++j) {
+//     arma::vec cbars_i(p);
+//     for (int r = 0; r < p; ++r) cbars_i[r] = cbars_r(r, j);
+//     
+//     arma::vec b = -cbars_i + B0;
+//     arma::vec ytmp = arma::solve(arma::trimatl(R.t()), b);
+//     arma::vec sol  = arma::solve(arma::trimatu(R), ytmp);
+//     
+//     for (int r = 0; r < p; ++r) Out_r(j, r) = -sol[r];
+//   }
+//   
+//   return Out_r;
+// }
 
 
 
