@@ -36,24 +36,24 @@ void neg_dgamma_glmb_rmat(const RVector<double>& x,           // observations
       }
 }
 
-void neg_dgamma_glmb_rmat_old(const RVector<double>& x,           // observations
-                          const RVector<double>& shape,       // shape parameters
-                          const RVector<double>& scale,       // scale parameters
-                          RVector<double>& res,               // output buffer
-                          const int lg)                       // log=TRUE?
-{
-  std::size_t n = x.length();
-  
-  for (std::size_t i = 0; i < n; ++i) {
-    double value = x[i];
-    double k     = shape[i];
-    double theta = scale[i];
-    
-    res[i] = -dgamma_local(value, k, theta, lg);  // call to mathlib version
-    //    res[i] = -R::dgamma(value, k, theta, lg);  // current R call
-    
-  }
-}
+// void neg_dgamma_glmb_rmat_old(const RVector<double>& x,           // observations
+//                           const RVector<double>& shape,       // shape parameters
+//                           const RVector<double>& scale,       // scale parameters
+//                           RVector<double>& res,               // output buffer
+//                           const int lg)                       // log=TRUE?
+// {
+//   std::size_t n = x.length();
+//   
+//   for (std::size_t i = 0; i < n; ++i) {
+//     double value = x[i];
+//     double k     = shape[i];
+//     double theta = scale[i];
+//     
+//     res[i] = -dgamma_local(value, k, theta, lg);  // call to mathlib version
+//     //    res[i] = -R::dgamma(value, k, theta, lg);  // current R call
+//     
+//   }
+// }
 
 
 

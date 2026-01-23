@@ -229,79 +229,79 @@ NumericVector  f2_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,Nume
 }
 
 
-arma::vec   f2_gaussian_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
-{
-  
-  // Get dimensions of x - Note: should match dimensions of
-  //  y, b, alpha, and wt (may add error checking)
-  
-  // May want to add method for dealing with alpha and wt when 
-  // constants instead of vectors
-  
-  int l1 = x.nrow(), l2 = x.ncol();
-  int m1 = b.ncol();
-  
-  //    int lalpha=alpha.nrow();
-  //    int lwt=wt.nrow();
-  
-  arma::mat b2full(b.begin(), l2, m1, false);  // Shallow view over b
-  
-  Rcpp::NumericMatrix b2temp(l2,1);
-  
-  arma::mat x2(x.begin(), l1, l2, false); 
-  arma::mat alpha2(alpha.begin(), l1, 1, false); 
-  
-  Rcpp::NumericVector xb(l1);
-  arma::colvec xb2(xb.begin(),l1,false); // Reuse memory - update both below
-  
-  
-  NumericVector invwt=1/sqrt(wt);
-  
-  // Moving Loop inside the function is key for speed
-  
-  NumericVector yy(l1);
-//  NumericVector res(m1);
-  NumericMatrix bmu(l2,1);
-  
-  arma::mat mu2(mu.begin(), l2, 1, false); 
-  arma::mat bmu2(bmu.begin(), l2, 1, false); 
-  arma::vec res2(m1);  // Owning allocation
-  
-  double res1=0;
-  
-  
-  for(int i=0;i<m1;i++){
-    b2temp=b(Range(0,l2-1),Range(i,i));
-    //arma::mat b2(b2temp.begin(), l2, 1, false); 
-    arma::mat b2(b2full.colptr(i), l2, 1, false);  // View of column i, size l2 × 1
-    
-    arma::mat P2(P.begin(), l2, l2, false); 
-    
-    bmu2=b2-mu2;
-    
-    res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
-    
-    xb2=alpha2+ x2 * b2;
-    
-    // Wrap existing R memory buffers
-    RcppParallel::RVector<double> y_view(y);
-    RcppParallel::RVector<double> xb_view(xb);
-    RcppParallel::RVector<double> invwt_view(invwt);
-    RcppParallel::RVector<double> yy_view(yy); //must be preallocated to match y.size()
-    
-    // In-place evaluation using your log-scale accurate backend
-    neg_dnorm_glmb_rmat_old(y_view,  xb_view,invwt_view, yy_view,1.0);
-    
- 
-    
- //   yy=-dnorm_glmb(y,xb,invwt,true);
-    
-//  res(i) =std::accumulate(yy.begin(), yy.end(), res1);
-    res2(i) = std::accumulate(yy.begin(), yy.end(), res1);
-  }
-  
-  return res2;      
-}
+// arma::vec   f2_gaussian_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
+// {
+//   
+//   // Get dimensions of x - Note: should match dimensions of
+//   //  y, b, alpha, and wt (may add error checking)
+//   
+//   // May want to add method for dealing with alpha and wt when 
+//   // constants instead of vectors
+//   
+//   int l1 = x.nrow(), l2 = x.ncol();
+//   int m1 = b.ncol();
+//   
+//   //    int lalpha=alpha.nrow();
+//   //    int lwt=wt.nrow();
+//   
+//   arma::mat b2full(b.begin(), l2, m1, false);  // Shallow view over b
+//   
+//   Rcpp::NumericMatrix b2temp(l2,1);
+//   
+//   arma::mat x2(x.begin(), l1, l2, false); 
+//   arma::mat alpha2(alpha.begin(), l1, 1, false); 
+//   
+//   Rcpp::NumericVector xb(l1);
+//   arma::colvec xb2(xb.begin(),l1,false); // Reuse memory - update both below
+//   
+//   
+//   NumericVector invwt=1/sqrt(wt);
+//   
+//   // Moving Loop inside the function is key for speed
+//   
+//   NumericVector yy(l1);
+// //  NumericVector res(m1);
+//   NumericMatrix bmu(l2,1);
+//   
+//   arma::mat mu2(mu.begin(), l2, 1, false); 
+//   arma::mat bmu2(bmu.begin(), l2, 1, false); 
+//   arma::vec res2(m1);  // Owning allocation
+//   
+//   double res1=0;
+//   
+//   
+//   for(int i=0;i<m1;i++){
+//     b2temp=b(Range(0,l2-1),Range(i,i));
+//     //arma::mat b2(b2temp.begin(), l2, 1, false); 
+//     arma::mat b2(b2full.colptr(i), l2, 1, false);  // View of column i, size l2 × 1
+//     
+//     arma::mat P2(P.begin(), l2, l2, false); 
+//     
+//     bmu2=b2-mu2;
+//     
+//     res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+//     
+//     xb2=alpha2+ x2 * b2;
+//     
+//     // Wrap existing R memory buffers
+//     RcppParallel::RVector<double> y_view(y);
+//     RcppParallel::RVector<double> xb_view(xb);
+//     RcppParallel::RVector<double> invwt_view(invwt);
+//     RcppParallel::RVector<double> yy_view(yy); //must be preallocated to match y.size()
+//     
+//     // In-place evaluation using your log-scale accurate backend
+//     neg_dnorm_glmb_rmat_old(y_view,  xb_view,invwt_view, yy_view,1.0);
+//     
+//  
+//     
+//  //   yy=-dnorm_glmb(y,xb,invwt,true);
+//     
+// //  res(i) =std::accumulate(yy.begin(), yy.end(), res1);
+//     res2(i) = std::accumulate(yy.begin(), yy.end(), res1);
+//   }
+//   
+//   return res2;      
+// }
 
 
 arma::vec f2_gaussian_rmat(

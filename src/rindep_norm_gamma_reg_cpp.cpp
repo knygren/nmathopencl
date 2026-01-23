@@ -459,379 +459,185 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
 // - Scale weights before likelihood call (wt2 = wt / dispersion)
 // - Pass wt2 directly into f2_gaussian_rmat (no scaling of returned LL)
 
-void rindep_loop_rmat(
-    int n,
-    // Inputs
-    const RcppParallel::RVector<double>& y_r,
-    const RcppParallel::RMatrix<double>& x_r,
-    const RcppParallel::RMatrix<double>& mu_r,
-    const RcppParallel::RMatrix<double>& P_r,
-    const RcppParallel::RVector<double>& alpha_r,
-    const RcppParallel::RVector<double>& wt_r,
-    
-    const RcppParallel::RMatrix<double>& cbars_r,
-    const RcppParallel::RVector<double>& PLSD_r,
-    const RcppParallel::RMatrix<double>& loglt_r,
-    const RcppParallel::RMatrix<double>& logrt_r,
-    
-    const RcppParallel::RVector<double>& lg_prob_factor_r,
-    const RcppParallel::RVector<double>& UB2min_r,
-    
-    double shape3,
-    double rate2,
-    double disp_upper,
-    double disp_lower,
-    double RSS_Min,
-    double max_New_LL_UB,
-    double max_LL_log_disp,
-    double lm_log1,
-    double lm_log2,
-    double lmc1,
-    double lmc2,
-    
-    // Cache (precomputed upstream)
-    const RcppParallel::RMatrix<double>& Pmat_r,
-    const RcppParallel::RMatrix<double>& Pmu_r,
-    const RcppParallel::RVector<double>& base_B0_r,
-    const RcppParallel::RMatrix<double>& base_A_r,
-    
-    // Outputs
-    RcppParallel::RMatrix<double>& beta_out_r,   // n × l1
-    RcppParallel::RVector<double>& disp_out_r,   // length n
-    RcppParallel::RVector<double>& iters_out_r,  // length n
-    RcppParallel::RVector<double>& weight_out_r  // length n
-) {
-  const int l2 = x_r.nrow();
-  const int l1 = x_r.ncol();
-  
-  // Thread-local buffers and views (no Rcpp::NumericMatrix allocations).
-  std::vector<double> out_buf(static_cast<std::size_t>(l1), 0.0);
-  RcppParallel::RMatrix<double> out_row(out_buf.data(), 1,  l1);  // 1×l1
-  RcppParallel::RMatrix<double> out_col(out_buf.data(), l1, 1);   // l1×1
-  
-  std::vector<double> theta_buf(static_cast<std::size_t>(l1), 0.0);
-  RcppParallel::RMatrix<double> theta_row(theta_buf.data(), 1,  l1); // 1×l1
-  RcppParallel::RMatrix<double> theta_col(theta_buf.data(), l1, 1);  // l1×1
-  
-  std::vector<double> cbars_col_buf(static_cast<std::size_t>(l1), 0.0);
-  RcppParallel::RMatrix<double> cbars_small_col(cbars_col_buf.data(), l1, 1); // l1×1
-  
-  // Scaled weights: classical logic requires wt2 = wt / dispersion before likelihood
-  Rcpp::NumericVector wt2_nv(l2);                  // thread-local
-  RcppParallel::RVector<double> wt2_r(wt2_nv);     // matches f2_gaussian_rmat signature
-  
-  for (int i = 0; i < n; ++i) {
-    
-    Rcpp::checkUserInterrupt();  // allow user to break out
-    
-    iters_out_r[i] = 1;
-    weight_out_r[i] = 1.0;
-    
-    int a1 = 0;
-    while (a1 == 0) {
-      // 1) Component selection via PLSD
-      double U = safe_runif();
-      int J_idx = 0;
-      double U_left = U;
-      while (true) {
-        if (U_left <= PLSD_r[J_idx]) break;
-        U_left -= PLSD_r[J_idx];
-        ++J_idx;
-      }
-      
-      // 2) Draw truncated-normal beta row
-      for (int j = 0; j < l1; ++j) {
-        out_row(0, j) = ctrnorm_cpp(
-          logrt_r(J_idx, j),
-          loglt_r(J_idx, j),
-          -cbars_r(J_idx, j),
-          1.0
-        );
-      }
-      
-      // 3) Draw dispersion
-      double dispersion = r_invgamma_safe(shape3, rate2, disp_upper, disp_lower);
-      
-
-      
-      // 4) Solve theta (strict row-only contract)
-      for (int j = 0; j < l1; ++j) cbars_small_col(j, 0) = cbars_r(J_idx, j);
-      
-      RcppParallel::RMatrix<double> theta_sol_r =
-        Inv_f3_with_disp_rmat(Pmat_r, Pmu_r, base_B0_r, base_A_r,
-                              dispersion, cbars_small_col);
-      
-      // Signedness-safe check (cast l1 to std::size_t for compare)
-      if (!(theta_sol_r.nrow() == 1 &&
-          static_cast<std::size_t>(theta_sol_r.ncol()) == static_cast<std::size_t>(l1))) {
-        Rcpp::stop(std::string("Inv_f3_with_disp_rmat must return 1×l1 row; got ") +
-          std::to_string(theta_sol_r.nrow()) + "x" +
-          std::to_string(theta_sol_r.ncol()));
-      }
-      for (int j = 0; j < l1; ++j) theta_row(0, j) = theta_sol_r(0, j);
-      
-      // 5) Scale weights before likelihood (classical behavior)
-      for (int r = 0; r < l2; ++r) wt2_r[r] = wt_r[r] / dispersion;
-      
-      // 6) Likelihood calls (column views, pre-scaled weights)
-      
-      
-
-      double LL_New2_scalar =
-        -f2_gaussian_rmat(theta_col, y_r, x_r, mu_r, P_r, alpha_r, wt2_r, 0)[0];
-        double LL_Test_scalar =
-        -f2_gaussian_rmat(out_col,   y_r, x_r, mu_r, P_r, alpha_r, wt2_r, 0)[0];
-        
-        // 7) Upper bounds (row math)
-        double U2 = safe_runif();
-        double log_U2 = std::log(U2);
-        
-        double UB1 = LL_New2_scalar;
-        for (int j = 0; j < l1; ++j)
-          UB1 -= cbars_r(J_idx, j) * (out_row(0, j) - theta_row(0, j));
-        
-        double quad_sum = 0.0;
-        for (int r = 0; r < l2; ++r) {
-          double x_theta = 0.0;
-          for (int c = 0; c < l1; ++c) x_theta += x_r(r, c) * theta_row(0, c);
-          double resid  = (y_r[r] - alpha_r[r] - x_theta);
-          double scaled = resid * std::sqrt(wt_r[r]);
-          quad_sum += scaled * scaled;
-        }
-        double UB2 = 0.5 * (1.0 / dispersion) * (quad_sum - RSS_Min);
-        UB2 -= UB2min_r[J_idx];
-        
-        double theta_P_theta = 0.0;
-        for (int r = 0; r < l1; ++r) {
-          double acc = 0.0;
-          for (int c = 0; c < l1; ++c) acc += P_r(r, c) * theta_row(0, c);
-          theta_P_theta += theta_row(0, r) * acc;
-        }
-        double c_theta = 0.0;
-        for (int j = 0; j < l1; ++j) c_theta += cbars_r(J_idx, j) * theta_row(0, j);
-        double New_LL_J = -0.5 * theta_P_theta + c_theta;
-        
-        double UB3A = lg_prob_factor_r[J_idx] + lmc1 + lmc2 * dispersion - New_LL_J;
-        double New_LL_log_disp = lm_log1 + lm_log2 * std::log(dispersion);
-        double UB3B = (max_New_LL_UB - max_LL_log_disp + New_LL_log_disp)
-          - (lmc1 + lmc2 * dispersion);
-        
-        double test1 = (LL_Test_scalar - UB1);
-  
-  
-  double test = test1 - (UB2 + UB3A + UB3B);
-  
-
-        test = test - log_U2;
-        
-      
-        // 8) Record outputs and accept/reject
-        disp_out_r[i] = dispersion;
-        for (int j = 0; j < l1; ++j) beta_out_r(i, j) = out_row(0, j);
-        
-        if (test >= 0.0) {
-          a1 = 1;
-        } else {
-          
-          iters_out_r[i] = iters_out_r[i] + 1;
-        }
-    } // while (a1 == 0)
-  } // for i
-} // end rindep_loop_rmat  
-
-
-
-    
-
-
-
-
-
-// Classic loop implementation: consumes pre-extracted inputs.
-// Calls f2_gaussian(...) directly (assumed defined elsewhere).
-void rindep_loop_classic(
-    int n,
-    // Rcpp originals for f2_gaussian
-    const Rcpp::NumericVector& y_nv,
-    const Rcpp::NumericMatrix& x_nm,
-    const Rcpp::NumericMatrix& mu_nm,
-    const Rcpp::NumericMatrix& P_nm,
-    const Rcpp::NumericVector& alpha_nv,
-    const Rcpp::NumericVector& wt_nv,
-
-    // Envelope matrices/vectors
-    Rcpp::NumericMatrix& cbars,
-    Rcpp::NumericVector& PLSD,
-    Rcpp::NumericMatrix& loglt,
-    Rcpp::NumericMatrix& logrt,
-
-    // UB vectors
-    Rcpp::NumericVector& lg_prob_factor,
-    Rcpp::NumericVector& UB2min,
-
-    // Scalar constants
-    double shape3,
-    double rate2,
-    double disp_upper,
-    double disp_lower,
-    double RSS_Min,
-    double max_New_LL_UB,
-    double max_LL_log_disp,
-    double lm_log1,
-    double lm_log2,
-    double lmc1,
-    double lmc2,
-
-    // Precomputed cache
-    Rcpp::List& cache,
-
-    // Armadillo views for UB math
-    arma::vec& y2,          // length l2
-    arma::vec& alpha2,      // length l2
-    arma::mat& x2,          // l2 × l1
-    arma::mat& P2,          // l1 × l1
-    arma::vec& sqrt_wt1b,   // length l2: sqrt(wt)
-
-    // Outputs
-    Rcpp::NumericMatrix& beta_out,   // n × l1
-    Rcpp::NumericVector& disp_out,   // length n
-    Rcpp::NumericVector& iters_out,  // length n
-    Rcpp::NumericVector& weight_out  // length n
-) {
-
-  const int l1 = x2.n_cols;
-  const int l2 = x2.n_rows;
-
-
-  // Declare storage before the for-loop
-  // int J_idx_first = -1;
-
-
-  for (int i = 0; i < n; ++i) {
-
-
-    int a1 = 0;
-    iters_out[i] = 1;
-
-    while (a1 == 0) {
-
-      // Draw component index J via PLSD
-      double U = safe_runif();
-      int J_idx = 0;
-      double U_left = U;
-      while (true) {
-        if (U_left <= PLSD[J_idx]) break;
-        U_left -= PLSD[J_idx];
-        ++J_idx;
-      }
-
-      // Simulate beta row
-      Rcpp::NumericMatrix out(1, l1);
-      for (int j = 0; j < l1; ++j) {
-        out(0, j) = ctrnorm_cpp(logrt(J_idx, j), loglt(J_idx, j), -cbars(J_idx, j), 1.0);
-      }
-
-      // Dispersion draw
-      double dispersion = r_invgamma_safe(shape3, rate2, disp_upper, disp_lower);
-
-
-
-
-      // Compute theta row
-      Rcpp::NumericMatrix cbars_small = cbars(Rcpp::Range(J_idx, J_idx),
-                                              Rcpp::Range(0, cbars.ncol() - 1));
-      arma::mat theta2 = Inv_f3_with_disp(cache, dispersion, Rcpp::transpose(cbars_small));
-
-
-      Rcpp::NumericMatrix thetabars_new(1, l1);
-      // Fill using theta2 exactly as returned (must be 1 × l1 row)
-      if (!(theta2.n_rows == 1 && theta2.n_cols == arma::uword(l1))) {
-        Rcpp::stop("Inv_f3_with_disp must return 1×l1 row; got " +
-          std::to_string(theta2.n_rows) + "x" + std::to_string(theta2.n_cols) +
-          ", expected 1×l1 (l1=" + std::to_string(l1) + ")");
-      }
-
-      // Deterministic copy into thetabars_new row
-      for (int j = 0; j < l1; ++j) thetabars_new(0, j) = theta2(0, j);
-
-
-      // Likelihoods (calls f2_gaussian directly with Rcpp inputs)
-      Rcpp::NumericVector wt2(l2);
-      for (int r = 0; r < l2; ++r) wt2[r] = wt_nv[r] / dispersion;
-
-
-      Rcpp::NumericVector LL_New2 = -f2_gaussian(Rcpp::transpose(thetabars_new),
-                                                 y_nv, x_nm, mu_nm, P_nm, alpha_nv, wt2);
-
-
-
-
-      Rcpp::NumericVector LL_Test = -f2_gaussian(Rcpp::transpose(out),
-                                                 y_nv, x_nm, mu_nm, P_nm, alpha_nv, wt2);
-
-      double U2 = safe_runif();
-      double log_U2 = std::log(U2);
-
-      // UB1
-      arma::rowvec b_out2(out.begin(), l1, false);
-      arma::vec    theta_vec(thetabars_new.begin(), l1, false);
-      Rcpp::NumericVector cbars_row = cbars(J_idx, Rcpp::_);
-      arma::vec cbars_vec(cbars_row.begin(), l1, false);
-      arma::colvec betadiff = b_out2.t() - theta_vec;
-      double UB1 = LL_New2[0] - arma::as_scalar(cbars_vec.t() * betadiff);
-
-      // UB2
-      double quad_sum = 0.0;
-      for (int r = 0; r < l2; ++r) {
-        double x_theta = 0.0;
-        for (int c = 0; c < l1; ++c) x_theta += x2(r, c) * theta_vec[c];
-        double resid  = (y2[r] - alpha2[r] - x_theta);
-        double scaled = resid * sqrt_wt1b[r];
-        quad_sum += scaled * scaled;
-      }
-
-
-
-      double UB2 = 0.5 * (1.0 / dispersion) * (quad_sum - RSS_Min);
-      UB2 -= UB2min[J_idx];
-
-      // UB3A
-      double theta_P_theta = arma::as_scalar(theta_vec.t() * P2 * theta_vec);
-      double c_theta       = arma::as_scalar(cbars_vec.t() * theta_vec);
-      double New_LL_J      = -0.5 * theta_P_theta + c_theta;
-      double UB3A          = lg_prob_factor[J_idx] + lmc1 + lmc2 * dispersion - New_LL_J;
-
-      // UB3B
-      double New_LL_log_disp = lm_log1 + lm_log2 * std::log(dispersion);
-      double UB3B = (max_New_LL_UB - max_LL_log_disp + New_LL_log_disp)
-        - (lmc1 + lmc2 * dispersion);
-
-      // Acceptance test
-    //  double test1 = LL_Test[0] - UB1;
-
-      double test1=LL_Test[0] - UB1;
-
-      double test= test1-(UB2+UB3A+UB3B);  // Should be all negative
-
-      test = test - log_U2;
-
-
-      // Record outputs
-      disp_out[i] = dispersion;
-      beta_out(i, Rcpp::_) = out(0, Rcpp::_);
-
-      if (test >= 0.0) {
-        a1 = 1;
-      } else {
-        iters_out[i] = iters_out[i] + 1;
-      }
-    } // end while
-  }   // end for
-
-
-
-
-}
+// void rindep_loop_rmat(
+//     int n,
+//     // Inputs
+//     const RcppParallel::RVector<double>& y_r,
+//     const RcppParallel::RMatrix<double>& x_r,
+//     const RcppParallel::RMatrix<double>& mu_r,
+//     const RcppParallel::RMatrix<double>& P_r,
+//     const RcppParallel::RVector<double>& alpha_r,
+//     const RcppParallel::RVector<double>& wt_r,
+//     
+//     const RcppParallel::RMatrix<double>& cbars_r,
+//     const RcppParallel::RVector<double>& PLSD_r,
+//     const RcppParallel::RMatrix<double>& loglt_r,
+//     const RcppParallel::RMatrix<double>& logrt_r,
+//     
+//     const RcppParallel::RVector<double>& lg_prob_factor_r,
+//     const RcppParallel::RVector<double>& UB2min_r,
+//     
+//     double shape3,
+//     double rate2,
+//     double disp_upper,
+//     double disp_lower,
+//     double RSS_Min,
+//     double max_New_LL_UB,
+//     double max_LL_log_disp,
+//     double lm_log1,
+//     double lm_log2,
+//     double lmc1,
+//     double lmc2,
+//     
+//     // Cache (precomputed upstream)
+//     const RcppParallel::RMatrix<double>& Pmat_r,
+//     const RcppParallel::RMatrix<double>& Pmu_r,
+//     const RcppParallel::RVector<double>& base_B0_r,
+//     const RcppParallel::RMatrix<double>& base_A_r,
+//     
+//     // Outputs
+//     RcppParallel::RMatrix<double>& beta_out_r,   // n × l1
+//     RcppParallel::RVector<double>& disp_out_r,   // length n
+//     RcppParallel::RVector<double>& iters_out_r,  // length n
+//     RcppParallel::RVector<double>& weight_out_r  // length n
+// ) {
+//   const int l2 = x_r.nrow();
+//   const int l1 = x_r.ncol();
+//   
+//   // Thread-local buffers and views (no Rcpp::NumericMatrix allocations).
+//   std::vector<double> out_buf(static_cast<std::size_t>(l1), 0.0);
+//   RcppParallel::RMatrix<double> out_row(out_buf.data(), 1,  l1);  // 1×l1
+//   RcppParallel::RMatrix<double> out_col(out_buf.data(), l1, 1);   // l1×1
+//   
+//   std::vector<double> theta_buf(static_cast<std::size_t>(l1), 0.0);
+//   RcppParallel::RMatrix<double> theta_row(theta_buf.data(), 1,  l1); // 1×l1
+//   RcppParallel::RMatrix<double> theta_col(theta_buf.data(), l1, 1);  // l1×1
+//   
+//   std::vector<double> cbars_col_buf(static_cast<std::size_t>(l1), 0.0);
+//   RcppParallel::RMatrix<double> cbars_small_col(cbars_col_buf.data(), l1, 1); // l1×1
+//   
+//   // Scaled weights: classical logic requires wt2 = wt / dispersion before likelihood
+//   Rcpp::NumericVector wt2_nv(l2);                  // thread-local
+//   RcppParallel::RVector<double> wt2_r(wt2_nv);     // matches f2_gaussian_rmat signature
+//   
+//   for (int i = 0; i < n; ++i) {
+//     
+//     Rcpp::checkUserInterrupt();  // allow user to break out
+//     
+//     iters_out_r[i] = 1;
+//     weight_out_r[i] = 1.0;
+//     
+//     int a1 = 0;
+//     while (a1 == 0) {
+//       // 1) Component selection via PLSD
+//       double U = safe_runif();
+//       int J_idx = 0;
+//       double U_left = U;
+//       while (true) {
+//         if (U_left <= PLSD_r[J_idx]) break;
+//         U_left -= PLSD_r[J_idx];
+//         ++J_idx;
+//       }
+//       
+//       // 2) Draw truncated-normal beta row
+//       for (int j = 0; j < l1; ++j) {
+//         out_row(0, j) = ctrnorm_cpp(
+//           logrt_r(J_idx, j),
+//           loglt_r(J_idx, j),
+//           -cbars_r(J_idx, j),
+//           1.0
+//         );
+//       }
+//       
+//       // 3) Draw dispersion
+//       double dispersion = r_invgamma_safe(shape3, rate2, disp_upper, disp_lower);
+//       
+// 
+//       
+//       // 4) Solve theta (strict row-only contract)
+//       for (int j = 0; j < l1; ++j) cbars_small_col(j, 0) = cbars_r(J_idx, j);
+//       
+//       RcppParallel::RMatrix<double> theta_sol_r =
+//         Inv_f3_with_disp_rmat(Pmat_r, Pmu_r, base_B0_r, base_A_r,
+//                               dispersion, cbars_small_col);
+//       
+//       // Signedness-safe check (cast l1 to std::size_t for compare)
+//       if (!(theta_sol_r.nrow() == 1 &&
+//           static_cast<std::size_t>(theta_sol_r.ncol()) == static_cast<std::size_t>(l1))) {
+//         Rcpp::stop(std::string("Inv_f3_with_disp_rmat must return 1×l1 row; got ") +
+//           std::to_string(theta_sol_r.nrow()) + "x" +
+//           std::to_string(theta_sol_r.ncol()));
+//       }
+//       for (int j = 0; j < l1; ++j) theta_row(0, j) = theta_sol_r(0, j);
+//       
+//       // 5) Scale weights before likelihood (classical behavior)
+//       for (int r = 0; r < l2; ++r) wt2_r[r] = wt_r[r] / dispersion;
+//       
+//       // 6) Likelihood calls (column views, pre-scaled weights)
+//       
+//       
+// 
+//       double LL_New2_scalar =
+//         -f2_gaussian_rmat(theta_col, y_r, x_r, mu_r, P_r, alpha_r, wt2_r, 0)[0];
+//         double LL_Test_scalar =
+//         -f2_gaussian_rmat(out_col,   y_r, x_r, mu_r, P_r, alpha_r, wt2_r, 0)[0];
+//         
+//         // 7) Upper bounds (row math)
+//         double U2 = safe_runif();
+//         double log_U2 = std::log(U2);
+//         
+//         double UB1 = LL_New2_scalar;
+//         for (int j = 0; j < l1; ++j)
+//           UB1 -= cbars_r(J_idx, j) * (out_row(0, j) - theta_row(0, j));
+//         
+//         double quad_sum = 0.0;
+//         for (int r = 0; r < l2; ++r) {
+//           double x_theta = 0.0;
+//           for (int c = 0; c < l1; ++c) x_theta += x_r(r, c) * theta_row(0, c);
+//           double resid  = (y_r[r] - alpha_r[r] - x_theta);
+//           double scaled = resid * std::sqrt(wt_r[r]);
+//           quad_sum += scaled * scaled;
+//         }
+//         double UB2 = 0.5 * (1.0 / dispersion) * (quad_sum - RSS_Min);
+//         UB2 -= UB2min_r[J_idx];
+//         
+//         double theta_P_theta = 0.0;
+//         for (int r = 0; r < l1; ++r) {
+//           double acc = 0.0;
+//           for (int c = 0; c < l1; ++c) acc += P_r(r, c) * theta_row(0, c);
+//           theta_P_theta += theta_row(0, r) * acc;
+//         }
+//         double c_theta = 0.0;
+//         for (int j = 0; j < l1; ++j) c_theta += cbars_r(J_idx, j) * theta_row(0, j);
+//         double New_LL_J = -0.5 * theta_P_theta + c_theta;
+//         
+//         double UB3A = lg_prob_factor_r[J_idx] + lmc1 + lmc2 * dispersion - New_LL_J;
+//         double New_LL_log_disp = lm_log1 + lm_log2 * std::log(dispersion);
+//         double UB3B = (max_New_LL_UB - max_LL_log_disp + New_LL_log_disp)
+//           - (lmc1 + lmc2 * dispersion);
+//         
+//         double test1 = (LL_Test_scalar - UB1);
+//   
+//   
+//   double test = test1 - (UB2 + UB3A + UB3B);
+//   
+// 
+//         test = test - log_U2;
+//         
+//       
+//         // 8) Record outputs and accept/reject
+//         disp_out_r[i] = dispersion;
+//         for (int j = 0; j < l1; ++j) beta_out_r(i, j) = out_row(0, j);
+//         
+//         if (test >= 0.0) {
+//           a1 = 1;
+//         } else {
+//           
+//           iters_out_r[i] = iters_out_r[i] + 1;
+//         }
+//     } // while (a1 == 0)
+//   } // for i
+// } // end rindep_loop_rmat  
 
 
 // [[Rcpp::export(".rindep_norm_gamma_reg_std_parallel_cpp")]]
@@ -1084,176 +890,4 @@ Rcpp::List rindep_norm_gamma_reg_std_parallel_cpp(
 
 
 
-
-// // [[Rcpp::export(".rindep_norm_gamma_reg_std_parallel_cpp")]]
-// 
-// Rcpp::List rindep_norm_gamma_reg_std_parallel_cpp(
-//     int n,
-//     Rcpp::NumericVector y,
-//     Rcpp::NumericMatrix x,
-//     Rcpp::NumericMatrix mu,  // typically standardized to be a zero vector
-//     Rcpp::NumericMatrix P,   // part of prior precision shifted to the likelihood
-//     Rcpp::NumericVector alpha,
-//     Rcpp::NumericVector wt,
-//     Rcpp::Function f2,
-//     Rcpp::List Envelope,
-//     Rcpp::List gamma_list,
-//     Rcpp::List UB_list,
-//     Rcpp::CharacterVector family,
-//     Rcpp::CharacterVector link,
-//     bool progbar = true
-// ) {
-//   // Base env (kept as-is)
-//   Rcpp::Environment base = Rcpp::Environment::base_env();
-//   Rcpp::Function interactive = base["interactive"];
-// 
-//   const int l1 = mu.nrow();
-//   const int l2 = x.nrow();
-// 
-//   // Scalars from lists
-//   double shape3          = gamma_list["shape3"];
-//   double rate2           = gamma_list["rate2"];
-//   double disp_upper      = gamma_list["disp_upper"];
-//   double disp_lower      = gamma_list["disp_lower"];
-//   double RSS_ML          = UB_list["RSS_ML"];
-//   double max_New_LL_UB   = UB_list["max_New_LL_UB"];
-//   double max_LL_log_disp = UB_list["max_LL_log_disp"];
-//   double lm_log1         = UB_list["lm_log1"];
-//   double lm_log2         = UB_list["lm_log2"];
-//   double lmc1            = UB_list["lmc1"];
-//   double lmc2            = UB_list["lmc2"];
-// 
-//   Rcpp::NumericVector lg_prob_factor = UB_list["lg_prob_factor"];
-//   Rcpp::NumericMatrix cbars          = Envelope["cbars"];
-//   Rcpp::NumericVector PLSD           = Envelope["PLSD"];
-//   Rcpp::NumericMatrix loglt          = Envelope["loglt"];
-//   Rcpp::NumericMatrix logrt          = Envelope["logrt"];
-//   double RSS_Min                     = UB_list["RSS_Min"];
-//   Rcpp::NumericVector UB2min         = UB_list["UB2min"];
-// 
-//   // Outputs
-//   Rcpp::NumericVector iters_out(n);
-//   Rcpp::NumericVector disp_out(n);
-//   Rcpp::NumericVector weight_out(n);
-//   Rcpp::NumericMatrix beta_out(n, l1);
-// 
-//   // Locals
-//   double dispersion = 0.0;
-//   Rcpp::NumericVector wt2(l2); // length l2, if used elsewhere
-// 
-//   // Armadillo views as in original
-//   arma::vec wt1b(wt.begin(), x.nrow());
-//   Rcpp::NumericMatrix cbarst(cbars.ncol(), cbars.nrow());
-//   Rcpp::NumericMatrix thetabars(cbars.nrow(), cbars.ncol());
-//   Rcpp::NumericMatrix thetabars_new(1, cbars.ncol());
-//   Rcpp::NumericVector New_LL(cbars.nrow());
-// 
-//   arma::mat cbarsb(cbars.begin(), cbars.nrow(), cbars.ncol(), false);
-//   arma::mat cbarstb(cbarst.begin(), cbarst.nrow(), cbarst.ncol(), false);
-// 
-//   arma::mat thetabarsb(thetabars.begin(), thetabars.nrow(), thetabars.ncol(), false);
-//   arma::mat thetabarsb_new(thetabars_new.begin(), thetabars_new.nrow(), thetabars_new.ncol(), false);
-//   cbarstb = arma::trans(cbarsb);
-// 
-//   arma::vec y2(y.begin(), l2);
-//   arma::vec alpha2(alpha.begin(), l2);
-//   arma::mat x2(x.begin(), l2, l1);
-//   arma::mat P2(P.begin(), l1, l1);
-// 
-//   double UB1 = 0.0, UB2v = 0.0, UB3A = 0.0, UB3B = 0.0, New_LL_log_disp = 0.0;
-// 
-//   int a1 = 0;
-//   double test1 = 0.0;
-//   double test = 0.0;
-// 
-//   Rcpp::NumericVector J(n);
-//   Rcpp::NumericVector draws(n);
-//   Rcpp::NumericMatrix out(1, l1);
-//   double a2 = 0.0;
-//   double U  = 0.0;
-//   double U2 = 0.0;
-// 
-//   // Build cache once outside the loop
-//   Rcpp::List cache = Inv_f3_precompute_disp(cbars, y, x, mu, P, alpha, wt);
-// 
-//   // Wrap outputs with RcppParallel views
-//   RcppParallel::RMatrix<double> beta_out_r(beta_out);
-//   RcppParallel::RVector<double> disp_out_r(disp_out);
-//   RcppParallel::RVector<double> iters_out_r(iters_out);
-//   RcppParallel::RVector<double> weight_out_r(weight_out);
-// 
-//   // Wrap inputs with RcppParallel views (used by rmat path)
-//   RcppParallel::RVector<double> y_r(y);
-//   RcppParallel::RMatrix<double> x_r(x);
-//   RcppParallel::RMatrix<double> mu_r(mu);
-//   RcppParallel::RMatrix<double> P_r(P);
-//   RcppParallel::RVector<double> alpha_r(alpha);
-//   RcppParallel::RVector<double> wt_r(wt);
-// 
-//   RcppParallel::RMatrix<double> cbars_r(cbars);
-//   RcppParallel::RVector<double> PLSD_r(PLSD);
-//   RcppParallel::RMatrix<double> loglt_r(loglt);
-//   RcppParallel::RMatrix<double> logrt_r(logrt);
-// 
-//   // Rcpp originals for classic loop
-//   const Rcpp::NumericVector& y_nv   = y;
-//   const Rcpp::NumericMatrix& x_nm   = x;
-//   const Rcpp::NumericMatrix& mu_nm  = mu;
-//   const Rcpp::NumericMatrix& P_nm   = P;
-//   const Rcpp::NumericVector& alpha_nv = alpha;
-//   const Rcpp::NumericVector& wt_nv    = wt;
-// 
-//   // sqrt(wt) for UB2 term
-//   arma::vec sqrt_wt1b(wt.begin(), l2, false);
-//   sqrt_wt1b = arma::sqrt(sqrt_wt1b);
-// 
-//   // Wrap cache components as RcppParallel views
-//   Rcpp::NumericMatrix Pmat_nm    = cache["Pmat"];
-//   Rcpp::NumericMatrix Pmu_nm     = cache["Pmu"];
-//   Rcpp::NumericVector base_B0_nv = cache["base_B0"];
-//   Rcpp::NumericMatrix base_A_nm  = cache["base_A"];
-// 
-//   RcppParallel::RMatrix<double> Pmat_r(Pmat_nm);
-//   RcppParallel::RMatrix<double> Pmu_r(Pmu_nm);
-//   RcppParallel::RVector<double> base_B0_r(base_B0_nv);
-//   RcppParallel::RMatrix<double> base_A_r(base_A_nm);
-// 
-//   // Wrap UB vectors for rmat call
-//   RcppParallel::RVector<double> lg_prob_factor_r(lg_prob_factor);
-//   RcppParallel::RVector<double> UB2min_r(UB2min);
-// 
-//   // Debug: entering rmat loop
-// //  Rcpp::Rcout << "[DEBUG] Entering rindep_loop_rmat\n";
-// 
-// 
-//   // Call the rmat loop to fill outputs first
-//   rindep_loop_rmat(
-//     n,
-//     // Likelihood inputs
-//     y_r, x_r, mu_r, P_r, alpha_r, wt_r,
-//     // Envelope components
-//     cbars_r, PLSD_r, loglt_r, logrt_r,
-//     // UB vectors
-//     lg_prob_factor_r,
-//     UB2min_r,
-//     // Scalars
-//     shape3, rate2, disp_upper, disp_lower,
-//     RSS_Min, max_New_LL_UB, max_LL_log_disp,
-//     lm_log1, lm_log2, lmc1, lmc2,
-//     // Cache
-//     Pmat_r, Pmu_r, base_B0_r, base_A_r,
-//     // Outputs
-//     beta_out_r, disp_out_r, iters_out_r, weight_out_r
-//   );
-// 
-// 
-// 
-//   return Rcpp::List::create(
-//     Rcpp::Named("beta_out")   = beta_out,
-//     Rcpp::Named("disp_out")   = disp_out,
-//     Rcpp::Named("iters_out")  = iters_out,
-//     Rcpp::Named("weight_out") = weight_out
-//   );
-// }
-// 
 

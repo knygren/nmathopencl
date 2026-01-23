@@ -149,7 +149,7 @@ arma::mat  f3_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatr
 NumericVector dnorm_glmb( NumericVector x, NumericVector means, NumericVector sds,int lg);
 NumericVector  f1_gaussian(NumericMatrix b,NumericVector y,NumericMatrix x,NumericVector alpha,NumericVector wt);
 NumericVector  f2_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
-arma::vec  f2_gaussian_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
+// arma::vec  f2_gaussian_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
 // Original version (unchanged)
 arma::vec f2_gaussian_rmat(const RcppParallel::RMatrix<double>& b,       // candidate coefficients
                            const RcppParallel::RVector<double>& y,       // observed counts
