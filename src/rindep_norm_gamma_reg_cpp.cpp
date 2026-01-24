@@ -11,6 +11,7 @@
 #include "famfuncs.h"
 #include "Envelopefuncs.h"
 #include "glmbsim.h"
+#include "miscfuncs.h"
 
 #include <cmath>         // for std::log or std::exp if used
 #include <math.h>

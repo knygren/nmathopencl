@@ -5,9 +5,7 @@
 
 using namespace Rcpp;
 
-double ctrnorm_cpp(double lgrt,double lglt,double mu,double sigma);
 
-void progress_bar2(double x, double N);
 
 Rcpp::List  rnnorm_reg_std_cpp(int n,NumericVector y,NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,Function f2,Rcpp::List  Envelope,Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1);
 
