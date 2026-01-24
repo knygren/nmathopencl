@@ -45,11 +45,11 @@ gpu_names <- function() {
     .Call(`_glmbayes_gpu_names`)
 }
 
-load_kernel_source_wrapper <- function(relative_path, package = "glmbayes") {
+load_kernel_source_wrapper <- function(relative_path, package) {
     .Call(`_glmbayes_load_kernel_source_wrapper`, relative_path, package)
 }
 
-load_kernel_library_wrapper <- function(subdir, package = "glmbayes", verbose = FALSE) {
+load_kernel_library_wrapper <- function(subdir, package, verbose) {
     .Call(`_glmbayes_load_kernel_library_wrapper`, subdir, package, verbose)
 }
 

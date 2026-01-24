@@ -1,3 +1,9 @@
+#ifndef OPENCLPORT_H
+#define OPENCLPORT_H
+#endif
+
+#include <RcppArmadillo.h>   // <-- REQUIRED for Rcpp::CharacterVector, Rcpp::StringVector, etc.
+#include <string>
 // -----------------------------------------------------------------------------
 // OpenCL Kernel Source Porting Utilities
 // -----------------------------------------------------------------------------
@@ -22,3 +28,24 @@ std::string load_kernel_library_wrapper(std::string subdir,
 bool has_opencl();
 int get_opencl_core_count();
 Rcpp::CharacterVector gpu_names();
+
+// Internal-only GPU detection for envelope scaling
+int detect_num_gpus_internal();
+
+// Conditional Header definitions
+
+#ifdef USE_OPENCL
+
+#pragma once
+#include <string>
+
+#ifdef USE_OPENCL
+std::string load_kernel_source(const std::string& relative_path, const std::string& package = "glmbayes");
+#endif
+
+#ifdef USE_OPENCL
+std::string load_kernel_library(const std::string& subdir, const std::string& package = "glmbayes",bool verbose=false );
+#endif
+
+
+#endif

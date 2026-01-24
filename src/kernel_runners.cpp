@@ -1,7 +1,6 @@
 
 
 #ifdef USE_OPENCL
-#include "kernel_loader.h"
 
 #ifdef USE_DIRECT_CLH
 #define CL_TARGET_OPENCL_VERSION 300

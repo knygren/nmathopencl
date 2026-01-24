@@ -43,6 +43,5 @@ void f2_f3_kernel_runner(
 );
 
 
-// Internal-only GPU detection for envelope scaling
-int detect_num_gpus_internal();
+
 

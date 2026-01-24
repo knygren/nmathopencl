@@ -2,7 +2,7 @@
 //#include <Rcpp.h>
 #include <vector>
 #include <string>
-#include "kernel_loader.h"
+#include "openclPort.h"
 #include "OpenCL_helper.h"
 #include "kernel_wrappers.h"
 #include "kernel_runners.h"
@@ -179,7 +179,7 @@ Rcpp::List f2_f3_opencl(
 
 // [[Rcpp::export]]
 std::string load_kernel_source_wrapper(std::string relative_path,
-                                   std::string package = "glmbayes") {
+                                   std::string package ) {
 #ifdef USE_OPENCL
   return load_kernel_source(relative_path, package);
 #else
@@ -189,8 +189,8 @@ std::string load_kernel_source_wrapper(std::string relative_path,
 
 // [[Rcpp::export]]
 std::string load_kernel_library_wrapper(std::string subdir,
-                                    std::string package = "glmbayes",
-                                    bool verbose = false) {
+                                    std::string package ,
+                                    bool verbose ) {
 #ifdef USE_OPENCL
   return load_kernel_library(subdir, package, verbose);
 #else
