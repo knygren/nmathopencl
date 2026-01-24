@@ -24,11 +24,6 @@ List EnvelopeBuild_cpp(NumericVector bStar,
 );
 
 
-// Dispersion-aware envelope solver
-arma::mat Inv_f3_with_disp(Rcpp::List cache,
-                           double dispersion,
-                           Rcpp::NumericMatrix cbars_small);
-
 
 double rss_face_at_disp(double dispersion,
                         Rcpp::List cache,

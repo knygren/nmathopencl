@@ -8,10 +8,12 @@
 #include "nmath_local.h"
 #include "dpq_local.h"
 #include "openclPort.h"
+#include "famfuncs.h"
 
 using namespace Rcpp;
 using namespace RcppParallel;
 using namespace openclPort;
+using namespace famfuncs;
 
 
 void progress_bar2(double x, double N);
@@ -28,6 +30,7 @@ inline double dbinom_raw_local(double x, double n, double p, double q, int give_
 
 ///////////////////////////////////////////////////////////
 
+namespace famfuncs {
 // Neg log binomial likelihood, vectorized
 void neg_dbinom_glmb_rmat(const RVector<double>& x,          // success proportion
                           const RVector<double>& N,          // trial count
@@ -931,3 +934,4 @@ arma::mat  f3_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,
     return trans(out2);      
 }
 
+}

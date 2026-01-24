@@ -3,10 +3,17 @@
 // we only include RcppArmadillo.h which pulls Rcpp.h in for us
 #include "RcppArmadillo.h"
 #include <RcppParallel.h>
+#include "famfuncs.h"
 
 using namespace Rcpp;
 using namespace RcppParallel;
+using namespace famfuncs;
+
+
 void progress_bar2(double x, double N);
+
+
+
 
 
 // f1 is negative log-likelihood
@@ -28,6 +35,8 @@ double dpois2(double x,double lambda,int lg){
 }
 
 
+
+namespace famfuncs {
 
 
 void neg_dpois_glmb_rmat(const RVector<double>& x,     // observed counts
@@ -365,3 +374,4 @@ arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMa
     return trans(out2);      
 }
 
+}

@@ -7,6 +7,9 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 
+
+namespace famfuncs {
+
 NumericVector dbinom_glmb( NumericVector x, NumericVector N, NumericVector means, int lg);
 NumericVector  f1_binomial_logit(NumericMatrix b,NumericVector y,NumericMatrix x,NumericVector alpha,NumericVector wt);
 NumericVector  f2_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar);
@@ -173,16 +176,6 @@ arma::vec f2_gaussian_rmat_mat(const RcppParallel::RMatrix<double>& b,   // cand
 arma::mat  f3_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
 NumericVector RSS(NumericVector y, NumericMatrix x,NumericMatrix b,NumericVector alpha,NumericVector wt);
 
-// 
-// RcppParallel::RMatrix<double> Inv_f3_with_disp_rmat(
-//     const RcppParallel::RMatrix<double>& Pmat_r,
-//     const RcppParallel::RMatrix<double>& Pmu_r,
-//     const RcppParallel::RVector<double>& base_B0_r,
-//     const RcppParallel::RMatrix<double>& base_A_r,
-//     double dispersion,
-//     const RcppParallel::RMatrix<double>& cbars_r // p × m
-// );
-
 Rcpp::List Inv_f3_precompute_disp(NumericMatrix cbars,
                                   NumericVector y,
                                   NumericMatrix x,
@@ -191,7 +184,10 @@ Rcpp::List Inv_f3_precompute_disp(NumericMatrix cbars,
                                   NumericVector alpha,
                                   NumericVector wt);
 
-
+// Dispersion-aware envelope solver
+arma::mat Inv_f3_with_disp(Rcpp::List cache,
+                           double dispersion,
+                           Rcpp::NumericMatrix cbars_small);
 
 
 arma::mat Inv_f3_with_disp_rmat_v2(
@@ -202,3 +198,6 @@ arma::mat Inv_f3_with_disp_rmat_v2(
     double dispersion,
     const RcppParallel::RMatrix<double>& cbars_r // p × m
 );
+
+
+}

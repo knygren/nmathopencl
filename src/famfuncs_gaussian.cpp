@@ -4,13 +4,14 @@
 #include <Rcpp.h>
 #include "nmath_local.h"
 #include "dpq_local.h"
-
+#include "famfuncs.h"
 
 using namespace Rcpp;
-
-
-
 using namespace RcppParallel;
+using namespace famfuncs;
+
+
+namespace famfuncs {
 
 void neg_dnorm_glmb_rmat(const RcppParallel::RVector<double>& x,         // observed values
                          const std::vector<double>& means,     // normal means
@@ -413,6 +414,48 @@ arma::mat  f3_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,NumericM
 using namespace Rcpp;
 
 
+
+Rcpp::List Inv_f3_precompute_disp(NumericMatrix cbars,
+                                  NumericVector y,
+                                  NumericMatrix x,
+                                  NumericMatrix mu,
+                                  NumericMatrix P,
+                                  NumericVector alpha,
+                                  NumericVector wt) {
+  int n = x.nrow();
+  int p = x.ncol();
+  int m = cbars.ncol();
+  
+  arma::mat X(x.begin(), n, p, false);
+  arma::mat Xt = X.t();
+  arma::vec yv(y.begin(), n, false);
+  arma::vec alphav(alpha.begin(), n, false);
+  arma::vec xb = alphav - yv;
+  
+  arma::mat Pmat(P.begin(), p, p, false);
+  Pmat = 0.5 * (Pmat + Pmat.t());
+  
+  arma::mat Mu(mu.begin(), p, 1, false);
+  arma::mat Pmu = Pmat * Mu;
+  
+  arma::vec wv(wt.begin(), n, false);
+  
+  arma::vec base_B0 = Xt * (wv % xb);
+  arma::mat base_A  = Xt * (X.each_col() % wv);
+  
+  arma::mat C(cbars.begin(), p, m, false);
+  
+  return Rcpp::List::create(
+    Rcpp::Named("Pmat")    = Pmat,
+    Rcpp::Named("Pmu")     = Pmu,
+    Rcpp::Named("base_B0") = base_B0,
+    Rcpp::Named("base_A")  = base_A,
+    Rcpp::Named("C")       = C
+  );
+}
+
+
+
 arma::mat Inv_f3_with_disp(Rcpp::List cache,
                            double dispersion,
                            Rcpp::NumericMatrix cbars_small) {
@@ -491,4 +534,6 @@ arma::mat Inv_f3_with_disp_rmat_v2(
   }
   
   return Out; // m × p
+}
+
 }

@@ -17,7 +17,7 @@
 
 using namespace Rcpp;
 using namespace openclPort;
-
+using namespace famfuncs;
 
 
 // Internal helper: run OpenCL pilot timing, print diagnostics, and prompt user.
@@ -1182,44 +1182,6 @@ List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar,NumericMatrix A,
 
 
 
-Rcpp::List Inv_f3_precompute_disp(NumericMatrix cbars,
-                                  NumericVector y,
-                                  NumericMatrix x,
-                                  NumericMatrix mu,
-                                  NumericMatrix P,
-                                  NumericVector alpha,
-                                  NumericVector wt) {
-  int n = x.nrow();
-  int p = x.ncol();
-  int m = cbars.ncol();
-  
-  arma::mat X(x.begin(), n, p, false);
-  arma::mat Xt = X.t();
-  arma::vec yv(y.begin(), n, false);
-  arma::vec alphav(alpha.begin(), n, false);
-  arma::vec xb = alphav - yv;
-  
-  arma::mat Pmat(P.begin(), p, p, false);
-  Pmat = 0.5 * (Pmat + Pmat.t());
-  
-  arma::mat Mu(mu.begin(), p, 1, false);
-  arma::mat Pmu = Pmat * Mu;
-  
-  arma::vec wv(wt.begin(), n, false);
-  
-  arma::vec base_B0 = Xt * (wv % xb);
-  arma::mat base_A  = Xt * (X.each_col() % wv);
-  
-  arma::mat C(cbars.begin(), p, m, false);
-  
-  return Rcpp::List::create(
-    Rcpp::Named("Pmat")    = Pmat,
-    Rcpp::Named("Pmu")     = Pmu,
-    Rcpp::Named("base_B0") = base_B0,
-    Rcpp::Named("base_A")  = base_A,
-    Rcpp::Named("C")       = C
-  );
-}
 
 
 

@@ -34,6 +34,7 @@ static tbb::mutex f2_mutex;
 
 
 using namespace Rcpp;
+using namespace famfuncs;
 
 
 void progress_bar3(double x, double N)
