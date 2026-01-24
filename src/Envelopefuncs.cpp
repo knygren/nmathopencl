@@ -381,11 +381,11 @@ Rcpp::List f2_f3_non_opencl(
 // [[Rcpp::export]]
 Rcpp::List EnvelopeSize(const arma::vec& a,
                         const Rcpp::NumericMatrix& G1,
-                        int Gridtype   = 2,
-                        int n          = 1000,
-                        int n_envopt   = -1,
-                        bool use_opencl = false,
-                        bool verbose    = false) 
+                        int Gridtype   ,
+                        int n          ,
+                        int n_envopt   ,
+                        bool use_opencl ,
+                        bool verbose    ) 
   {
   
 
@@ -524,8 +524,8 @@ Rcpp::List EnvelopeEval(const Rcpp::NumericMatrix& G4,   // grid (parameters × 
                         const Rcpp::NumericVector& wt,
                         const std::string& family,
                         const std::string& link,
-                        bool use_opencl = false,
-                        bool verbose = false) {
+                        bool use_opencl ,
+                        bool verbose ) {
   int progbar = 0;
   
   // Optional pilot timing for large parameter dimension
@@ -885,14 +885,14 @@ List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar,NumericMatrix A,
                                     NumericMatrix P,
                                     NumericVector alpha,
                                     NumericVector wt,
-                                    std::string family="binomial",
-                                    std::string link="logit",
-                                    int Gridtype=2, 
-                                    int n=1,
-                                    int n_envopt=-1,
-                                    bool sortgrid=false,
-                                    bool use_opencl    = false,
-                                    bool verbose       = false
+                                    std::string family,
+                                    std::string link,
+                                    int Gridtype, 
+                                    int n,
+                                    int n_envopt,
+                                    bool sortgrid,
+                                    bool use_opencl    ,
+                                    bool verbose       
 ){
   
   
@@ -1603,11 +1603,11 @@ List EnvelopeDispersionBuild_cpp(
     double RSS_ML,
     NumericMatrix mu,         // ← new
     NumericVector wt,         // ← new
-    double max_disp_perc = 0.99,
-    Nullable<double> disp_lower = R_NilValue,
-    Nullable<double> disp_upper = R_NilValue,
-    bool verbose = false,
-    bool use_parallel = true   // ← add flag here
+    double max_disp_perc ,
+    Nullable<double> disp_lower ,
+    Nullable<double> disp_upper ,
+    bool verbose ,
+    bool use_parallel    // ← add flag here
   
 )
   {

@@ -15,4 +15,31 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,NumericVector mu
 
 Rcpp::List rnorm_reg_cpp(int n,NumericVector y,NumericMatrix x, NumericVector mu,NumericMatrix P,NumericVector offset2,NumericVector wt,double dispersion,Rcpp::List famfunc, Function f1,Function f2,Function f3,NumericVector start,std::string family="binomial",std::string link="logit",int Gridtype=2);
 
+Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
+                                          NumericMatrix mu, /// This is typically standardized to be a zero vector
+                                          NumericMatrix P, /// Part of prior precision shifted to the likelihood
+                                          NumericVector alpha,NumericVector wt,
+                                          Function f2,Rcpp::List  Envelope,
+                                          Rcpp::List  gamma_list,
+                                          Rcpp::List  UB_list,
+                                          Rcpp::CharacterVector   family,Rcpp::CharacterVector   link,
+                                          bool progbar=true,
+                                          bool verbose=false);
 
+Rcpp::List rindep_norm_gamma_reg_std_parallel_cpp(
+    int n,
+    Rcpp::NumericVector y,
+    Rcpp::NumericMatrix x,
+    Rcpp::NumericMatrix mu,   // typically standardized to be a zero vector
+    Rcpp::NumericMatrix P,    // part of prior precision shifted to the likelihood
+    Rcpp::NumericVector alpha,
+    Rcpp::NumericVector wt,
+    Rcpp::Function f2,        // kept for signature parity
+    Rcpp::List Envelope,
+    Rcpp::List gamma_list,
+    Rcpp::List UB_list,
+    Rcpp::CharacterVector family,
+    Rcpp::CharacterVector link,
+    bool progbar = true,
+    bool verbose = false
+);

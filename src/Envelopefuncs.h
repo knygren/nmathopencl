@@ -37,3 +37,72 @@ double rss_face_at_disp(double dispersion,
                         Rcpp::NumericMatrix x,
                         Rcpp::NumericVector alpha,
                         Rcpp::NumericVector wt) ;
+
+Rcpp::List EnvelopeSize(const arma::vec& a,
+                        const Rcpp::NumericMatrix& G1,
+                        int Gridtype   = 2,
+                        int n          = 1000,
+                        int n_envopt   = -1,
+                        bool use_opencl = false,
+                        bool verbose    = false);
+
+Rcpp::List EnvelopeEval(const Rcpp::NumericMatrix& G4,   // grid (parameters × grid points)
+                        const Rcpp::NumericVector& y,
+                        const Rcpp::NumericMatrix& x,
+                        const Rcpp::NumericMatrix& mu,
+                        const Rcpp::NumericMatrix& P,
+                        const Rcpp::NumericVector& alpha,
+                        const Rcpp::NumericVector& wt,
+                        const std::string& family,
+                        const std::string& link,
+                        bool use_opencl = false,
+                        bool verbose = false);
+
+List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar,
+                                    NumericMatrix A,
+                                    NumericVector y, 
+                                    NumericMatrix x,
+                                    NumericMatrix mu,
+                                    NumericMatrix P,
+                                    NumericVector alpha,
+                                    NumericVector wt,
+                                    std::string family="binomial",
+                                    std::string link="logit",
+                                    int Gridtype=2, 
+                                    int n=1,
+                                    int n_envopt=-1,
+                                    bool sortgrid=false,
+                                    bool use_opencl    = false,
+                                    bool verbose       = false);
+
+double UB2(double dispersion,
+           Rcpp::List cache,
+           Rcpp::NumericVector cbars_j,
+           Rcpp::NumericVector y,
+           Rcpp::NumericMatrix x,
+           Rcpp::NumericVector alpha,
+           Rcpp::NumericVector wt,
+           double rss_min_global);
+
+List EnvelopeDispersionBuild_cpp(
+    List Env,
+    double Shape,
+    double Rate,
+    NumericMatrix P,
+    NumericVector y,
+    NumericMatrix x,
+    NumericVector alpha,
+    int n_obs,
+    double RSS_post,
+    double RSS_ML,
+    NumericMatrix mu,         // ← new
+    NumericVector wt,         // ← new
+    double max_disp_perc = 0.99,
+    Nullable<double> disp_lower = R_NilValue,
+    Nullable<double> disp_upper = R_NilValue,
+    bool verbose = false,
+    bool use_parallel = true   // ← add flag here
+  );
+
+
+  
