@@ -112,3 +112,31 @@ void Set_Grid_C2_pointwise(Rcpp::NumericMatrix GIndex,  Rcpp::NumericMatrix cbar
 List   setlogP(NumericMatrix logP,NumericVector NegLL,NumericMatrix cbars,NumericMatrix G3);
 // Rcpp::List   setlogP_C(NumericMatrix logP,NumericVector NegLL,NumericMatrix cbars,NumericMatrix G3,NumericMatrix LLconst);
 void setlogP_C2(NumericMatrix logP,NumericVector NegLL,NumericMatrix cbars,NumericMatrix G3,NumericMatrix LLconst);
+
+
+
+double f2_f3_opencl_pilot(const Rcpp::NumericMatrix& G4,
+                        const Rcpp::NumericVector& y,
+                        const Rcpp::NumericMatrix& x,
+                        const Rcpp::NumericMatrix& mu,
+                        const Rcpp::NumericMatrix& P,
+                        const Rcpp::NumericVector& alpha,
+                        const Rcpp::NumericVector& wt,
+                        const std::string& family,
+                        const std::string& link,
+                        bool use_opencl,
+                        bool verbose,
+                        double threshold_sec = 300.0);
+
+Rcpp::List f2_f3_non_opencl(
+    std::string family,
+    std::string link,
+    Rcpp::NumericMatrix  b,
+    Rcpp::NumericVector  y,
+    Rcpp::NumericMatrix  x,
+    Rcpp::NumericMatrix  mu,
+    Rcpp::NumericMatrix  P,
+    Rcpp::NumericVector  alpha,
+    Rcpp::NumericVector  wt,
+    int                  progbar
+);
