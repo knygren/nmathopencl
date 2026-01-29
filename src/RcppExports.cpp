@@ -115,23 +115,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// EnvelopeSize
-Rcpp::List EnvelopeSize(const arma::vec& a, const Rcpp::NumericMatrix& G1, int Gridtype, int n, int n_envopt, bool use_opencl, bool verbose);
-RcppExport SEXP _glmbayes_EnvelopeSize(SEXP aSEXP, SEXP G1SEXP, SEXP GridtypeSEXP, SEXP nSEXP, SEXP n_envoptSEXP, SEXP use_openclSEXP, SEXP verboseSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type G1(G1SEXP);
-    Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP);
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< int >::type n_envopt(n_envoptSEXP);
-    Rcpp::traits::input_parameter< bool >::type use_opencl(use_openclSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(EnvelopeSize(a, G1, Gridtype, n, n_envopt, use_opencl, verbose));
-    return rcpp_result_gen;
-END_RCPP
-}
 // rss_face_at_disp
 double rss_face_at_disp(double dispersion, Rcpp::List cache, Rcpp::NumericVector cbars_j, Rcpp::NumericVector y, Rcpp::NumericMatrix x, Rcpp::NumericVector alpha, Rcpp::NumericVector wt);
 RcppExport SEXP _glmbayes_rss_face_at_disp(SEXP dispersionSEXP, SEXP cacheSEXP, SEXP cbars_jSEXP, SEXP ySEXP, SEXP xSEXP, SEXP alphaSEXP, SEXP wtSEXP) {
@@ -473,12 +456,13 @@ BEGIN_RCPP
 END_RCPP
 }
 
+RcppExport SEXP _glmbayes_EnvelopeSize(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+
 static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_EnvelopeBuild_cpp", (DL_FUNC) &_glmbayes_EnvelopeBuild_cpp, 16},
     {"_glmbayes_EnvelopeBuild_Ind_Normal_Gamma", (DL_FUNC) &_glmbayes_EnvelopeBuild_Ind_Normal_Gamma, 16},
     {"_glmbayes_EnvelopeEval", (DL_FUNC) &_glmbayes_EnvelopeEval, 11},
     {"_glmbayes_EnvelopeOrchestrator_cpp", (DL_FUNC) &_glmbayes_EnvelopeOrchestrator_cpp, 21},
-    {"_glmbayes_EnvelopeSize", (DL_FUNC) &_glmbayes_EnvelopeSize, 7},
     {"_glmbayes_rss_face_at_disp", (DL_FUNC) &_glmbayes_rss_face_at_disp, 7},
     {"_glmbayes_UB2", (DL_FUNC) &_glmbayes_UB2, 8},
     {"_glmbayes_compute_mixture_and_outputs_cpp", (DL_FUNC) &_glmbayes_compute_mixture_and_outputs_cpp, 18},
@@ -497,6 +481,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_rnnorm_reg_std_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_std_cpp, 13},
     {"_glmbayes_rnnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_cpp, 18},
     {"_glmbayes_rnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnorm_reg_cpp, 14},
+    {"_glmbayes_EnvelopeSize",                (DL_FUNC) &_glmbayes_EnvelopeSize,                 7},
     {NULL, NULL, 0}
 };
 

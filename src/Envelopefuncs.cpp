@@ -105,7 +105,6 @@ double rss_face_at_disp(double dispersion,
 }
 
 
-
 // [[Rcpp::export]]
 double UB2(double dispersion,
            Rcpp::List cache,
