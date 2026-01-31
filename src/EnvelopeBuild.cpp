@@ -18,7 +18,7 @@
 
 using namespace Rcpp;
 using namespace openclPort;
-using namespace glmbayes::famfuncs;
+using namespace glmbayes::fam;
 using namespace glmbayes::envelopefuncs;
 
 

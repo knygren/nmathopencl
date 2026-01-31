@@ -11,7 +11,7 @@
 
 using namespace Rcpp;
 using namespace RcppParallel;
-using namespace glmbayes::famfuncs;
+using namespace glmbayes::fam;
 
 
 
@@ -19,7 +19,7 @@ void progress_bar2(double x, double N);
 
 namespace glmbayes{
 
-namespace famfuncs {
+namespace fam {
 void neg_dgamma_glmb_rmat(const RVector<double>& x,           // observations
                           const RVector<double>& shape,       // shape parameters
 //                          const RVector<double>& scale,       // scale parameters

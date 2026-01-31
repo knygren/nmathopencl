@@ -8,12 +8,12 @@
 
 using namespace Rcpp;
 using namespace RcppParallel;
-using namespace glmbayes::famfuncs;
+using namespace glmbayes::fam;
 
 
 namespace glmbayes{
 
-namespace famfuncs {
+namespace fam {
 
 void neg_dnorm_glmb_rmat(const RcppParallel::RVector<double>& x,         // observed values
                          const std::vector<double>& means,     // normal means

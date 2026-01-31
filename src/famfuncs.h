@@ -17,15 +17,16 @@ using namespace RcppParallel;
 
 // 5) Envelopefuncs.cpp
 // 6) EnvelopeEval.cpp
-// 7) rindep_norm_gamma_reg_cpp.cpp
-// 8) rnnorm_reg_cpp.cpp
+// 7) EnvelopeBuild.cpp
+// 8) rindep_norm_gamma_reg_cpp.cpp
+// 9) rnnorm_reg_cpp.cpp
 
 
 
 
 namespace glmbayes{
 
-namespace famfuncs {
+namespace fam {
 
 NumericVector dbinom_glmb( NumericVector x, NumericVector N, NumericVector means, int lg);
 NumericVector dpois_glmb( NumericVector x, NumericVector means, int lg);

@@ -7,7 +7,7 @@
 
 using namespace Rcpp;
 using namespace RcppParallel;
-using namespace glmbayes::famfuncs;
+using namespace glmbayes::fam;
 
 
 void progress_bar2(double x, double N);
@@ -37,7 +37,7 @@ double dpois2(double x,double lambda,int lg){
 
 namespace glmbayes{
 
-namespace famfuncs {
+namespace fam {
 
 
 void neg_dpois_glmb_rmat(const RVector<double>& x,     // observed counts

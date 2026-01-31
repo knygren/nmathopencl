@@ -15,7 +15,7 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 using namespace openclPort;
-using namespace glmbayes::famfuncs;
+using namespace glmbayes::fam;
 
 
 void progress_bar2(double x, double N);
@@ -34,7 +34,7 @@ inline double dbinom_raw_local(double x, double n, double p, double q, int give_
 
 namespace glmbayes{
 
-namespace famfuncs {
+namespace fam {
 // Neg log binomial likelihood, vectorized
 void neg_dbinom_glmb_rmat(const RVector<double>& x,          // success proportion
                           const RVector<double>& N,          // trial count
