@@ -18,6 +18,7 @@
 // 5) famfuncs_binomial.cpp
 // 6) famfuncs_poisson.cpp 
 // 7) rnnorm_reg_cpp.cpp
+// 8) rindep_norm_gamma_reg_cpp.cpp
 
 namespace glmbayes {
 
