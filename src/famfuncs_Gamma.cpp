@@ -155,7 +155,7 @@ NumericVector  f2_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,Numeric
     for(int i=0;i<m1;i++){
       Rcpp::checkUserInterrupt();
       if(progbar==1){ 
-        progress_bar2(i, m1-1);
+        progress_bar(i, m1-1);
         if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
       };  
       
@@ -331,7 +331,7 @@ arma::mat  f3_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatr
     for(int i=0;i<m1;i++){
       Rcpp::checkUserInterrupt();
       if(progbar==1){ 
-        progress_bar2(i, m1-1);
+        progress_bar(i, m1-1);
         if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
       };  
       

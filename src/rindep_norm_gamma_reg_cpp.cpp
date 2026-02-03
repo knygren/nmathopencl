@@ -200,7 +200,7 @@ void rindep_norm_gamma_worker::operator()(std::size_t begin, std::size_t end) {
 
     while (accept == 0) {
       // 1) Slice/component selection via PLSD
-      double U = safe_runif();
+      double U = runif_safe();
       int J_idx = 0;
       double U_left = U;
       while (true) {
@@ -211,7 +211,7 @@ void rindep_norm_gamma_worker::operator()(std::size_t begin, std::size_t end) {
 
       // 2) Draw truncated-normal beta row
       for (int j = 0; j < l1; ++j) {
-        out_row(0, j) = ctrnorm_cpp(
+        out_row(0, j) = rnorm_ct(
           logrt_r(J_idx, j),
           loglt_r(J_idx, j),
           -cbars_r(J_idx, j),
@@ -220,7 +220,7 @@ void rindep_norm_gamma_worker::operator()(std::size_t begin, std::size_t end) {
       }
 
       // 3) Draw dispersion
-      double dispersion = r_invgamma_safe(shape3, rate2, disp_upper, disp_lower);
+      double dispersion = rinvgamma_ct_safe(shape3, rate2, disp_upper, disp_lower);
 
       // 4) Solve theta (strict row-only)
       for (int j = 0; j < l1; ++j) cbars_small_col(j, 0) = cbars_r(J_idx, j);
@@ -265,7 +265,7 @@ void rindep_norm_gamma_worker::operator()(std::size_t begin, std::size_t end) {
 
 
         // 7) Upper bounds
-        double U2     = safe_runif();
+        double U2     = runif_safe();
         double log_U2 = std::log(U2);
 
         double UB1 = LL_New2_scalar;
@@ -436,7 +436,7 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
     
    if(progbar==1){
      // progress_bar3(i, n-1);
-     progress_bar2(i, n-1);
+     progress_bar(i, n-1);
      
      if(i==n-1) {Rcpp::Rcout << "" << std::endl;}
    }
@@ -470,13 +470,13 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
             
       // Simulate for beta
       
-      for(int j=0;j<l1;j++){  out(0,j)=ctrnorm_cpp(logrt(J(0),j),loglt(J(0),j),-cbars(J(0),j),1.0);          }
+      for(int j=0;j<l1;j++){  out(0,j)=rnorm_ct(logrt(J(0),j),loglt(J(0),j),-cbars(J(0),j),1.0);          }
       
       
 
       // Update this to make distribution contingent on component of the grid
       
-      dispersion=r_invgamma(shape3,rate2,disp_upper,disp_lower);
+      dispersion=rinvgamma_ct(shape3,rate2,disp_upper,disp_lower);
       
       
       

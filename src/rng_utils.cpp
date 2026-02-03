@@ -59,23 +59,23 @@ namespace glmbayes {
 namespace rng {
 
 // Core sampling function
-double safe_runif() {
+double runif_safe() {
   return safe_rng_dist(safe_rng_engine);
 }
 
 
 // 
 // // Declaration (e.g. in a header if needed)
-// // double r_invgamma_safe(double shape, double rate,
+// // double rinvgamma_safe(double shape, double rate,
 // //                        double disp_upper, double disp_lower);
 // 
 // // Definition (in your .cpp file)
-double r_invgamma_safe(double shape,
+double rinvgamma_ct_safe(double shape,
                        double rate,
                        double disp_upper,
                        double disp_lower) {
   // draw uniform(0,1) from thread‑local RNG
-  double p = safe_runif();
+  double p = runif_safe();
   
   // invert CDF at p to get inverse‑gamma draw
   // q_inv_gamma must be pure C++ math, no R calls

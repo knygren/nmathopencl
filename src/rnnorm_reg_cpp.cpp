@@ -347,7 +347,7 @@ void rnnorm_reg_worker::operator()(std::size_t begin, std::size_t end) {
 
       // 1) slice selection
       //double U  = R::runif(0.0, 1.0)
-      double U = safe_runif();
+      double U = runif_safe();
       double a2 = 0.0;
       int    J  = 0;
       while (a2 == 0.0) {
@@ -362,8 +362,8 @@ void rnnorm_reg_worker::operator()(std::size_t begin, std::size_t end) {
 
       // 2) draw truncated‐normal candidates
       for (int j = 0; j < l1; ++j) {
-        out(i, j) = ctrnorm_cpp(logrt(J, j),loglt(J, j),-cbars(J, j), 1.0 );
-        //  out(i, j) = ctrnorm_cpp(logrt2(J, j),loglt2(J, j),-cbars2(J, j), 1.0 );
+        out(i, j) = rnorm_ct(logrt(J, j),loglt(J, j),-cbars(J, j), 1.0 );
+        //  out(i, j) = rnorm_ct(logrt2(J, j),loglt2(J, j),-cbars2(J, j), 1.0 );
       }
 
       // 3) prepare for test
@@ -377,7 +377,7 @@ void rnnorm_reg_worker::operator()(std::size_t begin, std::size_t end) {
       testtemp2 = outtemp2 * trans(cbartemp2);
       //      double U2 = R::runif(0.0, 1.0);
 
-      double U2 = safe_runif();
+      double U2 = runif_safe();
 
 
       btemp2   = trans(outtemp2);
@@ -1061,7 +1061,7 @@ Rcpp::List  rnnorm_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
     
     Rcpp::checkUserInterrupt();
     if(progbar==1){
-      progress_bar2(i, n-1);
+      progress_bar(i, n-1);
       if(i==n-1) {Rcpp::Rcout << "" << std::endl;}
     }
     
@@ -1088,7 +1088,7 @@ Rcpp::List  rnnorm_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
       
       for(int j=0;j<l1;j++){  
         
-        out(i,j)=ctrnorm_cpp(logrt(J(i),j),loglt(J(i),j),-cbars(J(i),j),1.0);    
+        out(i,j)=rnorm_ct(logrt(J(i),j),loglt(J(i),j),-cbars(J(i),j),1.0);    
         
         
       }

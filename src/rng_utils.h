@@ -8,18 +8,18 @@ namespace glmbayes{
 namespace rng {
 
 // Thread-safe uniform RNG [0, 1)
-double safe_runif();
+double runif_safe();
 
-double r_invgamma_safe(double shape,
+double rinvgamma_ct_safe(double shape,
                        double rate,
                        double disp_upper,
                        double disp_lower);
 
 
 
-double ctrnorm_cpp(double lgrt,double lglt,double mu,double sigma);
+double  rnorm_ct(double lgrt,double lglt,double mu,double sigma);
 
-double r_invgamma(double shape,double rate,double disp_upper,double disp_lower);
+double rinvgamma_ct(double shape,double rate,double disp_upper,double disp_lower);
 
 
 }

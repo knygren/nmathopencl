@@ -339,7 +339,7 @@ arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMa
     for(int i=0;i<m1;i++){
       Rcpp::checkUserInterrupt();
       if(progbar==1){ 
-        progress_bar2(i, m1-1);
+        progress_bar(i, m1-1);
         if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
       };  
       

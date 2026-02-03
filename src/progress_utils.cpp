@@ -8,7 +8,7 @@ namespace glmbayes {
 
 namespace progress {
 
-void progress_bar2(double x, double N)
+void progress_bar(double x, double N)
 {
   // how wide you want the progress meter to be
   int totaldotz=40;

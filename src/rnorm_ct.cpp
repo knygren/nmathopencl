@@ -37,12 +37,12 @@ double safe_qnorm_logp(double logp, double mu, double sigma, bool lower_tail) {
 namespace glmbayes {
 namespace rng {
 
-double ctrnorm_cpp(double lgrt, double lglt, double mu, double sigma) {
+    double rnorm_ct(double lgrt, double lglt, double mu, double sigma) {
   double U = 0;
   double out = 0;
   
   if (lgrt >= lglt) {
-    U = safe_runif();
+    U = runif_safe();
     
     // u1 = 1 - exp(lgrt)  →  -expm1(lgrt)
     double u1   = -std::expm1(lgrt);
@@ -55,7 +55,7 @@ double ctrnorm_cpp(double lgrt, double lglt, double mu, double sigma) {
     out = safe_qnorm_logp(lgU3, mu, sigma, true);
     
   } else {
-    U = safe_runif();
+    U = runif_safe();
     
     // e1mu2 = 1 - exp(lglt) → -expm1(lglt)
     double e1mu2  = -std::expm1(lglt);

@@ -193,7 +193,7 @@ NumericVector  f2_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix 
       
       Rcpp::checkUserInterrupt();
       if(progbar==1){ 
-        progress_bar2(i, m1-1);
+        progress_bar(i, m1-1);
         if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
       };  
       
@@ -347,7 +347,7 @@ arma::mat  f3_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,Nu
       Rcpp::checkUserInterrupt();
       
     if(progbar==1){ 
-    progress_bar2(i, m1-1);
+    progress_bar(i, m1-1);
     if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
     };  
       
@@ -478,7 +478,7 @@ NumericVector  f2_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix
     for(int i=0;i<m1;i++){
       Rcpp::checkUserInterrupt();
       if(progbar==1){ 
-        progress_bar2(i, m1-1);
+        progress_bar(i, m1-1);
         if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
       };  
       
@@ -622,7 +622,7 @@ arma::mat  f3_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,N
       Rcpp::checkUserInterrupt();
       
       if(progbar==1){ 
-        progress_bar2(i, m1-1);
+        progress_bar(i, m1-1);
         if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
       };  
       
@@ -756,7 +756,7 @@ NumericVector  f2_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatri
       Rcpp::checkUserInterrupt();
       
       if(progbar==1){ 
-        progress_bar2(i, m1-1);
+        progress_bar(i, m1-1);
         if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
       };  
       
@@ -908,7 +908,7 @@ arma::mat  f3_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,
       Rcpp::checkUserInterrupt();
       
       if(progbar==1){ 
-        progress_bar2(i, m1-1);
+        progress_bar(i, m1-1);
         if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
       };  
       

@@ -51,7 +51,7 @@ inline void print_completed(const char* prefix, const Timer& tm) {
 }
 
 
-void progress_bar2(double x, double N);
+void progress_bar(double x, double N);
 
 }
 }

@@ -25,7 +25,7 @@ double  q_inv_gamma(double p,double shape,double rate,double disp_upper,double d
 namespace glmbayes {
 namespace rng {
 
-double r_invgamma(double shape,double rate,double disp_upper,double disp_lower){
+double rinvgamma_ct(double shape,double rate,double disp_upper,double disp_lower){
   double p= R::runif(0,1);
   return(q_inv_gamma(p,shape,rate,disp_upper,disp_lower));
 }
