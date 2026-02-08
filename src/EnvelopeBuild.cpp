@@ -19,7 +19,7 @@ using namespace Rcpp;
 using namespace openclPort;
 using namespace glmbayes::fam;
 using namespace glmbayes::env;
-
+using namespace glmbayes::progress;
 
 
 
@@ -164,11 +164,11 @@ List EnvelopeBuild(NumericVector bStar,
   // Print call parameters if verbose
   
   if (verbose) {
-    Rcpp::Rcout << ">>> EnvelopeBuild_c called with:\n"
-                << "    Gridtype   = " << Gridtype << "\n"
-                << "    n          = " << n << "\n"
-                << "    use_opencl = " << use_opencl << "\n"
-                << "    sortgrid   = " << sortgrid << "\n";
+    Rcpp::Rcout << "[EnvelopeBuild] Arguments:\n"
+                << "  [Gridtype]   " << Gridtype   << "\n"
+                << "  [n]          " << n          << "\n"
+                << "  [use_opencl] " << use_opencl << "\n"
+                << "  [sortgrid]   " << sortgrid   << "\n";
   }
   
   
@@ -245,15 +245,24 @@ List EnvelopeBuild(NumericVector bStar,
   NumericMatrix G4(G3.ncol(),G3.nrow());
   
   
-  // print grid size if requested
-  if (verbose) {
-    Rcpp::Rcout 
-    << ">>> EnvelopeBuild_c: grid size (l2) = " 
-    << l2 
-    << "\n";
-  }
+  // // print grid size if requested
+  // if (verbose) {
+  //   Rcpp::Rcout 
+  //   << ">>> EnvelopeBuild: grid size (l2) = " 
+  //   << l2 
+  //   << "\n";
+  // }
   
+  // if (verbose) {
+  //   Rcpp::Rcout << "[EnvelopeBuild] Grid size (l2) = "
+  //               << l2 << "\n";
+  // }
   
+  Rcpp::Rcout << "[EnvelopeBuild] Grid size (l2) = "
+              << glmbayes::progress::format_int_with_commas(l2)
+              << "\n";
+  
+
   
   arma::mat G3b(G3.begin(), G3.nrow(), G3.ncol(), false);
   arma::mat G4b(G4.begin(), G4.nrow(), G4.ncol(), false);
@@ -291,8 +300,9 @@ List EnvelopeBuild(NumericVector bStar,
   
   if (verbose) {
     
-    Rcpp::Rcout << "Entering Envelope Eval: "
-                << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+    Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval] Entering: "
+    //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                << glmbayes::progress::timestamp_cpp()
                 << "\n";
   }
   
@@ -303,8 +313,9 @@ List EnvelopeBuild(NumericVector bStar,
   
   if (verbose) {
     
-    Rcpp::Rcout << "Exiting Envelope Eval: "
-                << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+    Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval] Exiting: "
+//                << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                << glmbayes::progress::timestamp_cpp()
                 << "\n";
   }
   
@@ -319,19 +330,12 @@ List EnvelopeBuild(NumericVector bStar,
   
   cbars3=cbars2;
   
-  // July 2025 - Parallelization Implementation in steps
-  
-  // 1) EnvelopeSet_Grid_C2_pointwise changes loop to enable parallel processing (suggested by Copilot)
-  
-  
-  //  Rcpp::Rcout << "Entering Set grid C2 pointwise: "
-  //              << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
-  //              << "\n";
-  
+
   if (verbose) {
     
-    Rcpp::Rcout << "Setting Grid: "
-                << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+    Rcpp::Rcout << "[EnvelopeBuild:EnvelopeSet_Grid] Entering: "
+   //             << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                << glmbayes::progress::timestamp_cpp()
                 << "\n";
   }
   
@@ -340,24 +344,36 @@ List EnvelopeBuild(NumericVector bStar,
   //  EnvelopeSet_Grid_C2(GIndex, cbars, Lint1,Down,Up,loglt,logrt,logct,logU,logP);
   EnvelopeSet_Grid_C2_pointwise(GIndex, cbars, Lint1,Down,Up,loglt,logrt,logct,logU,logP);
   
+  if (verbose) {
+    
+    Rcpp::Rcout << "[EnvelopeBuild:EnvelopeSet_Grid] Exiting: "
+    //             << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                   << glmbayes::progress::timestamp_cpp()
+                   << "\n";
+  }
   
   
-  //    Rcpp::Rcout << "Entering setlogP_C2: "
-  //                << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
-  //                << "\n";
-  
-  
+
   // Set LOG P
   
   if (verbose) {
     
-    Rcpp::Rcout << "Setting logP: "
-                << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+    Rcpp::Rcout << "[EnvelopeBuild:EnvelopeSet_LogP] Entering: "
+        //        << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                << glmbayes::progress::timestamp_cpp()
                 << "\n";
   }
   
   
   setlogP_C2(logP,NegLL,cbars,G3,LLconst);
+  
+  if (verbose) {
+    
+    Rcpp::Rcout << "[EnvelopeBuild:EnvelopeSet_LogP] Exiting: "
+    //        << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+              << glmbayes::progress::timestamp_cpp()
+              << "\n";
+  }
   
   // Normalize probabilities (PLSD) for likelihood subgradient densities
   
@@ -376,14 +392,22 @@ List EnvelopeBuild(NumericVector bStar,
     
     if (verbose) {
       
-      Rcpp::Rcout << "Sorting Grid: "
-                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeSort] Entering: "
+                  << glmbayes::progress::timestamp_cpp()
                   << "\n";
     }
     
     
     Rcpp::List outlist=EnvSort(l1,l2,GIndex,G3,cbars,logU,logrt,loglt,logP,LLconst,PLSD,a_1,E_draws);
+
+    if (verbose) {
+      
+      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeSort] Exiting:"
+                  << glmbayes::progress::timestamp_cpp()
+                  << "\n";
+    }
     
+        
     return(outlist);
     
   }

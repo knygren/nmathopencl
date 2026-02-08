@@ -40,6 +40,10 @@ double f2_f3_opencl_pilot(const Rcpp::NumericMatrix& G4,
                         double threshold_sec=300) {
   if (!use_opencl) return NA_REAL;
   
+  glmbayes::progress::Timer t_pilot;
+  if (verbose) t_pilot.begin();
+  
+  
   int m1_total = G4.ncol();
   int y_obs    = y.size();
   
@@ -72,8 +76,9 @@ double f2_f3_opencl_pilot(const Rcpp::NumericMatrix& G4,
     
     if (verbose) {
       
-      Rcpp::Rcout << "Entering f2_F3_opencl warmup: "
-                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Entering warmup: "
+            //      << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")()))
+                  <<   now_hms() 
                   << "\n";
     }
     
@@ -82,8 +87,9 @@ double f2_f3_opencl_pilot(const Rcpp::NumericMatrix& G4,
     
     if (verbose) {
       
-      Rcpp::Rcout << "Exiting f2_F3_opencl warmup: "
-                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Exiting warmup: "
+              //    << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  <<   now_hms() 
                   << "\n";
     }
     
@@ -107,12 +113,12 @@ double f2_f3_opencl_pilot(const Rcpp::NumericMatrix& G4,
     fixed_cost    = time_A - m1_pilot_A * per_grid_cost;
     
     if (per_grid_cost <= 0.0) {
-      Rcpp::Rcout << "[WARNING] Negative per-grid cost — falling back to Pilot B average.\n";
+      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot][WARNING] Negative per-grid cost — falling back to Pilot B average.\n";
       per_grid_cost = time_B / m1_pilot_B;
       fixed_cost = 0.0;
     }
     if (fixed_cost < 0.0) {
-      Rcpp::Rcout << "[WARNING] Negative fixed cost — overriding to 0 and using Pilot B average.\n";
+      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot][WARNING] Negative fixed cost — overriding to 0 and using Pilot B average.\n";
       per_grid_cost = time_B / m1_pilot_B;
       fixed_cost = 0.0;
     }
@@ -127,10 +133,15 @@ double f2_f3_opencl_pilot(const Rcpp::NumericMatrix& G4,
     m_stage_grid = std::max(1, m_stage_grid);
     
     
-    if (verbose) {
-      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Running timed grid slice of size "
-                  << m_stage_grid << "...\n";
-    }
+    // if (verbose) {
+    //   Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Running timed grid slice of size "
+    //               << m_stage_grid << "...\n";
+    // }
+    
+    Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Running timed grid slice of size "
+                << glmbayes::progress::format_int_with_commas(static_cast<long long>(m_stage_grid))
+                << "...\n";
+    
     
     auto G4_pilot = slice_grid(m_stage_grid);
     auto t0p = std::chrono::high_resolution_clock::now();
@@ -138,56 +149,142 @@ double f2_f3_opencl_pilot(const Rcpp::NumericMatrix& G4,
     auto t1p = std::chrono::high_resolution_clock::now();
     double time_p = std::chrono::duration<double>(t1p - t0p).count();
     
-    double per_grid_sec_parallel = time_p / (double)m_stage_grid;
+    // double per_grid_sec_parallel = time_p / (double)m_stage_grid;
+    // refined_est_total_sec = per_grid_sec_parallel * m1_total;
+    // 
+    // auto fmt_hms = [](double seconds) {
+    //   int s = (int)std::round(seconds);
+    //   int h = s / 3600; s %= 3600;
+    //   int m = s / 60;   s %= 60;
+    //   std::ostringstream oss;
+    //   oss << h << "h " << m << "m " << s << "s";
+    //   return oss.str();
+    // };
+    // 
+    // if (verbose) {
+    //   
+    //   Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Calibration elapsed = " << time_p
+    //               << " s for " << m_stage_grid
+    //               << " grid points (" << per_grid_sec_parallel << " s/grid).\n";
+    //   
+    //   Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Refined grid build time estimate = "
+    //               << refined_est_total_sec << " seconds (" << fmt_hms(refined_est_total_sec) << ")\n";
+    //   
+    // }
+    
+    double per_grid_sec_parallel = time_p / static_cast<double>(m_stage_grid);
     refined_est_total_sec = per_grid_sec_parallel * m1_total;
     
-    auto fmt_hms = [](double seconds) {
-      int s = (int)std::round(seconds);
-      int h = s / 3600; s %= 3600;
-      int m = s / 60;   s %= 60;
-      std::ostringstream oss;
-      oss << h << "h " << m << "m " << s << "s";
-      return oss.str();
-    };
-    
     if (verbose) {
       
-      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Calibration elapsed = " << time_p
-                  << " s for " << m_stage_grid
-                  << " grid points (" << per_grid_sec_parallel << " s/grid).\n";
+      // // Calibration summary (still OK to show raw seconds here because it's a diagnostic)
+      // Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Calibration elapsed = "
+      //             << time_p << " s for " << m_stage_grid
+      //             << " grid points (" << per_grid_sec_parallel << " s/grid).\n";
       
+      
+      // Calibration summary (diagnostic: raw seconds OK)
+      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Calibration elapsed = "
+                  << time_p << " s for "
+                  << glmbayes::progress::format_int_with_commas(m_stage_grid)
+                  << " grid points ("
+                  << per_grid_sec_parallel << " s/grid).\n";
+      
+      
+      
+      
+      // Convert estimated total seconds to long
+      long total = static_cast<long>(std::round(refined_est_total_sec));
+      
+      // Use your new unified formatter
       Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Refined grid build time estimate = "
-                  << refined_est_total_sec << " seconds (" << fmt_hms(refined_est_total_sec) << ")\n";
-      
+                  << glmbayes::progress::format_hms(total) << "\n";
     }
-    long total = (long)std::round(refined_est_total_sec);
-    long h = total / 3600;
-    long m = (total % 3600) / 60;
-    long s = total % 60;
+    
+    // long total = (long)std::round(refined_est_total_sec);
+    // long h = total / 3600;
+    // long m = (total % 3600) / 60;
+    // long s = total % 60;
+    // 
+    // if (verbose) {
+    //   
+    //   Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Estimated full f2_f3 evaluation time = "
+    //               << refined_est_total_sec << " seconds (" << h << "h " << m << "m " << s << "s)\n";
+    //   
+    //   Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Components: fixed=" << fixed_cost
+    //               << ", per-grid=" << per_grid_cost << "\n";
+    //   
+    //   Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Note: estimate is approximate and may vary with system load.\n"; 
+    //   
+    // }
+    
+    long total = static_cast<long>(std::round(refined_est_total_sec));
     
     if (verbose) {
       
+      // Estimated full evaluation time (human‑readable only)
       Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Estimated full f2_f3 evaluation time = "
-                  << refined_est_total_sec << " seconds (" << h << "h " << m << "m " << s << "s)\n";
+                  << glmbayes::progress::format_hms(total) << "\n";
       
-      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Components: fixed=" << fixed_cost
-                  << ", per-grid=" << per_grid_cost << "\n";
+      // Components (these are diagnostic, so raw numbers are fine)
+      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Components: fixed="
+                  << fixed_cost << ", per-grid=" << per_grid_cost << "\n";
       
-      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Note: estimate is approximate and may vary with system load.\n"; 
-      
-      
+      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Note: estimate is approximate "
+                  << "and may vary with system load.\n";
     }
     
   }
   
+  // if (refined_est_total_sec > threshold_sec) {
+  //   Rcpp::Rcout << "\nEstimated run time exceeds 5 minutes ("
+  //               << refined_est_total_sec << " seconds).\n";
+  //   
+  //   Rcpp::Function r_interactive("interactive");
+  //   bool is_interactive = Rcpp::as<bool>(r_interactive());
+  //   
+  //   if (is_interactive) {
+  //     Rcpp::Function readline("readline");
+  //     std::string response = Rcpp::as<std::string>(
+  //       readline("Do you want to continue? [y/N]: ")
+  //     );
+  //     
+  //     if (response != "y" && response != "Y") {
+  //       Rcpp::Rcout << "Aborting full run per user choice.\n";
+  //       Rcpp::stop("User aborted run due to estimated time exceeding threshold.");
+  //     } else {
+  //       Rcpp::Rcout << "Proceeding with full run...\n";
+  //     }
+  //   } else {
+  //     // Non-interactive (e.g. CI/CRAN): auto-approve
+  //     Rcpp::Rcout << "[NOTE] Non-interactive session: proceeding automatically.\n";
+  //     Rcpp::Rcout << "Proceeding with full run...\n";
+  //   }
+  // }
+  
+  // ---------------------------------------------
+  // PRINT PILOT COMPLETION BEFORE USER PROMPT
+  // ---------------------------------------------
+  if (verbose) {
+    glmbayes::progress::print_completed(
+      "[EnvelopeBuild:EnvelopeEval:Pilot]", 
+      t_pilot
+    );
+  }
+  
   if (refined_est_total_sec > threshold_sec) {
+    
+    long total = static_cast<long>(std::round(refined_est_total_sec));
+    
     Rcpp::Rcout << "\nEstimated run time exceeds 5 minutes ("
-                << refined_est_total_sec << " seconds).\n";
+                << glmbayes::progress::format_hms(total)
+                << ").\n";
     
     Rcpp::Function r_interactive("interactive");
     bool is_interactive = Rcpp::as<bool>(r_interactive());
     
     if (is_interactive) {
+      
       Rcpp::Function readline("readline");
       std::string response = Rcpp::as<std::string>(
         readline("Do you want to continue? [y/N]: ")
@@ -199,8 +296,9 @@ double f2_f3_opencl_pilot(const Rcpp::NumericMatrix& G4,
       } else {
         Rcpp::Rcout << "Proceeding with full run...\n";
       }
+      
     } else {
-      // Non-interactive (e.g. CI/CRAN): auto-approve
+      // Non-interactive (e.g., CI/CRAN): auto-approve
       Rcpp::Rcout << "[NOTE] Non-interactive session: proceeding automatically.\n";
       Rcpp::Rcout << "Proceeding with full run...\n";
     }
@@ -316,22 +414,41 @@ Rcpp::List EnvelopeEval(const Rcpp::NumericMatrix& G4,   // grid (parameters × 
   // (originally: if (l1 >= 14) ...; here we use number of columns in G4)
   // --- Pilot timing ---
   if (G4.ncol() >= 14) {
-    Timer t_pilot; if (verbose) t_pilot.begin();
+//    Timer t_pilot; if (verbose) t_pilot.begin();
     
     if (verbose) {
       
-      Rcpp::Rcout << "Entering Run_opencl_pilot: "
-                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Entering: "
+          //        << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << now_hms() 
                   << "\n";
     }
     
     
-    double est_time = f2_f3_opencl_pilot(G4, y, x, mu, P, alpha, wt,family, link, use_opencl, verbose);
+    // double est_time = f2_f3_opencl_pilot(G4, y, x, mu, P, alpha, wt,family, link, use_opencl, verbose);
+    // if (verbose) {
+    //   print_completed("[EnvelopeBuild:EnvelopeEval:f2_f3_opencl_pilot]", t_pilot);
+    //   Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:f2_f3_opencl] Estimated time = "
+    //               << est_time << " seconds\n";
+    // }
+  
+  double est_time = f2_f3_opencl_pilot(
+    G4, y, x, mu, P, alpha, wt,
+    family, link, use_opencl, verbose
+  );
+    
     if (verbose) {
-      print_completed("[EnvelopeBuild::EnvelopeEval] Pilot", t_pilot);
-      Rcpp::Rcout << "[EnvelopeBuild::EnvelopeEval] Pilot estimated time = "
-                  << est_time << " seconds\n";
+      
+      // Print the pilot completion time using your Timer
+    //  print_completed("[EnvelopeBuild:EnvelopeEval:Pilot]", t_pilot);
+      
+      // Convert estimated seconds → long → formatted h/m/s
+      long total = static_cast<long>(std::round(est_time));
+      
+      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:f2_f3_opencl] Estimated time = "
+                  << glmbayes::progress::format_hms(total) << "\n";
     }
+  
   }
   
   
@@ -340,21 +457,36 @@ Rcpp::List EnvelopeEval(const Rcpp::NumericMatrix& G4,   // grid (parameters × 
   Rcpp::List prepGrad;
   if (use_opencl) {
     if (verbose) {
-      Rcpp::Rcout << "[EnvelopeBuild::EnvelopeEval] Initiating f2_f3_opencl at "
-                  << now_hms() << "\n";
+      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:f2_f3_opencl] Entering: "
+                  << now_hms() 
+      << "\n";
     }
     prepGrad = f2_f3_opencl(family, link, G4, y, x, mu, P, alpha, wt, progbar);
   } else {
     if (verbose) {
-      Rcpp::Rcout << "[EnvelopeEval] Initiating f2_f3_non_opencl at "
+      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:f2_f3_non_opencl]  Entering: "
                   << now_hms() << "\n";
     }
     prepGrad = f2_f3_non_opencl(family, link, G4, y, x, mu, P, alpha, wt, progbar);
   }
   if (verbose) {
-    print_completed("[EnvelopeBuild::EnvelopeEval] Dispatch", t_dispatch);
+    print_completed("[EnvelopeBuild:EnvelopeEval:f2_f3_opencl]", t_dispatch);
+  }
+
+  if (use_opencl) {
+    if (verbose) {
+      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:f2_f3_opencl] Exiting: "
+                  << now_hms() 
+                  << "\n";
+    }
+  } else {
+    if (verbose) {
+      Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:f2_f3_non_opencl]  Exiting: "
+                  << now_hms() << "\n";
+    }
   }
   
+    
   // Unpack results
   Rcpp::NumericVector NegLL = prepGrad["qf"];          // negative log likelihood values
   arma::mat cbars = Rcpp::as<arma::mat>(prepGrad["grad"]); // gradient matrix

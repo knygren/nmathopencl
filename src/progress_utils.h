@@ -5,30 +5,37 @@
 #include <tuple>
 #include <chrono>
 #include <ctime>
+#include <iomanip>
+#include <sstream>
 #include <RcppArmadillo.h>
 
-
-// Dependencies:
-
-// 1) progress_utils.cpp
-
-// 2) EnvelopeBuild_Ind_Normal_Gamma.cpp
-// 3) EnvelopeEval.cpp
-// 4) famfuncs_Gamma.cpp
-// 5) famfuncs_binomial.cpp
-// 6) famfuncs_poisson.cpp 
-// 7) rnnorm_reg_cpp.cpp
-// 8) rindep_norm_gamma_reg_cpp.cpp
-
 namespace glmbayes {
-
 namespace progress {
 
+// Existing now_hms()
 inline std::string now_hms() {
   std::time_t t = std::time(nullptr);
   char buf[16];
   std::strftime(buf, sizeof(buf), "%H:%M:%S", std::localtime(&t));
   return std::string(buf);
+}
+
+// New: full timestamp helper (replaces format(Sys.time()))
+inline std::string timestamp_cpp() {
+  using clock = std::chrono::system_clock;
+  auto now = clock::now();
+  std::time_t t = clock::to_time_t(now);
+  
+  std::tm tm;
+#ifdef _WIN32
+  localtime_s(&tm, &t);
+#else
+  localtime_r(&t, &tm);
+#endif
+  
+  std::ostringstream oss;
+  oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+  return oss.str();
 }
 
 struct Timer {
@@ -45,15 +52,45 @@ struct Timer {
   }
 };
 
+// Format from total seconds
+inline std::string format_hms(long total_seconds) {
+  long h = total_seconds / 3600;
+  long m = (total_seconds % 3600) / 60;
+  long s = total_seconds % 60;
+  
+  std::ostringstream oss;
+  oss << h << "h " << m << "m " << s << "s";
+  return oss.str();
+}
+
+// Format from (h, m, s) tuple
+inline std::string format_hms(int h, int m, int s) {
+  std::ostringstream oss;
+  oss << h << "h " << m << "m " << s << "s";
+  return oss.str();
+}
+
 inline void print_completed(const char* prefix, const Timer& tm) {
   auto [h,m,s] = tm.hms();
   Rcpp::Rcout << prefix << " completed in: " << h << "h " << m << "m " << s << "s.\n";
 }
 
+struct comma_numpunct : std::numpunct<char> {
+protected:
+  char do_thousands_sep() const override { return ','; }
+  std::string do_grouping() const override { return "\3"; }
+};
+
+inline std::string format_int_with_commas(long long value) {
+  std::ostringstream oss;
+  oss.imbue(std::locale(std::locale::classic(), new comma_numpunct));
+  oss << value;
+  return oss.str();
+}
 
 void progress_bar(double x, double N);
 
-}
-}
+} // namespace progress
+} // namespace glmbayes
 
 #endif

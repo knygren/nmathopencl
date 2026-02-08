@@ -691,22 +691,32 @@ Rcpp::List run_rcppparallel_pilot(
     double per_candidate_ms = static_cast<double>(elapsed_ms) / candidates_used;
     double est_total_ms = per_candidate_ms * E_draws * static_cast<double>(n);
     
-    auto fmt_hms = [](double seconds) {
-      int s = static_cast<int>(std::round(seconds));
-      int h = s / 3600; s %= 3600;
-      int m = s / 60;   s %= 60;
-      std::ostringstream oss;
-      oss << h << "h " << m << "m " << s << "s";
-      return oss.str();
-    };
+    // auto fmt_hms = [](double seconds) {
+    //   int s = static_cast<int>(std::round(seconds));
+    //   int h = s / 3600; s %= 3600;
+    //   int m = s / 60;   s %= 60;
+    //   std::ostringstream oss;
+    //   oss << h << "h " << m << "m " << s << "s";
+    //   return oss.str();
+    // };
     
     est_total_sec = est_total_ms / 1000.0;
     
-    if(verbose){
-    Rcpp::Rcout << "Estimated simulation time (" << n << " draws): "
-                << est_total_sec << " seconds (" << fmt_hms(est_total_sec) << ").\n"
-                << "Note: this phase uses RcppParallel and cannot be safely interrupted.\n";
-    }
+    // if(verbose){
+    // Rcpp::Rcout << "[rNormalGLM:Pilot] Estimated simulation time (" << n << " draws): "
+    //             << est_total_sec << " seconds (" << fmt_hms(est_total_sec) << ").\n"
+    //             << "Note: this phase uses RcppParallel and cannot be safely interrupted.\n";
+    // }
+  
+  if (verbose) {
+    Rcpp::Rcout
+    << "[rNormalGLM:Pilot] Estimated simulation time ("
+    << glmbayes::progress::format_int_with_commas(static_cast<long long>(n))
+    << " draws): "
+    << glmbayes::progress::format_hms(est_total_sec)
+    << "\n"
+    << "[rNormalGLM:Pilot] Note: this phase uses RcppParallel and cannot be safely interrupted.\n";
+  }
   
   }
   
@@ -719,11 +729,20 @@ Rcpp::List run_rcppparallel_pilot(
   int m2 = std::max(1, (int)std::floor(300000.0 / std::max(1.0, est_per_draw_ms_serial))); // 300k ms = ~5 minutes
   int m_stage = std::min(m1, m2);
   
-  if(verbose){
-  Rcpp::Rcout << "Calibrating simulation time estimate using " << m_stage
-              << " draws at "
-              << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")()))
-              << "\n";
+  // if(verbose){
+  // Rcpp::Rcout << "Calibrating simulation time estimate using " << m_stage
+  //             << " draws at "
+  //             << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")()))
+  //             << "\n";
+  // }
+  
+  if (verbose) {
+    Rcpp::Rcout
+    << "[rNormalGLM:Pilot] Calibrating simulation time estimate using "
+    << glmbayes::progress::format_int_with_commas(static_cast<long long>(m_stage))
+    << " draws at "
+    << glmbayes::progress::now_hms()
+    << "\n";
   }
   
   // --- calibration run for m_stage draws ---
@@ -752,46 +771,86 @@ Rcpp::List run_rcppparallel_pilot(
   
   // --- print diagnostics ---
   
-  if (verbose){
-  Rcpp::Rcout << "[CALIB] Calibration elapsed = " << cal_elapsed_sec
-              << " s for " << m_stage << " accepted draws using "
-              << total_candidates << " candidates.\n";
+  // if (verbose){
+  // Rcpp::Rcout << "[CALIB] Calibration elapsed = " << cal_elapsed_sec
+  //             << " s for " << m_stage << " accepted draws using "
+  //             << total_candidates << " candidates.\n";
+  // 
+  // Rcpp::Rcout << "[CALIB] avg_candidates_per_draw (empirical) = "
+  //             << avg_candidates_per_draw
+  //             << " vs E_draws = " << E_draws << "\n";
+  // 
+  // Rcpp::Rcout << "[CALIB] per_candidate_sec = " << per_candidate_sec
+  //             << " s, est_per_draw_sec = " << est_per_draw_sec << " s\n";
+  // }
   
-  Rcpp::Rcout << "[CALIB] avg_candidates_per_draw (empirical) = "
-              << avg_candidates_per_draw
-              << " vs E_draws = " << E_draws << "\n";
-  
-  Rcpp::Rcout << "[CALIB] per_candidate_sec = " << per_candidate_sec
-              << " s, est_per_draw_sec = " << est_per_draw_sec << " s\n";
+  if (verbose) {
+    Rcpp::Rcout
+    << "[rNormalGLM:Pilot] Calibration elapsed = "
+    << cal_elapsed_sec << " s for "
+    << glmbayes::progress::format_int_with_commas(static_cast<long long>(m_stage))
+    << " accepted draws using "
+    << glmbayes::progress::format_int_with_commas(static_cast<long long>(total_candidates))
+    << " candidates.\n";
+    
+    Rcpp::Rcout
+    << "[rNormalGLM:Pilot] avg_candidates_per_draw (empirical) = "
+    << avg_candidates_per_draw
+    << " vs E_draws = " << E_draws << "\n";
+    
+    Rcpp::Rcout
+    << "[rNormalGLM:Pilot] per_candidate_sec = "
+    << per_candidate_sec
+    << " s, est_per_draw_sec = "
+    << est_per_draw_sec << " s\n";
   }
   
-  auto fmt_hms2 = [](double seconds) {
-    long long s = static_cast<long long>(std::round(seconds));
-    long long h = s / 3600; s %= 3600;
-    long long m = s / 60;   s %= 60;
-    std::ostringstream oss;
-    if (h > 0) oss << h << "h ";
-    if (m > 0 || h > 0) oss << m << "m ";
-    oss << s << "s";
-    return oss.str();
-  };
   
-  if (verbose) {Rcpp::Rcout << "Refined simulation time estimate (" << n << " draws): "
-              << est_total_sec << " seconds ("
-              << fmt_hms2(est_total_sec) << ").\n";
+  // auto fmt_hms2 = [](double seconds) {
+  //   long long s = static_cast<long long>(std::round(seconds));
+  //   long long h = s / 3600; s %= 3600;
+  //   long long m = s / 60;   s %= 60;
+  //   std::ostringstream oss;
+  //   if (h > 0) oss << h << "h ";
+  //   if (m > 0 || h > 0) oss << m << "m ";
+  //   oss << s << "s";
+  //   return oss.str();
+  // };
+  // 
+  // if (verbose) {Rcpp::Rcout << "Refined simulation time estimate (" << n << " draws): "
+  //             << est_total_sec << " seconds ("
+  //             << fmt_hms2(est_total_sec) << ").\n";
+  // }
+  
+  if (verbose) {
+    Rcpp::Rcout
+    << "[rNormalGLM:Pilot] Refined simulation time estimate ("
+    << glmbayes::progress::format_int_with_commas(static_cast<long long>(n))
+    << " draws): "
+    << glmbayes::progress::format_hms(static_cast<long>(std::round(est_total_sec)))
+    << "\n";
   }
   
   // --- yes/no option if estimate exceeds 5 minutes ---
   if (est_total_sec > 300.0) {
-    std::string prompt = "Estimated simulation exceeds 5 minutes. Continue? [y/N]: ";
+    
+    // Blank line before the prompt (matches EnvelopeBuild style)
+    Rcpp::Rcout << "\nEstimated simulation exceeds 5 minutes ("
+                << glmbayes::progress::format_hms(static_cast<long>(std::round(est_total_sec)))
+                << ").\n";
+    
+    std::string prompt = "Do you want to continue? [y/N]: ";
     
     Rcpp::Function r_interactive("interactive");
     bool is_interactive = Rcpp::as<bool>(r_interactive());
     
     if (is_interactive) {
+      
       Rcpp::Function readline("readline");
+      
       while (true) {
         std::string ans = Rcpp::as<std::string>(readline(Rcpp::wrap(prompt)));
+        
         // trim whitespace
         auto ltrim = [](std::string &s) {
           s.erase(s.begin(), std::find_if(s.begin(), s.end(),
@@ -804,27 +863,37 @@ Rcpp::List run_rcppparallel_pilot(
         ltrim(ans); rtrim(ans);
         
         if (ans == "y" || ans == "yes" || ans == "1" || ans == "continue") {
-          Rcpp::Rcout << "[INFO] User chose to continue full run.\n";
-          Rcpp::Rcout << ">>> Running Full parallel sampler: "
-                      << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")()))
+          
+          Rcpp::Rcout << "\nUser chose to continue full run.\n";
+          
+          Rcpp::Rcout << "[rNormalGLM:Sampler] Running full parallel sampler: "
+                      << glmbayes::progress::timestamp_cpp()
                       << "\n";
-          break; // proceed to parallel simulation
+          
+          break;
+          
         } else if (ans == "n" || ans == "no" || ans == "2" || ans.empty()) {
-          Rcpp::Rcout << "[INFO] User declined. Stopping simulation.\n";
+          
+          Rcpp::Rcout << "User declined. Stopping simulation.\n";
           Rcpp::stop("Simulation stopped by user after time estimate.");
+          
         } else {
           Rcpp::Rcout << "Invalid input. Please enter y (continue) or N (stop).\n";
         }
       }
+      
     } else {
-      // Non-interactive session (e.g. CI/CRAN): auto-approve
+      
+      // Non-interactive session (e.g., CI/CRAN): auto-approve
       Rcpp::Rcout << "[NOTE] Non-interactive session: proceeding automatically.\n";
-      Rcpp::Rcout << "[INFO] Proceeding with full run.\n";
-      Rcpp::Rcout << ">>> Running Full parallel sampler: "
-                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")()))
+      Rcpp::Rcout << "Proceeding with full run.\n";
+      
+      Rcpp::Rcout << "[rNormalGLM:Sampler] Running full parallel sampler: "
+                  << glmbayes::progress::timestamp_cpp()
                   << "\n";
     }
   }
+  
   
   // Return summary with zero-copy references to original out/draws
   return Rcpp::List::create(
@@ -882,7 +951,7 @@ List rNormalGLM_std_parallel(
   }
   
 
-  if (verbose)  Rcpp::Rcout << "Estimated draws per Acceptance: " << E_draws << "\n";  
+  // if (verbose)  Rcpp::Rcout << "[rNormalGLM_std] Estimated draws per Acceptance: " << E_draws << "\n";  
 
 
 
@@ -1386,7 +1455,7 @@ Rcpp::List rNormalGLM(int n,NumericVector y,NumericMatrix x,
 
   
   
-  if (verbose)  Rcpp::Rcout << "Estimated draws per Acceptance: " << E_draws << "\n";  
+  if (verbose)  Rcpp::Rcout << "[rNormalGLM] Estimated draws per Acceptance: " << E_draws << "\n";  
   
   
   
@@ -1415,14 +1484,14 @@ Rcpp::List rNormalGLM(int n,NumericVector y,NumericMatrix x,
 
   // Choose serial vs. parallel sampler  
   if (!use_parallel || n == 1) {  
-    if (verbose) Rcpp::Rcout << ">>> Running serial sampler (use_parallel=FALSE or n=1): "
+    if (verbose) Rcpp::Rcout << "[rNormalGLM] Running serial sampler (use_parallel=FALSE or n=1): "
                              << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
       << "\n";    
     
     sim = rNormalGLM_std( n, y, x2_temp, mu2_temp, P2_temp, alpha, wt2,  f2, Envelope, family, link, progbar,verbose);  
   }
   else {  
-    if (verbose) Rcpp::Rcout << ">>> Running parallel sampler (use_parallel=TRUE and n>1):"
+    if (verbose) Rcpp::Rcout << "[rNormalGLM] Running parallel sampler (use_parallel=TRUE and n>1):"
                              << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
                              << "\n";          
       
@@ -1430,11 +1499,15 @@ Rcpp::List rNormalGLM(int n,NumericVector y,NumericMatrix x,
   }  
   
 
-  if (verbose) Rcpp::Rcout << ">>> Finished Simulation: "
-                           << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
-                           << "\n";    
+  // if (verbose) Rcpp::Rcout << ">>> Finished Simulation: "
+  //                          << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+  //                          << "\n";    
   
-    
+  if (verbose) {
+    Rcpp::Rcout << "[rNormalGLM:Sampler] Finished simulation: "
+                << glmbayes::progress::timestamp_cpp()
+                << "\n";
+  }    
   
 
   // Rcout << "Finished Simulation"  << std::endl;
