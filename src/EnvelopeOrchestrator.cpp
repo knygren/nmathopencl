@@ -16,6 +16,7 @@ using namespace glmbayes::env;
 namespace glmbayes {
 
 namespace env {
+
 Rcpp::List EnvelopeOrchestrator(
     NumericVector bstar2,
     NumericMatrix A,
@@ -64,6 +65,16 @@ Rcpp::List Env2 = EnvelopeBuild(
     verbose                      // bool
 );
 
+  
+// {
+//   Rcpp::NumericVector PLSD0 = Env2["PLSD"];
+//   Rcpp::Rcout << "[CHECK] PLSD0[0:8] = ";
+//   for (int i = 0; i < 9 && i < PLSD0.size(); ++i)
+//     Rcpp::Rcout << PLSD0[i] << " ";
+//   Rcpp::Rcout << "\n";
+// }  
+  
+  
 // --- Step 2: EnvelopeDispersionBuild (direct C++ call) ---
 Rcpp::List disp_env_out = EnvelopeDispersionBuild(
     Env2,                        // List Env
@@ -85,11 +96,24 @@ Rcpp::List disp_env_out = EnvelopeDispersionBuild(
     use_parallel                 // bool use_parallel
 );
 
+
+
 // --- Step 3: Call R's EnvelopeSort ---
 
 // Extract Env_out and UB_list as proper Lists
 Rcpp::List Env3_raw    = disp_env_out["Env_out"];
 Rcpp::List UB_list_new = disp_env_out["UB_list"];
+
+
+
+// {
+//   Rcpp::NumericVector PLSD1 = Env3_raw["PLSD"];
+//   Rcpp::Rcout << "[CHECK] PLSD1[0:8] = ";
+//   for (int i = 0; i < 9 && i < PLSD1.size(); ++i)
+//     Rcpp::Rcout << PLSD1[i] << " ";
+//   Rcpp::Rcout << "\n";
+// }
+// 
 
 // Extract cbars and its dimensions
 Rcpp::NumericMatrix cbars = Env3_raw["cbars"];
@@ -104,6 +128,39 @@ Rcpp::NumericMatrix logP_mat(logP_vec.size(), 1, logP_vec.begin());
 // Look up EnvelopeSort in the glmbayes namespace
 Rcpp::Environment pkg = Rcpp::Environment::namespace_env("glmbayes");
 Rcpp::Function EnvelopeSort = pkg["EnvelopeSort"];
+
+
+
+// --- Call C++ EnvelopeSort_cpp instead of R's EnvelopeSort ---
+// Rcpp::List Env3 = glmbayes::env::EnvelopeSort_cpp(
+//   l1,
+//   l2,
+//   Rcpp::as<Rcpp::NumericMatrix>(Env3_raw["GridIndex"]),   // GIndex
+//   Rcpp::as<Rcpp::NumericMatrix>(Env3_raw["thetabars"]),   // G3
+//   cbars,                                                  // cbars
+//   Rcpp::as<Rcpp::NumericVector>(Env3_raw["logU"]),        // logU
+//   Rcpp::as<Rcpp::NumericMatrix>(Env3_raw["logrt"]),       // logrt
+//   Rcpp::as<Rcpp::NumericMatrix>(Env3_raw["loglt"]),       // loglt
+//   logP_vec,                                               // logP (vector)
+//   Rcpp::as<Rcpp::NumericVector>(Env3_raw["LLconst"]),     // LLconst
+//   Rcpp::as<Rcpp::NumericVector>(Env3_raw["PLSD"]),        // PLSD
+//   Rcpp::as<Rcpp::NumericVector>(Env3_raw["a1"]),          // a1 (vector)
+//   Rcpp::as<double>(Env3_raw["E_draws"]),                  // E_draws (scalar)
+//   UB_list_new.containsElementNamed("lg_prob_factor")
+//   ? Rcpp::Nullable<Rcpp::NumericVector>(UB_list_new["lg_prob_factor"])
+//     : Rcpp::Nullable<Rcpp::NumericVector>(),
+//       UB_list_new.containsElementNamed("UB2min")
+//   ? Rcpp::Nullable<Rcpp::NumericVector>(UB_list_new["UB2min"])
+//     : Rcpp::Nullable<Rcpp::NumericVector>()
+// );
+
+
+
+
+// TEMPORARY: stop after calling C++ sorter
+//Rcpp::stop("DEBUG STOP: after EnvelopeSort_cpp");
+
+//Rcpp::stop("DEBUG STOP: halting before EnvelopeSort");
 
 // Call EnvelopeSort with the same arguments as the R orchestrator
 Rcpp::List Env3 = EnvelopeSort(

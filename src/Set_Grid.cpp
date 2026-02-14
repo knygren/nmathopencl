@@ -46,6 +46,8 @@ void EnvelopeSet_Grid_C2_pointwise(
       int code = static_cast<int>(GIndex(j, i));
       double cb  = cbars(j, i);
       
+
+            
       // 1. Determine [down, up]
       double down, up;
       if (code == 1) {
@@ -67,8 +69,7 @@ void EnvelopeSet_Grid_C2_pointwise(
       Down(j, i) = down;
       Up(j,   i) = up;
       
-      
-      
+
       // 2. Compute CDFs and log‐CDFs
       // P(Z <= up), log P(Z <= up)
 //      double p_up_nl    = R::pnorm(up,   0.0, 1.0, /*lower_tail=*/ true,  /*log_p=*/ false);
@@ -77,10 +78,13 @@ void EnvelopeSet_Grid_C2_pointwise(
       // P(Z > down), log P(Z > down)
 //      double p_down_gt  = R::pnorm(down, 0.0, 1.0, /*lower_tail=*/ false, /*log_p=*/ false);
       double logp_down_gt = R::pnorm(down, 0.0, 1.0, /*lower_tail=*/ false, /*log_p=*/ true);
-      
+
+
       // log‐tails for pure lower/upper
       lglt(j, i) = logp_up;         // log P(Z <= up)
       lgrt(j, i) = logp_down_gt;   // log P(Z >  down)
+      
+      
       
       // 3. Stable mid‐interval probability
       // p_mid = P(down < Z <= up)
@@ -99,7 +103,8 @@ void EnvelopeSet_Grid_C2_pointwise(
                                        
                                        // log p_mid = log P(Z<=up) + log(-expm1(delta))
                                        logp_mid_branch = logp_up + std::log(-std::expm1(delta));
-                                       
+
+                                      
       } else {
         // Lower‑anchored branch
         double logp_up_gt = R::pnorm(up, 0.0, 1.0,
@@ -109,7 +114,11 @@ void EnvelopeSet_Grid_C2_pointwise(
                                      
                                      // log p_mid = log P(Z>down) + log(-expm1(delta))
                                      logp_mid_branch = logp_down_gt + std::log(-std::expm1(delta));
+  
+
       }
+      
+      
       
       // --- Final step, after the if/else ---
       double logp_mid = (R_finite(logp_mid_branch) ? logp_mid_branch : R_NaReal);

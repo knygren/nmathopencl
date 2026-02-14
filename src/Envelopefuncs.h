@@ -126,6 +126,26 @@ Rcpp::List EnvelopeOrchestrator(
     bool verbose
 );
 
+Rcpp::List EnvelopeSort_cpp(
+    int l1,
+    int l2,
+    const Rcpp::NumericMatrix& GIndex,
+    const Rcpp::NumericMatrix& G3,
+    const Rcpp::NumericMatrix& cbars,
+    const Rcpp::NumericVector& logU,
+    const Rcpp::NumericMatrix& logrt,
+    const Rcpp::NumericMatrix& loglt,
+    const Rcpp::NumericVector& logP,
+    const Rcpp::NumericVector& LLconst,
+    const Rcpp::NumericVector& PLSD,
+    const Rcpp::NumericVector& a1,
+    double E_draws,
+    const Rcpp::Nullable<Rcpp::NumericVector>& lg_prob_factor = R_NilValue,
+    const Rcpp::Nullable<Rcpp::NumericVector>& UB2min        = R_NilValue
+);
+
+
+
 List EnvelopeSet_Grid(Rcpp::NumericMatrix GIndex,  Rcpp::NumericMatrix cbars, Rcpp::NumericMatrix Lint);
 void EnvelopeSet_Grid_C2(Rcpp::NumericMatrix GIndex,  Rcpp::NumericMatrix cbars, Rcpp::NumericMatrix Lint,Rcpp::NumericMatrix Down,Rcpp::NumericMatrix Up,Rcpp::NumericMatrix lglt,Rcpp::NumericMatrix lgrt,Rcpp::NumericMatrix lgct,Rcpp::NumericMatrix logU,Rcpp::NumericMatrix logP);
 void EnvelopeSet_Grid_C2_pointwise(Rcpp::NumericMatrix GIndex,  Rcpp::NumericMatrix cbars, Rcpp::NumericMatrix Lint,Rcpp::NumericMatrix Down,Rcpp::NumericMatrix Up,Rcpp::NumericMatrix lglt,Rcpp::NumericMatrix lgrt,Rcpp::NumericMatrix lgct,Rcpp::NumericMatrix logU,Rcpp::NumericMatrix logP);

@@ -98,6 +98,48 @@ Rcpp::List glmb_Standardize_Model(
 // Standardize Model to Have Diagonal Variance-Covariance Matrix at Posterior Mode
 
       eig_sym(eigval_1, eigvec_1, A1_b);
+      
+//////////////  Adding warnings if ill-conditioned /////  
+      
+      double lambda_min = eigval_1.min();
+      double lambda_max = eigval_1.max();
+      double kappa_H    = lambda_max / lambda_min;
+      
+      // --- Numerical stability warnings based on κ(H) ---
+      
+      if (!R_finite(kappa_H)) {
+        Rcpp::Rcout <<
+          "[glmb_Standardize_Model][WARNING] Posterior Hessian is not finite.\n"
+          "  kappa(H) is NaN or Inf.\n"
+          "  Standardization is likely to be numerically unstable.\n";
+      }
+      else if (kappa_H > 1e8) {
+        Rcpp::Rcout <<
+          "[glmb_Standardize_Model][WARNING] Posterior Hessian is effectively singular.\n"
+          "  kappa(H) = " << kappa_H << "\n"
+          "  Standardization may be unreliable; curvature is dominated by roundoff.\n";
+      }
+      else if (kappa_H > 1e6) {
+        Rcpp::Rcout <<
+          "[glmb_Standardize_Model][WARNING] Posterior Hessian is numerically dangerous.\n"
+          "  kappa(H) = " << kappa_H << "\n"
+          "  Curvature is extremely uneven; standardization may be unstable.\n";
+      }
+      else if (kappa_H > 1e5) {
+        Rcpp::Rcout <<
+          "[glmb_Standardize_Model][WARNING] Posterior Hessian is severely ill-conditioned.\n"
+          "  kappa(H) = " << kappa_H << "\n"
+          "  Expect sensitivity to rounding and potential instability.\n";
+      }
+      else if (kappa_H > 1e4) {
+        Rcpp::Rcout <<
+          "[glmb_Standardize_Model][NOTE] Posterior Hessian is moderately ill-conditioned.\n"
+          "  kappa(H) = " << kappa_H << "\n";
+      }
+      
+      
+////////////////////////////////////////////////////////////      
+      
       arma::mat D1=arma::diagmat(eigval_1);
       arma::mat L2= arma::sqrt(D1)*trans(eigvec_1);
       L2Inv=eigvec_1*sqrt(inv_sympd(D1));  // Also used to undo normalization later

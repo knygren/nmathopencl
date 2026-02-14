@@ -96,64 +96,201 @@
 #' @order 1
 
 
-rlmb<-function(n=1,y,x,pfamily,offset=rep(0,nobs),weights=NULL)
-  {
+# rlmb<-function(n=1,y,x,pfamily,offset=rep(0,nobs),weights=NULL)
+#   {
+# 
+# 
+#   ## Pull in information from the pfamily  
+#   pf=pfamily$pfamily
+#   #okfamilies=pfamily$okfamilies  
+#   okfamilies <- c("gaussian")    # Only gaussian is okfamily for rlmb (different from rglmb)
+#   plinks=pfamily$plinks
+#   prior_list=pfamily$prior_list 
+#   simfun=pfamily$simfun
+# 
+#   family=gaussian()
+#   
+# #  if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
+# #     is.numeric(mu)==FALSE||is.numeric(P)==FALSE) stop("non-numeric argument to numeric function")
+# 
+#   x <- as.matrix(x)
+#   #mu<-as.matrix(as.vector(prior_list$mu))
+#   #P<-as.matrix(P)    
+#   xnames <- dimnames(x)[[2L]]
+#   ynames <- if (is.matrix(y)) 
+#     rownames(y)
+#   else names(y)
+#   if(length(n)>1) n<-length(n)	   
+#   nobs <- NROW(y)
+#   nvars <- ncol(x)
+#   EMPTY <- nvars == 0
+#   if (is.null(offset)) 
+#     offset <- rep(0, nobs)
+#   
+#   #nvars2<-length(mu)	
+#   #if(!nvars==nvars2) stop("incompatible dimensions")
+#   #if (!all(dim(P) == c(nvars2, nvars2))) 
+#   #  stop("incompatible dimensions")
+#   
+#   
+#   #if(!isSymmetric(P))stop("matrix P must be symmetric")
+# 
+#     
+#   if(is.null(weights)) weights=rep(1,nobs)
+#   if(length(weights)==1) weights=rep(weights,nobs)
+#   nobs2=length(weights)
+#   nobs3=NROW(x)
+#   nobs4=NROW(offset)
+#   
+#   if(nobs2!=nobs) stop("weighting vector must have same number of elements as y")
+#   if(nobs3!=nobs) stop("matrix X must have same number of rows as y")
+#   if(nobs4!=nobs) stop("offset vector must have same number of rows as y")
+#   
+#   #tol<- 1e-06 # Link this to Magnitude of P	
+#   #eS <- eigen(P, symmetric = TRUE,only.values = FALSE)
+#   #ev <- eS$values
+#   #if (!all(ev >= -tol * abs(ev[1L]))) 
+#   #  stop("'P' is not positive definite")
+# 
+#   #if (is.null(start)) 
+#   #  start <- mu
+#   if (is.null(offset)) 
+#     offset <- rep.int(0, nobs)
+#   if (is.character(family)) 
+#     family <- get(family, mode = "function", envir = parent.frame())
+#   if (is.function(family)) 
+#     family <- family()
+#   if (is.null(family$family)) {
+#     print(family)
+#     stop("'family' not recognized")
+#   }
+#   
+# 
+#   if(family$family %in% okfamilies){
+#     oklinks<-c("identity")
+#     if(!family$link %in% oklinks){      
+#       stop(gettextf("link \"%s\" not available for selected family; available links are %s", 
+#                     family$link , paste(sQuote(oklinks), collapse = ", ")), 
+#            domain = NA)
+#     }
+#   }
+#   else{
+#     stop(gettextf("family \"%s\" not available for current pfamily; available families are %s", 
+#                   family$family , paste(sQuote(okfamilies), collapse = ", ")), 
+#          domain = NA)
+#     
+#   }
+#   
+# 
+#   simfun_args <- list(
+#     n = n,
+#     y = y,
+#     x = x,
+#     prior_list = prior_list,
+#     offset = offset,
+#     weights = weights,
+#     family = family
+#   )
+#   
+# 
+#   outlist=simfun(n=n,y=y,x=x,prior_list=prior_list,offset=offset,weights=weights,family=family)
+# 
+#   
+#   if (pfamily$pfamily == "dIndependent_Normal_Gamma") {
+#     if (!is.null(outlist$sim_bounds)) {
+# #      cat("simbounds$low:\n")
+# #      print(outlist$sim_bounds$low)
+# #      cat("simbounds$upp:\n")
+# #      print(outlist$sim_bounds$upp)
+#       pfamily$prior_list$disp_lower=outlist$sim_bounds$low
+#       pfamily$prior_list$disp_upper=outlist$sim_bounds$upp
+# #      cat("pfamily prior list-inside rlmb:\n")
+# #      print(pfamily$prior_list)
+#       
+#     } else {
+#       cat("No simbounds returned in outlist.\n")
+#     }
+#   }  
+# 
+#   simfun_call <- outlist$call 
+#   
+#   outlist$call <- match.call()  # overwrite with the rglmb call
+#     outlist$pfamily=pfamily
+#     outlist$simfun_call <- simfun_call         # simulation call
+#     outlist$simfun_args <- simfun_args         # simulation arguments
+#     
+#   class(outlist) <- c("rlmb", "rglmb", "glmb", "glm", "lm")  # <- Add this line
+#   
+#   return(outlist)
+#   
+# }
 
 
+rlmb <- function(
+    n = 1,
+    y,
+    x,
+    pfamily,
+    offset = rep(0, nobs),
+    weights = NULL,
+    Gridtype = 2,
+    n_envopt = NULL,
+    use_parallel = TRUE,
+    use_opencl = FALSE,
+    verbose = FALSE,
+    progbar = FALSE
+){
   ## Pull in information from the pfamily  
-  pf=pfamily$pfamily
-  #okfamilies=pfamily$okfamilies  
+  pf         <- pfamily$pfamily
+  # okfamilies <- pfamily$okfamilies
   okfamilies <- c("gaussian")    # Only gaussian is okfamily for rlmb (different from rglmb)
-  plinks=pfamily$plinks
-  prior_list=pfamily$prior_list 
-  simfun=pfamily$simfun
-
-  family=gaussian()
+  plinks     <- pfamily$plinks
+  prior_list <- pfamily$prior_list 
+  simfun     <- pfamily$simfun
   
-#  if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
-#     is.numeric(mu)==FALSE||is.numeric(P)==FALSE) stop("non-numeric argument to numeric function")
-
+  family <- gaussian()
+  
+  #  if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
+  #     is.numeric(mu)==FALSE||is.numeric(P)==FALSE) stop("non-numeric argument to numeric function")
+  
   x <- as.matrix(x)
-  #mu<-as.matrix(as.vector(prior_list$mu))
-  #P<-as.matrix(P)    
+  # mu <- as.matrix(as.vector(prior_list$mu))
+  # P  <- as.matrix(P)    
   xnames <- dimnames(x)[[2L]]
-  ynames <- if (is.matrix(y)) 
-    rownames(y)
-  else names(y)
-  if(length(n)>1) n<-length(n)	   
-  nobs <- NROW(y)
+  ynames <- if (is.matrix(y)) rownames(y) else names(y)
+  
+  if (length(n) > 1) n <- length(n)
+  nobs  <- NROW(y)
   nvars <- ncol(x)
   EMPTY <- nvars == 0
+  
   if (is.null(offset)) 
     offset <- rep(0, nobs)
   
-  #nvars2<-length(mu)	
-  #if(!nvars==nvars2) stop("incompatible dimensions")
-  #if (!all(dim(P) == c(nvars2, nvars2))) 
-  #  stop("incompatible dimensions")
+  # nvars2 <- length(mu)	
+  # if(!nvars==nvars2) stop("incompatible dimensions")
+  # if (!all(dim(P) == c(nvars2, nvars2))) 
+  #   stop("incompatible dimensions")
+  # if(!isSymmetric(P))stop("matrix P must be symmetric")
   
+  if (is.null(weights)) weights <- rep(1, nobs)
+  if (length(weights) == 1) weights <- rep(weights, nobs)
+  nobs2 <- length(weights)
+  nobs3 <- NROW(x)
+  nobs4 <- NROW(offset)
   
-  #if(!isSymmetric(P))stop("matrix P must be symmetric")
-
-    
-  if(is.null(weights)) weights=rep(1,nobs)
-  if(length(weights)==1) weights=rep(weights,nobs)
-  nobs2=length(weights)
-  nobs3=NROW(x)
-  nobs4=NROW(offset)
+  if (nobs2 != nobs) stop("weighting vector must have same number of elements as y")
+  if (nobs3 != nobs) stop("matrix X must have same number of rows as y")
+  if (nobs4 != nobs) stop("offset vector must have same number of rows as y")
   
-  if(nobs2!=nobs) stop("weighting vector must have same number of elements as y")
-  if(nobs3!=nobs) stop("matrix X must have same number of rows as y")
-  if(nobs4!=nobs) stop("offset vector must have same number of rows as y")
+  # tol <- 1e-06 # Link this to Magnitude of P	
+  # eS <- eigen(P, symmetric = TRUE,only.values = FALSE)
+  # ev <- eS$values
+  # if (!all(ev >= -tol * abs(ev[1L]))) 
+  #   stop("'P' is not positive definite")
   
-  #tol<- 1e-06 # Link this to Magnitude of P	
-  #eS <- eigen(P, symmetric = TRUE,only.values = FALSE)
-  #ev <- eS$values
-  #if (!all(ev >= -tol * abs(ev[1L]))) 
-  #  stop("'P' is not positive definite")
-
-  #if (is.null(start)) 
-  #  start <- mu
+  # if (is.null(start)) 
+  #   start <- mu
   if (is.null(offset)) 
     offset <- rep.int(0, nobs)
   if (is.character(family)) 
@@ -165,64 +302,75 @@ rlmb<-function(n=1,y,x,pfamily,offset=rep(0,nobs),weights=NULL)
     stop("'family' not recognized")
   }
   
-
-  if(family$family %in% okfamilies){
-    oklinks<-c("identity")
-    if(!family$link %in% oklinks){      
+  if (family$family %in% okfamilies) {
+    oklinks <- c("identity")
+    if (!family$link %in% oklinks) {      
       stop(gettextf("link \"%s\" not available for selected family; available links are %s", 
                     family$link , paste(sQuote(oklinks), collapse = ", ")), 
            domain = NA)
     }
-  }
-  else{
+  } else {
     stop(gettextf("family \"%s\" not available for current pfamily; available families are %s", 
                   family$family , paste(sQuote(okfamilies), collapse = ", ")), 
          domain = NA)
-    
   }
   
-
+  ## normalize n_envopt (like rglmb)
+  if (is.null(n_envopt)) n_envopt <- n
+  n_envopt <- as.integer(n_envopt)
+  
+  ## Preserve simfun_args exactly as before, just extended
   simfun_args <- list(
-    n = n,
-    y = y,
-    x = x,
+    n          = n,
+    y          = y,
+    x          = x,
     prior_list = prior_list,
-    offset = offset,
-    weights = weights,
-    family = family
+    offset     = offset,
+    weights    = weights,
+    family     = family,
+    Gridtype   = Gridtype,
+    n_envopt   = n_envopt,
+    use_parallel = use_parallel,
+    use_opencl  = use_opencl,
+    verbose     = verbose,
+    progbar     = progbar
   )
   
-
-  outlist=simfun(n=n,y=y,x=x,prior_list=prior_list,offset=offset,weights=weights,family=family)
-
+  ## Direct call, same style as original
+  outlist <- simfun(
+    n          = n,
+    y          = y,
+    x          = x,
+    prior_list = prior_list,
+    offset     = offset,
+    weights    = weights,
+    family     = family,
+    Gridtype   = Gridtype,
+    n_envopt   = n_envopt,
+    use_parallel = use_parallel,
+    use_opencl  = use_opencl,
+    verbose     = verbose,
+    progbar     = progbar
+  )
   
   if (pfamily$pfamily == "dIndependent_Normal_Gamma") {
     if (!is.null(outlist$sim_bounds)) {
-#      cat("simbounds$low:\n")
-#      print(outlist$sim_bounds$low)
-#      cat("simbounds$upp:\n")
-#      print(outlist$sim_bounds$upp)
-      pfamily$prior_list$disp_lower=outlist$sim_bounds$low
-      pfamily$prior_list$disp_upper=outlist$sim_bounds$upp
-#      cat("pfamily prior list-inside rlmb:\n")
-#      print(pfamily$prior_list)
-      
+      pfamily$prior_list$disp_lower <- outlist$sim_bounds$low
+      pfamily$prior_list$disp_upper <- outlist$sim_bounds$upp
     } else {
       cat("No simbounds returned in outlist.\n")
     }
-  }  
-
+  }
+  
   simfun_call <- outlist$call 
   
-  outlist$call <- match.call()  # overwrite with the rglmb call
-    outlist$pfamily=pfamily
-    outlist$simfun_call <- simfun_call         # simulation call
-    outlist$simfun_args <- simfun_args         # simulation arguments
-    
-  class(outlist) <- c("rlmb", "rglmb", "glmb", "glm", "lm")  # <- Add this line
+  outlist$call        <- match.call()  # overwrite with the rlmb call
+  outlist$pfamily     <- pfamily
+  outlist$simfun_call <- simfun_call   # simulation call
+  outlist$simfun_args <- simfun_args   # simulation arguments
   
+  class(outlist) <- c("rlmb", "rglmb", "glmb", "glm", "lm")
   return(outlist)
-  
 }
 
 #' @rdname rlmb

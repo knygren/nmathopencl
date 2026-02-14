@@ -145,10 +145,264 @@
 # #' @exportClass lmb  # temporarily disabled  - no current exportclass
 
 
-lmb <- function ( formula, pfamily, n=1000,data, subset, weights, na.action,method = "qr", model = TRUE, x = TRUE, 
-                  y = TRUE,qr = TRUE, singular.ok = TRUE, contrasts = NULL,offset, ...)
-{
-  
+# lmb <- function ( formula, pfamily, n=1000,data, subset, weights, na.action,method = "qr", model = TRUE, x = TRUE, 
+#                   y = TRUE,qr = TRUE, singular.ok = TRUE, contrasts = NULL,offset, ...)
+# {
+#   
+#   ret.x <- x
+#   ret.y <- y
+#   cl <- match.call()
+#   mf <- match.call(expand.dots = FALSE)
+#   m <- match(c("formula", "data", "subset", "weights", "na.action", "offset"),
+#              names(mf), 0L)
+#   mf <- mf[c(1L, m)]
+#   mf$drop.unused.levels <- TRUE
+#   ## need stats:: for non-standard evaluation
+#   mf[[1L]] <- quote(stats::model.frame)
+#   mf <- eval(mf, parent.frame())
+#   if (method == "model.frame")
+#     return(mf)
+#   else if (method != "qr")
+#     warning(gettextf("method = '%s' is not supported. Using 'qr'", method),
+#             domain = NA)
+#   mt <- attr(mf, "terms") # allow model.frame to update it
+#   y <- model.response(mf, "numeric")
+#   ## avoid any problems with 1D or nx1 arrays by as.vector.
+#   w <- as.vector(model.weights(mf))
+#   if(!is.null(w) && !is.numeric(w))
+#     stop("'weights' must be a numeric vector")
+#   offset <- as.vector(model.offset(mf))
+#   if(!is.null(offset)) {
+#     if(length(offset) != NROW(y))
+#       stop(gettextf("number of offsets is %d, should equal %d (number of observations)",
+#                     length(offset), NROW(y)), domain = NA)
+#   }
+#   
+#   if (is.empty.model(mt)) {
+#     x <- NULL
+#     z <- list(coefficients = if (is.matrix(y))
+#       matrix(,0,3) else numeric(), residuals = y,
+#       fitted.values = 0 * y, weights = w, rank = 0L,
+#       df.residual = if(!is.null(w)) sum(w != 0) else
+#         if (is.matrix(y)) nrow(y) else length(y))
+#     if(!is.null(offset)) {
+#       z$fitted.values <- offset
+#       z$residuals <- y - offset
+#     }
+#   }
+#   else {
+#     x <- model.matrix(mt, mf, contrasts)
+#     z <- if(is.null(w)) lm.fit(x, y, offset = offset,
+#                                singular.ok=singular.ok, ...)
+#     else lm.wfit(x, y, w, offset = offset, singular.ok=singular.ok, ...)
+#   }
+#   class(z) <- c(if(is.matrix(y)) "mlm", "lm")
+#   
+#   z$na.action <- attr(mf, "na.action")
+#   z$offset <- offset
+#   z$contrasts <- attr(x, "contrasts")
+#   z$xlevels <- .getXlevels(mt, mf)
+#   z$call <- cl
+#   z$terms <- mt
+#   if (model)
+#     z$model <- mf
+#   if (ret.x)
+#     z$x <- x
+#   if (ret.y)
+#     z$y <- y
+#   if (!qr) z$qr <- NULL
+#   
+#   if (!is.null(x)) {
+#     z$assign <- attr(x, "assign")
+#   }
+#   
+#   ######   End of lm function
+#   # Verify inputs and Initialize
+#   
+#   
+#   #    if(is.numeric(n)==FALSE||is.numeric(mu)==FALSE||is.numeric(Sigma)==FALSE) stop("non-numeric argument to numeric function")
+#   ## Pull in information from the pfamily  
+#   
+#   prior_list=pfamily$prior_list 
+#   y<-z$y	
+#   x<-z$x
+#   b<-z$coefficients
+#   mu<-as.matrix(as.vector(prior_list$mu))
+#   Sigma <- as.matrix(prior_list$Sigma)
+#   dispersion <- prior_list$dispersion
+#   
+#   R <- chol(Sigma)
+#   P <- chol2inv(R)
+#   P <- 0.5 * (P + t(P))
+#   
+# 
+#   if(is.null(z$weights))     wtin<-rep(1,length(y))
+#   else wtin=z$weights	
+# 
+#   
+# 
+#   sim<-rlmb(n=n,y=y,x=x,pfamily=pfamily,weights=wtin,
+#             offset=offset)
+#   
+#   
+#   if (pfamily$pfamily == "dIndependent_Normal_Gamma") {
+#     if (!is.null(sim$sim_bounds)) {
+#       pfamily$prior_list$disp_lower=sim$sim_bounds$low
+#       pfamily$prior_list$disp_upper=sim$sim_bounds$upp
+#     } else {
+#       cat("No simbounds returned in sim.\n")
+#     }
+#   }
+#     
+#   
+#   dispersion2<-sim$dispersion
+#   
+#   
+#   famfunc<-sim$famfunc
+#   
+#   
+#   Prior<-list(mean=as.numeric(mu),Variance=Sigma)
+#   names(Prior$mean)<-colnames(z$x)
+#   colnames(Prior$Variance)<-colnames(z$x)
+#   rownames(Prior$Variance)<-colnames(z$x)
+#   
+#   
+#   if (!is.null(offset)) {
+#     
+#     
+#     if(length(dispersion2)==1){
+#       
+#       # Scale weights by dispersion for consistent deviance computation
+#       wt_scaled <- wtin / dispersion2
+#       
+#       #DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
+# ##      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+#       DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wt_scaled,dispersion=1)
+#       
+#           }
+#     
+#     
+#     if(length(dispersion2)>1){
+#     
+#       #DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+# ##      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+# ##        DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wt_scaled,dispersion=1)
+#       DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt = wtin, dispersion = dispersion2)
+# ##      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt = wt_scaled, dispersion = dispersion2)
+#         
+#           }
+#     
+#     linear.predictors<-t(offset+x%*%t(sim$coefficients))
+#     fitted.values=linear.predictors
+#     
+#   }
+#   
+#   
+#   if (is.null(offset)) {
+#     
+#     if(length(dispersion2)==1){
+# 
+#       # Scale weights by dispersion for consistent deviance computation
+#       wt_scaled <- wtin / dispersion2
+#       
+#       
+#       #DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
+# ##      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+#       DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wt_scaled,dispersion=1)
+#           }
+#     
+#     if(length(dispersion2)>1){
+# ##      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+# #      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wt_scaled,dispersion=1)
+# 
+#       DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt = wtin, dispersion = dispersion2)
+# ##      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt = wt_scaled, dispersion = dispersion2)
+#   ##    DIC_Info(..., wt = wt_scaled, dispersion = dispersion2)
+#           }
+#     
+#     
+#     linear.predictors<-t(x%*%t(sim$coefficients))
+#     fitted.values=linear.predictors
+#     
+#   }
+#   
+#   residuals=fitted.values
+#   
+#   for(i in 1:n){
+#     
+#     residuals[i,1:length(y)]=y-residuals[i,1:length(y)]
+#   }	
+#   
+#   #linkinv<-z$family$linkinv
+#   outlist<-list(
+#     lm=z,
+#     coefficients=sim$coefficients,
+#     coef.means=colMeans(sim$coefficients),
+#     coef.mode=sim$coef.mode,
+#     dispersion=dispersion2,
+#     residuals=residuals,
+#     Prior=Prior,
+#     fitted.values=fitted.values,
+#     #family=fit$family,
+#     linear.predictors=linear.predictors,
+#     deviance=DICinfo$Deviance,
+#     pD=DICinfo$pD,
+#     Dbar=DICinfo$Dbar,
+#     Dthetabar=DICinfo$Dthetabar,
+#     DIC=DICinfo$DIC,
+#     prior.weights=wtin,
+#     weights=wtin,
+#     offset=offset,
+#     y=z$y,
+#     x=z$x,
+#     model=z$model,
+#     call=z$call,
+#     formula=z$formula,
+#     terms=z$terms,
+# ##    data=z$data,
+#     data=mf,
+#     fit=sim$fit,
+#     famfunc=famfunc,
+#     iters=sim$iters,
+#     contrasts=z$contrasts,	  
+#     xlevels=z$xlevels,
+#     pfamily=pfamily,
+# simfun_call=sim$simfun_call,
+# simfun_args=sim$simfun_args
+#     
+#   )
+#   
+#   outlist$call<-match.call()
+#   
+#   class(outlist)<-c(outlist$class,"lmb","glmb","glm","lm")
+#   outlist
+# }
+# 
+
+
+lmb <- function (
+    formula,
+    pfamily,
+    n = 1000,
+    data,
+    subset,
+    weights,
+    na.action,
+    method = "qr",
+    model = TRUE,
+    x = TRUE,
+    y = TRUE,
+    qr = TRUE,
+    singular.ok = TRUE,
+    contrasts = NULL,
+    offset,
+    Gridtype = 2,
+    n_envopt = NULL,
+    use_parallel = TRUE,
+    use_opencl = FALSE,
+    verbose = FALSE,
+    ...
+){
   ret.x <- x
   ret.y <- y
   cl <- match.call()
@@ -169,11 +423,11 @@ lmb <- function ( formula, pfamily, n=1000,data, subset, weights, na.action,meth
   y <- model.response(mf, "numeric")
   ## avoid any problems with 1D or nx1 arrays by as.vector.
   w <- as.vector(model.weights(mf))
-  if(!is.null(w) && !is.numeric(w))
+  if (!is.null(w) && !is.numeric(w))
     stop("'weights' must be a numeric vector")
   offset <- as.vector(model.offset(mf))
-  if(!is.null(offset)) {
-    if(length(offset) != NROW(y))
+  if (!is.null(offset)) {
+    if (length(offset) != NROW(y))
       stop(gettextf("number of offsets is %d, should equal %d (number of observations)",
                     length(offset), NROW(y)), domain = NA)
   }
@@ -181,22 +435,22 @@ lmb <- function ( formula, pfamily, n=1000,data, subset, weights, na.action,meth
   if (is.empty.model(mt)) {
     x <- NULL
     z <- list(coefficients = if (is.matrix(y))
-      matrix(,0,3) else numeric(), residuals = y,
+      matrix(, 0, 3) else numeric(), residuals = y,
       fitted.values = 0 * y, weights = w, rank = 0L,
-      df.residual = if(!is.null(w)) sum(w != 0) else
+      df.residual = if (!is.null(w)) sum(w != 0) else
         if (is.matrix(y)) nrow(y) else length(y))
-    if(!is.null(offset)) {
+    if (!is.null(offset)) {
       z$fitted.values <- offset
       z$residuals <- y - offset
     }
   }
   else {
     x <- model.matrix(mt, mf, contrasts)
-    z <- if(is.null(w)) lm.fit(x, y, offset = offset,
-                               singular.ok=singular.ok, ...)
-    else lm.wfit(x, y, w, offset = offset, singular.ok=singular.ok, ...)
+    z <- if (is.null(w)) lm.fit(x, y, offset = offset,
+                                singular.ok = singular.ok, ...)
+    else lm.wfit(x, y, w, offset = offset, singular.ok = singular.ok, ...)
   }
-  class(z) <- c(if(is.matrix(y)) "mlm", "lm")
+  class(z) <- c(if (is.matrix(y)) "mlm", "lm")
   
   z$na.action <- attr(mf, "na.action")
   z$offset <- offset
@@ -219,15 +473,12 @@ lmb <- function ( formula, pfamily, n=1000,data, subset, weights, na.action,meth
   ######   End of lm function
   # Verify inputs and Initialize
   
-  
-  #    if(is.numeric(n)==FALSE||is.numeric(mu)==FALSE||is.numeric(Sigma)==FALSE) stop("non-numeric argument to numeric function")
-  ## Pull in information from the pfamily  
-  
-  prior_list=pfamily$prior_list 
-  y<-z$y	
-  x<-z$x
-  b<-z$coefficients
-  mu<-as.matrix(as.vector(prior_list$mu))
+  ## Pull in information from the pfamily
+  prior_list <- pfamily$prior_list
+  y <- z$y
+  x <- z$x
+  b <- z$coefficients
+  mu <- as.matrix(as.vector(prior_list$mu))
   Sigma <- as.matrix(prior_list$Sigma)
   dispersion <- prior_list$dispersion
   
@@ -235,146 +486,136 @@ lmb <- function ( formula, pfamily, n=1000,data, subset, weights, na.action,meth
   P <- chol2inv(R)
   P <- 0.5 * (P + t(P))
   
-
-  if(is.null(z$weights))     wtin<-rep(1,length(y))
-  else wtin=z$weights	
-
+  if (is.null(z$weights)) wtin <- rep(1, length(y))
+  else wtin <- z$weights
   
-
-  sim<-rlmb(n=n,y=y,x=x,pfamily=pfamily,weights=wtin,
-            offset=offset)
+  ## normalize n_envopt (mirror glmb)
+  if (is.null(n_envopt)) n_envopt <- n
+  n_envopt <- as.integer(n_envopt)
   
+  sim <- rlmb(
+    n       = n,
+    y       = y,
+    x       = x,
+    pfamily = pfamily,
+    offset  = offset,
+    weights = wtin,
+    Gridtype   = Gridtype,
+    n_envopt   = n_envopt,
+    use_parallel = use_parallel,
+    use_opencl  = use_opencl,
+    verbose     = verbose
+  )
   
   if (pfamily$pfamily == "dIndependent_Normal_Gamma") {
     if (!is.null(sim$sim_bounds)) {
-      pfamily$prior_list$disp_lower=sim$sim_bounds$low
-      pfamily$prior_list$disp_upper=sim$sim_bounds$upp
+      pfamily$prior_list$disp_lower <- sim$sim_bounds$low
+      pfamily$prior_list$disp_upper <- sim$sim_bounds$upp
     } else {
       cat("No simbounds returned in sim.\n")
     }
   }
-    
   
-  dispersion2<-sim$dispersion
+  dispersion2 <- sim$dispersion
+  famfunc <- sim$famfunc
   
-  
-  famfunc<-sim$famfunc
-  
-  
-  Prior<-list(mean=as.numeric(mu),Variance=Sigma)
-  names(Prior$mean)<-colnames(z$x)
-  colnames(Prior$Variance)<-colnames(z$x)
-  rownames(Prior$Variance)<-colnames(z$x)
-  
+  Prior <- list(mean = as.numeric(mu), Variance = Sigma)
+  names(Prior$mean) <- colnames(z$x)
+  colnames(Prior$Variance) <- colnames(z$x)
+  rownames(Prior$Variance) <- colnames(z$x)
   
   if (!is.null(offset)) {
     
-    
-    if(length(dispersion2)==1){
+    if (length(dispersion2) == 1) {
       
       # Scale weights by dispersion for consistent deviance computation
       wt_scaled <- wtin / dispersion2
       
-      #DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
-##      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
-      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wt_scaled,dispersion=1)
+      DICinfo <- DIC_Info(sim$coefficients, y = y, x = x, alpha = offset,
+                          f1 = famfunc$f1, f4 = famfunc$f4,
+                          wt = wt_scaled, dispersion = 1)
+    }
+    
+    if (length(dispersion2) > 1) {
       
-          }
+      DICinfo <- DIC_Info(sim$coefficients, y = y, x = x, alpha = 0,
+                          f1 = famfunc$f1, f4 = famfunc$f4,
+                          wt = wtin, dispersion = dispersion2)
+    }
     
-    
-    if(length(dispersion2)>1){
-    
-      #DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
-##      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
-##        DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wt_scaled,dispersion=1)
-      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt = wtin, dispersion = dispersion2)
-##      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt = wt_scaled, dispersion = dispersion2)
-        
-          }
-    
-    linear.predictors<-t(offset+x%*%t(sim$coefficients))
-    fitted.values=linear.predictors
+    linear.predictors <- t(offset + x %*% t(sim$coefficients))
+    fitted.values <- linear.predictors
     
   }
-  
   
   if (is.null(offset)) {
     
-    if(length(dispersion2)==1){
-
+    if (length(dispersion2) == 1) {
+      
       # Scale weights by dispersion for consistent deviance computation
       wt_scaled <- wtin / dispersion2
       
+      DICinfo <- DIC_Info(sim$coefficients, y = y, x = x, alpha = 0,
+                          f1 = famfunc$f1, f4 = famfunc$f4,
+                          wt = wt_scaled, dispersion = 1)
+    }
+    
+    if (length(dispersion2) > 1) {
       
-      #DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
-##      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
-      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wt_scaled,dispersion=1)
-          }
+      DICinfo <- DIC_Info(sim$coefficients, y = y, x = x, alpha = 0,
+                          f1 = famfunc$f1, f4 = famfunc$f4,
+                          wt = wtin, dispersion = dispersion2)
+    }
     
-    if(length(dispersion2)>1){
-##      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
-#      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wt_scaled,dispersion=1)
-
-      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt = wtin, dispersion = dispersion2)
-##      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt = wt_scaled, dispersion = dispersion2)
-  ##    DIC_Info(..., wt = wt_scaled, dispersion = dispersion2)
-          }
-    
-    
-    linear.predictors<-t(x%*%t(sim$coefficients))
-    fitted.values=linear.predictors
+    linear.predictors <- t(x %*% t(sim$coefficients))
+    fitted.values <- linear.predictors
     
   }
   
-  residuals=fitted.values
+  residuals <- fitted.values
   
-  for(i in 1:n){
-    
-    residuals[i,1:length(y)]=y-residuals[i,1:length(y)]
-  }	
+  for (i in 1:n) {
+    residuals[i, 1:length(y)] <- y - residuals[i, 1:length(y)]
+  }
   
-  #linkinv<-z$family$linkinv
-  outlist<-list(
-    lm=z,
-    coefficients=sim$coefficients,
-    coef.means=colMeans(sim$coefficients),
-    coef.mode=sim$coef.mode,
-    dispersion=dispersion2,
-    residuals=residuals,
-    Prior=Prior,
-    fitted.values=fitted.values,
-    #family=fit$family,
-    linear.predictors=linear.predictors,
-    deviance=DICinfo$Deviance,
-    pD=DICinfo$pD,
-    Dbar=DICinfo$Dbar,
-    Dthetabar=DICinfo$Dthetabar,
-    DIC=DICinfo$DIC,
-    prior.weights=wtin,
-    weights=wtin,
-    offset=offset,
-    y=z$y,
-    x=z$x,
-    model=z$model,
-    call=z$call,
-    formula=z$formula,
-    terms=z$terms,
-##    data=z$data,
-    data=mf,
-    fit=sim$fit,
-    famfunc=famfunc,
-    iters=sim$iters,
-    contrasts=z$contrasts,	  
-    xlevels=z$xlevels,
-    pfamily=pfamily,
-simfun_call=sim$simfun_call,
-simfun_args=sim$simfun_args
-    
+  outlist <- list(
+    lm = z,
+    coefficients = sim$coefficients,
+    coef.means = colMeans(sim$coefficients),
+    coef.mode = sim$coef.mode,
+    dispersion = dispersion2,
+    residuals = residuals,
+    Prior = Prior,
+    fitted.values = fitted.values,
+    linear.predictors = linear.predictors,
+    deviance = DICinfo$Deviance,
+    pD = DICinfo$pD,
+    Dbar = DICinfo$Dbar,
+    Dthetabar = DICinfo$Dthetabar,
+    DIC = DICinfo$DIC,
+    prior.weights = wtin,
+    weights = wtin,
+    offset = offset,
+    y = z$y,
+    x = z$x,
+    model = z$model,
+    call = z$call,
+    formula = z$formula,
+    terms = z$terms,
+    data = mf,
+    fit = sim$fit,
+    famfunc = famfunc,
+    iters = sim$iters,
+    contrasts = z$contrasts,
+    xlevels = z$xlevels,
+    pfamily = pfamily,
+    simfun_call = sim$simfun_call,
+    simfun_args = sim$simfun_args
   )
   
-  outlist$call<-match.call()
+  outlist$call <- match.call()
   
-  class(outlist)<-c(outlist$class,"lmb","glmb","glm","lm")
+  class(outlist) <- c(outlist$class, "lmb", "glmb", "glm", "lm")
   outlist
 }
 

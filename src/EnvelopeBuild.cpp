@@ -253,14 +253,12 @@ List EnvelopeBuild(NumericVector bStar,
   //   << "\n";
   // }
   
-  // if (verbose) {
-  //   Rcpp::Rcout << "[EnvelopeBuild] Grid size (l2) = "
-  //               << l2 << "\n";
-  // }
-  
+  if (verbose) {
   Rcpp::Rcout << "[EnvelopeBuild] Grid size (l2) = "
               << glmbayes::progress::format_int_with_commas(l2)
               << "\n";
+}
+  
   
 
   
@@ -385,6 +383,49 @@ List EnvelopeBuild(NumericVector bStar,
   double sumP=sum(PLSD);
   
   PLSD=PLSD/sumP;
+  
+  
+  bool bad = false;
+  
+  for (int i = 0; i < PLSD.size(); ++i) {
+    double v = PLSD[i];
+    if (!R_finite(v) || v <= 0.0) {
+      Rcout << "[ERROR] Invalid PLSD at index " << i
+            << "  value=" << v
+            << "  logP2=" << logP2[i]
+            << "  maxlogP=" << maxlogP
+            << "\n";
+      bad = true;
+      break;
+    }
+  }
+  
+  if (bad) {
+    // --- Design-matrix diagnostics (unweighted) ---
+    arma::mat X(x.begin(), x.nrow(), x.ncol(), false);
+    arma::vec s = arma::svd(X);
+    
+    double kappa_X   = s.max() / s.min();                         // ~ kappa(X)
+    double kappa_XtX = (s.max() * s.max()) / (s.min() * s.min()); // ~ kappa(crossprod(X))
+    
+    double maxlogP = max(logP2);
+    double minlogP = min(logP2);
+    double spread  = maxlogP - minlogP;
+    
+    Rcpp::stop(
+      "[EnvelopeBuild] PLSD construction failed for this model.\n"
+      "  - kappa(X)           ≈ " + std::to_string(kappa_X)   + "\n"
+      "  - kappa(t(X) %*% X)  ≈ " + std::to_string(kappa_XtX) + "\n"
+      "  - PLSD log-weights span " + std::to_string(spread) + " on the log scale.\n"
+      "Interpretation:\n"
+      "  The design matrix used in the standardized model is highly collinear\n"
+      "  (very large kappa), so X'X has extremely uneven curvature. In combination\n"
+      "  with the chosen prior, this creates posterior directions that are either\n"
+      "  very sharp or nearly flat. The fixed PLSD partition from Nygren & Nygren\n"
+      "  (2006) cannot remain tight under this curvature, so the envelope becomes\n"
+      "  extremely loose and the PLSD weights blow up.\n"
+    );
+  }
   
   // Optionally sort grid for efficiency if sortgrid = TRUE
   

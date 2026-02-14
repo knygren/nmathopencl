@@ -291,7 +291,7 @@ rGamma_reg <- function(
     n_envopt = NULL,
     use_parallel = TRUE,
     use_opencl = FALSE,
-    verbose = FALSE
+    verbose = FALSE, progbar = FALSE
 ) {
   call <- match.call()
   
@@ -497,6 +497,7 @@ rindepNormalGamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=ga
                                       progbar=TRUE){
 
 
+
   call<-match.call()
   
   offset2=offset
@@ -601,7 +602,6 @@ rindepNormalGamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=ga
   if (is.null(n_envopt)) n_envopt <- n
   n_envopt <- as.integer(n_envopt)
 
-
   
   core_out <- .rIndepNormalGammaReg_cpp(
     n,
@@ -623,7 +623,10 @@ rindepNormalGamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=ga
     verbose,
     progbar
   )
+  
 
+
+  
   out        <- core_out$out
   betastar   <- core_out$betastar
   disp_out   <- core_out$disp_out
@@ -683,7 +686,7 @@ rindepNormalGamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=ga
 
 rNormalGamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
                             Gridtype=2,n_envopt = NULL,
-                            use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE
+                            use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE, progbar = FALSE
 ){
 
 
@@ -826,7 +829,7 @@ rNormalGamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussia
 
 rNormal_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
                       Gridtype=2,n_envopt = NULL,
-                      use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE){
+                      use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE,progbar=FALSE){
   
   ## Added for consistency with earlier verion of function
   ## Useful to copy offset and weight and then to modify to non-null as needed  

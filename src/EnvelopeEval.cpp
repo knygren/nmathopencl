@@ -431,7 +431,11 @@ Rcpp::List EnvelopeEval(const Rcpp::NumericMatrix& G4,   // grid (parameters × 
     //   Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:f2_f3_opencl] Estimated time = "
     //               << est_time << " seconds\n";
     // }
+
+    
   
+  if (use_opencl) {
+    
   double est_time = f2_f3_opencl_pilot(
     G4, y, x, mu, P, alpha, wt,
     family, link, use_opencl, verbose
@@ -449,6 +453,7 @@ Rcpp::List EnvelopeEval(const Rcpp::NumericMatrix& G4,   // grid (parameters × 
                   << glmbayes::progress::format_hms(total) << "\n";
     }
   
+  }
   }
   
   
@@ -470,7 +475,11 @@ Rcpp::List EnvelopeEval(const Rcpp::NumericMatrix& G4,   // grid (parameters × 
     prepGrad = f2_f3_non_opencl(family, link, G4, y, x, mu, P, alpha, wt, progbar);
   }
   if (verbose) {
+    
+    if (use_opencl) {
+      
     print_completed("[EnvelopeBuild:EnvelopeEval:f2_f3_opencl]", t_dispatch);
+    }
   }
 
   if (use_opencl) {

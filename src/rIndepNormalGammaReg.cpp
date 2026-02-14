@@ -203,6 +203,7 @@ void rIndepNormalGammaReg_worker::operator()(std::size_t begin, std::size_t end)
       double U = runif_safe();
       int J_idx = 0;
       double U_left = U;
+
       while (true) {
         if (U_left <= PLSD_r[J_idx]) break;
         U_left -= PLSD_r[J_idx];
@@ -220,11 +221,28 @@ void rIndepNormalGammaReg_worker::operator()(std::size_t begin, std::size_t end)
       }
 
       // 3) Draw dispersion
+      
+      // DEBUG: print inputs to rinvgamma_ct_safe
+      // Rcpp::Rcout << "[DEBUG] rinvgamma_ct_safe inputs:\n";
+      // Rcpp::Rcout << "  shape3     = " << shape3     << "\n";
+      // Rcpp::Rcout << "  rate2      = " << rate2      << "\n";
+      // Rcpp::Rcout << "  disp_lower = " << disp_lower << "\n";
+      // Rcpp::Rcout << "  disp_upper = " << disp_upper << "\n";
+      
+      // Now call the sampler
       double dispersion = rinvgamma_ct_safe(shape3, rate2, disp_upper, disp_lower);
-
+      
+      // DEBUG: print the result
+       // Rcpp::Rcout << "[DEBUG] rinvgamma_ct_safe draw = " << dispersion << "\n";
+      
+      // Guard
+      if (!std::isfinite(dispersion)) {
+        Rcpp::stop("Error: rinvgamma_ct_safe returned non-finite dispersion.");
+      }      
       // 4) Solve theta (strict row-only)
       for (int j = 0; j < l1; ++j) cbars_small_col(j, 0) = cbars_r(J_idx, j);
 
+      
       // RcppParallel::RMatrix<double> theta_sol_r =
       //   Inv_f3_with_disp_rmat(Pmat_r, Pmu_r, base_B0_r, base_A_r,
       //                         dispersion, cbars_small_col);
@@ -246,7 +264,6 @@ void rIndepNormalGammaReg_worker::operator()(std::size_t begin, std::size_t end)
 
 
 
-
 #if !defined(__EMSCRIPTEN__) && !defined(__wasm__)
       tbb::mutex::scoped_lock lock(f2_mutex);
 #endif
@@ -254,13 +271,12 @@ void rIndepNormalGammaReg_worker::operator()(std::size_t begin, std::size_t end)
       // Rcout << "Entering f2_gaussian_rmat_mat 1"  << std::endl;
 
       // 6) Likelihood calls (column views, pre-scaled weights)
-      double LL_New2_scalar =
-        -f2_gaussian_rmat_mat(theta_col, y_r, x_r, mu_r, P_r, alpha_r, wt2_r, 0)[0];
+      double LL_New2_scalar =-f2_gaussian_rmat_mat(theta_col, y_r, x_r, mu_r, P_r, alpha_r, wt2_r, 0)[0];
 
         // Rcout << "Entering f2_gaussian_rmat_mat 2"  << std::endl;
 
-        double LL_Test_scalar =
-        -f2_gaussian_rmat_mat(out_col,   y_r, x_r, mu_r, P_r, alpha_r, wt2_r, 0)[0];
+
+        double LL_Test_scalar =-f2_gaussian_rmat_mat(out_col,   y_r, x_r, mu_r, P_r, alpha_r, wt2_r, 0)[0];
 
 
 
@@ -295,13 +311,59 @@ void rIndepNormalGammaReg_worker::operator()(std::size_t begin, std::size_t end)
 
         double UB3A = lg_prob_factor_r[J_idx] + lmc1 + lmc2 * dispersion - New_LL_J;
         double New_LL_log_disp = lm_log1 + lm_log2 * std::log(dispersion);
-        double UB3B = (max_New_LL_UB - max_LL_log_disp + New_LL_log_disp)
-          - (lmc1 + lmc2 * dispersion);
 
+        // Old UB3B definition
+        
+       double UB3B = (max_New_LL_UB - max_LL_log_disp + New_LL_log_disp)
+         - (lmc1 + lmc2 * dispersion);
+
+        
+        // 3B: dispersion tilt bound (new definition)
+        // double UB3B =
+        // (lm_log1 + lm_log2 * std::log(dispersion))
+        //   - (lmc1   + lmc2   * dispersion);
+        
         double test1 = (LL_Test_scalar - UB1);
         double test  = test1 - (UB2 + UB3A + UB3B);
         test = test - log_U2;
-
+        
+        // Sanity checks: all must satisfy their sign constraints
+        bool bad = false;
+        std::ostringstream msg;
+        
+        if (test1 > 0.0) {
+          bad = true;
+          msg << "Sign violation: test1 = " << test1 << " > 0\n";
+        }
+        if (UB2 < 0.0) {
+          bad = true;
+          msg << "Sign violation: UB2 = " << UB2 << " < 0\n";
+        }
+        if (UB3A < 0.0) {
+          bad = true;
+          msg << "Sign violation: UB3A = " << UB3A << " < 0\n";
+        }
+        if (UB3B < 0.0) {
+          bad = true;
+          msg << "Sign violation: UB3B = " << UB3B << " < 0\n";
+        }
+        
+        if (bad) {
+          // Provide context for debugging
+          msg << "Dispersion=" << dispersion
+              << " LL_Test=" << LL_Test_scalar
+              << " UB1=" << UB1
+              << " UB2=" << UB2
+              << " UB3A=" << UB3A
+              << " UB3B=" << UB3B
+              << " test=" << test;
+          // Stop execution with informative error
+          throw std::runtime_error(msg.str());
+          
+        }
+        
+        
+        
 
         // Rcout << "Entering Output assignment"  << std::endl;
 
@@ -314,6 +376,7 @@ void rIndepNormalGammaReg_worker::operator()(std::size_t begin, std::size_t end)
         } else {
           iters_out_r[i] = iters_out_r[i] + 1;
         }
+        
     } // while (accept == 0)
   }   // for i
 }
@@ -424,10 +487,27 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
 //  NumericVector ub2_min=;
   
   
+  if (verbose) {
+    Rcpp::Rcout << "[rIndepNormalGammaReg_std:Inv_f3_precompute_disp] Entering: "
+    //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << glmbayes::progress::timestamp_cpp()
+                  << "\n";
+  }
+  
+  
   
   
   // Build cache once outside the loop
   Rcpp::List cache = Inv_f3_precompute_disp(cbars, y, x, mu, P, alpha, wt);
+  
+  
+  if (verbose) {
+    Rcpp::Rcout << "[rIndepNormalGammaReg_std:Inv_f3_precompute_disp] Exiting: "
+    //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << glmbayes::progress::timestamp_cpp()
+                  << "\n";
+  }
+  
   
   
   for(int i=0;i<n;i++){
@@ -444,7 +524,8 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
     // 3. Test progbar *and* interactive()
 
 
-
+    // Rcpp::Rcout << "[rIndepNormalGammaReg_std] Entering accept/reject: \n";
+   
     
     a1=0;
     iters_out[i]=1;  
@@ -476,8 +557,11 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
 
       // Update this to make distribution contingent on component of the grid
       
-      dispersion=rinvgamma_ct(shape3,rate2,disp_upper,disp_lower);
+//      dispersion=rinvgamma_ct(shape3,rate2,disp_upper,disp_lower);
+      dispersion=rinvgamma_ct_safe(shape3,rate2,disp_upper,disp_lower);
       
+      // DEBUG: print the result
+  //    Rcpp::Rcout << "[DEBUG] rinvgamma_ct draw = " << dispersion << "\n";
       
       
       wt2=wt/dispersion;
@@ -591,13 +675,28 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
       
       UB3A= lg_prob_factor(J_out(0))+lmc1+lmc2*dispersion-New_LL(J_out(0));
       
+      //double UB3A = lg_prob_factor_r[J_idx] + lmc1 + lmc2 * dispersion - New_LL_J;
+      
+      
       // Block 4: UB3B  
+      
+      
+      // Old UB3B definition
+      
+      
       
       New_LL_log_disp=lm_log1+lm_log2*log(dispersion);
       
       UB3B=(max_New_LL_UB-max_LL_log_disp+New_LL_log_disp)-(lmc1+lmc2*dispersion);
       
+      
+      
 
+      // UB3B =
+      //   (lm_log1 + lm_log2 * std::log(dispersion))
+      //   - (lmc1   + lmc2   * dispersion);
+      // 
+      
       
       test1=LL_Test[0]-UB1;
         
@@ -605,7 +704,17 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
       
 
       test = test - log_U2;
+
       
+      // Rcpp::Rcout
+      // << "J = "     << J_out(0)
+      // << "  test1 = " << test1
+      // << "  UB2 = "   << UB2
+      // << "  UB3A = "  << UB3A
+      // << "  UB3B = "  << UB3B
+      // << "  test = "  << test
+      // << "\n";
+            
       
       // Sanity checks: all must satisfy their sign constraints
       bool bad = false;
@@ -733,10 +842,25 @@ Rcpp::List rIndepNormalGammaReg_std_parallel(
   // Build cache once outside the loop
 
 
-
+  if (verbose) {
+    Rcpp::Rcout << "[rIndepNormalGammaReg:Inv_f3_precompute_disp] Entering: "
+    //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << glmbayes::progress::timestamp_cpp()
+                  << "\n";
+  }
+  
+  
   Rcpp::List cache = Inv_f3_precompute_disp(cbars, y, x, mu, P, alpha, wt);
 
 
+  if (verbose) {
+    Rcpp::Rcout << "[rIndepNormalGammaReg:Inv_f3_precompute_disp] Exiting: "
+    //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << glmbayes::progress::timestamp_cpp()
+                  << "\n";
+  }
+  
+  
     Rcpp::NumericMatrix Pmat_nm    = cache["Pmat"];
   Rcpp::NumericMatrix Pmu_nm     = cache["Pmu"];
   Rcpp::NumericVector base_B0_nv = cache["base_B0"];
@@ -770,6 +894,7 @@ Rcpp::List rIndepNormalGammaReg_std_parallel(
   RcppParallel::RMatrix<double> base_A_r(base_A_nm);
 
 
+
   // Construct worker
   rIndepNormalGammaReg_worker worker(
       n,
@@ -784,15 +909,24 @@ Rcpp::List rIndepNormalGammaReg_std_parallel(
   );
 
   
+  if (verbose) {
+    Rcpp::Rcout << "[rIndepNormalGammaReg:Simulation:Pilot] Entering: "
+    //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << glmbayes::progress::timestamp_cpp()
+                  << "\n";
+  }
+  
+  
+
   // --- Single-draw test (serial) ---
   int m_test = 1;
   auto t0 = std::chrono::steady_clock::now();
   worker(0, m_test);  // run worker serially for 1 observation
   auto t1 = std::chrono::steady_clock::now();
   double elapsed_test_sec = std::chrono::duration<double>(t1 - t0).count();
-  
-  if (verbose) Rcpp::Rcout << "[Pilot] Single test run took " << elapsed_test_sec << "s.\n";
-  
+
+  if (verbose) Rcpp::Rcout << "[rIndepNormalGammaReg:Simulation:Pilot] Completed in " << elapsed_test_sec << "s.\n";
+
   // --- Conservative calibration sizing (time-bounded) ---
   // Use single test to bound worst-case per-observation time in ms
   double per_obs_ms_serial = elapsed_test_sec * 1000.0 / std::max(1, m_test);
@@ -802,7 +936,7 @@ Rcpp::List rIndepNormalGammaReg_std_parallel(
   int m2 = std::max(1, (int)std::floor(300000.0 / std::max(1.0, per_obs_ms_serial))); // 300k ms ≈ 5 min
   int m_stage = std::min(m1, m2);   // <-- defined here, before use
   
-  if (verbose) {Rcpp::Rcout << "Calibrating simulation time estimate using " << m_stage
+  if (verbose) {Rcpp::Rcout << "[rIndepNormalGammaReg:Simulation:Calibration] Using " << m_stage
               << " observations at "
               << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")()))
               << "\n";}
@@ -818,9 +952,9 @@ Rcpp::List rIndepNormalGammaReg_std_parallel(
   double est_total_sec = per_obs_sec * (double)n;
   
   // Diagnostics
-  if (verbose){  Rcpp::Rcout << "[CALIB] Calibration elapsed = " << cal_elapsed_sec
+  if (verbose){  Rcpp::Rcout << "[rIndepNormalGammaReg:Simulation:Calibration] Completed in " << cal_elapsed_sec
               << " s for " << m_stage << " observations.\n";
-  Rcpp::Rcout << "[CALIB] per_obs_sec = " << per_obs_sec
+  Rcpp::Rcout << "[rIndepNormalGammaReg:Simulation:Calibration] per_obs_sec = " << per_obs_sec
               << " s; estimated total = " << est_total_sec << " s\n";}
   
   auto fmt_hms = [](double seconds) {
@@ -834,7 +968,7 @@ Rcpp::List rIndepNormalGammaReg_std_parallel(
     return oss.str();
   };
   
-  if (verbose) {Rcpp::Rcout << "[Estimate] Simulation time for " << n << " observations: "
+  if (verbose) {Rcpp::Rcout << "[rIndepNormalGammaReg:Simulation]  " << n << " observations: "
                             << fmt_hms(est_total_sec) << " (" << est_total_sec << " seconds).\n";}
   
   
@@ -880,7 +1014,7 @@ Rcpp::List rIndepNormalGammaReg_std_parallel(
   Rcpp::CharacterVector now = fmt(systime(), Rcpp::Named("format") = "%H:%M:%S");
   
    if (verbose) {
-    Rcpp::Rcout << "[Simulation] >>> Starting full run at "
+    Rcpp::Rcout << "[rIndepNormalGammaReg:Simulation]  Entering "
                 << Rcpp::as<std::string>(now[0]) << " <<<\n";
    }
   
@@ -893,7 +1027,10 @@ Rcpp::List rIndepNormalGammaReg_std_parallel(
   RcppParallel::parallelFor(0, n, worker);
   // worker(0,n);
   
-  if (verbose) Rcpp::Rcout << "Exiting Parallel Worker" << std::endl;
+  if (verbose) {
+    Rcpp::Rcout << "[rIndepNormalGammaReg:Simulation] Exiting "
+                << Rcpp::as<std::string>(now[0]) << " <<<\n";
+  }
   
   // --- Capture end time ---
   double sim_end = Rcpp::as<double>(
@@ -907,9 +1044,7 @@ Rcpp::List rIndepNormalGammaReg_std_parallel(
   
    if (verbose) {
     now = fmt(systime(), Rcpp::Named("format") = "%H:%M:%S");
-    Rcpp::Rcout << "[Simulation] >>> Exiting full run at "
-                << Rcpp::as<std::string>(now[0]) << " <<<\n";
-    Rcpp::Rcout << "[Simulation] Simulation completed in: "
+    Rcpp::Rcout << "[rIndepNormalGammaReg:Simulation] Completed in: "
                 << h_elapsed << " h  " << m_elapsed << " m  " << s_elapsed << " s.\n";
    }  
 
@@ -947,6 +1082,7 @@ Rcpp::List rIndepNormalGammaReg(
     bool verbose,
     bool progbar
 ){
+  
   
   // Base R functions
   Rcpp::Function lm_wfit("lm.wfit");
@@ -1007,6 +1143,26 @@ Rcpp::List rIndepNormalGammaReg(
   Rcpp::List cpp_out;   // declare here so it survives the loop
   double RSS_Post2 = NA_REAL;   // declare before the loop
   
+  
+  if (verbose) {
+    Rcpp::Rcout << "[rIndepNormalGammaReg:rNormalReg] Entering Loop: "
+    //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << glmbayes::progress::timestamp_cpp()
+                  << "\n";
+  }
+  
+  // // Debug: inspect first few weights
+  // Rcpp::Rcout << "[DEBUG] wt[0:9] = ";
+  // int n_print = std::min<int>(wt.size(), 10);
+  // for (int i = 0; i < n_print; ++i) {
+  //   Rcpp::Rcout << wt[i];
+  //   if (i < n_print - 1) Rcpp::Rcout << ", ";
+  // }
+  // Rcpp::Rcout << "\n";
+  // 
+  
+  
+  
   for (int j = 0; j < 10; ++j) {
     
     // --- Call rNormalReg (C++ version of .rnorm_reg) ---
@@ -1026,7 +1182,8 @@ Rcpp::List rIndepNormalGammaReg(
       "identity",     // link
       Gridtype        // Gridtype
     );
-    
+
+
     // Posterior draws: matrix (n_draws × p)
     arma::mat beta_draws = Rcpp::as<arma::mat>(cpp_out["coefficients"]);
 
@@ -1073,6 +1230,16 @@ Rcpp::List rIndepNormalGammaReg(
   }
   
   
+  if (verbose) {
+    Rcpp::Rcout << "[rIndepNormalGammaReg:rNormalReg] Exiting Loop: "
+    //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << glmbayes::progress::timestamp_cpp()
+                  << "\n";
+  }
+  
+  
+  
+  
   // -------------------------------
   // Posterior Mode + Hessian Block
   // -------------------------------
@@ -1102,7 +1269,10 @@ Rcpp::List rIndepNormalGammaReg(
   
   // ---- Posterior Mode Optimization ----
   if (verbose) {
-    Rcpp::Rcout << "[PosteriorMode] >>> Entering optim() call <<<\n";
+    Rcpp::Rcout << "[rIndepNormalGammaReg:optim] Entering: "
+    //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << glmbayes::progress::timestamp_cpp()
+                  << "\n";
   }
   
   // Call R's optim() directly
@@ -1119,7 +1289,15 @@ Rcpp::List rIndepNormalGammaReg(
     Rcpp::_["method"] = "BFGS",
     Rcpp::_["hessian"] = true
   );
-  
+
+
+  if (verbose) {
+    Rcpp::Rcout << "[rIndepNormalGammaReg:optim] Exiting: "
+    //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << glmbayes::progress::timestamp_cpp()
+                  << "\n";
+  }
+    
   // Extract posterior mode and Hessian
   Rcpp::NumericVector bstar  = opt_out["par"];
   Rcpp::NumericMatrix A1     = opt_out["hessian"];
@@ -1146,7 +1324,16 @@ Rcpp::List rIndepNormalGammaReg(
   for (int i = 0; i < p_dim; ++i) {
     mu2_mat(i, 0) = 0.0;
   }
+
+  if (verbose) {
+    Rcpp::Rcout << "[rIndepNormalGammaReg:glmb_Standardize_Model] Entering: "
+    //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << glmbayes::progress::timestamp_cpp()
+                  << "\n";
+  }
   
+  
+    
   // Call C++ standardization
   Rcpp::List Standard_Mod = glmb_Standardize_Model(
     Rcpp::as<Rcpp::NumericVector>(y),   // y
@@ -1155,7 +1342,15 @@ Rcpp::List rIndepNormalGammaReg(
     bstar_mat,                          // bstar
     A1_mat                              // A1
   );
+
+  if (verbose) {
+    Rcpp::Rcout << "[rIndepNormalGammaReg:glmb_Standardize_Model] Exiting: "
+    //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << glmbayes::progress::timestamp_cpp()
+                  << "\n";
+  }
   
+    
   // Extract standardized components
   Rcpp::NumericVector bstar2 = Standard_Mod["bstar2"];
   Rcpp::NumericMatrix A      = Standard_Mod["A"];
@@ -1171,11 +1366,16 @@ Rcpp::List rIndepNormalGammaReg(
   
   // RSS_Post2 from your last dispersion loop iteration
   double RSS_ML = NA_REAL;  // matches R: RSS_ML = NA
-  
 
   
+  if (verbose) {
+    Rcpp::Rcout << "[rIndepNormalGammaReg:EnvelopeOrchestrator] Entering: "
+    //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << glmbayes::progress::timestamp_cpp()
+                  << "\n";
+  }
   
-  
+    
   // Call C++ envelope orchestrator
   Rcpp::List env_out = EnvelopeOrchestrator(
     bstar2,
@@ -1192,13 +1392,13 @@ Rcpp::List rIndepNormalGammaReg(
     // n_envopt: treat negative as NULL
     (n_envopt < 0 ? R_NilValue : Rcpp::wrap(n_envopt)),
                 
-    shape,
-    rate,
-    RSS_Post2,
-    RSS_ML,
-    max_disp_perc,
+                shape,
+                rate,
+                RSS_Post2,
+                RSS_ML,
+                max_disp_perc,
                 
-    // disp_lower: Nullable<NumericVector> -> Nullable<double>
+                // disp_lower: Nullable<NumericVector> -> Nullable<double>
                 (disp_lower.isNull()
                    ? R_NilValue
                    : Rcpp::wrap(Rcpp::as<Rcpp::NumericVector>(disp_lower)[0])),
@@ -1208,11 +1408,21 @@ Rcpp::List rIndepNormalGammaReg(
                         ? R_NilValue
                         : Rcpp::wrap(Rcpp::as<Rcpp::NumericVector>(disp_upper)[0])),
                           
-      use_parallel,
-      use_opencl,
-      verbose
-  );  
+                          use_parallel,
+                          use_opencl,
+                          verbose
+  );
   
+  
+  if (verbose) {
+    Rcpp::Rcout << "[rIndepNormalGammaReg:EnvelopeOrchestrator] Exiting: "
+    //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << glmbayes::progress::timestamp_cpp()
+                  << "\n";
+  }
+  
+  
+    
   // Extract outputs (matching your R code)
   Rcpp::List Env3          = env_out["Env"];
   Rcpp::List gamma_list_new= env_out["gamma_list"];
@@ -1232,8 +1442,22 @@ Rcpp::List rIndepNormalGammaReg(
   
   // Choose serial vs parallel simulator
   Rcpp::List sim_temp;
+
+  
+  
+  
   if (!use_parallel || n == 1) {
-    // serial version (assumes same signature)
+
+    if (verbose) {
+      Rcpp::Rcout << "[rIndepNormalGammaReg:rIndepNormalGammaReg_std] Entering: "
+      //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                    << glmbayes::progress::timestamp_cpp()
+                    << "\n";
+    }
+    
+    
+        
+        // serial version (assumes same signature)
     sim_temp = rIndepNormalGammaReg_std(
       n,
       Rcpp::as<Rcpp::NumericVector>(y),
@@ -1251,7 +1475,23 @@ Rcpp::List rIndepNormalGammaReg(
       progbar,
       verbose
     );
+    
+    if (verbose) {
+      Rcpp::Rcout << "[rIndepNormalGammaReg:rIndepNormalGammaReg_std] Exiting: "
+      //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                    << glmbayes::progress::timestamp_cpp()
+                    << "\n";
+    }
+    
   } else {
+    
+    if (verbose) {
+      Rcpp::Rcout << "[rIndepNormalGammaReg:rIndepNormalGammaReg_std_parallel] Entering: "
+      //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                    << glmbayes::progress::timestamp_cpp()
+                    << "\n";
+    }
+    
     // parallel version (the one you pasted)
     sim_temp = rIndepNormalGammaReg_std_parallel(
       n,
@@ -1270,8 +1510,17 @@ Rcpp::List rIndepNormalGammaReg(
       progbar,
       verbose
     );
+    if (verbose) {
+      Rcpp::Rcout << "[rIndepNormalGammaReg:rIndepNormalGammaReg_std_parallel] Exiting: "
+      //            << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                    << glmbayes::progress::timestamp_cpp()
+                    << "\n";
+    }
+    
+    
   }
-  
+
+    
   // -------------------------------
   // Step 7: Back-transform
   // -------------------------------
