@@ -15,11 +15,11 @@ simfunction(object, ...)
 
 rNormal_reg(n, y, x, prior_list, offset = NULL, weights = 1,
             family = gaussian(), Gridtype = 2, n_envopt = NULL,
-            use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE)
+            use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE,progbar=FALSE)
 
 rNormalGamma_reg(n, y, x, prior_list, offset = NULL, weights = 1, family = gaussian(),
                   Gridtype = 2,n_envopt = NULL, 
-                  use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE)
+                  use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE,progbar=FALSE)
 
 rindepNormalGamma_reg(n, y, x, prior_list, offset = NULL, weights = 1,
                              family = gaussian(), Gridtype = 2,n_envopt = NULL,
@@ -28,7 +28,7 @@ rindepNormalGamma_reg(n, y, x, prior_list, offset = NULL, weights = 1,
 
 rGamma_reg(n, y, x, prior_list, offset = NULL, weights = 1, family = gaussian(),
            Gridtype = 2,n_envopt = NULL,
-            use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE)
+            use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE,progbar=FALSE)
 
 \method{print}{rGamma_reg}(x, digits = max(3, getOption("digits") - 3), ...)
 

@@ -14,7 +14,9 @@
 #' @param pfamily a description of the prior distribution and associated constants to be used in the model. This
 #' should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions.)
 #' @param digits the number of significant digits to use when printing.
+#' @param progbar Logical. Whether to display a progress base during simulation.
 #' @inheritParams lmb
+#' @inheritParams glmb
 #' @return \code{rlmb} returns a object of class \code{"rlmb"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},

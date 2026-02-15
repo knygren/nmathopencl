@@ -1334,28 +1334,34 @@ Rcpp::List compute_mixture_and_outputs_cpp(
   
 #include <iomanip>   // <-- add this at the top of the file
   
-  for (int j = 0; j < gs; ++j) {
-    // Face-specific affine slope in d: lmc2_j = New_LL_Slope[j]
-    lmc2_face[j]    = New_LL_Slope[j];
+
     
-    // Face-specific log-tilt slope: lm_log2_j = lmc2_j * d2
-    lm_log2_face[j] = lmc2_face[j] * d2;
     
-    // Face-specific shape:
-    shape3_face[j]  = shape2 - lm_log2_face[j];
+    for (int j = 0; j < gs; ++j) {
+      // Face-specific affine slope in d: lmc2_j = New_LL_Slope[j]
+      lmc2_face[j]    = New_LL_Slope[j];
+      
+      // Face-specific log-tilt slope: lm_log2_j = lmc2_j * d2
+      lm_log2_face[j] = lmc2_face[j] * d2;
+      
+      // Face-specific shape:
+      shape3_face[j]  = shape2 - lm_log2_face[j];
+      
+      // TEMPORARY DEBUG PRINT: only print first 81 faces
+      // if (j < 81) {
+      //   Rcout << std::setprecision(12)
+      //         << "[shape3_face] j=" << j
+      //         << "  New_LL_Slope=" << New_LL_Slope[j]
+      //         << "  lm_log2_face=" << lm_log2_face[j]
+      //         << "  shape3_face=" << shape3_face[j]
+      //         << "\n";
+      // }
+      
+      if (shape3_face[j] < min_shape3_face) min_shape3_face = shape3_face[j];
+      if (shape3_face[j] > max_shape3_face) max_shape3_face = shape3_face[j];
+    }
     
-    // // DEBUG PRINT
-    // Rcout << std::setprecision(12)
-    //       << "j=" << j
-    //       << "  New_LL_Slope=" << New_LL_Slope[j]
-    //       << "  lm_log2_face=" << lm_log2_face[j]
-    //       << "  shape3_face=" << shape3_face[j]
-    //       << "\n";
-    
-    if (shape3_face[j] < min_shape3_face) min_shape3_face = shape3_face[j];
-    if (shape3_face[j] > max_shape3_face) max_shape3_face = shape3_face[j];
-  }
-  
+
   ////////////////////////////////////////////////////////////////////////
   
   // --- Sanity checks on the tilted gamma parameters (global) ---

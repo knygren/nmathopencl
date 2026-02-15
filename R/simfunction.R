@@ -271,7 +271,7 @@ print.simfunction <- function(x, ...) {
 #' @example inst/examples/Ex_rglmb_dispersion.R
 #' @usage rGamma_reg(n, y, x, prior_list, offset = NULL, weights = 1, family = gaussian(),
 #'            Gridtype = 2,n_envopt = NULL,
-#'             use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE)
+#'             use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE,progbar=FALSE)
 #' @export 
 #' @rdname simfuncs
 #' @order 5
@@ -678,7 +678,7 @@ rindepNormalGamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=ga
 #' @example inst/examples/Ex_rnorm_gamma_reg.R
 #' @usage rNormalGamma_reg(n, y, x, prior_list, offset = NULL, weights = 1, family = gaussian(),
 #'                   Gridtype = 2,n_envopt = NULL, 
-#'                   use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE)
+#'                   use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE,progbar=FALSE)
 #' @export 
 #' @rdname simfuncs
 #' @order 3
@@ -820,7 +820,7 @@ rNormalGamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussia
 #' @example inst/examples/Ex_rnorm_gamma_reg.R
 #' @usage rNormal_reg(n, y, x, prior_list, offset = NULL, weights = 1,
 #'             family = gaussian(), Gridtype = 2, n_envopt = NULL,
-#'             use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE)
+#'             use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE,progbar=FALSE)
 #' @export 
 #' @rdname simfuncs
 #' @order 2

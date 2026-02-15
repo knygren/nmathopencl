@@ -29,6 +29,7 @@
 #' function, with a function which takes the same arguments as \code{glm.fit}. If specified as a character string it is looked up from within the \pkg{stats} namespace.
 #' @param digits the number of significant digits to use when printing.
 #' @inheritParams stats::lm
+#' @inheritParams glmb
 #' @return \code{lmb} returns an object of class \code{"lmb"}. The function \code{summary} (i.e., 
 #' \code{\link{summary.glmb}}) can be used to obtain or print a summary of the results.  The generic accessor functions 
 #' \code{\link{coefficients}}, \code{\link{fitted.values}}, \code{\link{residuals}}, and \code{\link{extractAIC}} can be used 

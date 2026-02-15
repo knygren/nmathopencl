@@ -5,7 +5,20 @@
 \alias{print.rlmb}
 \title{The Bayesian Linear Model Distribution}
 \usage{
-rlmb(n = 1, y, x, pfamily, offset = rep(0, nobs), weights = NULL)
+rlmb(
+  n = 1,
+  y,
+  x,
+  pfamily,
+  offset = rep(0, nobs),
+  weights = NULL,
+  Gridtype = 2,
+  n_envopt = NULL,
+  use_parallel = TRUE,
+  use_opencl = FALSE,
+  verbose = FALSE,
+  progbar = FALSE
+)
 
 \method{print}{rlmb}(x, digits = max(3, getOption("digits") - 3), ...)
 }
@@ -32,6 +45,20 @@ sum is used.  See \code{model.offset}.}
     If non-NULL, weighted least squares is used with weights
     \code{weights} (that is, minimizing \code{sum(w*e^2)}); otherwise
     ordinary least squares is used.  See also \sQuote{Details},}
+
+\item{Gridtype}{an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.}
+
+\item{n_envopt}{Effective sample size passed to EnvelopeOpt for grid
+construction. Defaults to match \code{n}. Larger values encourage tighter
+envelopes.}
+
+\item{use_parallel}{Logical. Whether to use parallel processing during simulation.}
+
+\item{use_opencl}{Logical. Whether to use OpenCL acceleration during Envelope construction.}
+
+\item{verbose}{Logical. Whether to print progress messages.}
+
+\item{progbar}{Logical. Whether to display a progress base during simulation.}
 
 \item{digits}{the number of significant digits to use when printing.}
 

@@ -21,6 +21,11 @@ lmb(
   singular.ok = TRUE,
   contrasts = NULL,
   offset,
+  Gridtype = 2,
+  n_envopt = NULL,
+  use_parallel = TRUE,
+  use_opencl = FALSE,
+  verbose = FALSE,
   ...
 )
 
@@ -79,6 +84,18 @@ vector or matrix of extents
 matching those of the response.  One or more \code{offset} terms can be
 included in the formula instead or as well, and if more than one are specified their
 sum is used.  See \code{model.offset}.}
+
+\item{Gridtype}{an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.}
+
+\item{n_envopt}{Effective sample size passed to EnvelopeOpt for grid
+construction. Defaults to match \code{n}. Larger values encourage tighter
+envelopes.}
+
+\item{use_parallel}{Logical. Whether to use parallel processing during simulation.}
+
+\item{use_opencl}{Logical. Whether to use OpenCL acceleration during Envelope construction.}
+
+\item{verbose}{Logical. Whether to print progress messages.}
 
 \item{...}{For \code{lm()}: additional arguments to be passed to the low level
     regression fitting functions (see below).}
@@ -225,6 +242,20 @@ lmb.D9_v3 <- lmb(
   )
 )
 summary(lmb.D9_v3)
+
+## Independent_Normal_Gamma_Prior
+lmb.D9_v3 <- lmb(
+  weight ~ group,
+  dIndependent_Normal_Gamma(
+    ps$mu,
+    ps$Sigma,
+    shape = ps$shape,
+    rate  = ps$rate
+  ),
+  use_opencl=TRUE
+)
+summary(lmb.D9_v3)
+
 
 anova(lmb.D9)
 }
