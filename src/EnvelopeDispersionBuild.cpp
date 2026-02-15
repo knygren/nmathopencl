@@ -1324,43 +1324,85 @@ Rcpp::List compute_mixture_and_outputs_cpp(
   double denom_log = log_upp - log_low;
   double d2        = (upp - low) / denom_log;
 
-  // --- Face-specific log-tilt slopes and shape3_j (diagnostics only) ---
+  //------------------------------------------------------------
+  // Face-specific UB3A and UB3B geometry
+  //------------------------------------------------------------
+  
+  // We compute:
+  //   lmc2_face[j]   = face-specific affine slope
+  //   lmc1_face[j]   = face-specific affine intercept (tangent at dispstar)
+  //   lm_log2_face[j]= face-specific log-tilt slope
+  //   lm_log1_face[j]= face-specific log-tilt intercept (match at d = low)
+  //   shape3_face[j] = face-specific Gamma shape (diagnostic)
+  
   NumericVector lmc2_face(gs);
+  NumericVector lmc1_face(gs);
   NumericVector lm_log2_face(gs);
+  NumericVector lm_log1_face(gs);
   NumericVector shape3_face(gs);
   
   double min_shape3_face = R_PosInf;
   double max_shape3_face = R_NegInf;
   
-#include <iomanip>   // <-- add this at the top of the file
-  
-
+  for (int j = 0; j < gs; ++j) {
     
+    //--------------------------------------------------------
+    // 1. UB3A slope (face-specific affine slope in d)
+    //--------------------------------------------------------
+    double slope_j = New_LL_Slope[j];
+    lmc2_face[j] = slope_j;
     
-    for (int j = 0; j < gs; ++j) {
-      // Face-specific affine slope in d: lmc2_j = New_LL_Slope[j]
-      lmc2_face[j]    = New_LL_Slope[j];
-      
-      // Face-specific log-tilt slope: lm_log2_j = lmc2_j * d2
-      lm_log2_face[j] = lmc2_face[j] * d2;
-      
-      // Face-specific shape:
-      shape3_face[j]  = shape2 - lm_log2_face[j];
-      
-      // TEMPORARY DEBUG PRINT: only print first 81 faces
-      // if (j < 81) {
-      //   Rcout << std::setprecision(12)
-      //         << "[shape3_face] j=" << j
-      //         << "  New_LL_Slope=" << New_LL_Slope[j]
-      //         << "  lm_log2_face=" << lm_log2_face[j]
-      //         << "  shape3_face=" << shape3_face[j]
-      //         << "\n";
-      // }
-      
-      if (shape3_face[j] < min_shape3_face) min_shape3_face = shape3_face[j];
-      if (shape3_face[j] > max_shape3_face) max_shape3_face = shape3_face[j];
-    }
+    //--------------------------------------------------------
+    // 2. Reconstruct face constant at dispstar
+    //    Using only available inputs:
+    //
+    //    thetabar_const_upp_apprx[j]
+    //      = theta_base_j + (upp - dispstar) * slope_j
+    //
+    //    ⇒ theta_base_j = thetabar_const_upp_apprx[j]
+    //                      - (upp - dispstar) * slope_j
+    //--------------------------------------------------------
+    double theta_base_j =
+      thetabar_const_upp_apprx[j] - (upp - dispstar) * slope_j;
     
+    //--------------------------------------------------------
+    // 3. UB3A intercept: tangent at d = dispstar
+    //--------------------------------------------------------
+    double lmc1_j = theta_base_j - slope_j * dispstar;
+    lmc1_face[j] = lmc1_j;
+    
+    //--------------------------------------------------------
+    // 4. UB3B slope (log-tilt slope)
+    //    A7-compatible slope relation:
+    //        lm_log2_j = slope_j * d2
+    //--------------------------------------------------------
+    double lm_log2_j = slope_j * d2;
+    lm_log2_face[j] = lm_log2_j;
+    
+    //--------------------------------------------------------
+    // 5. UB3B intercept: match UB3A at d = low
+    //
+    //    lm_log1_j + lm_log2_j * log(low)
+    //        = lmc1_j + slope_j * low
+    //
+    //    ⇒ lm_log1_j = lmc1_j + slope_j * low
+    //                   - lm_log2_j * log(low)
+    //--------------------------------------------------------
+    double lm_log1_j =
+      lmc1_j
+      + slope_j * low
+    - lm_log2_j * std::log(low);
+    
+    lm_log1_face[j] = lm_log1_j;
+    
+    //--------------------------------------------------------
+    // 6. Face-specific Gamma shape (diagnostic only)
+    //--------------------------------------------------------
+    shape3_face[j] = shape2 - lm_log2_j;
+    
+    if (shape3_face[j] < min_shape3_face) min_shape3_face = shape3_face[j];
+    if (shape3_face[j] > max_shape3_face) max_shape3_face = shape3_face[j];
+  }
 
   ////////////////////////////////////////////////////////////////////////
   
@@ -1378,11 +1420,20 @@ Rcpp::List compute_mixture_and_outputs_cpp(
   }
   
   Rcpp::List gamma_list = Rcpp::List::create(
-    Rcpp::Named("shape3")     = shape3,
-    Rcpp::Named("rate2")      = rate2,
-    Rcpp::Named("disp_upper") = upp,
-    Rcpp::Named("disp_lower") = low
+    // Global proposal parameters (unchanged)
+    Rcpp::Named("shape3")       = shape3,
+    Rcpp::Named("rate2")        = rate2,
+    Rcpp::Named("disp_upper")   = upp,
+    Rcpp::Named("disp_lower")   = low,
+    
+    // New: face-specific UB3A/UB3B geometry
+    Rcpp::Named("lmc1_face")    = lmc1_face,     // UB3A intercepts
+    Rcpp::Named("lmc2_face")    = lmc2_face,     // UB3A slopes
+    Rcpp::Named("lm_log1_face") = lm_log1_face,  // UB3B intercepts
+    Rcpp::Named("lm_log2_face") = lm_log2_face,  // UB3B slopes
+    Rcpp::Named("shape3_face")  = shape3_face    // per-face Gamma shapes
   );
+  
   
   List UB_list = List::create(
     Named("RSS_ML")          = RSS_ML,

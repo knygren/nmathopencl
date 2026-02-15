@@ -428,6 +428,13 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
   NumericVector lg_prob_factor =UB_list["lg_prob_factor"];
   NumericMatrix cbars=Envelope["cbars"];
   
+  // --- New: face-specific UB3A/UB3B and Gamma proposal geometry ---
+  NumericVector lmc1_face    = gamma_list["lmc1_face"];     // UB3A intercepts
+  NumericVector lmc2_face    = gamma_list["lmc2_face"];     // UB3A slopes
+  NumericVector lm_log1_face = gamma_list["lm_log1_face"];  // UB3B intercepts
+  NumericVector lm_log2_face = gamma_list["lm_log2_face"];  // UB3B slopes
+  NumericVector shape3_face  = gamma_list["shape3_face"];   // per-face Gamma shapes
+  
   
   NumericVector iters_out(n);
   NumericVector disp_out(n);
@@ -825,6 +832,13 @@ Rcpp::List rIndepNormalGammaReg_std_parallel(
   double lmc1            = UB_list["lmc1"];
   double lmc2            = UB_list["lmc2"];
 
+  // --- New: face-specific UB3A/UB3B and Gamma proposal geometry ---
+  NumericVector lmc1_face    = gamma_list["lmc1_face"];     // UB3A intercepts
+  NumericVector lmc2_face    = gamma_list["lmc2_face"];     // UB3A slopes
+  NumericVector lm_log1_face = gamma_list["lm_log1_face"];  // UB3B intercepts
+  NumericVector lm_log2_face = gamma_list["lm_log2_face"];  // UB3B slopes
+  NumericVector shape3_face  = gamma_list["shape3_face"];   // per-face Gamma shapes
+  
   Rcpp::NumericVector lg_prob_factor = UB_list["lg_prob_factor"];
   Rcpp::NumericMatrix cbars          = Envelope["cbars"];
   Rcpp::NumericVector PLSD           = Envelope["PLSD"];
@@ -1250,8 +1264,9 @@ Rcpp::List rIndepNormalGammaReg(
   
   // wt2 = wt / dispstar
   Rcpp::NumericVector wt2(n_obs);
-  for (int i = 0; i < n_obs; ++i)
-    wt2[i] = wt[i] / dispstar;
+  for (int i = 0; i < n_obs; ++i)    wt2[i] = wt[i] / dispstar;
+  
+
   
   // alpha = X %*% mu + offset
   arma::vec alpha_vec = X * Rcpp::as<arma::vec>(mu) + Rcpp::as<arma::vec>(offset);
@@ -1290,6 +1305,8 @@ Rcpp::List rIndepNormalGammaReg(
     Rcpp::_["hessian"] = true
   );
 
+
+  
 
   if (verbose) {
     Rcpp::Rcout << "[rIndepNormalGammaReg:optim] Exiting: "
@@ -1556,7 +1573,7 @@ Rcpp::List rIndepNormalGammaReg(
   
   return Rcpp::List::create(
     Rcpp::Named("out")        = out,
-    Rcpp::Named("betastar")   = bstar,       // posterior mode from optim()
+    Rcpp::Named("betastar")   = bstar+mu,       // posterior mode from optim() - Add back in prior mean
     Rcpp::Named("disp_out")   = disp_out,
     Rcpp::Named("iters_out")  = iters_out,
     Rcpp::Named("weight_out") = weight_out,

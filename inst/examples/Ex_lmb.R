@@ -54,6 +54,21 @@ lmb.D9_v3 <- lmb(
     shape = ps$shape,
     rate  = ps$rate
   ),
+  use_parallel = FALSE
+)
+
+summary(lmb.D9_v3)
+
+
+## Independent_Normal_Gamma_Prior
+lmb.D9_v3 <- lmb(
+  weight ~ group,
+  dIndependent_Normal_Gamma(
+    ps$mu,
+    ps$Sigma,
+    shape = ps$shape,
+    rate  = ps$rate
+  ),
   use_opencl=TRUE
 )
 summary(lmb.D9_v3)
