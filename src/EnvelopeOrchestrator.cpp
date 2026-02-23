@@ -197,10 +197,10 @@ Env3 = EnvelopeSort(
     Rcpp::_["a1"]      = Env3_raw["a1"],
     Rcpp::_["E_draws"] = Env3_raw["E_draws"],
     Rcpp::_["lg_prob_factor"] = UB_list_new["lg_prob_factor"],
-    Rcpp::_["UB2min"]         = UB_list_new["UB2min"],
-    Rcpp::_["thetabar_const_base"] = UB_list_new["thetabar_const_base"],
-    Rcpp::_["New_LL_Slope"]= UB_list_new["New_LL_Slope"],
-    Rcpp::_["shape3_face"]= gamma_list_new["shape3_face"]
+    Rcpp::_["UB2min"]         = UB_list_new["UB2min"]
+  // ,  Rcpp::_["thetabar_const_base"] = UB_list_new["thetabar_const_base"],
+  //   Rcpp::_["New_LL_Slope"]= UB_list_new["New_LL_Slope"],
+  //   Rcpp::_["shape3_face"]= gamma_list_new["shape3_face"]
 );
 }
 

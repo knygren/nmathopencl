@@ -19,9 +19,7 @@ EnvelopeSort(
   a1,
   E_draws,
   lg_prob_factor = NULL,
-  UB2min = NULL,
-  thetabar_const_base = NULL,
-  New_LL_Slope = NULL
+  UB2min = NULL
 )
 }
 \arguments{

@@ -424,13 +424,6 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
 )
 {
 
-    
-  // 1. Grab the base environment
-  Rcpp::Environment base = Rcpp::Environment::base_env();
-  
-  // 2. Pull out the 'interactive' function
-  Rcpp::Function interactive = base["interactive"];
-  
   
   int l1 = mu.nrow();
   int l2 = x.nrow();
@@ -452,12 +445,6 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
   NumericVector lg_prob_factor =UB_list["lg_prob_factor"];
   NumericMatrix cbars=Envelope["cbars"];
   
-  // --- New: face-specific UB3A/UB3B and Gamma proposal geometry ---
-
-  
-  // NEW: extract anchor geometry
-  double d1_star = UB_list["d1_star"];        // UB3A anchor
-
 
   NumericVector iters_out(n);
   NumericVector disp_out(n);
@@ -469,23 +456,11 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
   
   arma::vec wt1b(wt.begin(), x.nrow());
   
-  
-  NumericMatrix cbarst(cbars.ncol(),cbars.nrow());
-  NumericMatrix thetabars(cbars.nrow(),cbars.ncol());
   NumericMatrix thetabars_new(1,cbars.ncol());
+
   
-  NumericVector New_LL(cbars.nrow());
-  
-  
-  
-  
-  arma::mat cbarsb(cbars.begin(), cbars.nrow(), cbars.ncol(), false);
-  arma::mat cbarstb(cbarst.begin(), cbarst.nrow(), cbarst.ncol(), false);
-  
-  arma::mat thetabarsb(thetabars.begin(), thetabars.nrow(), thetabars.ncol(), false);
   arma::mat thetabarsb_new(thetabars_new.begin(), thetabars_new.nrow(), thetabars_new.ncol(), false);
-  cbarstb=trans(cbarsb);
-  
+
   arma::vec y2(y.begin(),l2);
   arma::vec alpha2(alpha.begin(),l2);
   arma::mat x2(x.begin(),l2,l1);
@@ -501,7 +476,7 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
   double test1=0;
   double test=0;
   NumericVector J(n);
-  NumericVector draws(n);
+  // NumericVector draws(n);
   NumericMatrix out(1,l1);
   double a2=0;
   double U=0;
@@ -514,14 +489,6 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
   double RSS_Min=UB_list["RSS_Min"];
   NumericVector UB2min=UB_list["UB2min"];
   
-// Adding to enable face specific dispersion bounds
-
-  NumericVector thetabar_const_base=UB_list["thetabar_const_base"];
-  NumericVector New_LL_Slope=UB_list["New_LL_Slope"];
-
-  
-//  NumericVector ub2_min=;
-  
   
   if (verbose) {
     Rcpp::Rcout << "[rIndepNormalGammaReg_std:Inv_f3_precompute_disp] Entering: "
@@ -529,8 +496,7 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
                   << "\n";
   }
   
-  
-  
+
   
   // Build cache once outside the loop
   Rcpp::List cache = Inv_f3_precompute_disp(cbars, y, x, mu, P, alpha, wt);
@@ -556,8 +522,6 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
      if(i==n-1) {Rcpp::Rcout << "" << std::endl;}
    }
     
-    // 3. Test progbar *and* interactive()
-
 
     // Rcpp::Rcout << "[rIndepNormalGammaReg_std] Entering accept/reject: \n";
    
@@ -588,11 +552,6 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
       
       for(int j=0;j<l1;j++){  out(0,j)=rnorm_ct(logrt(J(0),j),loglt(J(0),j),-cbars(J(0),j),1.0);          }
       
-      
-
-      // Update this to make distribution contingent on component of the grid
-      
-//      dispersion=rinvgamma_ct(shape3,rate2,disp_upper,disp_lower);
       dispersion=rinvgamma_ct_safe(shape3,rate2,disp_upper,disp_lower);
       
       
@@ -621,13 +580,9 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
       arma::vec  thetabars_temp2(thetabars_temp.begin(), l1);
       NumericVector cbars_temp=cbars(J_out(0),_);
       arma::vec  cbars_temp2(cbars_temp.begin(), l1);
-      
-      
-      
-      NumericVector LL_Test=-f2_gaussian(transpose(out),  y, x, mu, P, alpha, wt2);
-      
 
-      
+      NumericVector LL_Test=-f2_gaussian(transpose(out),  y, x, mu, P, alpha, wt2);
+
       // Block 1: UB1 
       //   Same form as in fixed dispersion case but thetabar is a function of the dispersion
       //   So all components that include thetabar must now be bounded as well
@@ -642,7 +597,7 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
 
       
       // Extract the current cbars row as a NumericVector
-      NumericVector cbars_j = cbars(J_out(0), _);
+      // NumericVector cbars_j = cbars(J_out(0), _);
       
 
     
@@ -652,13 +607,6 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
       // Subtract UB2min --> Should improve acceptance
       
       UB2=UB2-UB2min[J_out(0)];
-      
-      
-      // Block 3: UB3A (adjusts because probabilities of components in grid are different from original grid)
-      // Investigate whether changing probabilities of grid components for proposal
-      // allows us to do away with this term and to thereby improve the acceptance rate
-      
-      // This is likely time consuming part
       
 
       // Compute g1_j(d) for the chosen face j = J_out(0)
@@ -674,75 +622,21 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
         cbars         // matrix of c_j rows
       );
       
-      
-      // double g2j=g2_face_at_disp(
-      //   dispersion,   // current dispersion draw
-      //   j,            // face index
-      //   cache,        // cached matrices for Inv_f3_with_disp
-      //   P2,           // precision matrix
-      //   cbars,         // matrix of c_j rows
-      //   d1_star,
-      //   New_LL_Slope
-      // );
-      
-      // Store it exactly where New_LL(j) was previously used
-     New_LL(j) = g1j;
 
       // Modified UB3A 
       
-      UB3A= lg_prob_factor(J_out(0))+lmc1+lmc2*dispersion-New_LL(J_out(0));
-      
-      
-      // UB3A_face =thetabar_const_upp_apprx[J_out(0)]+ lmc1_face[J_out(0)] + lmc2_face[J_out(0)] * dispersion - New_LL(J_out(0));
-      //double UB3A = lg_prob_factor_r[J_idx] + lmc1 + lmc2 * dispersion - New_LL_J;
-      
-      // UB3A_face=g2j-g1j;
-      
-      // Block 4: UB3B  
-
-      //--------------------------------------------------------
-      // 4. UB3B slope (log-tilt slope)
-      //    A7-compatible slope relation:
-      //        lm_log2_j = slope_j * d2
-      
-      // where d2 = (upp - low) / log(upp/low)
-      
-      // double lmc1_j = g1j - New_LL_Slope[j] * d1_star;
-      // double lmc2_j=New_LL_Slope[j];
-      // 
-      // double lm_log2_j = New_LL_Slope[j] *(disp_upper-disp_lower)/log(disp_upper/disp_lower);
-      // 
-      // double lm_log1_j =lmc1_j + New_LL_Slope[j] *disp_lower-lm_log2_j*(log(disp_lower)) ;
-      
-      //    ⇒ lm_log1_j = lmc1_j + slope_j * low
-      //                   - lm_log2_j * log(low)
-      
-      
-      // double UB3B_face=lm_log1_j+lm_log2_j*log(dispersion)-(lmc1_j+lmc2_j*dispersion);
-      
-            
-      
-      // Old UB3B definition
-      
-      
-      
-      New_LL_log_disp=lm_log1+lm_log2*log(dispersion);
-      
-      UB3B=(max_New_LL_UB-max_LL_log_disp+New_LL_log_disp)-(lmc1+lmc2*dispersion);
+      UB3A= lg_prob_factor(J_out(0))+lmc1+lmc2*dispersion-g1j;
       
     
-      
+      New_LL_log_disp=lm_log1+lm_log2*log(dispersion);
+      UB3B=(max_New_LL_UB-max_LL_log_disp+New_LL_log_disp)-(lmc1+lmc2*dispersion);
+
       test1=LL_Test[0]-UB1;
         
       test= test1-(UB2+UB3A+UB3B);  // Should be all negative 
-      
-      
       test = test - log_U2;
 
-      
-      // double test_face=test1-(UB2+UB3A_face+UB3B_face)- log_U2;
-      
-
+    
       // Sanity checks: all must satisfy their sign constraints
       bool bad = false;
       std::ostringstream msg;
@@ -759,22 +653,14 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
         bad = true;
         msg << "Sign violation: UB3A = " << UB3A << " < 0\n";
       }
-      // if (UB3A_face < 0.0) {
-      //   bad = true;
-      //   msg << "Sign violation: UB3A_face = " << UB3A_face << " < 0\n";
-      // }
-    
+
             
       if (UB3B < 0.0) {
         bad = true;
         msg << "Sign violation: UB3B = " << UB3B << " < 0\n";
       }
     
-    // if (UB3B_face < 0.0) {
-    //   bad = true;
-    //   msg << "Sign violation: UB3B_face = " << UB3B_face << " < 0\n";
-    // }
-    
+
       
       if (bad) {
         // Provide context for debugging
@@ -783,14 +669,8 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
             << " UB1=" << UB1
             << " UB2=" << UB2
             << " UB3A=" << UB3A
-            // << " UB3A_face=" << UB3A_face
             << " UB3B=" << UB3B
-            // << " UB3B_face=" << UB3B_face
-        // << " thetabar_const_upp_apprx=" << thetabar_const_upp_apprx[J_out(0)]
-            // << " thetabar_const_low_apprx=" << thetabar_const_low_apprx[J_out(0)]
             << " lg_prob_factor[]=" << lg_prob_factor[J_out(0)]
-            << " lg_prob_factor()=" << lg_prob_factor(J_out(0))
-            << " New_LL(j)=" << New_LL(j)
             << " g1j=" << g1j
             << " test=" << test;
         
@@ -821,11 +701,9 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
     
   }
   
-  // Temporarily just return non-sense constants equal to all 1
-  
+
   return Rcpp::List::create(Rcpp::Named("beta_out")=beta_out,Rcpp::Named("disp_out")=disp_out,
                             Rcpp::Named("iters_out")=iters_out,Rcpp::Named("weight_out")=weight_out);  
-  
   
   
 }
@@ -934,7 +812,7 @@ Rcpp::List  rIndepNormalGammaReg_std_face(int n,NumericVector y,NumericMatrix x,
   double test1=0;
   double test=0;
   NumericVector J(n);
-  NumericVector draws(n);
+  // NumericVector draws(n);
   NumericMatrix out(1,l1);
   double a2=0;
   double U=0;
@@ -998,8 +876,6 @@ Rcpp::List  rIndepNormalGammaReg_std_face(int n,NumericVector y,NumericMatrix x,
     a1=0;
     iters_out[i]=1;  
     while(a1==0){
-      
-      
       
       // Simulate from discrete distribution
       
@@ -1076,7 +952,7 @@ Rcpp::List  rIndepNormalGammaReg_std_face(int n,NumericVector y,NumericMatrix x,
       
       
       // Extract the current cbars row as a NumericVector
-      NumericVector cbars_j = cbars(J_out(0), _);
+      // NumericVector cbars_j = cbars(J_out(0), _);
       
       
       
@@ -1124,6 +1000,7 @@ Rcpp::List  rIndepNormalGammaReg_std_face(int n,NumericVector y,NumericMatrix x,
       
       // Modified UB3A 
       
+//      UB3A= lg_prob_factor(J_out(0))+lmc1+lmc2*dispersion-New_LL(J_out(0));
       UB3A= lg_prob_factor(J_out(0))+lmc1+lmc2*dispersion-New_LL(J_out(0));
       
       
