@@ -744,6 +744,96 @@ arma::mat  f3_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,N
 }
 
 
+// Rcpp::List f2_f3_binomial_probit(
+//     Rcpp::NumericMatrix  b,
+//     Rcpp::NumericVector  y,
+//     Rcpp::NumericMatrix  x,
+//     Rcpp::NumericMatrix  mu,
+//     Rcpp::NumericMatrix  P,
+//     Rcpp::NumericVector  alpha,
+//     Rcpp::NumericVector  wt,
+//     int                  progbar
+// ) {
+//   // Dimensions
+//   int l1 = x.nrow();
+//   int l2 = x.ncol();
+//   int m1 = b.ncol();
+//   
+//   // Outputs (same storage order as original f3: we’ll transpose at the end)
+//   Rcpp::NumericVector qf(m1);
+//   Rcpp::NumericMatrix grad(l2, m1);
+//   arma::mat grad2(grad.begin(), l2, m1, false);
+//   
+//   // Common Armadillo views
+//   arma::mat x2(x.begin(),     l1, l2, false);
+//   arma::mat mu2(mu.begin(),   l2, 1,  false);
+//   arma::mat P2(P.begin(),     l2, l2, false);
+//   arma::mat alpha2(alpha.begin(), l1, 1, false);
+//   
+//   // Temporaries matching original f2/f3
+//   Rcpp::NumericMatrix b2temp(l2, 1);
+//   Rcpp::NumericVector xb(l1);
+//   arma::colvec xb2(xb.begin(), l1, false);
+//   
+//   Rcpp::NumericMatrix bmu(l2, 1);
+//   arma::mat bmu2(bmu.begin(), l2, 1, false);
+//   
+//   Rcpp::NumericVector yy(l1);
+//   Rcpp::NumericVector p1(l1);
+//   Rcpp::NumericVector p2(l1);
+//   Rcpp::NumericVector d1(l1);
+//   
+//   for (int i = 0; i < m1; i++) {
+//     Rcpp::checkUserInterrupt();
+//     if (progbar == 1) {
+//       progress_bar(i, m1 - 1);
+//       if (i == m1 - 1) Rcpp::Rcout << "" << std::endl;
+//     }
+//     
+//     // --- extract b_i exactly as in originals ---
+//     b2temp = b(Rcpp::Range(0, l2 - 1), Rcpp::Range(i, i));
+//     arma::mat b2(b2temp.begin(), l2, 1, false);
+//     
+//     // --- prior term (shared by f2 and f3) ---
+//     bmu2 = b2 - mu2;
+//     double mahal = 0.5 * arma::as_scalar(bmu2.t() * P2 * bmu2);
+//     
+//     // =========================
+//     // f2 part (matches f2_binomial_probit)
+//     // =========================
+//     xb2 = alpha2 + x2 * b2;          // eta
+//     xb  = pnorm(xb, 0.0, 1.0);       // p = Φ(eta)
+//     
+//     yy   = -dbinom_glmb(y, wt, xb, true);
+//     qf[i] = std::accumulate(yy.begin(), yy.end(), mahal);
+//     
+//     // =========================
+//     // f3 part (matches f3_binomial_probit)
+//     // =========================
+//     xb2 = alpha2 + x2 * b2;          // eta again
+//     p1  = pnorm(xb, 0.0, 1.0);       // Φ(eta)
+//     p2  = pnorm(-xb, 0.0, 1.0);      // Φ(-eta)
+//     d1  = dnorm(xb, 0.0, 1.0);       // φ(eta)
+//     
+//     for (int j = 0; j < l1; j++) {
+//       xb(j) = (y(j) * d1(j) / p1(j) - (1 - y(j)) * d1(j) / p2(j)) * wt(j);
+//     }
+//     
+//     // xb2 shares memory with xb, as in original f3
+//     // This fills columns in the same order as original out2
+//     grad2.col(i) = P2 * bmu2 - x2.t() * xb2;
+//   }
+//   
+//   // Match legacy f3 return orientation (so EnvelopeEval sees 9 x 2, not 2 x 9)
+//   arma::mat grad_out = grad2.t();
+//   
+//   return Rcpp::List::create(
+//     Rcpp::Named("qf")   = qf,
+//     Rcpp::Named("grad") = Rcpp::wrap(grad_out)
+//   );
+// }
+
+
 Rcpp::List f2_f3_binomial_probit(
     Rcpp::NumericMatrix  b,
     Rcpp::NumericVector  y,
@@ -765,15 +855,15 @@ Rcpp::List f2_f3_binomial_probit(
   arma::mat grad2(grad.begin(), l2, m1, false);
   
   // Common Armadillo views
-  arma::mat x2(x.begin(),     l1, l2, false);
-  arma::mat mu2(mu.begin(),   l2, 1,  false);
-  arma::mat P2(P.begin(),     l2, l2, false);
+  arma::mat x2(x.begin(),         l1, l2, false);
+  arma::mat mu2(mu.begin(),       l2, 1,  false);
+  arma::mat P2(P.begin(),         l2, l2, false);
   arma::mat alpha2(alpha.begin(), l1, 1, false);
   
   // Temporaries matching original f2/f3
   Rcpp::NumericMatrix b2temp(l2, 1);
-  Rcpp::NumericVector xb(l1);
-  arma::colvec xb2(xb.begin(), l1, false);
+  Rcpp::NumericVector xb(l1);                 // mutable buffer
+  arma::colvec xb2(xb.begin(), l1, false);    // view on xb
   
   Rcpp::NumericMatrix bmu(l2, 1);
   arma::mat bmu2(bmu.begin(), l2, 1, false);
@@ -782,6 +872,10 @@ Rcpp::List f2_f3_binomial_probit(
   Rcpp::NumericVector p1(l1);
   Rcpp::NumericVector p2(l1);
   Rcpp::NumericVector d1(l1);
+  
+  // NEW: separate, immutable buffer for eta = alpha + X b
+  Rcpp::NumericVector eta(l1);
+  arma::colvec eta2(eta.begin(), l1, false);
   
   for (int i = 0; i < m1; i++) {
     Rcpp::checkUserInterrupt();
@@ -798,11 +892,17 @@ Rcpp::List f2_f3_binomial_probit(
     bmu2 = b2 - mu2;
     double mahal = 0.5 * arma::as_scalar(bmu2.t() * P2 * bmu2);
     
+    // =====================================================
+    // Compute eta once and keep it in a separate buffer
+    // =====================================================
+    eta2 = alpha2 + x2 * b2;      // eta = alpha + X b
+    
     // =========================
     // f2 part (matches f2_binomial_probit)
     // =========================
-    xb2 = alpha2 + x2 * b2;          // eta
-    xb  = pnorm(xb, 0.0, 1.0);       // p = Φ(eta)
+    for (int j = 0; j < l1; j++) {
+      xb[j] = R::pnorm(eta[j], 0.0, 1.0, 1, 0);   // p = Φ(eta)
+    }
     
     yy   = -dbinom_glmb(y, wt, xb, true);
     qf[i] = std::accumulate(yy.begin(), yy.end(), mahal);
@@ -810,21 +910,24 @@ Rcpp::List f2_f3_binomial_probit(
     // =========================
     // f3 part (matches f3_binomial_probit)
     // =========================
-    xb2 = alpha2 + x2 * b2;          // eta again
-    p1  = pnorm(xb, 0.0, 1.0);       // Φ(eta)
-    p2  = pnorm(-xb, 0.0, 1.0);      // Φ(-eta)
-    d1  = dnorm(xb, 0.0, 1.0);       // φ(eta)
-    
     for (int j = 0; j < l1; j++) {
-      xb(j) = (y(j) * d1(j) / p1(j) - (1 - y(j)) * d1(j) / p2(j)) * wt(j);
+      double eta_j = eta[j];
+      double p     = R::pnorm(eta_j, 0.0, 1.0, 1, 0);   // Φ(eta)
+      double q     = R::pnorm(-eta_j, 0.0, 1.0, 1, 0);  // Φ(-eta)
+      double d     = R::dnorm(eta_j, 0.0, 1.0, 0);      // φ(eta)
+      
+      p1[j] = p;
+      p2[j] = q;
+      d1[j] = d;
+      
+      xb[j] = (y[j] * d / p - (1.0 - y[j]) * d / q) * wt[j];
     }
     
     // xb2 shares memory with xb, as in original f3
-    // This fills columns in the same order as original out2
     grad2.col(i) = P2 * bmu2 - x2.t() * xb2;
   }
   
-  // Match legacy f3 return orientation (so EnvelopeEval sees 9 x 2, not 2 x 9)
+  // Match legacy f3 return orientation (so EnvelopeEval sees m1 × l2)
   arma::mat grad_out = grad2.t();
   
   return Rcpp::List::create(
@@ -832,7 +935,6 @@ Rcpp::List f2_f3_binomial_probit(
     Rcpp::Named("grad") = Rcpp::wrap(grad_out)
   );
 }
-
 
 ///////////////////////// cLOGLOG FUNCTION ///////////////////////////////////////
 
@@ -1114,6 +1216,98 @@ arma::mat  f3_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,
     return trans(out2);      
 }
 
+// Rcpp::List f2_f3_binomial_cloglog(
+//     Rcpp::NumericMatrix  b,
+//     Rcpp::NumericVector  y,
+//     Rcpp::NumericMatrix  x,
+//     Rcpp::NumericMatrix  mu,
+//     Rcpp::NumericMatrix  P,
+//     Rcpp::NumericVector  alpha,
+//     Rcpp::NumericVector  wt,
+//     int                  progbar
+// ) {
+//   // Dimensions
+//   int l1 = x.nrow();
+//   int l2 = x.ncol();
+//   int m1 = b.ncol();
+//   
+//   // Outputs (same storage order as original f3: we’ll transpose at the end)
+//   Rcpp::NumericVector qf(m1);
+//   Rcpp::NumericMatrix grad(l2, m1);
+//   arma::mat grad2(grad.begin(), l2, m1, false);
+//   
+//   // Common Armadillo views
+//   arma::mat x2(x.begin(),     l1, l2, false);
+//   arma::mat mu2(mu.begin(),   l2, 1,  false);
+//   arma::mat P2(P.begin(),     l2, l2, false);
+//   arma::mat alpha2(alpha.begin(), l1, 1, false);
+//   
+//   // Temporaries matching original f2/f3
+//   Rcpp::NumericMatrix b2temp(l2, 1);
+//   Rcpp::NumericVector xb(l1);
+//   arma::colvec xb2(xb.begin(), l1, false);
+//   
+//   Rcpp::NumericMatrix bmu(l2, 1);
+//   arma::mat bmu2(bmu.begin(), l2, 1, false);
+//   
+//   Rcpp::NumericVector yy(l1);
+//   Rcpp::NumericVector p1(l1);
+//   Rcpp::NumericVector p2(l1);
+//   Rcpp::NumericVector atemp(l1);
+//   
+//   for (int i = 0; i < m1; i++) {
+//     Rcpp::checkUserInterrupt();
+//     if (progbar == 1) {
+//       progress_bar(i, m1 - 1);
+//       if (i == m1 - 1) Rcpp::Rcout << "" << std::endl;
+//     }
+//     
+//     // --- extract b_i exactly as in originals ---
+//     b2temp = b(Rcpp::Range(0, l2 - 1), Rcpp::Range(i, i));
+//     arma::mat b2(b2temp.begin(), l2, 1, false);
+//     
+//     // --- prior term (shared by f2 and f3) ---
+//     bmu2 = b2 - mu2;
+//     double mahal = 0.5 * arma::as_scalar(bmu2.t() * P2 * bmu2);
+//     
+//     // =========================
+//     // f2 part (matches f2_binomial_cloglog)
+//     // =========================
+//     xb2 = alpha2 + x2 * b2;          // eta
+//     
+//     for (int j = 0; j < l1; j++) {
+//       xb(j) = 1.0 - std::exp(-std::exp(xb(j)));
+//     }
+//     
+//     yy   = -dbinom_glmb(y, wt, xb, true);
+//     qf[i] = std::accumulate(yy.begin(), yy.end(), mahal);
+//     
+//     // =========================
+//     // f3 part (matches f3_binomial_cloglog)
+//     // =========================
+//     xb2 = alpha2 + x2 * b2;          // eta again
+//     
+//     for (int j = 0; j < l1; j++) {
+//       p1(j)    = 1.0 - std::exp(-std::exp(xb(j)));
+//       p2(j)    = std::exp(-std::exp(xb(j)));
+//       atemp(j) = std::exp(xb(j) - std::exp(xb(j)));
+//       xb(j)    = ( (y(j) * atemp(j) / p1(j)) -
+//         ((1.0 - y(j)) * atemp(j) / p2(j)) ) * wt(j);
+//     }
+//     
+//     // xb2 shares memory with xb, as in original f3
+//     grad2.col(i) = P2 * bmu2 - x2.t() * xb2;
+//   }
+//   
+//   // Match legacy f3 return orientation
+//   arma::mat grad_out = grad2.t();
+//   
+//   return Rcpp::List::create(
+//     Rcpp::Named("qf")   = qf,
+//     Rcpp::Named("grad") = Rcpp::wrap(grad_out)
+//   );
+// }
+
 Rcpp::List f2_f3_binomial_cloglog(
     Rcpp::NumericMatrix  b,
     Rcpp::NumericVector  y,
@@ -1135,15 +1329,15 @@ Rcpp::List f2_f3_binomial_cloglog(
   arma::mat grad2(grad.begin(), l2, m1, false);
   
   // Common Armadillo views
-  arma::mat x2(x.begin(),     l1, l2, false);
-  arma::mat mu2(mu.begin(),   l2, 1,  false);
-  arma::mat P2(P.begin(),     l2, l2, false);
-  arma::mat alpha2(alpha.begin(), l1, 1, false);
+  arma::mat x2(x.begin(),         l1, l2, false);
+  arma::mat mu2(mu.begin(),       l2, 1,  false);
+  arma::mat P2(P.begin(),         l2, l2, false);
+  arma::mat alpha2(alpha.begin(), l1, 1,  false);
   
   // Temporaries matching original f2/f3
   Rcpp::NumericMatrix b2temp(l2, 1);
-  Rcpp::NumericVector xb(l1);
-  arma::colvec xb2(xb.begin(), l1, false);
+  Rcpp::NumericVector xb(l1);                 // mutable buffer
+  arma::colvec xb2(xb.begin(), l1, false);    // view on xb
   
   Rcpp::NumericMatrix bmu(l2, 1);
   arma::mat bmu2(bmu.begin(), l2, 1, false);
@@ -1152,6 +1346,10 @@ Rcpp::List f2_f3_binomial_cloglog(
   Rcpp::NumericVector p1(l1);
   Rcpp::NumericVector p2(l1);
   Rcpp::NumericVector atemp(l1);
+  
+  // NEW: separate, immutable buffer for eta = alpha + X b
+  Rcpp::NumericVector eta(l1);
+  arma::colvec eta2(eta.begin(), l1, false);
   
   for (int i = 0; i < m1; i++) {
     Rcpp::checkUserInterrupt();
@@ -1168,13 +1366,17 @@ Rcpp::List f2_f3_binomial_cloglog(
     bmu2 = b2 - mu2;
     double mahal = 0.5 * arma::as_scalar(bmu2.t() * P2 * bmu2);
     
+    // =====================================================
+    // Compute eta once and keep it in a separate buffer
+    // =====================================================
+    eta2 = alpha2 + x2 * b2;      // eta = alpha + X b
+    
     // =========================
     // f2 part (matches f2_binomial_cloglog)
     // =========================
-    xb2 = alpha2 + x2 * b2;          // eta
-    
     for (int j = 0; j < l1; j++) {
-      xb(j) = 1.0 - std::exp(-std::exp(xb(j)));
+      double e_eta = std::exp(eta[j]);
+      xb[j] = 1.0 - std::exp(-e_eta);   // p = 1 - exp(-exp(eta))
     }
     
     yy   = -dbinom_glmb(y, wt, xb, true);
@@ -1183,14 +1385,17 @@ Rcpp::List f2_f3_binomial_cloglog(
     // =========================
     // f3 part (matches f3_binomial_cloglog)
     // =========================
-    xb2 = alpha2 + x2 * b2;          // eta again
-    
     for (int j = 0; j < l1; j++) {
-      p1(j)    = 1.0 - std::exp(-std::exp(xb(j)));
-      p2(j)    = std::exp(-std::exp(xb(j)));
-      atemp(j) = std::exp(xb(j) - std::exp(xb(j)));
-      xb(j)    = ( (y(j) * atemp(j) / p1(j)) -
-        ((1.0 - y(j)) * atemp(j) / p2(j)) ) * wt(j);
+      double e_eta = std::exp(eta[j]);                 // exp(eta)
+      double p     = 1.0 - std::exp(-e_eta);           // p1
+      double q     = std::exp(-e_eta);                 // p2
+      double a     = std::exp(eta[j] - e_eta);         // atemp
+      
+      p1[j]    = p;
+      p2[j]    = q;
+      atemp[j] = a;
+      
+      xb[j] = ( (y[j] * a / p) - ((1.0 - y[j]) * a / q) ) * wt[j];
     }
     
     // xb2 shares memory with xb, as in original f3

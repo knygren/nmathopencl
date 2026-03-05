@@ -288,8 +288,8 @@ Rcpp::List f2_f3_non_opencl(
     
       }
   else if (family == "binomial" && link == "probit") {
-    // NegLL  = f2_binomial_probit(b, y, x, mu, P, alpha, wt, progbar);
-    // cbars2 = f3_binomial_probit(b, y, x, mu, P, alpha, wt, progbar);
+     // NegLL  = f2_binomial_probit(b, y, x, mu, P, alpha, wt, progbar);
+     // cbars2 = f3_binomial_probit(b, y, x, mu, P, alpha, wt, progbar);
   
   f2_f3_list = f2_f3_binomial_probit(b, y, x, mu, P, alpha, wt, progbar);
   
@@ -375,7 +375,7 @@ Rcpp::List f2_f3_non_opencl(
   else if (family == "quasipoisson") {
     // NegLL  = f2_poisson(b, y, x, mu, P, alpha, wt, progbar);
     // cbars2 = f3_poisson(b, y, x, mu, P, alpha, wt, progbar);
-    // 
+// 
     f2_f3_list = f2_f3_poisson(b, y, x, mu, P, alpha, wt, progbar);
     
     NegLL  = Rcpp::as<Rcpp::NumericVector>(f2_f3_list["qf"]);
@@ -386,8 +386,8 @@ Rcpp::List f2_f3_non_opencl(
   
   // --- gamma family ---
   else if (family == "Gamma") {
-    // NegLL  = f2_gamma(b, y, x, mu, P, alpha, wt, progbar);
-    // cbars2 = f3_gamma(b, y, x, mu, P, alpha, wt, progbar);
+     // NegLL  = f2_gamma(b, y, x, mu, P, alpha, wt, progbar);
+     // cbars2 = f3_gamma(b, y, x, mu, P, alpha, wt, progbar);
 
     f2_f3_list = f2_f3_gamma(b, y, x, mu, P, alpha, wt, progbar);
     

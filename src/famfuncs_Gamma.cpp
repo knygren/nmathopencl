@@ -363,6 +363,96 @@ arma::mat  f3_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatr
     return trans(out2);      
 }
 
+// Rcpp::List f2_f3_gamma(
+//     Rcpp::NumericMatrix  b,
+//     Rcpp::NumericVector  y,
+//     Rcpp::NumericMatrix  x,
+//     Rcpp::NumericMatrix  mu,
+//     Rcpp::NumericMatrix  P,
+//     Rcpp::NumericVector  alpha,
+//     Rcpp::NumericVector  wt,
+//     int                  progbar
+// ) {
+//   // Dimensions
+//   int l1 = x.nrow();
+//   int l2 = x.ncol();
+//   int m1 = b.ncol();
+//   
+//   // Outputs (same layout as original f3: we transpose at the end)
+//   Rcpp::NumericVector qf(m1);
+//   Rcpp::NumericMatrix grad(l2, m1);
+//   arma::mat grad2(grad.begin(), l2, m1, false);
+//   
+//   // Armadillo views
+//   arma::mat x2(x.begin(),     l1, l2, false);
+//   arma::mat mu2(mu.begin(),   l2, 1,  false);
+//   arma::mat P2(P.begin(),     l2, l2, false);
+//   arma::mat alpha2(alpha.begin(), l1, 1, false);
+//   
+//   // Temporaries matching original f2/f3
+//   Rcpp::NumericMatrix b2temp(l2, 1);
+//   Rcpp::NumericVector xb(l1);
+//   arma::colvec xb2(xb.begin(), l1, false);
+//   
+//   Rcpp::NumericMatrix bmu(l2, 1);
+//   arma::mat bmu2(bmu.begin(), l2, 1, false);
+//   
+//   Rcpp::NumericVector yy(l1);
+//   Rcpp::NumericVector p1(l1);     // not used but kept for structural symmetry
+//   Rcpp::NumericVector p2(l1);     // not used but kept for structural symmetry
+//   Rcpp::NumericVector atemp(l1);  // not used but kept for structural symmetry
+//   
+//   for (int i = 0; i < m1; i++) {
+//     Rcpp::checkUserInterrupt();
+//     if (progbar == 1) {
+//       progress_bar(i, m1 - 1);
+//       if (i == m1 - 1) Rcpp::Rcout << "" << std::endl;
+//     }
+//     
+//     // --- extract b_i exactly as in originals ---
+//     b2temp = b(Rcpp::Range(0, l2 - 1), Rcpp::Range(i, i));
+//     arma::mat b2(b2temp.begin(), l2, 1, false);
+//     
+//     // --- prior term (shared by f2 and f3) ---
+//     bmu2 = b2 - mu2;
+//     double mahal = 0.5 * arma::as_scalar(bmu2.t() * P2 * bmu2);
+//     
+//     // =========================
+//     // f2 part (matches f2_gamma)
+//     // =========================
+//     xb2 = arma::exp(alpha2 + x2 * b2);   // xb = exp(alpha + X b)
+//     
+//     for (int j = 0; j < l1; j++) {
+//       xb[j] = xb[j] / wt[j];            // EXACTLY as in original f2_gamma
+//     }
+//     
+//     yy = -dgamma_glmb(y, wt, xb, true);
+//     
+//     qf[i] = std::accumulate(yy.begin(), yy.end(), mahal);
+//     
+//     // =========================
+//     // f3 part (matches f3_gamma)
+//     // =========================
+//     xb2 = arma::exp(alpha2 + x2 * b2);  // mu = exp(alpha + Xb)
+//     
+//     for (int j = 0; j < l1; j++) {
+//       xb[j] = (1.0 - y[j] / xb[j]) * wt[j];   // EXACT gradient term
+//     }
+//     
+//     // xb2 shares memory with xb, as in original f3
+//     grad2.col(i) = P2 * bmu2 + x2.t() * xb2;
+//   }
+//   
+//   // Match legacy f3 return orientation (trans(out2))
+//   arma::mat grad_out = grad2.t();
+//   
+//   return Rcpp::List::create(
+//     Rcpp::Named("qf")   = qf,
+//     Rcpp::Named("grad") = Rcpp::wrap(grad_out)
+//   );
+// }
+
+
 Rcpp::List f2_f3_gamma(
     Rcpp::NumericMatrix  b,
     Rcpp::NumericVector  y,
@@ -384,23 +474,24 @@ Rcpp::List f2_f3_gamma(
   arma::mat grad2(grad.begin(), l2, m1, false);
   
   // Armadillo views
-  arma::mat x2(x.begin(),     l1, l2, false);
-  arma::mat mu2(mu.begin(),   l2, 1,  false);
-  arma::mat P2(P.begin(),     l2, l2, false);
-  arma::mat alpha2(alpha.begin(), l1, 1, false);
+  arma::mat x2(x.begin(),          l1, l2, false);
+  arma::mat mu2(mu.begin(),        l2, 1,  false);
+  arma::mat P2(P.begin(),          l2, l2, false);
+  arma::mat alpha2(alpha.begin(),  l1, 1,  false);
   
   // Temporaries matching original f2/f3
   Rcpp::NumericMatrix b2temp(l2, 1);
-  Rcpp::NumericVector xb(l1);
-  arma::colvec xb2(xb.begin(), l1, false);
+  Rcpp::NumericVector xb(l1);                 // mutable buffer
+  arma::colvec xb2(xb.begin(), l1, false);    // view on xb
   
   Rcpp::NumericMatrix bmu(l2, 1);
   arma::mat bmu2(bmu.begin(), l2, 1, false);
   
   Rcpp::NumericVector yy(l1);
-  Rcpp::NumericVector p1(l1);     // not used but kept for structural symmetry
-  Rcpp::NumericVector p2(l1);     // not used but kept for structural symmetry
-  Rcpp::NumericVector atemp(l1);  // not used but kept for structural symmetry
+  
+  // NEW: separate, immutable buffer for eta = alpha + X b
+  Rcpp::NumericVector eta(l1);
+  arma::colvec eta2(eta.begin(), l1, false);
   
   for (int i = 0; i < m1; i++) {
     Rcpp::checkUserInterrupt();
@@ -417,26 +508,29 @@ Rcpp::List f2_f3_gamma(
     bmu2 = b2 - mu2;
     double mahal = 0.5 * arma::as_scalar(bmu2.t() * P2 * bmu2);
     
+    // =====================================================
+    // Compute eta once and keep it in a separate buffer
+    // =====================================================
+    eta2 = alpha2 + x2 * b2;      // eta = alpha + X b
+    
     // =========================
     // f2 part (matches f2_gamma)
     // =========================
-    xb2 = arma::exp(alpha2 + x2 * b2);   // xb = exp(alpha + X b)
-    
+    // mu = exp(eta); we copy into xb (mutable) for f2
     for (int j = 0; j < l1; j++) {
-      xb[j] = xb[j] / wt[j];            // EXACTLY as in original f2_gamma
+      xb[j] = std::exp(eta[j]) / wt[j];   // EXACTLY as original: xb = exp(eta)/wt
     }
     
     yy = -dgamma_glmb(y, wt, xb, true);
-    
     qf[i] = std::accumulate(yy.begin(), yy.end(), mahal);
     
     // =========================
     // f3 part (matches f3_gamma)
     // =========================
-    xb2 = arma::exp(alpha2 + x2 * b2);  // mu = exp(alpha + Xb)
-    
+    // Reuse eta to get mu again, without recomputing X*b
     for (int j = 0; j < l1; j++) {
-      xb[j] = (1.0 - y[j] / xb[j]) * wt[j];   // EXACT gradient term
+      double mu_j = std::exp(eta[j]);                 // mu = exp(eta)
+      xb[j] = (1.0 - y[j] / mu_j) * wt[j];            // EXACT gradient term
     }
     
     // xb2 shares memory with xb, as in original f3
@@ -451,7 +545,6 @@ Rcpp::List f2_f3_gamma(
     Rcpp::Named("grad") = Rcpp::wrap(grad_out)
   );
 }
-
 
 } //famfuncs
 
