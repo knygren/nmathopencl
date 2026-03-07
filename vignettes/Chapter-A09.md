@@ -1,7 +1,7 @@
 ---
 title: "Chapter A09: Parallel Sampling Implementation using RcppParallel"
 author: "Kjell Nygren"
-date: "`r Sys.Date()`"
+date: "2026-03-06"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Chapter A09: Parallel Sampling Implementation using RcppParallel}
@@ -9,15 +9,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
 
-```{r setup}
+
+
+``` r
 library(glmbayes)
+#> Loading required package: MASS
 ```
 
 # Chapter A09: Parallel Sampling Implementation using RcppParallel
@@ -186,7 +183,8 @@ This is parallel **envelope construction**, not sampling, but it uses the same s
 
 To disable parallel sampling:
 
-```{r eval=FALSE}
+
+``` r
 glmb(formula, data, family, pfamily, n = 5000, use_parallel = FALSE)
 rglmb(n = 5000, y, x, family, pfamily, use_parallel = FALSE)
 ```

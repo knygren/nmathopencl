@@ -1,7 +1,7 @@
 ---
 title: "Chapter A10: Accelerated EnvelopeBuild Implementation using OpenCL"
 author: "Kjell Nygren"
-date: "`r Sys.Date()`"
+date: "2026-03-06"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Chapter A10: Accelerated EnvelopeBuild Implementation using OpenCL}
@@ -9,15 +9,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
 
-```{r setup}
+
+
+``` r
 library(glmbayes)
+#> Loading required package: MASS
 ```
 
 # Chapter A10: Accelerated EnvelopeBuild Implementation using OpenCL
@@ -50,12 +47,16 @@ EnvelopeEval (EnvelopeEval.cpp)
             f2_f3_non_opencl() → CPU famfuncs (f2_f3_binomial_logit, etc.)
 ```
 
-`EnvelopeEval` receives the grid `G4` (coefficients at each tangency point), the design matrix, prior parameters, and family/link. It chooses the GPU or CPU path based on `use_opencl` and the outcome of the pilot (when applicable). The GPU path calls `f2_f3_opencl`, which assembles the OpenCL program and invokes `f2_f3_kernel_runner`; the CPU path calls `f2_f3_non_opencl`, which dispatches to the appropriate C++ family function.
+`EnvelopeEval` receives the grid `G4` (coefficients at each tangency point), the design matrix, prior parameters, and family/link. 
+It chooses the GPU or CPU path based on `use_opencl` and the outcome of the pilot (when applicable). 
+The GPU path calls `f2_f3_opencl`, which assembles the OpenCL program and invokes `f2_f3_kernel_runner`; 
+the CPU path calls `f2_f3_non_opencl`, which dispatches to the appropriate C++ family function.
 
 
 ## 3. Program Construction
 
-OpenCL kernels are not stored as single monolithic files. Instead, the package builds the program by **concatenating** several source components in a fixed order. This mirrors a C/C++ build where headers and libraries are included before the main source.
+OpenCL kernels are not stored as single monolithic files. Instead, the package builds the program by **concatenating**
+several source components in a fixed order. This mirrors a C/C++ build where headers and libraries are included before the main source.
 
 ### 3.1 Assembly Order
 
@@ -69,7 +70,8 @@ all_src = OPENCL.cl
         + kernel file (load_kernel_source, e.g. "src/f2_f3_binomial_logit.cl")
 ```
 
-1. **OPENCL.cl** – Global configuration: extensions (`cl_khr_fp64`, `cl_khr_printf`), IEEE constants (`ML_NAN`, `ML_POSINF`), feature detection for `expm1`/`log1p`, and utility macros.
+1. **OPENCL.cl** – Global configuration: extensions (`cl_khr_fp64`, `cl_khr_printf`), IEEE constants (`ML_NAN`, `ML_POSINF`), 
+feature detection for `expm1`/`log1p`, and utility macros.
 2. **rmath** – Mathematical constants (M_E, M_PI, etc.) and distribution function declarations.
 3. **dpq** – R-style density/CDF macros (`R_D__0`, `R_DT_val`, etc.) used in give_log/lower_tail logic.
 4. **nmath** – Ported numerical routines (bd0, stirlerr, lgamma, dbinom, dpois, pnorm, etc.).
@@ -77,15 +79,20 @@ all_src = OPENCL.cl
 
 ### 3.2 load_kernel_source and load_kernel_library
 
-- **`load_kernel_source(relative_path)`** – Loads a single `.cl` file from `inst/cl/` via `system.file("cl", relative_path, package = "glmbayes")`.
-- **`load_kernel_library(subdir)`** – Loads all `.cl` files in a subdirectory (e.g., `"nmath"`, `"rmath"`, `"dpq"`), parses `@provides` and `@depends` annotations, performs a **dependency-aware topological sort**, and concatenates the files so that dependents appear after their dependencies.
+- **`load_kernel_source(relative_path)`** – Loads a single `.cl` file from `inst/cl/` 
+via `system.file("cl", relative_path, package = "glmbayes")`.
+- **`load_kernel_library(subdir)`** – Loads all `.cl` files in a subdirectory (e.g., `"nmath"`, `"rmath"`, `"dpq"`), 
+parses `@provides` and `@depends` annotations, performs a **dependency-aware topological sort**, 
+and concatenates the files so that dependents appear after their dependencies.
 
-The `@provides` and `@depends` tags allow modular, maintainable kernel code: each file declares what it provides and what it needs. See `?load_kernel_library` for details.
+The `@provides` and `@depends` tags allow modular, maintainable kernel code: each file declares what it provides 
+and what it needs. See `?load_kernel_library` for details.
 
 
 ## 4. Ported Math Libraries (nmath / rmath / dpq)
 
-The likelihood and gradient computations require statistical functions that match R's behavior. Because OpenCL C does not include these, the package **ports** a core set from R's nmath and rmath libraries to OpenCL C.
+The likelihood and gradient computations require statistical functions that match R's behavior. Because OpenCL C 
+does not include these, the package **ports** a core set from R's nmath and rmath libraries to OpenCL C.
 
 ### 4.1 nmath
 
@@ -109,11 +116,13 @@ The likelihood and gradient computations require statistical functions that matc
 
 ### 4.2 rmath
 
-`Rmath.cl` provides additional constants (M_E, M_PI, M_LN2, etc.) and distribution functions consistent with R's `Rmath` library.
+`Rmath.cl` provides additional constants (M_E, M_PI, M_LN2, etc.) and distribution functions consistent 
+with R's `Rmath` library.
 
 ### 4.3 dpq
 
-`dpq.cl` and `dpq_prelude.cl` provide macros for density and CDF handling with `give_log` and `lower_tail`, matching R's DPQ (density, probability, quantile) conventions.
+`dpq.cl` and `dpq_prelude.cl` provide macros for density and CDF handling with `give_log` and `lower_tail`, 
+matching R's DPQ (density, probability, quantile) conventions.
 
 These ports ensure that the OpenCL kernels produce results **numerically consistent** with the CPU path and with R itself.
 

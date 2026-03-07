@@ -91,7 +91,7 @@ symbols(
   inches  = FALSE,
   add     = TRUE,
   lwd     = 2,
-  border  = "gray"
+  fg      = "gray"
 )
 
 ## Add prior mean at origin
