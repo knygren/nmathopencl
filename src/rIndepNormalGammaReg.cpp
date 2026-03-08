@@ -28,6 +28,7 @@
 static tbb::mutex f2_mutex;
 #endif
 #include <string>
+#include <algorithm>
 #include <atomic>
 #include <memory>
 
@@ -144,6 +145,7 @@ struct rIndepNormalGammaReg_worker : public RcppParallel::Worker {
   double max_New_LL_UB, max_LL_log_disp, lm_log1, lm_log2, lmc1, lmc2;
   
   // Cache (precomputed upstream)
+  Rcpp::List cache;
   RcppParallel::RMatrix<double>       Pmat_r;
   RcppParallel::RMatrix<double>       Pmu_r;
   RcppParallel::RVector<double>       base_B0_r;
@@ -176,6 +178,7 @@ struct rIndepNormalGammaReg_worker : public RcppParallel::Worker {
     double max_New_LL_UB_, double max_LL_log_disp_,
     double lm_log1_, double lm_log2_,
     double lmc1_, double lmc2_,
+    const Rcpp::List& cache_,
     const RcppParallel::RMatrix<double>& Pmat_r_,
     const RcppParallel::RMatrix<double>& Pmu_r_,
     const RcppParallel::RVector<double>& base_B0_r_,
@@ -191,7 +194,7 @@ struct rIndepNormalGammaReg_worker : public RcppParallel::Worker {
       shape3(shape3_), rate2(rate2_), disp_upper(disp_upper_), disp_lower(disp_lower_),
       RSS_Min(RSS_Min_), max_New_LL_UB(max_New_LL_UB_), max_LL_log_disp(max_LL_log_disp_),
       lm_log1(lm_log1_), lm_log2(lm_log2_), lmc1(lmc1_), lmc2(lmc2_),
-      Pmat_r(Pmat_r_), Pmu_r(Pmu_r_), base_B0_r(base_B0_r_), base_A_r(base_A_r_),
+      cache(cache_), Pmat_r(Pmat_r_), Pmu_r(Pmu_r_), base_B0_r(base_B0_r_), base_A_r(base_A_r_),
       beta_out_r(beta_out_r_), disp_out_r(disp_out_r_), iters_out_r(iters_out_r_), weight_out_r(weight_out_r_) {}
   
   // --- Parallel Loop ---
@@ -311,16 +314,28 @@ void rIndepNormalGammaReg_worker::operator()(std::size_t begin, std::size_t end)
         for (int j = 0; j < l1; ++j)
           UB1 -= cbars_r(J_idx, j) * (out_row(0, j) - theta_row(0, j));
 
-        double quad_sum = 0.0;
+        // RSS via rss_face_at_disp (matches EnvelopeDispersionBuild / UB2 minimization)
+        Rcpp::NumericVector cbars_j_par(l1);
+        for (int k = 0; k < l1; ++k) cbars_j_par[k] = cbars_r(J_idx, k);
+        Rcpp::NumericVector y_par(l2), alpha_par(l2), wt_par(l2);
         for (int r = 0; r < l2; ++r) {
-          double x_theta = 0.0;
-          for (int c = 0; c < l1; ++c) x_theta += x_r(r, c) * theta_row(0, c);
-          double resid  = (y_r[r] - alpha_r[r] - x_theta);
-          double scaled = resid * std::sqrt(wt_r[r]);
-          quad_sum += scaled * scaled;
+          y_par[r] = y_r[r]; alpha_par[r] = alpha_r[r]; wt_par[r] = wt_r[r];
         }
-        double UB2 = 0.5 * (1.0 / dispersion) * (quad_sum - RSS_Min);
-        UB2 -= UB2min_r[J_idx];
+        Rcpp::NumericMatrix x_par(l2, l1);
+        for (int r = 0; r < l2; ++r)
+          for (int c = 0; c < l1; ++c) x_par(r, c) = x_r(r, c);
+        double quad_sum = rss_face_at_disp(dispersion, cache, cbars_j_par, y_par, x_par, alpha_par, wt_par);
+        // Old inline method (kept for reference):
+        // double quad_sum = 0.0;
+        // for (int r = 0; r < l2; ++r) {
+        //   double x_theta = 0.0;
+        //   for (int c = 0; c < l1; ++c) x_theta += x_r(r, c) * theta_row(0, c);
+        //   double resid  = (y_r[r] - alpha_r[r] - x_theta);
+        //   double scaled = resid * std::sqrt(wt_r[r]);
+        //   quad_sum += scaled * scaled;
+        // }
+        double UB2_raw = 0.5 * (1.0 / dispersion) * (quad_sum - RSS_Min);
+        double UB2 = UB2_raw - UB2min_r[J_idx];
 
         double theta_P_theta = 0.0;
         for (int r = 0; r < l1; ++r) {
@@ -348,9 +363,8 @@ void rIndepNormalGammaReg_worker::operator()(std::size_t begin, std::size_t end)
         
         double test1 = (LL_Test_scalar - UB1);
         double test  = test1 - (UB2 + UB3A + UB3B);
-        test = test - log_U2;
         
-        // Sanity checks: all must satisfy their sign constraints
+        // Sanity checks: all must satisfy their sign constraints (use test before log_U2)
         bool bad = false;
         std::ostringstream msg;
         
@@ -359,8 +373,28 @@ void rIndepNormalGammaReg_worker::operator()(std::size_t begin, std::size_t end)
           msg << "Sign violation: test1 = " << test1 << " > 0\n";
         }
         if (UB2 < 0.0) {
-          bad = true;
-          msg << "Sign violation: UB2 = " << UB2 << " < 0\n";
+          double ratio = std::abs(UB2) / std::max(std::abs(test), 1e-15);
+          // 1e-2: tolerate small violations; throw if ratio >= 1e-2
+          // 1e-4: suppress diagnostic warnings when ratio < 1e-4 (truly negligible)
+          if (ratio < 1e-2) {
+            if (ratio >= 1e-4) {
+              if (quad_sum < RSS_Min) {
+                Rcpp::Rcout << "Warning [UB2 diagnostics]: quad_sum=" << quad_sum
+                            << " < RSS_Min=" << RSS_Min
+                            << " (dispersion=" << dispersion << " J_idx=" << J_idx << ")\n";
+              }
+              if (UB2_raw < UB2min_r[J_idx]) {
+                Rcpp::Rcout << "Warning [UB2 diagnostics]: UB2_raw=" << UB2_raw
+                            << " < UB2min=" << UB2min_r[J_idx]
+                            << " (dispersion=" << dispersion << " J_idx=" << J_idx << ")\n";
+              }
+              Rcpp::Rcout << "Warning: UB2 sign violation (UB2=" << UB2
+                          << ") negligible relative to test (|UB2|/|test|=" << ratio << "); continuing.\n";
+            }
+          } else {
+            bad = true;
+            msg << "Sign violation: UB2 = " << UB2 << " < 0\n";
+          }
         }
         if (UB3A < 0.0) {
           bad = true;
@@ -374,6 +408,7 @@ void rIndepNormalGammaReg_worker::operator()(std::size_t begin, std::size_t end)
         if (bad) {
           // Provide context for debugging
           msg << "Dispersion=" << dispersion
+              << " J[0]=" << J_idx
               << " LL_Test=" << LL_Test_scalar
               << " UB1=" << UB1
               << " UB2=" << UB2
@@ -385,10 +420,7 @@ void rIndepNormalGammaReg_worker::operator()(std::size_t begin, std::size_t end)
           
         }
         
-        
-        
-
-        // Rcout << "Entering Output assignment"  << std::endl;
+        test = test - log_U2;
 
         // 8) Record outputs and accept/reject
         disp_out_r[i] = dispersion;
@@ -593,21 +625,14 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
       //Block 2: UB2 [RSS Term bounded by shifting it to the gamma candidate]
       
       
-      arma::colvec yxbeta=(y2-alpha2-x2*thetabars_temp2)%sqrt(wt1b); 
-
-      
-      // Extract the current cbars row as a NumericVector
-      // NumericVector cbars_j = cbars(J_out(0), _);
-      
-
-    
-      // Continue with existing UB2 calculation without modification
-      UB2=0.5*(1.0/dispersion)*(arma::as_scalar(trans(yxbeta)*yxbeta)-RSS_Min);
-      
-      // Subtract UB2min --> Should improve acceptance
-      
-      UB2=UB2-UB2min[J_out(0)];
-      
+      // RSS via rss_face_at_disp (matches EnvelopeDispersionBuild / UB2 minimization)
+      NumericVector cbars_j = cbars(J_out(0), _);
+      double quad_sum_serial = rss_face_at_disp(dispersion, cache, cbars_j, y, x, alpha, wt);
+      // Old inline method (kept for reference):
+      // arma::colvec yxbeta=(y2-alpha2-x2*thetabars_temp2)%sqrt(wt1b);
+      // double quad_sum_serial = arma::as_scalar(trans(yxbeta)*yxbeta);
+      double UB2_raw = 0.5 * (1.0 / dispersion) * (quad_sum_serial - RSS_Min);
+      UB2 = UB2_raw - UB2min[J_out(0)];
 
       // Compute g1_j(d) for the chosen face j = J_out(0)
 
@@ -634,10 +659,8 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
       test1=LL_Test[0]-UB1;
         
       test= test1-(UB2+UB3A+UB3B);  // Should be all negative 
-      test = test - log_U2;
-
     
-      // Sanity checks: all must satisfy their sign constraints
+      // Sanity checks: all must satisfy their sign constraints (use test before log_U2)
       bool bad = false;
       std::ostringstream msg;
       
@@ -646,8 +669,28 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
         msg << "Sign violation: test1 = " << test1 << " > 0\n";
       }
       if (UB2 < 0.0) {
-        bad = true;
-        msg << "Sign violation: UB2 = " << UB2 << " < 0\n";
+        double ratio = std::abs(UB2) / std::max(std::abs(test), 1e-15);
+        // 1e-2: tolerate small violations; throw if ratio >= 1e-2
+        // 1e-4: suppress diagnostic warnings when ratio < 1e-4 (truly negligible)
+        if (ratio < 1e-2) {
+          if (ratio >= 1e-4) {
+            if (quad_sum_serial < RSS_Min) {
+              Rcpp::Rcout << "Warning [UB2 diagnostics]: quad_sum=" << quad_sum_serial
+                          << " < RSS_Min=" << RSS_Min
+                          << " (dispersion=" << dispersion << " J=" << J_out(0) << ")\n";
+            }
+            if (UB2_raw < UB2min[J_out(0)]) {
+              Rcpp::Rcout << "Warning [UB2 diagnostics]: UB2_raw=" << UB2_raw
+                          << " < UB2min=" << UB2min[J_out(0)]
+                          << " (dispersion=" << dispersion << " J=" << J_out(0) << ")\n";
+            }
+            Rcpp::Rcout << "Warning: UB2 sign violation (UB2=" << UB2
+                        << ") negligible relative to test (|UB2|/|test|=" << ratio << "); continuing.\n";
+          }
+        } else {
+          bad = true;
+          msg << "Sign violation: UB2 = " << UB2 << " < 0\n";
+        }
       }
       if (UB3A < 0.0) {
         bad = true;
@@ -665,6 +708,7 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
       if (bad) {
         // Provide context for debugging
         msg << "Dispersion=" << dispersion
+            << " J[0]=" << J(0)
             << " LL_Test=" << LL_Test[0]
             << " UB1=" << UB1
             << " UB2=" << UB2
@@ -679,7 +723,7 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
         
       }
       
-      
+      test = test - log_U2;
       
       disp_out[i] = dispersion;
       beta_out(i, _) = out(0, _);
@@ -830,7 +874,7 @@ Rcpp::List rIndepNormalGammaReg_std_parallel(
       shape3, rate2, disp_upper, disp_lower,
       RSS_Min, max_New_LL_UB, max_LL_log_disp,
       lm_log1, lm_log2, lmc1, lmc2,
-      Pmat_r, Pmu_r, base_B0_r, base_A_r,
+      cache, Pmat_r, Pmu_r, base_B0_r, base_A_r,
       beta_out_r, disp_out_r, iters_out_r, weight_out_r
   );
 

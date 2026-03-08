@@ -2368,9 +2368,9 @@ EnvelopeDispersionBuild_parallel_internal <- function(par0, low, upp,
     cores <- min(cores, avail_cores, gs)
   }
   
-  message("[EnvelopeDispersionBuild_parallel_internal] Available cores: ", avail_cores,
-          " | Using cores: ", if (use_parallel) cores else 1L)
-  
+  # message("[EnvelopeDispersionBuild_parallel_internal] Available cores: ", avail_cores,
+  #         " | Using cores: ", if (use_parallel) cores else 1L)
+
   worker_fun <- function(j) {
     cbars_j <- cbars[j, ]
     optim(par0,
@@ -2383,7 +2383,8 @@ EnvelopeDispersionBuild_parallel_internal <- function(par0, low, upp,
           y      = y,
           x      = x,
           alpha  = alpha,
-          wt     = wt)
+          wt     = wt,
+          control = list(factr = 1e2, pgtol = 1e-10))
   }
   
   if (use_parallel) {
@@ -2439,9 +2440,9 @@ EnvelopeUB2_parallel_internal <- function(par0, low, upp,
     cores <- min(cores, avail_cores, gs)
   }
   
-  message("[EnvelopeUB2_parallel_internal] Available cores: ", avail_cores,
-          " | Using cores: ", if (use_parallel) cores else 1L)
-  
+  # message("[EnvelopeUB2_parallel_internal] Available cores: ", avail_cores,
+  #         " | Using cores: ", if (use_parallel) cores else 1L)
+
   worker_fun <- function(j) {
     cbars_j <- cbars[j, ]
     optim(par0,
@@ -2455,7 +2456,8 @@ EnvelopeUB2_parallel_internal <- function(par0, low, upp,
           x      = x,
           alpha  = alpha,
           wt     = wt,
-          rss_min_global = rss_min_global)
+          rss_min_global = rss_min_global,
+          control = list(factr = 1e2, pgtol = 1e-10))
   }
   
   if (use_parallel) {

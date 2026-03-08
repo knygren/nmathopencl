@@ -567,122 +567,22 @@ arma::mat Inv_f3_with_disp_rmat(
   arma::mat Pmu(const_cast<double*>(Pmu_r.begin()), p, 1, false, true);
   arma::mat base_A(const_cast<double*>(base_A_r.begin()), p, p, false, true);
   
-  // Scale base terms
+  // Scale base terms (match Inv_f3_with_disp exactly)
   arma::vec B0(p);
   for (int i = 0; i < p; ++i) {
     B0[i] = base_B0_r[i] / dispersion + Pmu(i, 0);
   }
   
-  // Rcpp::Rcout << "[rIndepNormalGammaReg:Inv_f3_with_disp_rmat] Starting A Calculation:/n ";
+  // A matrix: same construction as Inv_f3_with_disp (no pre-symmetrization)
+  arma::mat A = Pmat + base_A / dispersion;
+  A = 0.5 * (A + A.t());
   
-  
-  // ------------------------------------------------------------
-  // 1. Compute base_A / dispersion, symmetrize, check PSD
-  // ------------------------------------------------------------
-  arma::mat baseA_scaled = base_A / dispersion;
-  baseA_scaled = 0.5 * (baseA_scaled + baseA_scaled.t());
-  
-  // ------------------------------------------------------------
-  // TEMPORARY DIAGNOSTIC: print base_A and baseA_scaled if <= 3x3
-  // ------------------------------------------------------------
-  
-  // Print raw base_A (before scaling)
-  // if (base_A.n_rows <= 3 && base_A.n_cols <= 3) {
-  //   Rcpp::Rcout << "[DEBUG] base_A (" 
-  //               << base_A.n_rows << "x" << base_A.n_cols << "):\n";
-  //   for (arma::uword r = 0; r < base_A.n_rows; ++r) {
-  //     for (arma::uword c = 0; c < base_A.n_cols; ++c) {
-  //       Rcpp::Rcout << "  base_A(" << r << "," << c << ") = "
-  //                   << base_A(r,c) << "\n";
-  //     }
-  //   }
-  // }
-  
-  // Print scaled + symmetrized baseA_scaled
-  // if (baseA_scaled.n_rows <= 3 && baseA_scaled.n_cols <= 3) {
-  //   Rcpp::Rcout << "[DEBUG] baseA_scaled (" 
-  //               << baseA_scaled.n_rows << "x" << baseA_scaled.n_cols << "):\n";
-  //   for (arma::uword r = 0; r < baseA_scaled.n_rows; ++r) {
-  //     for (arma::uword c = 0; c < baseA_scaled.n_cols; ++c) {
-  //       Rcpp::Rcout << "  baseA_scaled(" << r << "," << c << ") = "
-  //                   << baseA_scaled(r,c) << "\n";
-  //     }
-  //   }
-  // }
-  
-  // Also print dispersion for context
-  // Rcpp::Rcout << "[DEBUG] dispersion = " << dispersion << "\n";
-  
-  // Early NaN/Inf guard
-  if (!base_A.is_finite()) {
-    Rcpp::stop("Error: base_A contains non-finite values.");
-  }
-  if (!baseA_scaled.is_finite()) {
-    Rcpp::stop("Error: baseA_scaled contains non-finite values.");
+  if (!A.is_finite()) {
+    Rcpp::stop("Error: A matrix contains non-finite values.");
   }
   
-  // ------------------------------------------------------------
-  // 2. Symmetrize Pmat and check SPD
-  // ------------------------------------------------------------
-  arma::mat Pmat_sym = 0.5 * (Pmat + Pmat.t());
-  
-  // ------------------------------------------------------------
-  // TEMPORARY DIAGNOSTIC: print Pmat and Pmat_sym if <= 3x3
-  // ------------------------------------------------------------
-  // if (Pmat.n_rows <= 3 && Pmat.n_cols <= 3) {
-  //   Rcpp::Rcout << "[DEBUG] Pmat (" 
-  //               << Pmat.n_rows << "x" << Pmat.n_cols << "):\n";
-  //   for (arma::uword r = 0; r < Pmat.n_rows; ++r) {
-  //     for (arma::uword c = 0; c < Pmat.n_cols; ++c) {
-  //       Rcpp::Rcout << "  P(" << r << "," << c << ") = "
-  //                   << Pmat(r,c) << "\n";
-  //     }
-  //   }
-  // }
-  
-  // if (Pmat_sym.n_rows <= 3 && Pmat_sym.n_cols <= 3) {
-  //   Rcpp::Rcout << "[DEBUG] Pmat_sym (" 
-  //               << Pmat_sym.n_rows << "x" << Pmat_sym.n_cols << "):\n";
-  //   for (arma::uword r = 0; r < Pmat_sym.n_rows; ++r) {
-  //     for (arma::uword c = 0; c < Pmat_sym.n_cols; ++c) {
-  //       Rcpp::Rcout << "  P_sym(" << r << "," << c << ") = "
-  //                   << Pmat_sym(r,c) << "\n";
-  //     }
-  //   }
-  // }
-  
-  // Optional: catch NaNs early
-  if (!Pmat.is_finite()) {
-    Rcpp::stop("Error: Prior precision P contains non-finite values.");
-  }
-  if (!Pmat_sym.is_finite()) {
-    Rcpp::stop("Error: Symmetrized prior precision P contains non-finite values.");
-  }
-  // ------------------------------------------------------------
-  // 3. Form A = P + baseA_scaled, symmetrize, check SPD
-  // ------------------------------------------------------------
-  // Build A
-  arma::mat A = Pmat_sym + baseA_scaled;
-  A = 0.5 * (A + A.t());  // enforce symmetry numerically
-  
-  // ------------------------------------------------------------
-  // TEMPORARY DIAGNOSTIC: print A if it is 3×3 or smaller
-  // ------------------------------------------------------------
-  // if (A.n_rows <= 3 && A.n_cols <= 3) {
-  //   Rcpp::Rcout << "[DEBUG] A matrix (" 
-  //               << A.n_rows << "x" << A.n_cols << "):\n";
-  //   for (arma::uword r = 0; r < A.n_rows; ++r) {
-  //     for (arma::uword c = 0; c < A.n_cols; ++c) {
-  //       Rcpp::Rcout << "  A(" << r << "," << c << ") = " 
-  //                   << A(r,c) << "\n";
-  //     }
-  //   }
-  // }
-  // 
-  
-  // ------------------------------------------------------------
-  // 4. Now and ONLY now solve
-  // ------------------------------------------------------------
+  // Cholesky solve (match Inv_f3_with_disp; do not use LU)
+  arma::mat R = arma::chol(A);
   
   // Output: m × p
   arma::mat Out(m, p, arma::fill::none);
@@ -692,13 +592,8 @@ arma::mat Inv_f3_with_disp_rmat(
     for (int r = 0; r < p; ++r) cbars_j[r] = cbars_r(r, j);
     
     arma::vec b = -cbars_j + B0;
-    
-    arma::vec sol;
-    bool ok = arma::solve(sol, A, b);   // LU-based solve
-    
-    if (!ok) {
-      Rcpp::stop("Error: solve(A, b) failed; posterior precision is singular or indefinite.");
-    }
+    arma::vec ytmp = arma::solve(arma::trimatl(R.t()), b);
+    arma::vec sol = arma::solve(arma::trimatu(R), ytmp);
     
     Out.row(j) = (-sol).t();
   }

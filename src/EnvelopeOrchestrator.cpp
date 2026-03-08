@@ -115,7 +115,10 @@ Rcpp::List disp_env_out = EnvelopeDispersionBuild(
 );
 
 
+if(verbose){
+
 Rcpp::Rcout << "[EnvelopeDipsersionBuild] Exiting: \n";
+}
 
 // --- Step 3: Call R's EnvelopeSort ---
 
@@ -181,8 +184,9 @@ Rcpp::List Env3;
 
 // Call EnvelopeSort with the same arguments as the R orchestrator
 
+if(verbose){
 Rcpp::Rcout << "[EnvelopeSort] Entering: \n";
-
+}
 
 if(disp_grid_type==1){
 Env3 = EnvelopeSort(
@@ -230,8 +234,10 @@ if(disp_grid_type==2){
 );
 }
 
-Rcpp::Rcout << "[EnvelopeSort] Exiting: \n";
 
+if(verbose){
+Rcpp::Rcout << "[EnvelopeSort] Exiting: \n";
+}
 
 
 // --- Step 4: Update UB_list_new with reordered values from Env3 ---

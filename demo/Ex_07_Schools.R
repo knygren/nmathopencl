@@ -16,9 +16,12 @@ sigma.theta_2=sigma.theta^2
 sigma.mu=((max(estimate)-min(estimate))/2)^2
 sqrt(sigma.mu)
 1/sigma.mu
-wt=1/sigma.y_2
 
 
+sigma.y_2=sd^2
+#wt=1/sigma.y_2
+
+wt=1/sd^2
 
 
 ## Modify the data
