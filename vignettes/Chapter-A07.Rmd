@@ -1880,4 +1880,275 @@ Thus, for all \(d \in [\text{low}, \text{upp}]\),
 which completes the proof.
 
 
+# Appendix: Bounding RSS_j(d) Using the ML Decomposition
 
+This appendix explains the identity
+
+\[
+RSS_j(d) \;=\; RSS_{ML} \;+\; (\beta_j(d) - \hat{\beta})^{T} Q (\beta_j(d) - \hat{\beta})
+\]
+
+and develops a closed form lower bound for
+
+\[
+RSS_{\min,j} \;=\; \min_{d \in [low,\,upp]} RSS_j(d).
+\]
+
+The key idea is to use the explicit dependence of the tangency point
+\(\beta_j(d)\) on the dispersion parameter \(d\).
+
+---------------------------------------------------------------------
+
+## 1. Why the RSS decomposition holds
+
+Let
+
+\[
+RSS(\beta) \;=\; \sum_{i=1}^n w_i (y_i - x_i^{T}\beta)^2,
+\qquad
+Q \;=\; X^{T} W X,
+\]
+
+and let \(\hat{\beta}\) be the weighted least squares (maximum likelihood)
+estimate:
+
+\[
+\hat{\beta} \;=\; \arg\min_{\beta} RSS(\beta).
+\]
+
+Since \(\hat{\beta}\) minimizes \(RSS(\beta)\), the quadratic expansion
+around \(\hat{\beta}\) is exact:
+
+\[
+RSS(\beta) \;=\; RSS(\hat{\beta})
+\;+\;
+(\beta - \hat{\beta})^{T} Q (\beta - \hat{\beta}).
+\]
+
+Therefore, for any face \(j\) and dispersion \(d\),
+
+\[
+RSS_j(d)
+\;=\;
+RSS_{ML}
+\;+\;
+(\beta_j(d) - \hat{\beta})^{T} Q (\beta_j(d) - \hat{\beta}).
+\]
+
+This equality is valid only when \(\hat{\beta}\) is the ML/WLS estimator
+computed with the same weights \(w_i\) used in the definition of
+\(RSS(\beta)\).
+
+---------------------------------------------------------------------
+
+## 2. Structure of the tangency point beta_j(d)
+
+From the implementation:
+
+\[
+A(d) \;=\; P \;+\; \frac{\text{base\_A}}{d},
+\qquad
+B_0(d) \;=\; \frac{\text{base\_B0}}{d} \;+\; P\mu,
+\]
+
+and
+
+\[
+\beta_j(d)
+\;=\;
+A(d)^{-1}\,\bigl(B_0(d) - \bar{c}_j\bigr).
+\]
+
+Introduce the variable
+
+\[
+t \;=\; \frac{1}{d},
+\qquad
+t \in [t_{\min},\,t_{\max}] \;=\; [1/upp,\;1/low].
+\]
+
+Define the vectors
+
+\[
+a_j \;=\; \text{base\_B0} \;-\; \text{base\_A}\,\hat{\beta},
+\qquad
+b_j \;=\; P\mu \;-\; P\hat{\beta} \;-\; \bar{c}_j.
+\]
+
+Then
+
+\[
+B_0(d) - \bar{c}_j - A(d)\hat{\beta}
+\;=\;
+a_j\,t \;+\; b_j.
+\]
+
+Define the "A-B residual"
+
+\[
+r_j(d) \;=\; a_j\,t \;+\; b_j.
+\]
+
+Using this,
+
+\[
+\beta_j(d) - \hat{\beta}
+\;=\;
+A(d)^{-1} r_j(d).
+\]
+
+---------------------------------------------------------------------
+
+## 3. Lower bounding the quadratic form
+
+We want a lower bound on
+
+\[
+(\beta_j(d) - \hat{\beta})^{T} Q (\beta_j(d) - \hat{\beta}).
+\]
+
+Using eigenvalue bounds:
+
+\[
+(\beta_j(d) - \hat{\beta})^{T} Q (\beta_j(d) - \hat{\beta})
+\;\ge\;
+\lambda_{\min}(Q)\,\|\beta_j(d) - \hat{\beta}\|_2^2.
+\]
+
+Also,
+
+\[
+\|\beta_j(d) - \hat{\beta}\|_2
+\;=\;
+\|A(d)^{-1} r_j(d)\|_2
+\;\ge\;
+\frac{\|r_j(d)\|_2}{\|A(d)\|_{\text{op}}}.
+\]
+
+Since
+
+\[
+A(d) \;=\; P + \frac{\text{base\_A}}{d}
+\]
+
+is monotone in \(1/d\) when base\_A is positive semidefinite, the largest
+operator norm occurs at \(d = low\). Define
+
+\[
+A_{\max} \;=\; P + \frac{\text{base\_A}}{low}.
+\]
+
+Then
+
+\[
+\|A(d)\|_{\text{op}} \;\le\; \lambda_{\max}(A_{\max})
+\quad\text{for all } d \in [low,\,upp].
+\]
+
+Thus
+
+\[
+(\beta_j(d) - \hat{\beta})^{T} Q (\beta_j(d) - \hat{\beta})
+\;\ge\;
+\frac{\lambda_{\min}(Q)}{\lambda_{\max}(A_{\max})^2}
+\;\|r_j(d)\|_2^2.
+\]
+
+Define the constant
+
+\[
+C \;=\; \frac{\lambda_{\min}(Q)}{\lambda_{\max}(A_{\max})^2}.
+\]
+
+Then
+
+\[
+RSS_j(d)
+\;\ge\;
+RSS_{ML} \;+\; C\,\|r_j(d)\|_2^2.
+\]
+
+---------------------------------------------------------------------
+
+## 4. Closed form minimization of the residual norm
+
+Since
+
+\[
+r_j(d) \;=\; a_j\,t \;+\; b_j,
+\qquad
+t \in [t_{\min},\,t_{\max}],
+\]
+
+the squared norm is
+
+\[
+\|r_j(d)\|_2^2
+\;=\;
+\|a_j t + b_j\|_2^2
+\;=\;
+t^2 \|a_j\|_2^2
+\;+\;
+2 t\, a_j^{T} b_j
+\;+\;
+\|b_j\|_2^2.
+\]
+
+This is a scalar quadratic in \(t\). The unconstrained minimizer is
+
+\[
+t^{*}
+\;=\;
+-\frac{a_j^{T} b_j}{\|a_j\|_2^2}
+\quad\text{(when } a_j \neq 0\text{)}.
+\]
+
+Project onto the feasible interval:
+
+\[
+\tilde{t}_j
+\;=\;
+\min\bigl(\max(t^{*},\,t_{\min}),\,t_{\max}\bigr).
+\]
+
+Define
+
+\[
+m_j^2
+\;=\;
+\|a_j\,\tilde{t}_j + b_j\|_2^2.
+\]
+
+This is the minimum of \(\|r_j(d)\|_2^2\) over all \(d \in [low,\,upp]\).
+
+---------------------------------------------------------------------
+
+## 5. Final closed form lower bound for RSS_min,j
+
+For all \(d \in [low,\,upp]\),
+
+\[
+RSS_j(d)
+\;\ge\;
+RSS_{ML} \;+\; C\,m_j^2.
+\]
+
+Therefore,
+
+\[
+RSS_{\min,j}
+\;\ge\;
+RSS_{ML} \;+\; C\,m_j^2.
+\]
+
+Where:
+
+- \(C = \lambda_{\min}(Q) / \lambda_{\max}(A_{\max})^2\)
+- \(A_{\max} = P + \text{base\_A}/low\)
+- \(a_j = \text{base\_B0} - \text{base\_A}\,\hat{\beta}\)
+- \(b_j = P\mu - P\hat{\beta} - \bar{c}_j\)
+- \(\tilde{t}_j\) is the projection of \(t^{*}\) onto \([1/upp,\,1/low]\)
+- \(m_j^2 = \|a_j\,\tilde{t}_j + b_j\|_2^2\)
+
+This bound is closed form, fast, and valid for all dispersion values in
+the allowed interval.

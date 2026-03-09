@@ -8,6 +8,7 @@
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 
+#include <Rmath.h>
 #include "famfuncs.h"
 #include "Envelopefuncs.h"
 #include <RcppParallel.h>
@@ -643,6 +644,271 @@ Rcpp::List minimize_rss_over_dispersion(
 
 
 // ---------------------------------------------------------------------
+// bound_rss_over_dispersion
+// Closed-form lower bound for RSS_min per Appendix A07 (RSS ML Decomposition).
+// RSS_j(d) = RSS_ML + quad_j(d); quad_j(d) >= C*m_j^2 with fixed a_j, b_j.
+// LB = RSS_ML + C * m_j^2 (no d1_star).
+// ---------------------------------------------------------------------
+Rcpp::List bound_rss_over_dispersion(
+    const Rcpp::List& cache,
+    const Rcpp::List& Env,
+    double RSS_ML,
+    double shape2,
+    double rate3,
+    double low,
+    double upp,
+    bool verbose
+) {
+  using namespace Rcpp;
+  using namespace arma;
+
+  NumericMatrix cbars = Env["cbars"];
+  int gs = cbars.nrow();
+  int p  = cbars.ncol();
+
+  arma::mat base_A  = cache["base_A"];
+  arma::vec base_B0 = cache["base_B0"];
+  arma::mat Pmat    = cache["Pmat"];
+  arma::vec Pmu     = cache["Pmu"];
+  Pmat = 0.5 * (Pmat + Pmat.t());
+
+  bool dbg = verbose;
+  if (dbg && !R_finite(RSS_ML)) Rcout << "[bound_rss:VALIDATE] RSS_ML non-finite\n";
+
+  // Q = X' W X = base_A; beta_hat = ML
+  arma::vec beta_hat = -arma::solve(base_A, base_B0);
+
+  // lambda_min(Q)
+  arma::vec evals_Q = arma::eig_sym(base_A);
+  double lambda_min_Q = evals_Q(0);
+  if (dbg && (!R_finite(lambda_min_Q) || lambda_min_Q <= 0.0))
+    Rcout << "[bound_rss:VALIDATE] lambda_min(Q) non-finite or <=0\n";
+
+  // A_max = P + base_A/low; C = lambda_min(Q) / lambda_max(A_max)^2
+  arma::mat A_max = Pmat + base_A / low;
+  A_max = 0.5 * (A_max + A_max.t());
+  arma::vec evals_A_max = arma::eig_sym(A_max);
+  double lambda_max_A = evals_A_max(evals_A_max.n_elem - 1);
+  if (dbg && (!R_finite(lambda_max_A) || lambda_max_A <= 0.0))
+    Rcout << "[bound_rss:VALIDATE] lambda_max(A_max) non-finite or <=0\n";
+  double C = lambda_min_Q / (lambda_max_A * lambda_max_A);
+
+  double t_min = 1.0 / upp;
+  double t_max = 1.0 / low;
+
+  NumericVector rss_bound_parallel(gs);
+  NumericVector disp_min_parallel(gs);
+  double rss_min_bound = R_PosInf;
+
+  for (int j = 0; j < gs; ++j) {
+    arma::vec cbar_j(p);
+    for (int r = 0; r < p; ++r) cbar_j(r) = cbars(j, r);
+
+    // Fixed a_j, b_j: r_j(t) = a_j*t + b_j with t = 1/d
+    arma::vec a_j = -(base_B0 + base_A * beta_hat);
+    arma::vec b_j = cbar_j - Pmu - Pmat * beta_hat;
+
+    double aa = arma::dot(a_j, a_j);
+    double ab = arma::dot(a_j, b_j);
+    double t_star = (aa > 0.0 ? -ab / aa : t_min);
+    double t_tilde = std::min(std::max(t_star, t_min), t_max);
+
+    arma::vec r_min = a_j * t_tilde + b_j;
+    double m_j_sq = arma::dot(r_min, r_min);
+    double quad_lower_bound = C * m_j_sq;
+
+    double lb_j = RSS_ML + quad_lower_bound;
+    rss_bound_parallel(j) = lb_j;
+    disp_min_parallel(j) = 1.0 / t_tilde;
+
+    if (verbose && j < 5) {
+      double m_j = std::sqrt(m_j_sq);
+      Rcout << "[bound_rss:face " << j << "] t_tilde=" << t_tilde
+            << " m_j=" << m_j << " lb_j-RSS_ML=" << (lb_j - RSS_ML) << "\n";
+    }
+    if (R_finite(lb_j) && lb_j < rss_min_bound) rss_min_bound = lb_j;
+  }
+
+  if (verbose) {
+    double beta_hat_norm = std::sqrt(arma::as_scalar(beta_hat.t() * beta_hat));
+    Rcout << "[EnvelopeDispersionBuild:bound_rss] RSS_ML=" << RSS_ML
+          << " LB^RSS_min=" << rss_min_bound
+          << " | lambda_min_Q=" << lambda_min_Q
+          << " lambda_max_A=" << lambda_max_A << " C=" << C
+          << " ||beta_hat||=" << beta_hat_norm
+          << " low=" << low << " upp=" << upp << "\n";
+  }
+
+  return List::create(
+    Named("ok")                   = true,
+    Named("rss_min_bound")        = rss_min_bound,
+    Named("rss_bound_parallel")   = rss_bound_parallel,
+    Named("disp_min_parallel")    = disp_min_parallel,
+    Named("rss_min_global")       = rss_min_bound,
+    Named("rss_min_parallel")     = rss_bound_parallel
+  );
+}
+
+
+// ---------------------------------------------------------------------
+// rss_face_bound_from_cache_cpp
+// Per-face diagnostic: compare closed-form RSS lower bound to actual
+// minimized RSS. Uses same algebra as bound_rss_over_dispersion.
+// Not exported; for internal/debug use only.
+// ---------------------------------------------------------------------
+Rcpp::List rss_face_bound_from_cache_cpp(
+    Rcpp::List cache,
+    Rcpp::NumericVector beta_hat_r,
+    Rcpp::NumericVector cbars_j_r,
+    double low,
+    double upp,
+    Rcpp::NumericVector y_r,
+    Rcpp::NumericMatrix X_r,
+    Rcpp::NumericVector alpha_r,
+    Rcpp::NumericVector wt_r,
+    double shape2,
+    double rate3,
+    double RSS_ML,
+    double rss_min_j_actual,
+    bool verbose = true,
+    int face_j = -1
+) {
+  using namespace arma;
+
+  arma::vec beta_hat(beta_hat_r.begin(), beta_hat_r.size(), false);
+  arma::vec cbars_j(cbars_j_r.begin(), cbars_j_r.size(), false);
+  arma::vec y(y_r.begin(), y_r.size(), false);
+  arma::mat X(X_r.begin(), X_r.nrow(), X_r.ncol(), false);
+  arma::vec alpha(alpha_r.begin(), alpha_r.size(), false);
+  arma::vec wt(wt_r.begin(), wt_r.size(), false);
+
+  arma::mat Pmat    = cache["Pmat"];
+  arma::vec Pmu     = cache["Pmu"];
+  arma::vec base_B0 = cache["base_B0"];
+  arma::mat base_A  = cache["base_A"];
+  Pmat = 0.5 * (Pmat + Pmat.t());
+
+  // Q = X' W X (same as base_A for Gaussian)
+  arma::vec sqrtw = arma::sqrt(wt);
+  arma::mat Xw = X.each_col() % sqrtw;
+  arma::mat Q = Xw.t() * Xw;
+
+  arma::vec eig_Q = arma::eig_sym(Q);
+  double lambda_min_Q = eig_Q.min();
+
+  arma::mat A_max = Pmat + base_A / low;
+  A_max = 0.5 * (A_max + A_max.t());
+  arma::vec eig_Amax = arma::eig_sym(A_max);
+  double lambda_max_Amax = eig_Amax(eig_Amax.n_elem - 1);
+
+  double C = lambda_min_Q / (lambda_max_Amax * lambda_max_Amax);
+
+  // Fixed a_j, b_j: r_j(t) = a_j*t + b_j with t = 1/d
+  arma::vec a_j = -(base_B0 + base_A * beta_hat);
+  arma::vec b_j = cbars_j - Pmu - Pmat * beta_hat;
+
+  double t_min = 1.0 / upp;
+  double t_max = 1.0 / low;
+
+  double aa = arma::dot(a_j, a_j);
+  double ab = arma::dot(a_j, b_j);
+  double t_star = (aa > 0.0 ? -ab / aa : t_min);
+  double t_tilde = std::min(std::max(t_star, t_min), t_max);
+
+  arma::vec r_min = a_j * t_tilde + b_j;
+  double m_j2 = arma::dot(r_min, r_min);
+  double quad_lower_bound = C * m_j2;
+  double RSS_lb_j = RSS_ML + quad_lower_bound;
+
+  if (verbose) {
+    double diff_j = rss_min_j_actual - RSS_lb_j;
+    if (face_j >= 0) {
+      Rcpp::Rcout << "  " << face_j << " | bound=" << RSS_lb_j
+                  << " actual=" << rss_min_j_actual
+                  << " diff=" << diff_j << "\n";
+    } else {
+      Rcpp::Rcout << "Closed-form RSS lower bound: " << RSS_lb_j << "\n";
+      Rcpp::Rcout << "Actual minimized RSS:        " << rss_min_j_actual << "\n";
+      Rcpp::Rcout << "Difference (actual - bound): " << diff_j << "\n";
+    }
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("RSS_lower_bound") = RSS_lb_j,
+    Rcpp::Named("RSS_actual")      = rss_min_j_actual,
+    Rcpp::Named("C")               = C,
+    Rcpp::Named("m_j2")            = m_j2,
+    Rcpp::Named("t_tilde")         = t_tilde,
+    Rcpp::Named("a_j")             = a_j,
+    Rcpp::Named("b_j")             = b_j,
+    Rcpp::Named("Q")               = Q
+  );
+}
+
+
+// ---------------------------------------------------------------------
+// rss_face_quadratic_sum_internal
+// Computes closed-form lower bound on quad: quad >= quad_lower_bound for all d in [low, upp].
+// No dispersion, no printing, no RSS-minimization dependency. Q = base_A from cache.
+// Caller does quad-at-d diagnostics externally (e.g. via rss_face_at_disp - RSS_ML).
+// NOTE: no [[Rcpp::export]] — internal only
+// ---------------------------------------------------------------------
+Rcpp::List rss_face_quadratic_sum_internal(
+    Rcpp::List cache,
+    Rcpp::NumericVector cbars_j_r,
+    Rcpp::NumericVector beta_hat_r,
+    double low,
+    double upp
+) {
+  using namespace arma;
+
+  vec cbars_j(cbars_j_r.begin(), cbars_j_r.size(), false);
+  vec beta_hat(beta_hat_r.begin(), beta_hat_r.size(), false);
+
+  mat Pmat    = cache["Pmat"];
+  vec Pmu     = cache["Pmu"];
+  vec base_B0 = cache["base_B0"];
+  mat base_A  = cache["base_A"];
+  Pmat = 0.5 * (Pmat + Pmat.t());
+  mat Q = base_A;
+
+  vec a_j = -(base_B0 + base_A * beta_hat);
+  vec b_j = cbars_j - Pmu - Pmat * beta_hat;
+
+  double t_min = 1.0 / upp;
+  double t_max = 1.0 / low;
+  double aa = dot(a_j, a_j);
+  double ab = dot(a_j, b_j);
+  double t_star = (aa > 0.0 ? -ab / aa : t_min);
+  double t_tilde = std::min(std::max(t_star, t_min), t_max);
+
+  vec r_min = a_j * t_tilde + b_j;
+  double m_j2 = dot(r_min, r_min);
+
+  mat A_max = Pmat + base_A / low;
+  A_max = 0.5 * (A_max + A_max.t());
+  vec eig_Amax = eig_sym(A_max);
+  double lambda_max_Amax = eig_Amax(eig_Amax.n_elem - 1);
+  vec eig_Q = eig_sym(Q);
+  double lambda_min_Q = eig_Q.min();
+  double C = lambda_min_Q / (lambda_max_Amax * lambda_max_Amax);
+  double quad_lower_bound = C * m_j2;
+
+  return Rcpp::List::create(
+    Rcpp::Named("quad_lower_bound") = quad_lower_bound,
+    Rcpp::Named("C")                = C,
+    Rcpp::Named("m_j2")             = m_j2,
+    Rcpp::Named("t_tilde")          = t_tilde,
+    Rcpp::Named("a_j")              = a_j,
+    Rcpp::Named("b_j")              = b_j,
+    Rcpp::Named("beta_hat")         = beta_hat,
+    Rcpp::Named("Q")                = Q
+  );
+}
+
+
+
+// ---------------------------------------------------------------------
 // Internal helper: minimize UB2 over dispersion for all faces
 // Not exported. Only visible inside this .cpp file.
 // ---------------------------------------------------------------------
@@ -1270,7 +1536,30 @@ List EnvelopeDispersionBuild(
                   << "\n";
   }
   
-    
+  // Step 3B1: Compute RSS_ML when caller did not supply it (rIndepNormalGammaReg passes NA)
+  if (!R_finite(RSS_ML)) {
+    arma::mat base_A  = cache["base_A"];
+    arma::vec base_B0 = cache["base_B0"];
+    arma::vec beta_hat = -arma::solve(arma::mat(base_A), base_B0);
+    arma::mat X(x.begin(), x.nrow(), x.ncol(), false);
+    arma::vec yv(y.begin(), y.size(), false);
+    arma::vec alphav(alpha.begin(), alpha.size(), false);
+    arma::vec wv(wt.begin(), wt.size(), false);
+    arma::vec resid = yv - X * beta_hat - alphav;
+    RSS_ML = arma::as_scalar(resid.t() * (wv % resid));
+  }
+  
+  // Step 3B2: Closed-form RSS_min bound (dispersion-aware ball)
+  Rcpp::List rss_bound_res = bound_rss_over_dispersion(
+    cache, Env, RSS_ML, shape2, rate3, low, upp, verbose
+  );
+  Rcpp::NumericVector rss_bound_parallel;
+  bool bound_ok = false;
+  if (rss_bound_res.containsElementNamed("ok") && Rcpp::as<bool>(rss_bound_res["ok"])) {
+    rss_bound_parallel = Rcpp::as<Rcpp::NumericVector>(rss_bound_res["rss_bound_parallel"]);
+    bound_ok           = true;
+  }
+
   // Step 3C: Minimize RSS over dispersion for each face (optional diagnostics / UB2 prep)
   // Strategy A (pure C++): call a Brent/golden-section minimizer using rss_face_at_disp()
   // Strategy B (R-side): call optim("Brent") on [low, upp] — easier to prototype
@@ -1309,12 +1598,98 @@ List EnvelopeDispersionBuild(
   }
   
     
-  double rss_min_global       = rss_res["rss_min_global"];
-//  double disp_min_global      = rss_res["disp_min_global"];
-//  int    j_best               = rss_res["j_best"];
-  
-  NumericVector rss_min_parallel  = rss_res["rss_min_parallel"];
-  NumericVector disp_min_parallel = rss_res["disp_min_parallel"];
+    
+  double rss_min_global;
+  NumericVector rss_min_parallel;
+  NumericVector disp_min_parallel;
+  if (!bound_ok || rss_bound_parallel.size() != static_cast<R_xlen_t>(gs)) {
+    Rcpp::stop("bound_rss_over_dispersion failed or size mismatch; RSS must come from closed-form bound.");
+  }
+  rss_min_global    = Rcpp::as<double>(rss_bound_res["rss_min_global"]);
+  rss_min_parallel  = Rcpp::as<Rcpp::NumericVector>(rss_bound_res["rss_min_parallel"]);
+  disp_min_parallel = Rcpp::as<Rcpp::NumericVector>(rss_bound_res["disp_min_parallel"]);
+
+  // Temporary check: bound <= rss_min from minimization for all faces, and diff is small
+  if (verbose && gs <= 81) {
+    NumericVector rss_min_from_minimize = rss_res["rss_min_parallel"];
+    const double tol = 1e-6 * std::max(1.0, rss_min_global);
+    bool ok = true;
+    for (int j = 0; j < gs; ++j) {
+      double diff = rss_min_parallel[j] - rss_min_from_minimize[j];
+      if (diff > tol) {
+        Rcpp::Rcout << "[rss_bound:CHECK] face " << j << " bound > min: bound="
+                    << rss_min_parallel[j] << " min=" << rss_min_from_minimize[j]
+                    << " diff=" << diff << "\n";
+        ok = false;
+      }
+    }
+    if (!ok) {
+      Rcpp::Rcout << "[rss_bound:CHECK] bound should be <= min for all faces; diff should be small.\n";
+    }
+  }
+
+  // Comparison: bound (source) vs minimize (check), when gs <= 81 and verbose
+  if (gs <= 81 && verbose) {
+    NumericVector rss_min_from_minimize = rss_res["rss_min_parallel"];
+    double rss_min_global_from_minimize = rss_res["rss_min_global"];
+    double d1_star_comp = rate3 / (shape2 - 1.0);
+    Rcpp::Rcout << "[EnvelopeDispersionBuild:RSS comparison] gs=" << gs
+                << " | bound_global=" << rss_min_global
+                << " min_global=" << rss_min_global_from_minimize
+                << " d1_star=" << d1_star_comp << "\n";
+    Rcpp::Rcout << "  face | bound | min | disp_min"
+                << " | bound-RSS_ML | min-RSS_ML | bound-min\n";
+    for (int j = 0; j < gs; ++j) {
+      double diff_bound = rss_min_parallel[j] - RSS_ML;
+      double diff_min   = rss_min_from_minimize[j] - RSS_ML;
+      double diff_check = rss_min_parallel[j] - rss_min_from_minimize[j];
+      Rcpp::Rcout << "  " << j << " | "
+                  << rss_min_parallel[j] << " | "
+                  << rss_min_from_minimize[j] << " | "
+                  << disp_min_parallel[j] << " | "
+                  << diff_bound << " | " << diff_min << " | " << diff_check << "\n";
+    }
+    // Per-face diagnostic: compare closed-form bound to actual (each face)
+    if (gs > 0) {
+      Rcpp::Rcout << "  face | bound | actual | diff\n";
+      arma::mat X_mat(x.begin(), x.nrow(), x.ncol(), false);
+      arma::vec yv(y.begin(), y.size(), false);
+      arma::vec alphav(alpha.begin(), alpha.size(), false);
+      arma::vec wv(wt.begin(), wt.size(), false);
+      arma::mat Q = X_mat.t() * (X_mat.each_col() % wv);
+      Q = 0.5 * (Q + Q.t());
+      arma::vec rhs = X_mat.t() * (wv % (yv - alphav));
+      arma::vec beta_hat_vec = arma::solve(Q, rhs);
+      arma::vec resid_ml = (yv - alphav - X_mat * beta_hat_vec) % arma::sqrt(wv);
+      double rss_at_beta_hat = arma::as_scalar(resid_ml.t() * resid_ml);
+      double rel_err = std::abs(rss_at_beta_hat - RSS_ML) / std::max(1e-15, std::abs(RSS_ML));
+      if (rel_err > 1e-8) {
+        Rcpp::Rcout << "[rss_face_bound:CHECK] beta_hat does not reproduce RSS_ML: "
+                    << "RSS(beta_hat)=" << rss_at_beta_hat << " RSS_ML=" << RSS_ML
+                    << " rel_err=" << rel_err << "\n";
+      }
+      Rcpp::NumericVector beta_hat_r = Rcpp::wrap(beta_hat_vec);
+      Rcpp::Rcout << "  [quad vs quad_lb at disp_min]\n";
+      for (int j = 0; j < gs; ++j) {
+        Rcpp::NumericVector cbars_j_r(cbars.ncol());
+        for (int k = 0; k < cbars.ncol(); ++k) cbars_j_r[k] = cbars(j, k);
+        rss_face_bound_from_cache_cpp(
+          cache, beta_hat_r, cbars_j_r,
+          low, upp, y, x, alpha, wt,
+          shape2, rate3, RSS_ML, rss_min_parallel[j], true, j
+        );
+        double disp_j = disp_min_parallel[j];
+        Rcpp::List quad_res = rss_face_quadratic_sum_internal(
+          cache, cbars_j_r, beta_hat_r, low, upp
+        );
+        double quad_lb = Rcpp::as<double>(quad_res["quad_lower_bound"]);
+        double rss_at_d = rss_face_at_disp(disp_j, cache, cbars_j_r, y, x, alpha, wt);
+        double quad = rss_at_d - RSS_ML;
+        Rcpp::Rcout << "  face " << j << " | quad=" << quad << " | quad_lb=" << quad_lb
+                    << " | diff=" << (quad - quad_lb) << "\n";
+      }
+    }
+  }
 
   if (verbose) {
     
