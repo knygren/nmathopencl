@@ -259,7 +259,7 @@ where:
     + \tfrac{\mathrm{RSS\_Min}}{2}
 \]       
        where:
-       - \(\tfrac{\text{RSS_Min}}{2}\) is the classical residual sum of squares,  
+       - \(\tfrac{\mathrm{RSS\_Min}}{2}\) is the classical residual sum of squares,  
        - used as a conservative bound on the residual term that varies across tangency points.  
    - Construct the **Per-Face Subgradient Selection Probabilities (PLSD)** for each grid component \(j\) as follows:  
      \[
@@ -562,15 +562,15 @@ For dispersion \(d \in [\,\text{low},\,\text{upp}\,]\), define the truncated inv
 \[
 \begin{aligned}
 \log q_\Gamma^{\text{trunc}}(d)
-&= \Big(\text{Shape} + \tfrac{n_{w}}{2} - \mathrm{lm\_log2}\Big)\,\log\!\Big(\text{Rate} + \tfrac{\mathrm{RSS_Min}}{2}\Big) \\
+&= \Big(\text{Shape} + \tfrac{n_{w}}{2} - \mathrm{lm\_log2}\Big)\,\log\!\Big(\text{Rate} + \tfrac{\mathrm{RSS\_Min}}{2}\Big) \\
 &\quad - \log \Gamma\!\Big(\text{Shape} + \tfrac{n_{w}}{2} - \mathrm{lm\_log2}\Big) \\[6pt]
 &\quad - \Big(\text{Shape} + \tfrac{n_{w}}{2} - \mathrm{lm\_log2} + 1\Big)\,\log d
-   - \frac{\text{Rate} + \tfrac{\mathrm{RSS_Min}}{2}}{d} \\[6pt]
+   - \frac{\text{Rate} + \tfrac{\mathrm{RSS\_Min}}{2}}{d} \\[6pt]
 &\quad - \log\!\Bigg(
 F_\Gamma\!\Big(\tfrac{1}{\text{low}};\,\text{Shape} + \tfrac{n_{w}}{2} - \mathrm{lm\_log2},\,
-\text{Rate} + \tfrac{\text{RSS_Min}}{2}\Big) \\[6pt]
+\text{Rate} + \tfrac{\mathrm{RSS\_Min}}{2}\Big) \\[6pt]
 &\quad  -\;  F_\Gamma\!\Big(\tfrac{1}{\text{upp}};\,\text{Shape} + \tfrac{n_{w}}{2} - \mathrm{lm\_log2},\,
-\text{Rate} + \tfrac{\text{RSS_Min}}{2}\Big)
+\text{Rate} + \tfrac{\mathrm{RSS\_Min}}{2}\Big)
 \Bigg),
 \end{aligned}
 \]
@@ -1973,15 +1973,15 @@ The UB2 bound for face \(j\) at dispersion \(d\) is defined by
 For the prior, let \(P \succ 0\) denote the prior precision matrix and
 \(\mu\) the prior mean. We will use the implementation‑style notation
 \[
-  \text{base_A} \;=\; X^{T} W X \;=\; Q,
+  \mathrm{base\_A} \;=\; X^{T} W X \;=\; Q,
   \qquad
-  \text{base_B0} \;=\; X^{T} W(\alpha - y).
+  \mathrm{base\_B0} \;=\; X^{T} W(\alpha - y).
 \]
 For dispersion \(d\), define
 \[
-  A(d) \;=\; P \;+\; \frac{\text{base_A}}{d},
+  A(d) \;=\; P \;+\; \frac{\mathrm{base\_A}}{d},
   \qquad
-  B_0(d) \;=\; \frac{\text{base_B0}}{d} \;+\; P\mu,
+  B_0(d) \;=\; \frac{\mathrm{base\_B0}}{d} \;+\; P\mu,
 \]
 so that the tangency point satisfies
 \[
@@ -2058,14 +2058,17 @@ notation,
 \]
 with
 \(
-  A(d) = P + \text{base_A}/d
+  A(d) = P + \mathrm{base\_A}/d
 \)
 and
 \(
-  B_0(d) = \text{base_B0}/d + P\mu.
+  B_0(d) = \mathrm{base\_B0}/d + P\mu.
 \)
 Rewriting in terms of \(t = 1/d\) and using \(A(t) = P + tQ\),
-\(B_0(t) = t\,\text{base_B0} + P\mu\), we obtain
+\(
+  B_0(t) = t\,\mathrm{base\_B0} + P\mu
+\),
+we obtain
 \[
   \tilde{\beta}_j(t)
   =
