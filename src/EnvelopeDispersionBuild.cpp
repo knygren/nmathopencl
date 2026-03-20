@@ -792,109 +792,45 @@ Rcpp::List minimize_ub2_over_dispersion(
   // Case 1: UB2 minimization is performed (UB2_Min_Type == 1)
   // -------------------------------------------------------------------
   if (UB2_Min_Type == 1) {
-    
-    Environment ns2 = Environment::namespace_env("glmbayes");
-    Function ub2_parallel_fn = ns2["EnvelopeUB2_parallel"];
-    
-    double est_total_ub2 = 0.0;
-    
-    // Threshold for UB2 pilot runs
-    const int pilot_threshold_ub2 = static_cast<int>(std::pow(3, 14));
-    
-    // Optional UB2 pilot block
-    if (gs >= pilot_threshold_ub2) {
-      Rcout << "[EnvelopeDispersionBuild:minimize_ub2] Running UB2 pilot block (faces="
-            << gs << " >= threshold=" << pilot_threshold_ub2 << ").\n";
-      
-      List ub2_res = run_ub2_pilot_block(
-        ub2_parallel_fn, gs, l1,
-        low, upp, cache, cbars,
-        y, x, alpha, wt,
-        rss_min_global,
-        verbose
-      );
-      est_total_ub2 = ub2_res["est_total"];
-      
-      if (verbose) {
-        Rcout << "[EnvelopeDispersionBuild:minimize_ub2] run_ub2_pilot_block completed; "
-              << "est_total=" << est_total_ub2 << " seconds.\n";
-      }
-    } else {
-      if (verbose) {
-        Rcout << "[EnvelopeDispersionBuild:minimize_ub2] Skipping UB2 pilot block "
-              << "(faces=" << gs << " < threshold=" << pilot_threshold_ub2 << ").\n";
-      }
-    }
-    
-    // Time estimate guard
-    if (est_total_ub2 > 300.0) {
-      std::string prompt =
-        "Estimated UB2 minimization exceeds 5 minutes. Continue? [y/N]: ";
-      
-      Function r_interactive("interactive");
-      bool is_interactive = as<bool>(r_interactive());
-      
-      if (is_interactive) {
-        Function readline("readline");
-        while (true) {
-          std::string ans = as<std::string>(readline(wrap(prompt)));
-          // trim whitespace
-          ans.erase(ans.begin(), std::find_if(ans.begin(), ans.end(),
-                              [](unsigned char ch){ return !std::isspace(ch); }));
-          ans.erase(std::find_if(ans.rbegin(), ans.rend(),
-                                 [](unsigned char ch){ return !std::isspace(ch); }).base(), ans.end());
-          
-          if (ans == "y" || ans == "yes" || ans == "1" || ans == "continue") {
-            Rcout << "[INFO] User chose to continue UB2 minimization.\n";
-            Rcout << ">>> Running Full UB2 parallel minimization: "
-                  << as<std::string>(Function("format")(Function("Sys.time")()))
-                  << "\n";
-            break;
-          } else if (ans == "n" || ans == "no" || ans == "2" || ans.empty()) {
-            Rcout << "[INFO] User declined. Stopping UB2 minimization.\n";
-            stop("UB2 minimization stopped by user after time estimate.");
-          } else {
-            Rcout << "Invalid input. Please enter y (continue) or N (stop).\n";
-          }
+    // UB2 parallel minimization via the former R callback has been removed.
+    // We keep `UB2_Min_Type == 1` as a compatibility mode, but compute UB2
+    // minima using endpoint evaluation only.
+    if (RSS_Min_Type == 1) {
+      for (int j = 0; j < gs; ++j) {
+        NumericVector cbars_j(cbars.ncol());
+        for (int k = 0; k < cbars.ncol(); ++k) cbars_j[k] = cbars(j, k);
+        
+        double rss_at_low = rss_face_at_disp(low, cache, cbars_j, y, x, alpha, wt);
+        double rss_at_upp = rss_face_at_disp(upp, cache, cbars_j, y, x, alpha, wt);
+        
+        double ub2_at_low = (0.5 / low) * (rss_at_low - rss_min_global);
+        double ub2_at_upp = (0.5 / upp) * (rss_at_upp - rss_min_global);
+        
+        if (ub2_at_low <= ub2_at_upp) {
+          ub2_min[j]      = ub2_at_low;
+          disp_min_ub2[j] = low;
+        } else {
+          ub2_min[j]      = ub2_at_upp;
+          disp_min_ub2[j] = upp;
         }
-      } else {
-        Rcout << "[NOTE] Non-interactive session: proceeding automatically.\n";
-        Rcout << "[INFO] Proceeding with full UB2 minimization.\n";
-        Rcout << ">>> Running Full UB2 parallel minimization: "
-              << as<std::string>(Function("format")(Function("Sys.time")()))
-              << "\n";
+      }
+      if (verbose) {
+        Rcout << "[EnvelopeDispersionBuild] UB2 source = endpoint eval via rss_face_at_disp (no R callback)\n";
+      }
+    } else if (RSS_Min_Type == 2) {
+      for (int j = 0; j < gs; ++j) {
+        ub2_min[j]      = 0.0;
+        disp_min_ub2[j] = upp;  // enforce upper bound anchor
+      }
+      if (verbose) {
+        Rcout << "[EnvelopeDispersionBuild] UB2 source = Set to 0 (skip RSS_Min and UB2 Min)\n";
       }
     }
-    
-    // Full UB2 minimization
-    double start_time_ub2 = as<double>(
-      Function("as.numeric")(Function("Sys.time")())
-    );
-    
 
-    List ub2_parallel_res = ub2_parallel_fn(
-      Named("par0")   = disp_start,
-      Named("low")    = low,
-      Named("upp")    = upp,
-      Named("cache")  = cache,
-      Named("cbars")  = cbars,
-      Named("y")      = y,
-      Named("x")      = x,
-      Named("alpha")  = alpha,
-      Named("wt")     = wt,
-      Named("rss_min_global") = rss_min_global
-    );
-    
-    double end_time_ub2 = as<double>(
-      Function("as.numeric")(Function("Sys.time")())
-    );
-    
-    double elapsed_ub2 = end_time_ub2 - start_time_ub2;
-    
-    disp_min_ub2 = ub2_parallel_res["disp_min"];
-    ub2_min      = ub2_parallel_res["ub2_min"];
-    
     // Find global UB2 minimum
+    ub2_min_global      = R_PosInf;
+    disp_min_global_ub2 = NA_REAL;
+    j_best_ub2          = -1;
     for (int j = 0; j < gs; ++j) {
       if (ub2_min[j] < ub2_min_global) {
         ub2_min_global      = ub2_min[j];
@@ -902,24 +838,14 @@ Rcpp::List minimize_ub2_over_dispersion(
         j_best_ub2          = j;
       }
     }
-    
-    if (verbose) {
-      Function fmt("format");
-      Function systime("Sys.time");
-      CharacterVector now = fmt(systime(), Named("format") = "%H:%M:%S");
-      
-      int h = static_cast<int>(elapsed_ub2 / 3600);
-      int m = static_cast<int>((elapsed_ub2 - h*3600) / 60);
-      int s = static_cast<int>(elapsed_ub2 - h*3600 - m*60);
-      
-      Rcout << "[EnvelopeDispersionBuild:minimize_ub2] UB2 parallel helper completed in "
-            << h << "h " << m << "m " << s << "s.\n";
-    }
-    
-    // -------------------------------------------------------------------
-    // Case 2: UB2 minimization skipped (UB2_Min_Type == 2)
-    // Use same inversion (rss_face_at_disp -> Inv_f3_with_disp) at endpoints.
-    // -------------------------------------------------------------------
+
+    return List::create(
+      Named("ub2_min")           = ub2_min,
+      Named("disp_min_ub2")      = disp_min_ub2,
+      Named("ub2_min_global")    = ub2_min_global,
+      Named("disp_min_global_ub2") = disp_min_global_ub2,
+      Named("j_best_ub2")        = j_best_ub2
+    );
   } else { // UB2_Min_Type == 2
     
     if (RSS_Min_Type == 1) {
@@ -1573,37 +1499,8 @@ List EnvelopeDispersionBuild(
 
   NumericVector disp_min_ub2_bound = bound_res["disp_min_ub2"];
 
-  // UB2 minimization over dispersion is currently disabled: the endpoint
+  // UB2 minimization over dispersion is currently disabled; the endpoint
   // evaluation in bound_ub2_over_dispersion is used as the UB2 source.
-  // The block below (call to minimize_ub2_over_dispersion and use of its
-  // outputs) is kept for potential future re‑enablement.
-  /*
-  if (verbose) {
-    Rcpp::Rcout << "[EnvelopeDispersionBuild:minimize_ub2] Entering: "
-                << glmbayes::progress::timestamp_cpp()
-                << "\n";
-  }
-  Rcpp::List ub2_res = minimize_ub2_over_dispersion(
-    gs, l1, low, upp,
-    cache, cbars,
-    y, x, alpha, wt,
-    rss_min_global,
-    rss_min_parallel,
-    RSS_ML,
-    RSS_Min_Type,
-    UB2_Min_Type,
-    verbose,
-    rss_bound_res,
-    disp_min_ub2_bound
-  );
-  NumericVector ub2_min_from_minimize      = ub2_res["ub2_min"];
-  NumericVector disp_min_ub2_from_minimize = ub2_res["disp_min_ub2"];
-  if (verbose) {
-    Rcpp::Rcout << "[EnvelopeDispersionBuild:minimize_ub2] Exiting: "
-                << glmbayes::progress::timestamp_cpp()
-                << "\n";
-  }
-  */
 
   // Results from bounding (used downstream)
   NumericVector ub2_min_bound = bound_res["ub2_min"];

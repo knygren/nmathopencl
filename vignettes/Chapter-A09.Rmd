@@ -155,26 +155,13 @@ Same as rNormalGLM: if `est_total_sec > 300`, prompt in interactive sessions.
 
 ## 7. EnvelopeDispersionBuild Pilot (Envelope Construction)
 
-The RSS path in `EnvelopeDispersionBuild` now uses closed-form bounds (`bound_rss_over_dispersion`) and no longer performs minimization or pilots. The UB2 path, when enabled, would use parallelization and pilots:
+The RSS and UB2 steps in `EnvelopeDispersionBuild` use closed-form bounds
+(`bound_rss_over_dispersion` and `bound_ub2_over_dispersion`) and no longer
+perform RSS/UB2 minimization or pilot timing blocks.
 
-### 7.1 When Pilots Run (UB2 path, when enabled)
+### 7.1 Five-Minute Safeguard
 
-When the number of envelope faces `gs` exceeds a threshold (e.g., \(3^{14}\)), the UB2 code runs pilot blocks before the full minimization:
-
-- **UB2 pilot:** `run_ub2_pilot_block` – estimates time for the UB2 minimization phase
-
-*(Note: The UB2 minimization and pilot are currently commented out; the package uses `bound_ub2_over_dispersion` instead.)*
-
-### 7.2 Five-Minute Safeguard
-
-If the estimated time for either phase exceeds 5 minutes:
-
-- **RSS:** `"Estimated minimization exceeds 5 minutes. Continue? [y/N]: "`
-- **UB2:** `"Estimated UB2 minimization exceeds 5 minutes. Continue? [y/N]: "`
-
-In non-interactive sessions, the run proceeds automatically.
-
-This is parallel **envelope construction**, not sampling, but it uses the same safeguard pattern because it, too, cannot be interrupted once started.
+Since minimization/pilots are disabled, the time-estimate safeguard is not used.
 
 
 ## 8. Choosing Serial vs Parallel
