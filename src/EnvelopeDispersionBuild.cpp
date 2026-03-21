@@ -357,27 +357,39 @@ Rcpp::List bound_rss_over_dispersion(
   // Q = X' W X = base_A; beta_hat = ML
   arma::vec beta_hat = -arma::solve(base_A, base_B0);
 
-  // A_max = P + base_A/low (needed for M-based C)
-  arma::mat A_max = Pmat + base_A / low;
-  A_max = 0.5 * (A_max + A_max.t());
-
-  // Old C: C_old = lambda_min(Q) / lambda_max(A_max)^2 (commented out; M-based C used instead)
-  // arma::vec evals_Q = arma::eig_sym(base_A);
-  // double lambda_min_Q = evals_Q(0);
-  // if (dbg && (!R_finite(lambda_min_Q) || lambda_min_Q <= 0.0))
-  //   Rcout << "[bound_rss:VALIDATE] lambda_min(Q) non-finite or <=0\n";
-  // arma::vec evals_A_max = arma::eig_sym(A_max);
-  // double lambda_max_A = evals_A_max(evals_A_max.n_elem - 1);
-  // if (dbg && (!R_finite(lambda_max_A) || lambda_max_A <= 0.0))
-  //   Rcout << "[bound_rss:VALIDATE] lambda_max(A_max) non-finite or <=0\n";
-  // double C_old = lambda_min_Q / (lambda_max_A * lambda_max_A);
-
-  // M-based bound: M(low) = A_max^{-1} Q A_max^{-1}, C = lambda_min(M(low)) bounds universally
-  arma::mat Ainv_max = arma::inv_sympd(A_max);
-  arma::mat M_min = Ainv_max.t() * base_A * Ainv_max;  // Q = base_A for Gaussian
+  // M(low) and C = lambda_min(M(low)): use precomputed M_min from cache (Step 3B1.5 in
+  // EnvelopeDispersionBuild) — same matrix as former internal block below, avoids
+  // duplicate A_max / inv_sympd / M_min work.
+  if (!cache.containsElementNamed("M_min")) {
+    Rcpp::stop("bound_rss_over_dispersion: cache must contain M_min; call after Step 3B1.5 precompute.");
+  }
+  arma::mat M_min = Rcpp::as<arma::mat>(cache["M_min"]);
   M_min = 0.5 * (M_min + M_min.t());
   arma::vec evals_M = arma::eig_sym(M_min);
   double C = evals_M(0);
+
+  // --- Internal duplicate of Step 3B1.5 (kept for reference; do not delete) ---
+  // // A_max = P + base_A/low (needed for M-based C)
+  // arma::mat A_max = Pmat + base_A / low;
+  // A_max = 0.5 * (A_max + A_max.t());
+  //
+  // // Old C: C_old = lambda_min(Q) / lambda_max(A_max)^2 (commented out; M-based C used instead)
+  // // arma::vec evals_Q = arma::eig_sym(base_A);
+  // // double lambda_min_Q = evals_Q(0);
+  // // if (dbg && (!R_finite(lambda_min_Q) || lambda_min_Q <= 0.0))
+  // //   Rcout << "[bound_rss:VALIDATE] lambda_min(Q) non-finite or <=0\n";
+  // // arma::vec evals_A_max = arma::eig_sym(A_max);
+  // // double lambda_max_A = evals_A_max(evals_A_max.n_elem - 1);
+  // // if (dbg && (!R_finite(lambda_max_A) || lambda_max_A <= 0.0))
+  // //   Rcout << "[bound_rss:VALIDATE] lambda_max(A_max) non-finite or <=0\n";
+  // // double C_old = lambda_min_Q / (lambda_max_A * lambda_max_A);
+  //
+  // // M-based bound: M(low) = A_max^{-1} Q A_max^{-1}, C = lambda_min(M(low)) bounds universally
+  // arma::mat Ainv_max = arma::inv_sympd(A_max);
+  // arma::mat M_min = Ainv_max.t() * base_A * Ainv_max;  // Q = base_A for Gaussian
+  // M_min = 0.5 * (M_min + M_min.t());
+  // arma::vec evals_M = arma::eig_sym(M_min);
+  // double C = evals_M(0);
 
   // double t_min = 1.0 / upp;
   // double t_max = 1.0 / low;
@@ -482,10 +494,22 @@ Rcpp::List bound_rss_over_dispersion(
 
 
 // ---------------------------------------------------------------------
-// rss_face_bound_from_cache_cpp
+// rss_face_bound_from_cache_cpp — UNUSED on active path; entire definition
+// commented out (do not delete). Only referenced from the large commented
+// diagnostic block below (search rss_face_bound_from_cache_cpp). Uncomment
+// this function if that block is re-enabled.
+// ---------------------------------------------------------------------
+/*
 // Per-face diagnostic: compare closed-form RSS lower bound to actual
 // minimized RSS. Uses same algebra as bound_rss_over_dispersion.
 // Not exported; for internal/debug use only.
+//
+// Call sites: only inside a *commented-out* verbose diagnostic block in
+// EnvelopeDispersionBuild (search for rss_face_bound_from_cache_cpp). It is not
+// on the active code path unless that block is re-enabled.
+//
+// Using Q = base_A from cache (below) avoids recomputing X'WX from (X, wt); for
+// Gaussian, Inv_f3_precompute_disp already stores Q as base_A — same matrix.
 // ---------------------------------------------------------------------
 Rcpp::List rss_face_bound_from_cache_cpp(
     Rcpp::List cache,
@@ -519,10 +543,17 @@ Rcpp::List rss_face_bound_from_cache_cpp(
   arma::mat base_A  = cache["base_A"];
   Pmat = 0.5 * (Pmat + Pmat.t());
 
-  // Q = X' W X (same as base_A for Gaussian)
-  arma::vec sqrtw = arma::sqrt(wt);
-  arma::mat Xw = X.each_col() % sqrtw;
-  arma::mat Q = Xw.t() * Xw;
+  // Q = X' W X — identical to cache's base_A from Inv_f3_precompute_disp (Gaussian).
+  // Extract instead of recomputing from X, wt:
+  //   arma::vec sqrtw = arma::sqrt(wt);
+  //   arma::mat Xw = X.each_col() % sqrtw;
+  //   arma::mat Q = Xw.t() * Xw;
+  arma::mat Q = base_A;
+  // Retain y, X, alpha, wt in signature for diagnostic callers; Q matches X'WX from cache.
+  (void)y;
+  (void)X;
+  (void)alpha;
+  (void)wt;
 
   arma::vec eig_Q = arma::eig_sym(Q);
   double lambda_min_Q = eig_Q.min();
@@ -537,14 +568,25 @@ Rcpp::List rss_face_bound_from_cache_cpp(
   double lambda_max_Amax = eig_Amax(eig_Amax.n_elem - 1);
   double C = lambda_min_Q / (lambda_max_Amax * lambda_max_Amax);
 
-  arma::mat A_max2 = Pmat + base_A / low;
-  A_max2 = 0.5 * (A_max2 + A_max2.t());
-  
-  // Q = base_A
-  arma::mat Ainv_max = arma::inv_sympd(A_max2);
-  arma::mat M_min    = Ainv_max.t() * base_A * Ainv_max;
-  
-  arma::vec evals_M_min = arma::eig_sym(M_min);
+  // M_min for eigenvalue diagnostic: prefer cache (same as bound_rss_over_dispersion) when present.
+  arma::mat M_min_diag;
+  if (cache.containsElementNamed("M_min")) {
+    M_min_diag = Rcpp::as<arma::mat>(cache["M_min"]);
+    M_min_diag = 0.5 * (M_min_diag + M_min_diag.t());
+  } else {
+    // Was: duplicate of Step 3B1.5
+    // arma::mat A_max2 = Pmat + base_A / low;
+    // A_max2 = 0.5 * (A_max2 + A_max2.t());
+    // arma::mat Ainv_max = arma::inv_sympd(A_max2);
+    // M_min_diag = Ainv_max.t() * base_A * Ainv_max;
+    arma::mat A_max2 = Pmat + base_A / low;
+    A_max2 = 0.5 * (A_max2 + A_max2.t());
+    arma::mat Ainv_max = arma::inv_sympd(A_max2);
+    M_min_diag = Ainv_max.t() * base_A * Ainv_max;
+    M_min_diag = 0.5 * (M_min_diag + M_min_diag.t());
+  }
+
+  arma::vec evals_M_min = arma::eig_sym(M_min_diag);
   Rcout << "[rss_face_bound:eigenvalues of M] ";
   for (arma::uword i = 0; i < evals_M_min.n_elem; ++i)
     Rcout << evals_M_min(i) << (i + 1 < evals_M_min.n_elem ? " " : "\n");
@@ -595,6 +637,7 @@ Rcpp::List rss_face_bound_from_cache_cpp(
     Rcpp::Named("Q")               = Q
   );
 }
+*/
 
 
 // ---------------------------------------------------------------------
