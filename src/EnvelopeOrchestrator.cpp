@@ -45,7 +45,9 @@ Rcpp::List EnvelopeOrchestrator(
     bool use_opencl,
     bool verbose
 ) {
-  
+  // Unknown dispersion always uses full envelope size (3^p grid); smaller grids not supported.
+  Gridtype = 3;
+
   int disp_grid_type=2;
   
   if(use_parallel) disp_grid_type=2;
@@ -71,8 +73,17 @@ Rcpp::List EnvelopeOrchestrator(
   
   
   
-// --- Step 1: EnvelopeBuild (direct C++ call) ---
-Rcpp::List Env2 = EnvelopeBuild(
+  // sortgrid: false when n==1, true when n>1 (matches rNormalGLM logic).
+  // Saves redundant first sort; EnvelopeDispersionBuild + second EnvelopeSort
+  // still run. Unknown-dispersion has poorer acceptance than fixed-dispersion
+  // (~279 candidates/draw vs theoretical bound), but for n==1 (e.g., Gibbs)
+  // the sort cost can outweigh the benefit.
+  if (n == 1 && verbose) {
+    Rcpp::Rcout << "[EnvelopeOrchestrator] n=1: skipping envelope sort (use n>1 for iid)\n";
+  }
+
+  // --- Step 1: EnvelopeBuild (direct C++ call) ---
+  Rcpp::List Env2 = EnvelopeBuild(
     bstar2,                      // NumericVector
     A,                           // NumericMatrix
     y,                           // NumericVector
@@ -80,13 +91,14 @@ Rcpp::List Env2 = EnvelopeBuild(
     mu2,                         // NumericMatrix (p x 1)
     P2,                          // NumericMatrix
     alpha,                       // NumericVector
-    wt2,                          // NumericVector
+    wt2,                         // NumericVector
     "gaussian",                  // family
     "identity",                  // link
     Gridtype,                    // int
     n,                           // int
     n_envopt.isNull() ? -1 : Rcpp::as<int>(n_envopt),
-    true,                        // sortgrid
+    false,                       // sortgrid: skip redundant first sort; EnvelopeDispersionBuild
+                                // overwrites PLSD, so we sort once in Step 3 with correct weights
     use_opencl,                  // bool
     verbose                      // bool
 );

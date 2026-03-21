@@ -71,6 +71,4 @@ test_that("Bayesian Gaussian regression with Independent Normal-Gamma prior — 
   avg_candidates <- mean(lmb.boston_v3$iters)
   expect_true(avg_candidates < 400)
   
- 
-  
 })

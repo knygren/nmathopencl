@@ -76,8 +76,7 @@ lmb.boston_v3 <- glmb(n = 1000,
                                                              rate  = ps$rate
                       ),
                       use_parallel = TRUE,
-                      use_opencl = TRUE,
-                      verbose    = FALSE
+                      use_opencl = TRUE
 )
 
 
