@@ -24,3 +24,4 @@
 ^pandoc.*\.deb$
 ^\.RDataTmp$
 ^data-raw$
+^scripts$

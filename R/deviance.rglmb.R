@@ -4,7 +4,7 @@
 #' @param object an object of class \code{"rglmb"}, typically the result of a call to \link{rglmb}
 #' @param ... further arguments to or from other methods
 #' @return A vector with the deviance extracted from the \code{object}.
-#' @example inst/examples/Ex_extractAIC.glmb.R
+#' @example inst/examples/Ex_deviance.rglmb.R
 #' @export
 #' @method deviance rglmb
 

@@ -24,6 +24,8 @@
 #' The package includes extensive documentation on model fitting, prior
 #' construction, diagnostics, and optional GPU acceleration using OpenCL.
 #'
+#' @example inst/examples/Ex_glmbayes-package.R
+#'
 #' @seealso
 #' Useful links:
 #' \itemize{

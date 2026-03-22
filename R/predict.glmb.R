@@ -153,7 +153,6 @@ predict.glmb<-function(object,newdata=NULL,type="link",
 #' @param Check_Rows Logical indicating whether Number of Rows Should be checked (the default). If FALSE,
 #' differing number of rows are allowed
 #' @return 0 if the two model frames pass the comparison. If not, the function stops.
-#' @example inst/examples/Ex_confint.glmb.R
 #' @noRd
 
 Compare_Model_Frames<-function(oldframe,newframe,Check_Rows=TRUE){
@@ -212,9 +211,8 @@ Compare_Model_Frames<-function(oldframe,newframe,Check_Rows=TRUE){
 #' (unless the environment contains the needed information). It will generally 
 #' succeed if the all variables used to derive exogenous or offset
 #' variables are present and olddata contains data for 
-#' the missing variables that can be used to substitute the missing 
-#' data in newdata with means from the olddata  
-#' @example inst/examples/Ex_confint.glmb.R
+#' the missing variables that can be used to substitute the missing
+#' data in newdata with means from the olddata
 #' @noRd
 
 
@@ -385,7 +383,6 @@ complete_newdata<-function(object,newdata,olddata,type){
 #' @param olddata A data frame containing the model variables (and values) from the original model
 #' @param newdata A data frame containing the model variables wih possible new values
 #' @return A design matrix x_new and a model frame mod_frame_new
-#' @example inst/examples/Ex_confint.glmb.R
 #' @noRd
 
 get_x_matrix<-function(object,olddata,newdata){
@@ -440,7 +437,6 @@ get_x_matrix<-function(object,olddata,newdata){
 #' @return A matrix \code{pred} with model predictions where the number of rows equal the number of 
 #' rows in \code{object$coefficients} and the number of columns equal the number of rows in  
 #' newdata passed to the predict function.
-#' @example inst/examples/Ex_confint.glmb.R
 #' @noRd 
 
 generate_predictions<-function(object,type="link",new_x,new_model_frame){
