@@ -134,8 +134,8 @@ List EnvelopeDispersionBuild(
 );
 
 
-/// EnvelopeCentering: initial dispersion + dispersion anchoring loop for Normal-Gamma.
-/// Returns dispersion and RSS_post for downstream mode optimization and envelope build.
+/// EnvelopeCentering: dispersion anchoring for Normal-Gamma; RSS_post is closed-form
+/// E[RSS] each iteration and drives the Gamma update; MC RSS optional (verbose).
 List EnvelopeCentering(
     NumericVector y,
     NumericMatrix x,

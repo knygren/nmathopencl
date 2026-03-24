@@ -1,10 +1,12 @@
 #' Envelope Centering for Bayesian Gaussian Regression
 #'
 #' @description
-#' `EnvelopeCentering()` computes an initial dispersion and posterior residual
-#' sum of squares (RSS) for use in envelope construction when the dispersion is
-#' unknown. It implements the dispersion-anchoring loop: sample regression
-#' coefficients, compute RSS, and update the dispersion via the Gamma posterior.
+#' `EnvelopeCentering()` computes an initial dispersion and the expected
+#' posterior weighted RSS (closed form under the Normal posterior for
+#' coefficients) for use in envelope construction when the dispersion is
+#' unknown. The dispersion-anchoring loop updates dispersion from the Gamma
+#' posterior using that expected RSS each iteration. Verbose diagnostic output
+#' from C++ is currently disabled (MC comparison block commented in source).
 #' This step is typically called inside \code{rIndepNormalGammaReg()} before
 #' \code{\link{EnvelopeOrchestrator}}, but may be used directly for diagnostics
 #' or custom workflows.
@@ -24,14 +26,15 @@
 #' A list with components:
 #' \describe{
 #'   \item{\code{dispersion}}{Numeric. Anchored dispersion value.}
-#'   \item{\code{RSS_post}}{Numeric. Posterior residual sum of squares.}
+#'   \item{\code{RSS_post}}{Numeric. Expected posterior weighted RSS (closed form;
+#'     last iteration).}
 #' }
 #'
 #' @details
 #' The function first obtains an initial dispersion via \code{lm.wfit} residual
-#' variance, then iteratively: (1) samples regression coefficients from the
-#' Normal posterior given the current dispersion, (2) computes the mean RSS,
-#' and (3) updates the dispersion via the Gamma posterior. The result is used
+#' variance, then iteratively: (1) computes the expected weighted RSS under the
+#' Normal posterior (closed form), (2) updates the
+#' dispersion via the Gamma posterior using the expected RSS. The result is used
 #' as \code{dispersion2} and \code{RSS_Post2} in downstream envelope construction
 #' (e.g., \code{\link{EnvelopeOrchestrator}}).
 #'
