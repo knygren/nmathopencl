@@ -411,6 +411,26 @@ Rcpp::List EnvelopeOrchestrator_cpp_export(
 }
 
 // [[Rcpp::export]]
+Rcpp::List EnvelopeCentering_cpp_export(
+    const Rcpp::NumericVector& y,
+    const Rcpp::NumericMatrix& x,
+    const Rcpp::NumericVector& mu,
+    const Rcpp::NumericMatrix& P,
+    const Rcpp::NumericVector& offset,
+    const Rcpp::NumericVector& wt,
+    double shape,
+    double rate,
+    int Gridtype = 2,
+    bool verbose = false
+) {
+  return glmbayes::env::EnvelopeCentering(
+    y, x, mu, P, offset, wt,
+    shape, rate,
+    Gridtype, verbose
+  );
+}
+
+// [[Rcpp::export]]
 Rcpp::List EnvelopeSet_Grid_cpp_export(
     const Rcpp::NumericMatrix& GIndex,
     const Rcpp::NumericMatrix& cbars,

@@ -328,6 +328,26 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// EnvelopeCentering_cpp_export
+Rcpp::List EnvelopeCentering_cpp_export(const Rcpp::NumericVector& y, const Rcpp::NumericMatrix& x, const Rcpp::NumericVector& mu, const Rcpp::NumericMatrix& P, const Rcpp::NumericVector& offset, const Rcpp::NumericVector& wt, double shape, double rate, int Gridtype, bool verbose);
+RcppExport SEXP _glmbayes_EnvelopeCentering_cpp_export(SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP offsetSEXP, SEXP wtSEXP, SEXP shapeSEXP, SEXP rateSEXP, SEXP GridtypeSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type P(PSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type offset(offsetSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type wt(wtSEXP);
+    Rcpp::traits::input_parameter< double >::type shape(shapeSEXP);
+    Rcpp::traits::input_parameter< double >::type rate(rateSEXP);
+    Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(EnvelopeCentering_cpp_export(y, x, mu, P, offset, wt, shape, rate, Gridtype, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // EnvelopeSet_Grid_cpp_export
 Rcpp::List EnvelopeSet_Grid_cpp_export(const Rcpp::NumericMatrix& GIndex, const Rcpp::NumericMatrix& cbars, const Rcpp::NumericMatrix& Lint);
 RcppExport SEXP _glmbayes_EnvelopeSet_Grid_cpp_export(SEXP GIndexSEXP, SEXP cbarsSEXP, SEXP LintSEXP) {
@@ -490,6 +510,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_EnvelopeEval_cpp_export", (DL_FUNC) &_glmbayes_EnvelopeEval_cpp_export, 11},
     {"_glmbayes_EnvelopeDispersionBuild_cpp_export", (DL_FUNC) &_glmbayes_EnvelopeDispersionBuild_cpp_export, 17},
     {"_glmbayes_EnvelopeOrchestrator_cpp_export", (DL_FUNC) &_glmbayes_EnvelopeOrchestrator_cpp_export, 21},
+    {"_glmbayes_EnvelopeCentering_cpp_export", (DL_FUNC) &_glmbayes_EnvelopeCentering_cpp_export, 10},
     {"_glmbayes_EnvelopeSet_Grid_cpp_export", (DL_FUNC) &_glmbayes_EnvelopeSet_Grid_cpp_export, 3},
     {"_glmbayes_EnvelopeSet_LogP_cpp_export", (DL_FUNC) &_glmbayes_EnvelopeSet_LogP_cpp_export, 4},
     {"_glmbayes_rIndepNormalGammaReg_std_cpp_export", (DL_FUNC) &_glmbayes_rIndepNormalGammaReg_std_cpp_export, 15},

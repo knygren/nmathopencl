@@ -1,3 +1,52 @@
+#' Envelope Centering for Bayesian Gaussian Regression
+#'
+#' @description
+#' `EnvelopeCentering()` computes an initial dispersion and posterior residual
+#' sum of squares (RSS) for use in envelope construction when the dispersion is
+#' unknown. It implements the dispersion-anchoring loop: sample regression
+#' coefficients, compute RSS, and update the dispersion via the Gamma posterior.
+#' This step is typically called inside \code{rIndepNormalGammaReg()} before
+#' \code{\link{EnvelopeOrchestrator}}, but may be used directly for diagnostics
+#' or custom workflows.
+#'
+#' @param y Numeric response vector of length \code{m}.
+#' @param x Numeric design matrix of dimension \code{m * p}.
+#' @param mu Numeric vector of prior means (length \code{p}).
+#' @param P Numeric matrix of prior precision (\code{p * p}).
+#' @param offset Numeric vector of length \code{m}. Use \code{rep(0, m)} for none.
+#' @param wt Numeric vector of prior weights.
+#' @param shape Numeric. Shape parameter of the Gamma prior for the dispersion.
+#' @param rate Numeric. Rate parameter of the Gamma prior for the dispersion.
+#' @param Gridtype Integer. Grid construction method (default \code{2}).
+#' @param verbose Logical. Whether to print progress messages.
+#'
+#' @return
+#' A list with components:
+#' \describe{
+#'   \item{\code{dispersion}}{Numeric. Anchored dispersion value.}
+#'   \item{\code{RSS_post}}{Numeric. Posterior residual sum of squares.}
+#' }
+#'
+#' @details
+#' The function first obtains an initial dispersion via \code{lm.wfit} residual
+#' variance, then iteratively: (1) samples regression coefficients from the
+#' Normal posterior given the current dispersion, (2) computes the mean RSS,
+#' and (3) updates the dispersion via the Gamma posterior. The result is used
+#' as \code{dispersion2} and \code{RSS_Post2} in downstream envelope construction
+#' (e.g., \code{\link{EnvelopeOrchestrator}}).
+#'
+#' @seealso
+#' \code{\link{EnvelopeOrchestrator}} for envelope construction,
+#' \code{\link{rindepNormalGamma_reg}} for the full simulation routine.
+#'
+#' @export
+EnvelopeCentering <- function(y, x, mu, P, offset, wt, shape, rate,
+                             Gridtype = 2L, verbose = FALSE) {
+  .EnvelopeCentering_cpp(y, x, mu, P, offset, wt, shape, rate,
+                         Gridtype, verbose)
+}
+
+
 #' Envelope Construction Orchestrator for Bayesian Gaussian Regression
 #'
 #' @description

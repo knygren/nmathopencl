@@ -53,6 +53,10 @@ EnvelopeOrchestrator_cpp_export <- function(bstar2, A, y, x2, mu2, P2, alpha, wt
     .Call(`_glmbayes_EnvelopeOrchestrator_cpp_export`, bstar2, A, y, x2, mu2, P2, alpha, wt, n, Gridtype, n_envopt, shape, rate, RSS_Post2, RSS_ML, max_disp_perc, disp_lower, disp_upper, use_parallel, use_opencl, verbose)
 }
 
+EnvelopeCentering_cpp_export <- function(y, x, mu, P, offset, wt, shape, rate, Gridtype = 2L, verbose = FALSE) {
+    .Call(`_glmbayes_EnvelopeCentering_cpp_export`, y, x, mu, P, offset, wt, shape, rate, Gridtype, verbose)
+}
+
 EnvelopeSet_Grid_cpp_export <- function(GIndex, cbars, Lint) {
     .Call(`_glmbayes_EnvelopeSet_Grid_cpp_export`, GIndex, cbars, Lint)
 }

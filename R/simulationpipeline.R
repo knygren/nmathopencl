@@ -2361,6 +2361,67 @@ rNormalGLM_std<-function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, 
 }
 
 
+#' The Bayesian Gaussian Regression with Independent Normal-Gamma Prior in Standard Form
+#'
+#' \code{rIndepNormalGammaReg_std} generates iid samples from a Bayesian Gaussian
+#' regression model with an independent Normal-Gamma prior, in standard form. The
+#' function should only be called after standardization and envelope construction
+#' (e.g., via \code{\link{EnvelopeOrchestrator}}).
+#'
+#' @param n Number of draws to generate. If \code{length(n) > 1}, the length is
+#'   taken to be the number required.
+#' @param y A vector of observations of length \code{m}.
+#' @param x A design matrix of dimension \code{m * p}.
+#' @param mu A matrix of prior means (typically standardized to zero) of dimension
+#'   \code{p * 1}.
+#' @param P A positive-definite matrix of dimension \code{p * p} specifying the
+#'   prior precision component shifted into the log-likelihood.
+#' @param alpha A numeric vector of length \code{m} for the offset-adjusted mean
+#'   component. See \code{\link{model.offset}}.
+#' @param wt An optional vector of prior weights. Should be \code{NULL} or a
+#'   numeric vector.
+#' @param f2 Function used to calculate the negative of the log-posterior
+#'   (kept for signature parity with \code{rNormalGLM_std}).
+#' @param Envelope An envelope object containing \code{PLSD}, \code{loglt},
+#'   \code{logrt}, \code{cbars}, and related components from
+#'   \code{\link{EnvelopeOrchestrator}}.
+#' @param gamma_list A list with \code{shape3}, \code{rate2}, \code{disp_lower},
+#'   and \code{disp_upper} from the Gamma posterior for the dispersion.
+#' @param UB_list A list with \code{lg_prob_factor}, \code{UB2min}, \code{RSS_Min},
+#'   and other bounds from \code{\link{EnvelopeOrchestrator}}.
+#' @param family Character vector specifying the family (e.g., \code{"gaussian"}).
+#' @param link Character vector specifying the link (e.g., \code{"identity"}).
+#' @param progbar Logical. Whether to display a progress bar during simulation.
+#' @param verbose Logical. Whether to print diagnostic messages.
+#'
+#' @return A list with components:
+#' \item{beta_out}{A matrix of simulated regression coefficients in standardized
+#'   space. Each row is one draw.}
+#' \item{disp_out}{A vector of dispersion draws for each sample.}
+#' \item{iters_out}{A vector of iteration counts (candidates per acceptance) for
+#'   each draw.}
+#' \item{weight_out}{A vector of weights (typically all ones).}
+#'
+#' @details
+#' This function uses the envelope and dispersion bounds from
+#' \code{\link{EnvelopeOrchestrator}} to sample from the joint posterior of
+#' coefficients and dispersion via rejection sampling. It is typically called
+#' internally by \code{rindepNormalGamma_reg()}, but may be used directly for
+#' custom split workflows (e.g., after constructing the envelope separately).
+#'
+#' @seealso
+#' \code{\link{EnvelopeOrchestrator}} for envelope construction,
+#' \code{\link{rNormalGLM_std}} for the non-Gaussian standardized sampler,
+#' \code{\link{rindepNormalGamma_reg}} for the full simulation routine.
+#'
+#' @export
+rIndepNormalGammaReg_std <- function(n, y, x, mu, P, alpha, wt, f2, Envelope,
+                                     gamma_list, UB_list, family, link,
+                                     progbar = TRUE, verbose = FALSE) {
+  .rIndepNormalGammaReg_std_cpp(n, y, x, mu, P, alpha, wt, f2, Envelope,
+                                gamma_list, UB_list, family, link,
+                                progbar, verbose)
+}
 
 
 # Helpers --------------------------------------------------------------------

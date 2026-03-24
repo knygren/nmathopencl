@@ -19,10 +19,10 @@
 #
 #  Wrappers are organized by tier:
 #    Tier 1: Core Simulation   - Main sampling entry points (rNormal_reg, etc.)
-#    Tier 2: Envelope          - Envelope build/eval; used by .rNormalGLM_cpp
-#    Tier 3: Indep NG std      - Split workflow samplers (custom use)
-#    Tier 4: Model Utilities   - Standardization
-#    Tier 5: OpenCL/GPU        - Kernel loading, GPU diagnostics
+#    Tier 2: Envelope          - Envelope build/eval, EnvelopeCentering,
+#                                rNormalGLM_std, rIndepNormalGammaReg_std
+#    Tier 3: Model Utilities   - Standardization
+#    Tier 4: OpenCL/GPU        - Kernel loading, GPU diagnostics
 # -------------------------------------------------------------------------
 
 
@@ -95,7 +95,8 @@
 # =============================================================================
 #  Tier 2: Envelope & Standardization
 #  Callers: EnvelopeSize, EnvelopeBuild, EnvelopeEval, EnvelopeDispersionBuild,
-#           EnvelopeOrchestrator, rNormalGLM_std; EnvelopeSet_* are internal
+#           EnvelopeOrchestrator, EnvelopeCentering, rNormalGLM_std,
+#           rIndepNormalGammaReg_std; EnvelopeSet_* are internal
 #  User:    Advanced users – understanding algorithm, custom envelope workflows
 # =============================================================================
 
@@ -111,6 +112,24 @@
         f2, Envelope,
         family, link,
         progbar, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rIndepNormalGammaReg_std_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar, verbose) {
+  .Call(`_glmbayes_rIndepNormalGammaReg_std_cpp_export`, n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rIndepNormalGammaReg_std_parallel_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar, verbose) {
+  .Call(`_glmbayes_rIndepNormalGammaReg_std_parallel_cpp_export`, n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.EnvelopeCentering_cpp <- function(y, x, mu, P, offset, wt, shape, rate, Gridtype = 2L, verbose = FALSE) {
+  .Call(`_glmbayes_EnvelopeCentering_cpp_export`, y, x, mu, P, offset, wt, shape, rate, Gridtype, verbose)
 }
 
 #' @noRd
@@ -206,26 +225,7 @@
 
 
 # =============================================================================
-#  Tier 3: Standardized Samplers (Indep Normal-Gamma)
-#  Callers: C++ only (rIndepNormalGammaReg); R wrappers for custom split workflow
-#  User:    Advanced / developers – after EnvelopeOrchestrator, sample separately
-# =============================================================================
-
-#' @noRd
-#' @keywords internal
-.rIndepNormalGammaReg_std_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar, verbose) {
-  .Call(`_glmbayes_rIndepNormalGammaReg_std_cpp_export`, n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar, verbose)
-}
-
-#' @noRd
-#' @keywords internal
-.rIndepNormalGammaReg_std_parallel_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar, verbose) {
-  .Call(`_glmbayes_rIndepNormalGammaReg_std_parallel_cpp_export`, n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar, verbose)
-}
-
-
-# =============================================================================
-#  Tier 4: Model Utilities
+#  Tier 3: Model Utilities
 #  Callers: glmb_Standardize_Model
 #  User:    Advanced users – model preparation, standardization
 # =============================================================================
@@ -238,7 +238,7 @@
 
 
 # =============================================================================
-#  Tier 5: OpenCL / GPU
+#  Tier 4: OpenCL / GPU
 #  Callers: load_kernel_source, load_kernel_library, has_opencl,
 #           get_opencl_core_count, gpu_names
 #  User:    Advanced users – GPU diagnostics, kernel loading for use_opencl
