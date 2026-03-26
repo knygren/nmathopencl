@@ -326,8 +326,8 @@ The subgradients \eqn{c(\bar{\theta})} enter the likelihood-subgradient density 
 negative log-likelihoods (through \eqn{h_{\bar{\theta}}(\cdot)}) are used in the accept-reject procedure.
 CPU and GPU routines compute these values efficiently.
 \itemize{
-\item On CPU: via \code{f2_f3_non_opencl} 
-\item On GPU: via \code{f2_f3_opencl}
+\item On CPU: via \code{f2_f3_non_opencl}.
+\item On GPU: via \code{f2_f3_opencl}, which computes these in parallel acros faces
 }
 \item \strong{Call \code{EnvelopeSet_Grid_C2_pointwise} to evaluate restricted multivariate normal log-densities.}
 Each restricted density corresponds to a subset of the partition, normalized

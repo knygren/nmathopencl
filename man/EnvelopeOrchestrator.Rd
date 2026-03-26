@@ -49,7 +49,9 @@ the log‑likelihood.}
 
 \item{n}{Integer. Number of envelope grid points or simulation draws.}
 
-\item{Gridtype}{Integer specifying the envelope grid construction method.}
+\item{Gridtype}{Integer specifying the envelope grid construction method for
+API compatibility. The C++ orchestrator \strong{overrides} this to \code{3L}
+(full \eqn{3^{p}} grid): unknown dispersion does not use smaller grids.}
 
 \item{n_envopt}{Optional integer. Effective sample size passed to
 \code{EnvelopeOpt} during grid construction. Larger values encourage tighter
@@ -59,8 +61,10 @@ envelopes.}
 
 \item{rate}{Numeric. Rate parameter of the Gamma prior for the dispersion.}
 
-\item{RSS_Post2}{Numeric. Posterior residual sum of squares used for
-dispersion anchoring.}
+\item{RSS_Post2}{Numeric. Expected posterior weighted RSS used to anchor the
+dispersion axis (typically \code{centering_out$RSS_post} from
+\code{\link{EnvelopeCentering}} inside \code{\link{rindepNormalGamma_reg}};
+see vignette \code{Chapter-A11}).}
 
 \item{RSS_ML}{Numeric. Maximum‑likelihood residual sum of squares.}
 
@@ -117,17 +121,235 @@ It is typically used inside *.cpp routines such as
 diagnostics, envelope visualization, or custom simulation workflows.
 }
 \details{
-\code{EnvelopeOrchestrator()} consolidates the envelope‑related steps that were
-previously distributed across multiple R and C++ routines.
-It provides a stable, high‑level interface for envelope construction and
-reduces the number of exported C++ functions required by the package.
+\code{EnvelopeOrchestrator()} is the \strong{envelope-construction stage} for Bayesian
+\strong{Gaussian regression with an independent Normal--Gamma prior} on
+\eqn{(\beta, \phi)} (dispersion \eqn{\phi}; precision \eqn{\tau = 1/\phi} in
+much of the theory). It is implemented in \file{src/EnvelopeOrchestrator.cpp}
+and composes direct C++ calls to \code{EnvelopeBuild} and
+\code{EnvelopeDispersionBuild} with an R call to \code{\link{EnvelopeSort}}.
 
-The function does \strong{not} perform simulation.
-Simulation should be carried out afterward using either
-\code{.rIndepNormalGammaReg_std_cpp()} or
-\code{.rIndepNormalGammaReg_std_parallel_cpp()}, depending on the
-\code{use_parallel} flag.
+\strong{What this function does not do.} It does \strong{not} run the iterative
+dispersion centering loop (\code{\link{EnvelopeCentering}}), \strong{not} optimize
+the posterior mode or Hessian, \strong{not} standardize the model
+(\code{\link{glmb_Standardize_Model}}), and \strong{not} draw posterior samples.
+Those steps are performed by \code{\link{rindepNormalGamma_reg}} (see vignette
+\code{Chapter-A11}) before and after the orchestrator. Inputs such as
+\code{bstar2}, \code{A}, \code{x2}, \code{mu2}, and \code{P2} must therefore
+already be in \strong{standard form} for the coefficient subproblem, exactly as
+passed from that workflow.
+
+\strong{What the return value is for.} The returned \code{Env}, \code{gamma_list},
+and \code{UB_list} are consumed by the internal standardized samplers
+\code{rIndepNormalGammaReg_std} and \code{rIndepNormalGammaReg_std_parallel} in
+\file{src/rIndepNormalGammaReg.cpp}, which implement the joint
+accept--reject procedure over \eqn{(\beta, \phi)}. Theory for the dispersion
+envelope and bounding arguments is in vignette \code{Chapter-A07}; the
+end-to-end implementation map is in \code{Chapter-A11}. The coefficient-only
+likelihood-subgradient envelope (\insertCite{Nygren2006}{glmbayes}) is
+documented under \code{\link{EnvelopeBuild}} and vignette \code{Chapter-A08}.
+
+The function does \strong{not} perform simulation. Simulation is carried out
+afterward via \code{.rIndepNormalGammaReg_std_cpp()} or
+\code{.rIndepNormalGammaReg_std_parallel_cpp()}, depending on
+\code{use_parallel}.
 }
+\section{Use of the envelope during sampling}{
+
+
+After \code{EnvelopeOrchestrator()} returns, \code{\link{rindepNormalGamma_reg}}
+delegates iid simulation to \code{rIndepNormalGammaReg_std} (serial) or
+\code{rIndepNormalGammaReg_std_parallel} (parallel). These routines are \strong{not
+exported}; they are the direct analogues of the fixed-dispersion path
+\code{.rNormalGLM_std_cpp()} for GLMs, but for the \strong{joint} posterior
+\eqn{\pi(\beta, \phi \mid y)} under the independent Normal--Gamma prior.
+
+\strong{Dominating proposal (conceptual).} The envelope list \code{Env} still
+describes a \strong{mixture of restricted multivariate Normal} proposal pieces for
+the \strong{standardized} regression coefficients, with mixture weights
+\eqn{\tilde{p}_j} stored in \code{PLSD}. After
+\code{\link{EnvelopeDispersionBuild}}, those weights and the per-face
+constants are adjusted so that, together with a \strong{truncated inverse-Gamma}
+(dispersion) proposal derived from \code{gamma_list}, the joint proposal
+dominates the target posterior on the truncated dispersion interval
+\code{[low, upp]}. Chapter A07 derives the dispersion-related bounds;
+Chapter A11 records how \code{UB_list} entries enter the code.
+
+\strong{One accept--reject iteration} (standardized coordinates) proceeds as follows:
+
+\enumerate{
+\item \strong{Draw a mixture component (face)} \eqn{J}. An index \eqn{J} is
+drawn from the discrete distribution with probabilities \code{PLSD}.
+\item \strong{Propose coefficients} \eqn{\beta^\star}. Conditional on \eqn{J},
+each coordinate is drawn from the \strong{restricted Normal} used in the
+fixed-dispersion construction: cumulative-normal tail probabilities
+\code{loglt[J, ]}, \code{logrt[J, ]}, and subgradient shift
+\code{-cbars[J, ]} (internal \code{rnorm_ct} truncated Normal
+sampling, same structural role as \code{ctrnorm_cpp()} in the GLM path).
+\item \strong{Propose dispersion} \eqn{\phi}. A draw is taken from the truncated
+inverse-Gamma / Gamma piece defined by \code{shape3}, \code{rate2},
+\code{disp_lower}, and \code{disp_upper} in \code{gamma_list}
+(\code{rinvgamma_ct_safe}).
+\item \strong{Re-weight the likelihood for} \eqn{\phi}. Observation weights in
+the Gaussian log-likelihood are scaled by \eqn{1/\phi}
+(\code{wt2 = wt / dispersion} in the C++ sources).
+\item \strong{Dispersion-adjusted tangency.} Because the tangency point for the
+linear upper bound depends on dispersion, the code recomputes a
+\strong{face-specific} \eqn{\bar{\theta}_J(\phi)} via
+\code{Inv_f3_with_disp} (using a one-time cache from
+\code{Inv_f3_precompute_disp} built from \code{cbars} and the data).
+The negative log-likelihood at that point feeds the \strong{UB1} tangent term.
+\item \strong{Log-likelihood at the proposal.} Compute
+\eqn{-\log f(y \mid \beta^\star, \phi)} with the same \eqn{\phi} and
+scaled weights (output \code{LL_Test} in the serial implementation).
+}
+
+\strong{Acceptance inequality (structure).} Write \eqn{\ell(\beta,\phi)} for the
+Gaussian log-likelihood (weighted, with offset). The serial sampler forms
+\eqn{\mathrm{UB1}} from the tangent to \eqn{-\ell} at
+\eqn{\bar{\theta}_J(\phi)} along subgradient \eqn{c_J = }\code{cbars[J, ]}:
+\deqn{
+  \mathrm{UB1} =
+  -\ell\!\big(\bar{\theta}_J(\phi), \phi\big)
+  - c_J^\top \big(\beta^\star - \bar{\theta}_J(\phi)\big).
+}
+Additional terms bound RSS variation along \eqn{\phi} (\strong{UB2}, using
+\code{RSS_Min} and \code{UB2min} from \code{UB_list}) and dispersion-axis
+majorization (\strong{UB3A}, \strong{UB3B}) built from \code{lg_prob_factor},
+\code{lmc1}, \code{lmc2}, \code{lm_log1}, \code{lm_log2},
+\code{max_New_LL_UB}, and \code{max_LL_log_disp}. With
+\eqn{L_{\mathrm{test}} = -\ell(\beta^\star,\phi)}, define
+\eqn{T_1 = L_{\mathrm{test}} - \mathrm{UB1}} and
+\eqn{T = T_1 - (\mathrm{UB2} + \mathrm{UB3A} + \mathrm{UB3B})}. The code draws
+\eqn{U_2 \sim \mathrm{Unif}(0,1)} and \strong{accepts} \eqn{(\beta^\star, \phi)} when
+\deqn{
+  T - \log(U_2) \ge 0.
+}
+Serial and parallel workers use the same logical decomposition up to
+implementation detail. Under the construction in
+\code{\link{EnvelopeDispersionBuild}}, the terms are arranged so that
+\eqn{T_1 \le 0} and \eqn{\mathrm{UB2}}, \eqn{\mathrm{UB3A}}, \eqn{\mathrm{UB3B}}
+are nonnegative up to controlled numerical slack. Iteration counts are stored
+in \code{iters_out}.
+
+\strong{Mapping orchestrator outputs to the sampler.}
+\itemize{
+\item \code{Env$PLSD}: mixture probabilities over envelope faces for Step 1.
+\item \code{Env$loglt}, \code{Env$logrt}, \code{Env$cbars}: restricted
+Normal proposal for \eqn{\beta^\star} in Step 2.
+\item \code{Env$GridIndex}, \code{Env$thetabars}, \code{Env$logU},
+\code{Env$logP}: same role as in \code{\link{EnvelopeBuild}} for the
+coefficient mixture; dispersion refinement may update \code{PLSD}
+before sorting.
+\item \code{gamma_list}: truncated dispersion proposal parameters
+(\code{shape3}, \code{rate2}, bounds) for Step 3.
+\item \code{UB_list}: global and per-face constants (\code{RSS_Min},
+\code{UB2min}, \code{lg_prob_factor}, linear \code{lmc}/\code{lm_log}
+pieces) for \eqn{\mathrm{UB2}}, \eqn{\mathrm{UB3A}}, \eqn{\mathrm{UB3B}}.
+\item \code{low}, \code{upp}: dispersion interval endpoints (duplicated
+from \code{gamma_list} for convenience).
+}
+Unlike the fixed-dispersion GLM sampler, this path does \strong{not} apply the
+stored \code{LLconst} vector directly in the acceptance test; the tangent
+piece is recomputed as \eqn{\mathrm{UB1}} once \eqn{\phi} and
+\eqn{\bar{\theta}_J(\phi)} are known.
+}
+
+\section{Algorithmic steps}{
+
+
+The orchestrator implements the \strong{independent Normal--Gamma} envelope
+pipeline: first a \strong{coefficient} envelope at a \strong{dispersion anchor}
+(\insertCite{Nygren2006}{glmbayes}; vignette \code{Chapter-A08}), then
+\strong{dispersion-aware} refinement (\code{Chapter-A07}), then sorting. Steps 3--8
+repeat the internal logic of \code{\link{EnvelopeBuild}} (same formulas on that
+help page); here the likelihood is \strong{Gaussian} with \strong{identity} link, weights
+are \eqn{w_i / d_\star} with \eqn{d_\star} from the anchor below, and the first
+pass uses \code{sortgrid = FALSE} so sorting runs \strong{after} dispersion
+refinement.
+\enumerate{
+\item \strong{Force full grid for unknown dispersion.} The argument \code{Gridtype}
+is overridden to \code{3L} so the coefficient grid always uses the full
+\eqn{3^{p}} partition (implementation policy in
+\file{src/EnvelopeOrchestrator.cpp}).
+\item \strong{Anchor dispersion and rescale weights for} \code{EnvelopeBuild}.
+Let \eqn{n_w = \sum_i w_i}. With prior hyperparameters \code{shape}
+(\eqn{a_0}) and \code{rate} (\eqn{b_0}) and centered RSS \code{RSS_Post2},
+define \eqn{s = a_0 + n_w/2} and \eqn{r = b_0 + \mathrm{RSS}_{\mathrm{post}}/2}
+where \eqn{\mathrm{RSS}_{\mathrm{post}}} denotes \code{RSS_Post2} (the C++
+code names the scalars \code{shape2} and \code{rate3}). The dispersion anchor
+is \eqn{d_\star = r/(s - 1)}, and observation weights \eqn{w_i} passed into
+the embedded \code{EnvelopeBuild} call are scaled by \eqn{1/d_\star}. This ties
+the coefficient envelope to the Gamma posterior for the precision conditional
+on the centered RSS (Chapters A07, A11).
+\item \strong{Compute width parameters} \eqn{\omega_i} \strong{from the diagonal precision
+matrix.} Let \eqn{\theta^{\ast}} be the standardized posterior mode. For
+each dimension \eqn{i},
+\deqn{
+     \omega_{i} :=
+     \frac{\sqrt{2} - \exp\!\big(-1.20491 - 0.7321\,\sqrt{0.5 - \partial^{2}\log f(\theta^{\ast}\mid y)/\partial\theta_{i}^{2}}\big)}
+          {\sqrt{1 - \partial^{2}\log f(\theta^{\ast}\mid y)/\partial\theta_{i}^{2}}}.
+   }
+Here \eqn{f} is the weighted Gaussian log-posterior for \eqn{\beta} at the
+anchored dispersion.
+\item \strong{Construct intervals and the} \eqn{3^{p}} \strong{partition} around
+\eqn{\theta^\star}. Set
+\deqn{
+     \ell_{i,1} = \theta^{\ast}_{i} - 0.5\,\omega_{i}, \quad
+     \ell_{i,2} = \theta^{\ast}_{i} + 0.5\,\omega_{i},
+   }
+and
+\deqn{
+     A_{i,1} = (-\infty,\ell_{i,1}), \quad
+     A_{i,2} = [\ell_{i,1},\ell_{i,2}], \quad
+     A_{i,3} = (\ell_{i,2},\infty).
+   }
+With \eqn{J = \prod_{i=1}^{p} \{1,2,3\}} and \eqn{j = (j_1,\ldots,j_p)},
+\eqn{A^{\ast}_{j} = \prod_{i=1}^{p} A_{i,j_i}} partitions standardized
+coefficient space.
+\item \strong{Select tangency points} \eqn{\bar{\theta}_j} \strong{per cell} (left / mode /
+right of each interval). For index sets \eqn{C_{j1},C_{j2},C_{j3}} by
+coordinate,
+\deqn{
+     \bar{\theta}_{j,i} =
+     \begin{cases}
+       \theta^{\ast}_{i} - \omega_{i}, & i \in C_{j1}, \\
+       \theta^{\ast}_{i},              & i \in C_{j2}, \\
+       \theta^{\ast}_{i} + \omega_{i}, & i \in C_{j3}.
+     \end{cases}
+   }
+\item \strong{Evaluate negative log-likelihood and gradient at each grid point.}
+Subgradients \eqn{c(\bar{\theta}_j)} and negative log-likelihoods define
+the likelihood-subgradient envelope pieces (\insertCite{Nygren2006}{glmbayes};
+\code{Chapter-A08}). CPU: \code{f2_f3_non_opencl}; GPU (optional):
+\code{f2_f3_opencl}.
+\item \strong{Call} \code{EnvelopeSet_Grid_C2_pointwise} \strong{and}
+\code{EnvelopeSet_LogP_C2} \strong{(C++ pipeline)} to obtain restricted Normal
+log-densities, mixture log-probabilities, and constants as in Remarks 5--6
+of the JASA paper (same as \code{\link{EnvelopeBuild}}).
+\item \strong{Normalize to} \code{PLSD} \strong{without sorting.} The embedded
+\code{EnvelopeBuild} call sets \code{sortgrid = FALSE} so an intermediate
+sort is not wasted before \code{\link{EnvelopeDispersionBuild}} revises
+mixture weights for the joint \eqn{(\beta,\phi)} target and
+\code{\link{EnvelopeSort}} runs once at the end.
+\item \strong{Call} \code{EnvelopeDispersionBuild} \strong{(C++).} Pass the coefficient
+envelope list, prior \code{shape}, \code{rate}, standardized \code{P2},
+data \code{y}, \code{x2}, \code{alpha}, \code{mu2}, \code{wt},
+\code{RSS_Post2}, \code{RSS_ML}, dispersion controls
+(\code{max_disp_perc}, optional bounds), and \code{use_parallel}. This
+constructs the dispersion truncation interval, updates Gamma proposal
+parameters (\code{gamma_list}), computes \code{UB_list}, and returns
+\code{Env_out} with adjusted \code{PLSD}. See \code{Chapter-A07} and
+\code{Chapter-A11}, Section 3.3.
+\item \strong{Call} \code{\link{EnvelopeSort}} \strong{(R).} Reorder envelope components and
+align \code{lg_prob_factor} and \code{UB2min} with the sorted indexing. If
+sorting cannot allocate safely, the implementation falls back to unsorted
+\code{Env_out} with UB fields patched (\file{src/EnvelopeOrchestrator.cpp}).
+\item \strong{Return} \code{Env}, \code{gamma_list}, \code{UB_list},
+\code{diagnostics}, \code{low}, and \code{upp} for the standardized
+samplers.
+}
+}
+
 \examples{
 ############################### Start of EnvelopeOrchestrator example ####################
 
@@ -279,11 +501,17 @@ env_out
 # End: envelope construction only
 ###############################################################################
 }
+\references{
+\insertAllCited{}
+}
 \seealso{
 \itemize{
 \item \link[glmbayes]{EnvelopeBuild} – fixed‑dispersion envelope construction
 \item \link[glmbayes]{EnvelopeDispersionBuild} – dispersion‑aware envelope refinement
 \item \link[glmbayes]{EnvelopeSort} – envelope sorting and reindexing
-\item \code{rIndepNormalGammaReg()} – full Normal–Gamma *.cpp simulation routine
+\item \link[glmbayes]{EnvelopeCentering} – \code{RSS_Post2} and dispersion anchor
+\item \link[glmbayes]{glmb_Standardize_Model} – standardized inputs for the orchestrator
+\item \code{\link{rindepNormalGamma_reg}} – full Normal–Gamma workflow (R + C++)
+\item Vignettes \code{Chapter-A07}, \code{Chapter-A08}, \code{Chapter-A11}
 }
 }
