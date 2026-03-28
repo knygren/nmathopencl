@@ -1,6 +1,10 @@
 ---
 title: "Chapter 08: Models for the Poisson Family"
+author: "Kjell Nygren"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
+bibliography: REFERENCES.bib
+reference-section-title: References
 vignette: >
   %\VignetteIndexEntry{Chapter 08: Models for the Poisson Family}
   %\VignetteEngine{knitr::rmarkdown}
@@ -21,11 +25,11 @@ library(glmbayes)
 
 ## 1. Introductory Discussion
 
-Poisson regression is the canonical GLM for modeling count data.  
-The Poisson likelihood is log‑concave under the log link, making it an ideal setting for envelope‑based Bayesian sampling.  
+Poisson regression is the canonical GLM for modeling count data [@McCullagh1989].  
+The Poisson likelihood is log‑concave under the log link, making it an ideal setting for envelope‑based Bayesian sampling [@Nygren2006].  
 This chapter mirrors the structure used for the Binomial vignette: we begin with the classical glm() fit, then introduce the Bayesian glmb() version, discuss prior specification, and compare posterior summaries to their classical counterparts.
 
-We use the well‑known Dobson (1990) randomized controlled trial dataset, which appears in many GLM textbooks and is included in the base R documentation for glm().  
+We use the well‑known randomized controlled trial dataset of [@Dobson1990], which appears in many GLM textbooks and is included in the base R documentation for glm().  
 The dataset contains counts of subjects classified by treatment group and outcome category.
 
 ## 2. Poisson Likelihood and Model Structure
@@ -322,6 +326,3 @@ In later chapters, we extend these ideas to:
 - informative priors  
 - prediction and posterior predictive checks  
 - GPU‑accelerated Poisson models for large datasets
-
-
-# References

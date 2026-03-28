@@ -113,6 +113,8 @@ burn_time <- system.time({
   }
 })
 
+burn_time
+
 # Main simulation
 sim_time <- system.time({
   for (k in seq_len(n_sim)) {
@@ -132,7 +134,7 @@ sim_time <- system.time({
   }
 })
 
-burn_time
+
 sim_time
 ```
 

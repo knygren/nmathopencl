@@ -4,6 +4,7 @@ author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 bibliography: REFERENCES.bib
+reference-section-title: References
 vignette: >
   %\VignetteIndexEntry{Chapter A07: Accept–Reject Sampling for gaussian Regression models with independent normal-gamma priors}
   %\VignetteEngine{knitr::rmarkdown}

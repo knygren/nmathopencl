@@ -8,6 +8,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: REFERENCES.bib
+reference-section-title: References
 ---
 
 ```{r, include = FALSE}
@@ -33,9 +34,7 @@ This vignette documents the implementation of the **independent Normal-Gamma ext
 The discussion then deep-dives into the **accept-reject sampler** used after the envelope is constructed:
 `rIndepNormalGammaReg_std` (serial) / `rIndepNormalGammaReg_std_parallel` (parallel).
 
-Theory justification and the underlying accept-reject / envelope construction are described in:
-- Chapter A07 (the independent Normal-Gamma extension theory), and
-- Nygren & Nygren (2006) for the base likelihood subgradient approach.
+Theory justification and the underlying accept-reject / envelope construction are described in Chapter A07 (the independent Normal-Gamma extension theory) and in [@Nygren2006] for the base likelihood subgradient approach. Implementation of independent Normal--Gamma regression is discussed in [@GriffinBrown2010].
 
 For the fixed-dispersion coefficient-envelope implementation details, see Chapter A05.
 

@@ -5,109 +5,13 @@ date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
     dfprint:: default
+bibliography: REFERENCES.bib
+reference-section-title: References
 vignette: >
   %\VignetteIndexEntry{Chapter 03: Tailoring Priors - Leveraging the Prior_Setup Function}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
----
-references:
-- id: nygren2006
-  title: Likelihood Subgradient Densities
-  author:
-  - family: Nygren
-    given: Kjell
-  - family: Nygren
-    given: Lan Ma
-  container-title: Journal of the American Statistical Association
-  volume: 101
-  URL: 'https://doi.org/10.1198/016214506000000357'
-  DOI: 10.1198/016214506000000357
-  issue: 475
-  publisher: Taylor and Francis, Ltd
-  page: 1144-1156
-  type: article-journal
-  issued:
-    year: 2006
-    month: 9
-
-- id: Venables2002
-  title: Modern Applied Statistics with S.
-  author:
-  - family: Venables
-    given: W. N.
-  - family: Ripley
-    given: B. D.
-  URL: 'https://www.springer.com/gp/book/9780387954578'
-  DOI: 10.1007/978-0-387-21706-2
-  publisher: Springer-Verlag New York
-  page: 1-498
-  type: book
-  issued:
-    year: 2002
-    
-- id: Hamilton2004
-  title: Lecture notes obstetrics and gynaecology
-  author:
-  - family: Hamilton-Fairley
-    given: Diana
-  URL: 'https://www.bookdepository.com/Lecture-Notes-Obstetrics-Gynaecology-Diana-Hamilton-Fairley/9781405120661'
-  publisher: Blackwell Pub.
-  type: book
-  issued:
-    year: 2004
-    month: 11
-
-- id: Evans2006
-  title: Checking for Prior-Data Conflict
-  author:
-  - family: Evans
-    given: Michael
-  - family: Moshonov
-    given: Hadas
-  container-title: Bayesian Analysis
-  volume: 1
-  URL: 'http://dx.doi.org/10.1214/06-BA129'
-  DOI: 10.1214/06-BA129
-  issue: 4
-  page: 893-914
-  type: article-journal
-  issued:
-    year: 2006
-    month: 
-
-- id: Spiegelhalter2002
-  title: Bayesian measures of model complexity and fit
-  author:
-  - family: Spiegelhalter
-    given: David J.
-  - family: Best
-    given: Nicola G.
-  - family: Carlin
-    given: Bradley P.
-  - family: Van Der Linde
-    given: Angelika
-  container-title: Journal of the Royal Statistical Society Series B (Statistical Methodology)
-  volume: 64
-  URL: 'https://doi.org/10.1111/1467-9868.00353'
-  DOI: 10.1111/1467-9868.00353
-  issue: 4
-  page: 583-639
-  type: article-journal
-  issued:
-    year: 2002
-    month: 9
-
-    
----
-
----
-nocite: | 
-  @nygren2006
-...
-
-
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -134,7 +38,7 @@ set.seed(333)
 
 ## 1. Introductory Discussion
 
-In this chapter, we explore how the Prior_Setup function can be used to specify multivariate normal priors for both Bayesian linear models and the generalized linear models (GLMs) introduced in later chapters. In the previous chapter, we covered the minimal arguments required to invoke the function: a model formula and a family (with an optional link function). These define the structure of the model to which the prior will be applied—namely, the variables being modeled, the assumed distribution of the response, and the link function connecting the linear predictor to the data.
+In this chapter, we explore how the Prior_Setup function can be used to specify multivariate normal priors for both Bayesian linear models and the generalized linear models (GLMs) introduced in later chapters. In the previous chapter, we covered the minimal arguments required to invoke the function: a model formula and a family (with an optional link function). These define the structure of the model to which the prior will be applied—namely, the variables being modeled, the assumed distribution of the response, and the link function connecting the linear predictor to the data. Multivariate normal and g-prior structure connects to standard GLM treatments [@McCullagh1989; @VenablesRipley2002; @zellner1986gprior]. Prior–data conflict diagnostics (when used elsewhere in the package) relate to [@EvansMoshonov2006]. Envelope sampling builds on [@Nygren2006].
 
 In many cases, it is also helpful to provide a data frame to Prior_Setup, allowing the function to correctly identify and extract the relevant variables from the model environment.
 
@@ -852,7 +756,3 @@ This interaction is especially important when predictors are uncentered or when 
 - Always consider prior strength when evaluating the impact of prior centering.
 
 These considerations help ensure that prior specification behaves predictably and supports the analyst's inferential goals.
-
-
-
-# 6. References 

@@ -5,6 +5,7 @@ output:
     toc: true
     number_sections: true
 bibliography: REFERENCES.bib
+reference-section-title: References
 vignette: >
   %\VignetteIndexEntry{Chapter 00: Introduction}
   %\VignetteEngine{knitr::rmarkdown}
@@ -24,7 +25,7 @@ library(glmbayes)
 
 # Chapter 00: Introduction
 
-This vignette introduces **glmbayes**, a package for fitting Bayesian generalized linear models via efficient envelope-based sampling. The vignette series is organized into five main parts and a set of technical appendices. You will move from basic installation and first models, through linear and generalized linear models, to advanced prior structures, dispersion modeling, and GPU-accelerated computation. The appendices document the underlying simulation methods and implementation details.
+This vignette introduces **glmbayes**, a package for fitting Bayesian generalized linear models via efficient envelope-based sampling. The vignette series is organized into five main parts and a set of technical appendices. You will move from basic installation and first models, through linear and generalized linear models, to advanced prior structures, dispersion modeling, and GPU-accelerated computation. The appendices document the underlying simulation methods and implementation details. The envelope sampling methodology builds on the likelihood subgradient framework of [@Nygren2006].
 
 ## Part 1: An Introduction
 

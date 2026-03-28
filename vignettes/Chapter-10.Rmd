@@ -1,6 +1,10 @@
 ---
 title: "Chapter 10: Informative Priors: Centering and priors with differential prior weights"
+author: "Kjell Nygren"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
+bibliography: REFERENCES.bib
+reference-section-title: References
 vignette: >
   %\VignetteIndexEntry{Chapter 10: Informative Priors: Centering and priors with differentiated prior weights}
   %\VignetteEngine{knitr::rmarkdown}
@@ -25,11 +29,11 @@ library(glmbayes)
 
 # General Discussion 
 
-As we saw in the previous chapter, using the Bayesian version *glmb* of the classical function *glm* requires the specification of an additional prior distribution (a pfamily). For Poisson and Binomial families, the most appropriate of the currently implemented priors would be the dNormal pfamily which requires specifying a prior mean and a prior variance-covariance matrix for the regression coefficients. Some models (covered more in a later Vignette) also requires providing either a constant or a prior for the dispersion (variance) parameter associated with the model. Here we focus on the case where only the regression coefficients require a prior and walk through an example where we specify a multivariate prior for a model with two coeffcients related to the Age of menarche (i.e., the age at which girls experience their first period).  As part of the setup, we discuss the approach taken and give some general advice in regards to setting of prior distributions.
+As we saw in the previous chapter, using the Bayesian version *glmb* of the classical function *glm* requires the specification of an additional prior distribution (a pfamily). Envelope-based sampling builds on [@Nygren2006]. For Poisson and Binomial families, the most appropriate of the currently implemented priors would be the dNormal pfamily which requires specifying a prior mean and a prior variance-covariance matrix for the regression coefficients. Some models (covered more in a later Vignette) also requires providing either a constant or a prior for the dispersion (variance) parameter associated with the model. Here we focus on the case where only the regression coefficients require a prior and walk through an example where we specify a multivariate prior for a model with two coeffcients related to the Age of menarche (i.e., the age at which girls experience their first period).  As part of the setup, we discuss the approach taken and give some general advice in regards to setting of prior distributions.
  
 # The Age of Menarche Data 
 
-The data we will be using here is the *menarche* data covering the *Age of Menarche* for girls in Warsaw. This data appears in [@Venables2002] and in their supporting *MASS* package. It is provided (and renamed) here so as to allow examples to run during build without loading of the *MASS* package.  
+The data we will be using here is the *menarche* data covering the *Age of Menarche* for girls in Warsaw. This data appears in [@VenablesRipley2002] and in their supporting *MASS* package. It is provided (and renamed) here so as to allow examples to run during build without loading of the *MASS* package.  
 
 In the data, there are observations related to 25 cohorts of girls at ages ranging from an average age of 9.21 to an average age of 17.58. The average age for each cohort is captured in a column named *Age*.  For each of the cohorts, there is also a column (*Total*) giving the total number of girls in the cohort and a column *Menarche* giving the number of girls out of the cohort who had experienced Menarche at that age.
 
@@ -46,7 +50,7 @@ head(menarche, 5)
 
 Because of the need for a prior distribution, it is important that coefficients in Bayesian models can be interpreted so that analysts can set reasonable priors. This is true regardless of whether analysts are looking to give a model a *weak* prior (that will limit any move of the estimates away from those driven purely by the data for that specific model) or if the analyst is looking to give the model a *strong* prior that incorporates meaningful external information and/or prior knowledge. If the analysts can't interpret the coefficients, then is is difficult to know whether a prior distribution is *weak* or *strong* and whether it is likely to move estimates meaningfully away from classical estimates.   
 
-A useful approach to making coefficients more interpretable involves centering variables closer to the center (or at least within the support of) the data. To facilitate the interpretation of the coefficients in our model, we will therefore pick a reference age *ref_age1* within the support of the data (we pick 13 but you can feel free to pick a different reference age or to use the mean across the observations) and define a new variable *Age2=Age-ref_age1*. This will allow our prior for the intercept to represent a point estimate (on the chosen link function scale) for the percentage of girls who have had their first period by age 13. It also happens to be an age close to the average age of menarche in other sources [@Hamilton2004, p.29] which reported the UK average age of menarche in the UK as 12.9.  
+A useful approach to making coefficients more interpretable involves centering variables closer to the center (or at least within the support of) the data. To facilitate the interpretation of the coefficients in our model, we will therefore pick a reference age *ref_age1* within the support of the data (we pick 13 but you can feel free to pick a different reference age or to use the mean across the observations) and define a new variable *Age2=Age-ref_age1*. This will allow our prior for the intercept to represent a point estimate (on the chosen link function scale) for the percentage of girls who have had their first period by age 13. It also happens to be an age close to the average age of menarche in other sources [@HamiltonFairley2004, p. 29] which reported the UK average age of menarche in the UK as 12.9.  
 
 In addition to the intercept, our model will contain a slope coefficient for the modified age variable that will capture the change in the percentage of girls who have had their first period (on the relevant link scale). To be able to formulate a prior for this, we will set up a second reference age *ref_age2* (our choice will be 15) at which we also will formulate a point estimate for the percentage who have had their first period. A point estimate for the slope on the link scale will then be derived as the difference between the two estimates (on the link scale) divided by the Age gap between the two reference ages. Below is code doing the variable transformation and a preliminary setup to prepare for the prior specification.   
 
@@ -242,12 +246,10 @@ As we noted above, the posterior estimates for the intercept appear broadly cons
 
 # Concluding Discussion
 
-In this note, we walked through an example illustrating a process for setting of the prior in the case of the *Age of Menarche* model based on the data in [@Venables2002]. There are several approaches taken here the we believe analysts can find useful in setting reasonable priors. These include:
+In this note, we walked through an example illustrating a process for setting of the prior in the case of the *Age of Menarche* model based on the data in [@VenablesRipley2002]. There are several approaches taken here the we believe analysts can find useful in setting reasonable priors. These include:
 
 * Centering variables so that the intercept can be given a meaningful prior and so that meaningful priors for the other variables can be formulated based on sensitivity in the support of data
 * Incorporating external information if available (like our information regarding the average age of Menarche in the UK)
 * Making reasonable assumptions based on other knowledge/insight (e.g., our prior point estimate at age 15)
 
 In the next section, we will take a take a look at how the analysts can check whether the data seems consistent with the specified prior.
-
-# References

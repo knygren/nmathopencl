@@ -572,7 +572,7 @@ f(y \mid \theta, \phi)
 
 ---
 
-## 6. References
+## Appendix A. Exponential-family and link reference tables
 
 ## A.1 Gaussian Family
 

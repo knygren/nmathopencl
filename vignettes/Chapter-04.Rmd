@@ -3,109 +3,13 @@ title: "Chapter 04: Reviewing Model Predictions, Deviance Residuals and Model St
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
+bibliography: REFERENCES.bib
+reference-section-title: References
 vignette: >
   %\VignetteIndexEntry{Chapter 04: Reviewing Model Predictions, Deviance Residuals and Model Statistics}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
----
-references:
-- id: nygren2006
-  title: Likelihood Subgradient Densities
-  author:
-  - family: Nygren
-    given: Kjell
-  - family: Nygren
-    given: Lan Ma
-  container-title: Journal of the American Statistical Association
-  volume: 101
-  URL: 'https://doi.org/10.1198/016214506000000357'
-  DOI: 10.1198/016214506000000357
-  issue: 475
-  publisher: Taylor and Francis, Ltd
-  page: 1144-1156
-  type: article-journal
-  issued:
-    year: 2006
-    month: 9
-
-- id: Venables2002
-  title: Modern Applied Statistics with S.
-  author:
-  - family: Venables
-    given: W. N.
-  - family: Ripley
-    given: B. D.
-  URL: 'https://www.springer.com/gp/book/9780387954578'
-  DOI: 10.1007/978-0-387-21706-2
-  publisher: Springer-Verlag New York
-  page: 1-498
-  type: book
-  issued:
-    year: 2002
-    
-- id: Hamilton2004
-  title: Lecture notes obstetrics and gynaecology
-  author:
-  - family: Hamilton-Fairley
-    given: Diana
-  URL: 'https://www.bookdepository.com/Lecture-Notes-Obstetrics-Gynaecology-Diana-Hamilton-Fairley/9781405120661'
-  publisher: Blackwell Pub.
-  type: book
-  issued:
-    year: 2004
-    month: 11
-
-- id: Evans2006
-  title: Checking for Prior-Data Conflict
-  author:
-  - family: Evans
-    given: Michael
-  - family: Moshonov
-    given: Hadas
-  container-title: Bayesian Analysis
-  volume: 1
-  URL: 'http://dx.doi.org/10.1214/06-BA129'
-  DOI: 10.1214/06-BA129
-  issue: 4
-  page: 893-914
-  type: article-journal
-  issued:
-    year: 2006
-    month: 
-
-- id: Spiegelhalter2002
-  title: Bayesian measures of model complexity and fit
-  author:
-  - family: Spiegelhalter
-    given: David J.
-  - family: Best
-    given: Nicola G.
-  - family: Carlin
-    given: Bradley P.
-  - family: Van Der Linde
-    given: Angelika
-  container-title: Journal of the Royal Statistical Society Series B (Statistical Methodology)
-  volume: 64
-  URL: 'https://doi.org/10.1111/1467-9868.00353'
-  DOI: 10.1111/1467-9868.00353
-  issue: 4
-  page: 583-639
-  type: article-journal
-  issued:
-    year: 2002
-    month: 9
-
-    
----
-
----
-nocite: | 
-  @nygren2006
-...
-
-
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -230,7 +134,7 @@ glmb.out1<-glmb(n=1000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(lo
 
 # Introduction
 
-In this section, we will be continuing our discussion of the Bayesian model using the Menarche data that we covered in chapter 4.  Recall that our main model (with the carefully specified prior) had the summary output below. The focus of this chapter will be to dig deeper and to examine model predictions/fit, residuals, outliers, and the DIC statistic (for model comparisons).  
+In this section, we continue the discussion of the Bayesian model fit to the menarche data from the previous chapter. Recall that our main model (with the carefully specified prior) had the summary output below. The focus of this chapter will be to dig deeper and to examine model predictions/fit, residuals, outliers, and the DIC statistic for model comparisons [@Spiegelhalter2002]. GLM background appears in [@McCullagh1989]; the sampling approach follows [@Nygren2006].  
 
 ```{r Summary Logit}
 summary(glmb.out1)
@@ -857,6 +761,3 @@ lines(Age, -res_high,lty=1)
 lines(Age, -res_low1,lty=2)
 lines(Age, -res_high1,lty=2)
 ```
-
-
-# References

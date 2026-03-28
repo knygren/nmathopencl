@@ -5,6 +5,7 @@ date: "`r Sys.Date()`"
 output:
   rmarkdown::html_vignette
 bibliography: REFERENCES.bib
+reference-section-title: References
 vignette: >
   %\VignetteIndexEntry{Chapter 01: Getting started with glmbayes}
   %\VignetteEngine{knitr::rmarkdown_notangle}
@@ -32,13 +33,13 @@ library(glmbayes)
 
 # 1. Introductory Discussion
 
-The **glmb()** family of functions provides fully Bayesian analogues to **glm()** and its standard methods. This vignette demonstrates how to set up and call **glmb()**, compares its syntax and output to **glm()**, and highlights the additional arguments required for prior specification. A specialized **lmb()** function for Bayesian linear regression is bundled in the package and will be explored in Chapter 2. Separate vignettes cover all complementary methods for both **lmb()** and **glmb()**.
+The **glmb()** family of functions provides fully Bayesian analogues to **glm()** and its standard methods [@McCullagh1989; @VenablesRipley2002]. This vignette demonstrates how to set up and call **glmb()**, compares its syntax and output to **glm()**, and highlights the additional arguments required for prior specification. A specialized **lmb()** function for Bayesian linear regression is bundled in the package and will be explored in Chapter 2. For Bayesian regression perspective, see [@Gelman2013]. Separate vignettes cover all complementary methods for both **lmb()** and **glmb()**.
 
 
 
 # 2. Preparing a dataframe
 
-We begin by reproducing Dobson’s (1990) randomized controlled trial example, which is the standard demo for **glm()**. Comparing **glmb()** output to this familiar dataset will make parallels clear. The data frame contains treatment groups, outcomes, and observed counts:
+We begin by reproducing the randomized controlled trial example of [@Dobson1990], which is the standard demo for **glm()**. Comparing **glmb()** output to this familiar dataset will make parallels clear. The data frame contains treatment groups, outcomes, and observed counts:
 
 
 ```{r dobson}
@@ -156,7 +157,7 @@ The Deviance Information Criterion (DIC) combines expected residual deviance wit
 
 ## 5.1 Agresti - Foundations of Linear and Generalized Linear Models
 
-
+The section references in the table below follow @Agresti2015.
 
 | Vignette Section                           | Textbook Chapter & Section                                           | Notes (provisional)                                                                                                                                         |
 |--------------------------------------------|----------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -171,6 +172,3 @@ The Deviance Information Criterion (DIC) combines expected residual deviance wit
 | 4.2.2 Effective Number of Parameters       | 10.3 Bayesian Generalized Linear Models                              | Defines effective parameter count \(p_D = \bar D - D(\bar\theta)\); discusses its role in penalizing model complexity.                                       |
 | 4.2.3 Expected Residual Deviance           | 10.3 Bayesian Generalized Linear Models                              | Explains computation of \(\bar D\), the posterior-mean deviance, and its use in posterior predictive checks (see that chapter).                                |
 | 4.2.4 DIC                                  | 10.3 Bayesian Generalized Linear Models                              | Derives DIC \(\!= \bar D + p_D\); compares DIC to AIC/BIC and highlights limitations when priors are highly informative.                                      |
-
-
-# 5. References
