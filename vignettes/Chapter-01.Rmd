@@ -4,7 +4,7 @@ author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output:
   rmarkdown::html_vignette
-bibliography: ../inst/References.bib
+bibliography: REFERENCES.bib
 vignette: >
   %\VignetteIndexEntry{Chapter 01: Getting started with glmbayes}
   %\VignetteEngine{knitr::rmarkdown_notangle}

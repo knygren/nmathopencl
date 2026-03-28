@@ -64,20 +64,39 @@
 #' }
 #'
 #' @details
-#' GPU acceleration in \pkg{glmbayes} relies on OpenCL. A complete OpenCL
-#' environment requires:
+#' GPU acceleration speeds up **envelope construction and grid evaluation**
+#' (e.g. large \eqn{3^p} grids or many tangency evaluations) when you pass
+#' \code{use_opencl = TRUE} in modeling and envelope functions such as
+#' \code{\link{glmb}} and \code{\link{rglmb}}. OpenCL is **vendor-neutral**
+#' (NVIDIA, AMD, Intel); CPU-only builds remain valid and are often used when
+#' no OpenCL stack is present.
+#'
+#' **Practical setup (summary).** Prebuilt binaries from CRAN or R-Universe
+#' are typically built **without** OpenCL GPU support; enabling the GPU path
+#' usually requires installing \pkg{glmbayes} **from source** on a machine
+#' with OpenCL **headers**, a linkable **OpenCL library / ICD loader**, and
+#' a working **vendor runtime** (GPU driver). You need a normal C/C++
+#' toolchain (e.g. Rtools on Windows, \code{build-essential} and
+#' \code{r-base-dev} on Linux, Xcode CLT plus GCC on macOS for source installs).
+#' Vendor-specific notes (CUDA Toolkit vs Intel SDK vs Khronos headers on
+#' Windows, \code{opencl-headers} and \code{ocl-icd} packages on Linux, etc.)
+#' are spelled out in \insertCite{glmbayesChapter12}{glmbayes}.
+#'
+#' **What this help page checks.** A usable OpenCL environment requires:
 #' \enumerate{
 #'   \item OpenCL headers (e.g., \code{CL/cl.h}) at compile time,
 #'   \item the OpenCL ICD loader (e.g., \code{libOpenCL.so.1}) at runtime,
-#'   \item correct PATH and library search paths,
-#'   \item a functional OpenCL platform and device.
+#'   \item correct PATH and library search paths (especially on Linux/WSL),
+#'   \item a functional OpenCL platform and device (driver installed).
 #' }
+#' The functions here inspect these pieces. On Linux and WSL,
+#' \code{verify_opencl_runtime()} tries to create a platform, device, context,
+#' queue, and compile a minimal kernel. On Windows, that probe is skipped
+#' because platform-creation failures are often uninformative; rely on
+#' \code{diagnose_glmbayes()} and driver/runtime detection instead.
 #'
-#' The diagnostic functions check each of these components. On Linux and
-#' WSL, \code{verify_opencl_runtime()} attempts to create an OpenCL
-#' platform, device, context, and command queue, and to compile a minimal
-#' kernel. On Windows, this probe is skipped because platform creation
-#' failures are not informative.
+#' Start with \code{\link{diagnose_glmbayes()}} for a single readable report;
+#' use \code{\link{has_opencl()}} for a quick boolean when scripting.
 #'
 #' @return
 #' Most functions return structured lists describing detected hardware,
@@ -89,8 +108,18 @@
 #' \code{\link{diagnose_glmbayes}},
 #' \code{\link{detect_environment_and_gpus}},
 #' \code{\link{detect_compute_runtimes}},
-#' \code{\link{verify_opencl_runtime}}
+#' \code{\link{verify_opencl_runtime}},
+#' \code{\link{has_opencl}}.
 #'
+#' Modeling with \code{use_opencl}: \code{\link{glmb}}, \code{\link{rglmb}}.
+#' Envelope helpers: \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeEval}}.
+#'
+#' Full install and troubleshooting: \code{vignette("Chapter-12", package = "glmbayes")}
+#' (\insertCite{glmbayesChapter12}{glmbayes}); implementation notes:
+#' \insertCite{glmbayesChapterA10}{glmbayes}.
+#' @references
+#' \insertAllCited{}
+#' @importFrom Rdpack reprompt
 #' @keywords diagnostics gpu opencl environment
 #' @name gpu_diagnostics
 NULL

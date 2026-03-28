@@ -1,7 +1,10 @@
 ---
 title: "Chapter 00: Introduction"
-output: rmarkdown::html_vignette
-bibliography: ../inst/References.bib
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    number_sections: true
+bibliography: REFERENCES.bib
 vignette: >
   %\VignetteIndexEntry{Chapter 00: Introduction}
   %\VignetteEngine{knitr::rmarkdown}
@@ -18,17 +21,6 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(glmbayes)
 ```
-
----
-title: "Chapter 00: Introduction"
-output:
-  rmarkdown::html_vignette:
-    toc: true
-    number_sections: true
-vignette:
-  engine: knitr::rmarkdown
-  encoding: UTF-8
----
 
 # Chapter 00: Introduction
 

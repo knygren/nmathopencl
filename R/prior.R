@@ -47,6 +47,60 @@
 #'   - `intercept_source`: method used to set the prior mean for the intercept
 #'   - `effects_source`: method used to set the prior mean for the effects
 #'
+#' ### Connection to \code{pfamily} constructors and \code{prior_list}
+#'
+#' Call \code{Prior_Setup(formula, family = \dots)} (with \code{data},
+#' \code{weights}, etc. as needed) so \code{mu}, \code{Sigma}, and (for
+#' Gaussian families) \code{dispersion}, \code{shape}, and \code{rate} are
+#' on the scale implied by the likelihood and your \code{pwt} / \code{n_prior}.
+#' The recommended mapping from the returned list into a \code{\link{pfamily}}
+#' or into \code{prior_list} for \code{\link{simfuncs}} follows the worked
+#' patterns in \code{example("Prior_Setup")} (\code{inst/examples/Ex_Prior_Setup.R}).
+#' Distinct priors use **different** combinations of \code{Sigma} versus
+#' \code{Sigma/dispersion}; mixing these up is a common error.
+#'
+#' #### \code{\link{dNormal}()}
+#' * **Typical use (e.g. Poisson \code{\link{glmb}}):** \code{dNormal(mu = ps$mu, Sigma = ps$Sigma)}.
+#' * **Gaussian with fixed dispersion (\code{\link{lmb}} / \code{\link{rlmb}}):**
+#'   pass \code{dispersion = ps2$dispersion} as well:
+#'   \code{dNormal(mu = ps2$mu, Sigma = ps2$Sigma, dispersion = ps2$dispersion)}.
+#' * Matrix-input fits use the same \code{pfamily} with \code{y} and \code{x}
+#'   taken from \code{ps$y} and \code{as.matrix(ps$x)} (see examples).
+#'
+#' #### \code{\link{dNormal_Gamma}()} (conjugate Normal--Gamma, Gaussian)
+#' The second argument is the prior covariance on the **precision-weighted**
+#' coefficient scale: use **\code{ps2$Sigma / ps2$dispersion}**, not \code{ps2$Sigma}
+#' alone. Recommended call:
+#' \code{dNormal_Gamma(ps2$mu, ps2$Sigma / ps2$dispersion, shape = ps2$shape, rate = ps2$rate)}.
+#' For \code{\link{rNormalGamma_reg}}, build
+#' \code{prior_list = list(mu = ps2$mu, Sigma = ps2$Sigma / ps2$dispersion, shape = ps2$shape, rate = ps2$rate)}
+#' (again **divided** \code{Sigma}).
+#'
+#' #### \code{\link{dIndependent_Normal_Gamma}()} (Gaussian, non-conjugate joint \eqn{(\beta,\phi)})
+#' Here the second argument is the **full** prior covariance on \eqn{\beta}:
+#' \code{dIndependent_Normal_Gamma(ps2$mu, ps2$Sigma, shape = ps2$shape, rate = ps2$rate)}.
+#' Same pattern for \code{\link{rglmb}} / \code{\link{rlmb}} with that \code{pfamily}.
+#' For \code{\link{rindepNormalGamma_reg}}, the template \code{prior_list} also
+#' uses **undivided** \code{Sigma}, plus \code{dispersion}, \code{Precision = solve(Sigma)},
+#' and envelope controls such as \code{max_disp_perc} (see examples).
+#'
+#' #### \code{\link{dGamma}()} (Gamma on precision / dispersion with fixed \eqn{\beta})
+#' \code{Prior_Setup()} supplies \code{shape} and \code{rate} for the Gamma on
+#' precision; you still choose fixed coefficients \code{beta} (e.g. from an
+#' \code{\link[stats]{lm}} fit). Recommended:
+#' \code{dGamma(shape = ps2$shape, rate = ps2$rate, beta = beta_fix)}.
+#' For \code{\link{rGamma_reg}}, pass
+#' \code{prior_list = list(beta = beta_fix, shape = ps2$shape, rate = ps2$rate)}.
+#'
+#' #### References and further reading
+#' Zellner-style scaling of \code{Sigma} from the likelihood
+#' \insertCite{zellner1986gprior}{glmbayes}; conjugate Gaussian theory
+#' \insertCite{Raiffa1961}{glmbayes}; envelope sampling for \code{dNormal()}
+#' on non-Gaussian families and for \code{dIndependent_Normal_Gamma()}
+#' \insertCite{Nygren2006}{glmbayes}; Normal--Gamma / GLM background
+#' \insertCite{Gelman2013,Dobson1990,McCullagh1989}{glmbayes}; prior tailoring
+#' \insertCite{glmbayesChapter03}{glmbayes}.
+#'
 #' ### Inputs to the function
 #'
 #' The inputs to `Prior_Setup()` fall into three conceptual categories:
@@ -96,8 +150,8 @@
 #' Likewise, if `n_prior` is provided, `pwt` is computed as:
 #' \deqn{pwt = \frac{n_{\mathrm{prior}}}{n_{\mathrm{prior}} + n_{\mathrm{likelihood}}}}
 #'
-#'#' When applicable, `Prior_Setup()` computes the shape and rate parameters for a Gamma prior on the residual precision (inverse variance), used in 
-#'compound prior families such as `dNormal_Gamma()` , `dIndependent_Normal_Gamma()`, and `dGamma()`. These are derived from the effective prior sample size and the estimated dispersion:
+#' When applicable, `Prior_Setup()` computes the shape and rate parameters for a Gamma prior on the residual precision (inverse variance), used in
+#' compound prior families such as `dNormal_Gamma()`, `dIndependent_Normal_Gamma()`, and `dGamma()`. These are derived from the effective prior sample size and the estimated dispersion:
 #'
 #' \deqn{\text{shape} = \frac{n_{\mathrm{prior}}}{2}}
 #' \deqn{\text{rate} = \text{shape} \cdot \text{dispersion} = \frac{n_{\mathrm{prior}}}{2} \cdot \text{dispersion}}
@@ -109,9 +163,7 @@
 #' \deqn{\text{rate}_{\mathrm{post}} = \text{rate} + \frac{1}{2} \cdot \text{RSS} =  \frac{n_{\mathrm{prior}}+n_{\mathrm{likelihood}} - k}{2}  \cdot dispersion}
 #' 
 #' This structure allows the prior to contribute pseudo-observations to the residual precision estimate, enabling adaptive shrinkage and hierarchical 
-#' regularization - especially valuable in small-sample or high-dimensional settings.
-#' especially in small-sample or high-dimensional settings.
-#'
+#' regularization---especially valuable in small-sample or high-dimensional settings.
 #'
 #' @return A list with items related to the prior.
 #' \item{mu}{A prior mean vector}
@@ -123,6 +175,19 @@
 #' \item{x}{The design matrix from \code{object} if it exists}
 #' \item{PriorSettings}{A list containing prior configuration details}
 #' @family prior
+#' @seealso
+#' \code{\link{pfamily}} for prior-family objects and the constructors
+#' \code{\link{dNormal}}, \code{\link{dNormal_Gamma}}, \code{\link{dGamma}},
+#' and \code{\link{dIndependent_Normal_Gamma}}.
+#'
+#' \code{\link{glmb}}, \code{\link{lmb}} for formula-based fits with a
+#' \code{pfamily} built from \code{Prior_Setup()} output; \code{\link{rglmb}},
+#' \code{\link{rlmb}} for matrix-based sampling that consumes the same prior
+#' structure; \code{\link{simfuncs}} for functions that take a \code{prior_list}
+#' assembled from those components (including \code{\link{rindepNormalGamma_reg}}
+#' for \code{\link{dIndependent_Normal_Gamma}()}).
+#'
+#' \insertCite{glmbayesChapter03}{glmbayes} for prior tailoring and examples.
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
