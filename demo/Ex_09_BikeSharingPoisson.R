@@ -18,10 +18,9 @@ form2 <- cnt ~ part_of_day + quarter + holiday + workingday + weathersit +
 
 pct_train  <- 0.01   # 1% of data (~175 obs) for fast demo; use 0.05+ for analysis
 
-# 5% train / 95% test split
 set.seed(42)
 n <- nrow(BikeSharing_c)
-idx_train <- sample(n, size = round(pct_train * n))  # ~869 obs
+idx_train <- sample(n, size = round(pct_train * n))
 idx_test  <- setdiff(seq_len(n), idx_train)
 
 Bike_train <- BikeSharing_c[idx_train, ]
@@ -56,6 +55,20 @@ theta_out  <- matrix(0, nrow = n_sim, ncol = n_train)
 
 set.seed(123)
 
+## Format elapsed seconds as hours, minutes, seconds (for demo output)
+fmt_hms <- function(secs) {
+  secs <- as.numeric(secs)
+  if (!is.finite(secs) || secs < 0) {
+    secs <- 0
+  }
+  h <- floor(secs / 3600)
+  rem <- secs - h * 3600
+  m <- floor(rem / 60)
+  s <- rem - m * 60
+  sprintf("%d h %d min %.2f s", h, m, s)
+}
+
+cat("Burn-in started: ", format(Sys.time(), usetz = TRUE), "\n", sep = "")
 burn_time <- system.time({
   for (k in seq_len(n_burn)) {
     out_pop <- rglmb(1, theta, X_train, family = gaussian(),
@@ -71,10 +84,19 @@ burn_time <- system.time({
     }
   }
 })
-
-cat("Burn-in time:\n")
+cat("Burn-in ended:   ", format(Sys.time(), usetz = TRUE), "\n", sep = "")
+cat("Burn-in elapsed: ", fmt_hms(burn_time["elapsed"]), "\n", sep = "")
 print(burn_time)
 
+est_sim_sec <- as.numeric(burn_time["elapsed"]) * n_sim / n_burn
+cat(
+  "Estimated main simulation (linear from burn-in): ",
+  fmt_hms(est_sim_sec), "\n",
+  "(CODA / prediction after the main loop are usually much smaller.)\n",
+  sep = ""
+)
+
+cat("\nMain simulation started: ", format(Sys.time(), usetz = TRUE), "\n", sep = "")
 sim_time <- system.time({
   for (k in seq_len(n_sim)) {
     out_pop <- rglmb(1, theta, X_train, family = gaussian(),
@@ -93,9 +115,16 @@ sim_time <- system.time({
     theta_out[k, ] <- theta
   }
 })
-
-cat("\nMain simulation time:\n")
+cat("Main simulation ended:   ", format(Sys.time(), usetz = TRUE), "\n", sep = "")
+cat("Main simulation elapsed: ", fmt_hms(sim_time["elapsed"]), "\n", sep = "")
 print(sim_time)
+
+gibbs_total_sec <- as.numeric(burn_time["elapsed"]) + as.numeric(sim_time["elapsed"])
+cat(
+  "Actual burn-in + main Gibbs total: ",
+  fmt_hms(gibbs_total_sec), "\n",
+  sep = ""
+)
 
 
 
