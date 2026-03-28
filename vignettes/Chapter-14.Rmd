@@ -18,6 +18,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(glmbayes)
+library(coda)
 ```
 
 # Chapter 14: Hierarchical Generalized Linear Models
@@ -38,7 +39,7 @@ The two-block Gibbs sampler alternates:
 1. **Block 1 (population):** Draw $(\beta, \sigma_\theta^2) \mid \theta$ — conjugate Normal-Gamma given $\theta$, implemented with **`rglmb`** (family `gaussian()`).
 2. **Block 2 (observations):** For each $i$, draw $\theta_i \mid \beta, \sigma_\theta^2, y_i$ — Poisson likelihood with normal prior, implemented with **`rglmb`** (family `poisson()`).
 
-With $n$ observations, Block 2 requires $n$ calls to **`rglmb`** per iteration. To keep run time manageable for the vignette, we use a 1% random subset of the data for training and reserve the rest for out-of-sample prediction.
+With $n$ observations, Block 2 requires $n$ calls to **`rglmb`** per iteration. To keep run time manageable for the vignette, we use a 1% random subset of the data for training and reserve the rest for out-of-sample prediction. The chain used in Sections 4–5 is **precomputed** with the same settings as **`demo("Ex_09_BikeSharingPoisson")`** (`n_burn = 200`, `n_sim = 1000`) and stored as **`inst/extdata/BikeSharing_ch14_gibbs.rds`**. Section 3 still shows the full Gibbs code for reference; it is not re-run when this vignette is built.
 
 ## 2. Data and Setup
 
@@ -59,11 +60,14 @@ form <- cnt ~ part_of_day + quarter + holiday + workingday + weathersit +
 form2 <- cnt ~ part_of_day + quarter + holiday + workingday + weathersit +
   hr_sin + hr_cos + mon_sin + mon_cos
 
-# Train/test split (1% train for vignette; increase for analysis)
+# Train/test split: indices bundled with precomputed Gibbs output (matches demo, set.seed(42))
 pct_train <- 0.01
-set.seed(42)
 n <- nrow(BikeSharing_c)
-idx_train <- sample(n, size = round(pct_train * n))
+ch14_path <- system.file("extdata", "BikeSharing_ch14_gibbs.rds", package = "glmbayes")
+stopifnot(nzchar(ch14_path), file.exists(ch14_path))
+ch14_saved <- readRDS(ch14_path)
+stopifnot(length(ch14_saved$idx_train) == round(pct_train * n))
+idx_train <- ch14_saved$idx_train
 idx_test  <- setdiff(seq_len(n), idx_train)
 
 Bike_train <- BikeSharing_c[idx_train, ]
@@ -87,9 +91,11 @@ ps_pop <- Prior_Setup(form_pop, family = gaussian(), data = data_pop)
 
 ## 3. Two-Block Gibbs Sampler
 
-```{r bikesharing-gibbs, eval = TRUE}
-n_burn <- 100
-n_sim  <- 500
+The following chunk is **not evaluated** when the vignette is built (`eval = FALSE`). For a live run, execute it in your session or use **`demo("Ex_09_BikeSharingPoisson")`** (expect a long runtime).
+
+```{r bikesharing-gibbs, eval = FALSE}
+n_burn <- 200
+n_sim  <- 1000
 
 beta_out   <- matrix(0, nrow = n_sim, ncol = p)
 sigma_out  <- numeric(n_sim)
@@ -138,23 +144,42 @@ sim_time <- system.time({
 sim_time
 ```
 
+Load the precomputed draws (regenerate with **`demo("Ex_09_BikeSharingPoisson")`** and save with `saveRDS` to `inst/extdata/BikeSharing_ch14_gibbs.rds`).
+
+```{r bikesharing-gibbs-loaded}
+beta_out  <- ch14_saved$beta_out
+sigma_out <- ch14_saved$sigma_out
+n_burn    <- ch14_saved$n_burn
+n_sim     <- ch14_saved$n_sim
+mcmc_main <- ch14_saved$mcmc_main
+stopifnot(nrow(beta_out) == n_sim, length(sigma_out) == n_sim, ncol(beta_out) == p)
+```
+
 ## 4. CODA Diagnostics
 
-We summarize the main parameters ($\beta$ and $\sigma_\theta$) using the **coda** package. Random effects $\theta$ are excluded from the summary.
+We summarize the main parameters ($\beta$ and $\sigma_\theta$) using the **coda** package. Random effects $\theta$ are excluded from the summary. Object `mcmc_main` comes from the saved chain (coefficient columns match `X_train`, plus `sigma_theta`).
 
 ```{r bikesharing-coda}
-mcmc_main <- coda::mcmc(cbind(beta_out, sigma_theta = sigma_out))
-colnames(mcmc_main) <- c(colnames(X_train), "sigma_theta")
-
 summary(mcmc_main)
-coda::effectiveSize(mcmc_main)
 
-# Lag-1 own autocorrelations
+es <- coda::effectiveSize(mcmc_main)
+knitr::kable(
+  data.frame(parameter = names(es), effective_size = as.numeric(es)),
+  row.names = FALSE,
+  digits = 4,
+  caption = "Effective sample size (coda::effectiveSize)"
+)
+
 ac1 <- coda::autocorr(mcmc_main, lag = 1)
 ac1_mat <- drop(ac1)
 own_ac1 <- diag(ac1_mat)
 names(own_ac1) <- colnames(mcmc_main)
-round(own_ac1, 4)
+knitr::kable(
+  data.frame(parameter = names(own_ac1), lag_1_autocorr = as.numeric(own_ac1)),
+  row.names = FALSE,
+  digits = 4,
+  caption = "Lag-1 autocorrelation (diagonal of coda::autocorr, lag = 1)"
+)
 ```
 
 ## 5. Out-of-Sample Prediction
@@ -199,5 +224,6 @@ cat("Option B (post. pred.): MAE =", round(mae_pp, 2), " RMSE =", round(rmse_pp,
 | **Block 2 (observations)** | For each $i$: `rglmb(1, y[i], matrix(1,1,1), family = poisson(), pfamily = dNormal(mu_i, sigma^2))` |
 | **Prior for $\beta, \sigma^2$** | From `Prior_Setup` on $\theta \sim X\beta$ (Gaussian) |
 | **Data** | BikeSharing (1% train, 99% test for vignette) |
+| **Vignette chain** | Precomputed `BikeSharing_ch14_gibbs.rds` (200 burn-in, 1000 stored iterations) |
 
 For longer runs and full diagnostics, see **`demo("Ex_09_BikeSharingPoisson")`**. For hierarchical linear models, see Chapter 13.
