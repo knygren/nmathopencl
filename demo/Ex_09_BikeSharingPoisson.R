@@ -72,7 +72,7 @@ cat("Burn-in started: ", format(Sys.time(), usetz = TRUE), "\n", sep = "")
 burn_time <- system.time({
   for (k in seq_len(n_burn)) {
     out_pop <- rglmb(1, theta, X_train, family = gaussian(),
-                     pfamily = dNormal_Gamma(ps_pop$mu, ps_pop$Sigma_0,
+                     pfamily = dNormal_Gamma(ps_pop$mu, Sigma_0 = ps_pop$Sigma_0,
                                              ps_pop$shape, ps_pop$rate))
     beta   <- as.vector(out_pop$coefficients[1, ])
     sigma_theta_sq <- out_pop$dispersion[1]
@@ -100,7 +100,7 @@ cat("\nMain simulation started: ", format(Sys.time(), usetz = TRUE), "\n", sep =
 sim_time <- system.time({
   for (k in seq_len(n_sim)) {
     out_pop <- rglmb(1, theta, X_train, family = gaussian(),
-                     pfamily = dNormal_Gamma(ps_pop$mu, ps_pop$Sigma_0,
+                     pfamily = dNormal_Gamma(ps_pop$mu, Sigma_0 = ps_pop$Sigma_0,
                                              ps_pop$shape, ps_pop$rate))
     beta   <- as.vector(out_pop$coefficients[1, ])
     sigma_theta_sq <- out_pop$dispersion[1]

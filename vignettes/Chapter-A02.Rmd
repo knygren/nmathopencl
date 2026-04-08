@@ -127,9 +127,10 @@ dGamma                      shape: shape parameter for Gamma prior on precision
                                   truncation bounds
 
 dNormal_Gamma               mu: prior mean vector for coefficients
-                            Sigma: prior covariance matrix
+                            Sigma_0: prior covariance on precision-weighted scale
                             shape: shape parameter for Gamma prior on precision
                             rate: rate parameter for Gamma prior on precision
+                            (`prior_list` still uses component name `Sigma`.)
 
 dIndependent_Normal_Gamma   mu: prior mean vector for coefficients
                             Sigma: prior covariance matrix

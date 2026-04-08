@@ -26,12 +26,12 @@ lmb.D9 <- lmb(n=1000,
 summary(lmb.D9)
 vcov(lmb.D9)
 
-## Conjugate Normal_Gamma Prior (note division by dispersion)
+## Conjugate Normal_Gamma Prior (second argument is Sigma_0 from Prior_Setup)
 lmb.D9_v2 <- lmb(n=1000,
   weight ~ group,
   pfamily = dNormal_Gamma(
     ps$mu,
-    ps$Sigma_0,
+    Sigma_0 = ps$Sigma_0,
     shape = ps$shape,
     rate  = ps$rate
   )

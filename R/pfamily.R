@@ -8,7 +8,11 @@
 #' @param object the function \code{pfamily} accesses the \code{pfamily} objects which
 #' are stored within objects created by modelling functions (e.g., \code{glmb}).
 #' @param mu a prior mean vector for the the modeling coefficients used in several pfamilies
-#' @param Sigma a prior Variance-Covariance matrix for the model coefficients in several pfamilies
+#' @param Sigma a prior variance-covariance matrix for \code{dNormal()} and
+#'   \code{dIndependent_Normal_Gamma()}.
+#' @param Sigma_0 prior variance-covariance on the precision-weighted coefficient scale for
+#'   \code{dNormal_Gamma()} only (Gaussian). Stored in \code{prior_list$Sigma} for compatibility
+#'   with downstream samplers.
 #' @param dispersion the dispersion to be assumed when it is not given a prior. Should be provided
 #' when the Normal prior is for the \code{gaussian()}, \code{Gamma()}, \code{quasibinomial},
 #' or \code{quasipoisson} families. The \code{binomial()} and \code{poisson()} families
@@ -86,8 +90,9 @@
 #'   in exponential families \insertCite{Gelman2013,Dobson1990,McCullagh1989}{glmbayes}.
 #'
 #' - **`dNormal_Gamma()`**: Combines a multivariate normal prior on coefficients with a gamma prior on precision, 
-#'   forming a conjugate structure for Gaussian models with unknown variance. This formulation parallels classical 
-#'   Normal-Gamma models and is compatible with hierarchical extensions \insertCite{Gelman2013,Raiffa1961}{glmbayes}.
+#'   forming a conjugate structure for Gaussian models with unknown variance. The second argument is \code{Sigma_0}
+#'   (precision-weighted scale); it is aliased internally to \code{Sigma} in \code{prior_list}.
+#'   This formulation parallels classical Normal-Gamma models and is compatible with hierarchical extensions \insertCite{Gelman2013,Raiffa1961}{glmbayes}.
 #'   
 #'
 #' - **`dIndependent_Normal_Gamma()`**: Similar to `dNormal_Gamma()`, but assumes independence between the 
@@ -266,7 +271,8 @@ dGamma<-function(shape,rate,beta,max_disp_perc = 0.99,disp_lower=NULL,disp_upper
 #' @rdname pfamily
 #' @order 4
 
-dNormal_Gamma<-function(mu, Sigma,shape, rate){
+dNormal_Gamma <- function(mu, Sigma_0, shape, rate) {
+  Sigma <- Sigma_0
 
   ############################################################  
   

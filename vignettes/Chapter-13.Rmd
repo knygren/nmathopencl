@@ -298,7 +298,7 @@ Block Gibbs sampling with **`rlmb`** for the population and school blocks follow
 | Use case | Function | Block 1 | Block 2 | Data used |
 |----------|----------|---------|---------|-----------|
 | Dispersion + \(\beta\) (Gaussian) | **rlmb** | \(\beta \mid \phi\): `dNormal(..., dispersion = phi)` | \(\phi \mid \beta\): `dGamma(shape, rate, beta = beta)` | Dobson plant weight |
-| Hierarchical (Eight Schools, Gibbs-suitable) | **rlmb** | \((\mu, \sigma_\theta^2) \mid \theta\): `dNormal_Gamma(mu, Sigma, shape, rate)` | \(\theta_j \mid \mu, \sigma_\theta^2\): `dNormal(..., dispersion = sigma_j^2)` | Eight Schools |
+| Hierarchical (Eight Schools, Gibbs-suitable) | **rlmb** | \((\mu, \sigma_\theta^2) \mid \theta\): `dNormal_Gamma(mu, Sigma_0, shape, rate)` | \(\theta_j \mid \mu, \sigma_\theta^2\): `dNormal(..., dispersion = sigma_j^2)` | Eight Schools |
 | Hierarchical (Eight Schools) | **rlmb** | \((\mu, \sigma_\theta^2) \mid \theta\): `dIndependent_Normal_Gamma` | \(\theta_j \mid \mu, \sigma_\theta^2\): `dNormal(..., dispersion = sigma_j^2)` | Eight Schools |
 
 The same dispersion-and-coefficients idea extends to **gamma regression** when dispersion must be estimated; a worked example may be added when a suitable dataset is available.

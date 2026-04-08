@@ -124,7 +124,7 @@
 #' The second argument is the prior covariance on the **precision-weighted**
 #' coefficient scale: use **\code{ps2$Sigma_0}** from \code{\link{Prior_Setup}} (Gaussian
 #' only), not coefficient-scale \code{ps2$Sigma} alone. Recommended call:
-#' \code{dNormal_Gamma(ps2$mu, ps2$Sigma_0, shape = ps2$shape, rate = ps2$rate)}.
+#' \code{dNormal_Gamma(ps2$mu, Sigma_0 = ps2$Sigma_0, shape = ps2$shape, rate = ps2$rate)}.
 #' For \code{\link{rNormalGamma_reg}}, build
 #' \code{prior_list = list(mu = ps2$mu, Sigma = ps2$Sigma_0, shape = ps2$shape, rate = ps2$rate)}.
 #'

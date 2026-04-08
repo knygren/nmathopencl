@@ -145,7 +145,7 @@ beta_out[k,1:nobs]=t(beta_temp)
 ### Update Fixed Effects and Dispersion
 
 outtemp2=rglmb(n = 1, y=beta_temp, x=x, 
-               family=gaussian(), pfamily=dNormal_Gamma(mu=mu,Sigma=V/disp_ML,shape=shape,rate=rate), 
+               family=gaussian(), pfamily=dNormal_Gamma(mu=mu,Sigma_0=V/disp_ML,shape=shape,rate=rate), 
                offset = NULL, weights = 1)
 
 xbeta=x%*%outtemp2$coefficients[1,1:nvar]
@@ -183,7 +183,7 @@ for(k in 1:n_sim){
   ### Update Fixed Effects and Dispersion
   
   outtemp2=rglmb(n = 1, y=beta_temp, x=x, 
-                 family=gaussian(), pfamily=dNormal_Gamma(mu=mu,Sigma=V/disp_ML,shape=shape,rate=rate), 
+                 family=gaussian(), pfamily=dNormal_Gamma(mu=mu,Sigma_0=V/disp_ML,shape=shape,rate=rate), 
                  offset = NULL, weights = 1)
   
   xbeta=x%*%outtemp2$coefficients[1,1:nvar]
@@ -212,7 +212,7 @@ nu_out
 
 
 outtemp2=rglmb(n = 1, y=beta_temp, x=x, 
-               family=gaussian(), pfamily=dNormal_Gamma(mu=mu,Sigma=V/disp_ML,shape=shape,rate=rate), 
+               family=gaussian(), pfamily=dNormal_Gamma(mu=mu,Sigma_0=V/disp_ML,shape=shape,rate=rate), 
                offset = NULL, weights = Insured)
 
 xbeta=x%*%outtemp2$coefficients[1,1:nvar]

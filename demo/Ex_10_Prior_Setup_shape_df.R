@@ -144,7 +144,7 @@ fit_p1_ng <- lmb(
   weight ~ group,
   pfamily = dNormal_Gamma(
     p1_ng$mu,
-    p1_ng$Sigma_0,
+    Sigma_0 = p1_ng$Sigma_0,
     shape = p1_ng$shape,
     rate = p1_ng$rate
   ),
@@ -289,7 +289,7 @@ fit_p2_ng <- lmb(
   weight_s2 ~ group_s2,
   pfamily = dNormal_Gamma(
     p2_ng$mu,
-    p2_ng$Sigma_0,
+    Sigma_0 = p2_ng$Sigma_0,
     shape = shape_p2_ng,
     rate = rate_p2_ng
   ),

@@ -22,7 +22,7 @@ dGamma(
   disp_upper = NULL
 )
 
-dNormal_Gamma(mu, Sigma, shape, rate)
+dNormal_Gamma(mu, Sigma_0, shape, rate)
 
 dIndependent_Normal_Gamma(
   mu,
@@ -42,7 +42,8 @@ are stored within objects created by modelling functions (e.g., \code{glmb}).}
 
 \item{mu}{a prior mean vector for the the modeling coefficients used in several pfamilies}
 
-\item{Sigma}{a prior Variance-Covariance matrix for the model coefficients in several pfamilies}
+\item{Sigma}{a prior variance-covariance matrix for \code{dNormal()} and
+\code{dIndependent_Normal_Gamma()}.}
 
 \item{dispersion}{the dispersion to be assumed when it is not given a prior. Should be provided
 when the Normal prior is for the \code{gaussian()}, \code{Gamma()}, \code{quasibinomial},
@@ -70,6 +71,10 @@ rates, while larger values allow broader dispersion support but may increase env
 \item{disp_lower}{lower bound truncation for dispersion}
 
 \item{disp_upper}{upper bound truncation for dispersion}
+
+\item{Sigma_0}{prior variance-covariance on the precision-weighted coefficient scale for
+\code{dNormal_Gamma()} only (Gaussian). Stored in \code{prior_list$Sigma} for compatibility
+with downstream samplers.}
 
 \item{x}{an object, a pfamily function that is to be printed}
 
@@ -135,8 +140,9 @@ developed for regression models using g-prior structures by \insertCite{zellner1
 or variance components. This prior is particularly relevant for Gamma likelihoods and dispersion modeling
 in exponential families \insertCite{Gelman2013,Dobson1990,McCullagh1989}{glmbayes}.
 \item \strong{\code{dNormal_Gamma()}}: Combines a multivariate normal prior on coefficients with a gamma prior on precision,
-forming a conjugate structure for Gaussian models with unknown variance. This formulation parallels classical
-Normal-Gamma models and is compatible with hierarchical extensions \insertCite{Gelman2013,Raiffa1961}{glmbayes}.
+forming a conjugate structure for Gaussian models with unknown variance. The second argument is \code{Sigma_0}
+(precision-weighted scale); it is aliased internally to \code{Sigma} in \code{prior_list}.
+This formulation parallels classical Normal-Gamma models and is compatible with hierarchical extensions \insertCite{Gelman2013,Raiffa1961}{glmbayes}.
 \item \strong{\code{dIndependent_Normal_Gamma()}}: Similar to \code{dNormal_Gamma()}, but assumes independence between the
 coefficient and precision priors. This structure is useful for models where prior independence is desired
 or analytically convenient.
@@ -195,7 +201,7 @@ lmb.D9_v2 <- lmb(
   weight ~ group,
   pfamily = dNormal_Gamma(
     ps2$mu,
-    ps2$Sigma_0,
+    Sigma_0 = ps2$Sigma_0,
     shape = ps2$shape,
     rate  = ps2$rate
   )

@@ -158,7 +158,7 @@ This prior is typically used as a prior when calling either the *lmb* or *rglmb*
 
 ```{r Calling dNormal_Gamma,results = "hide"}
 
-dNormal_Gamma(mu=mu1,Sigma=Sigma1,shape=4,rate=0.1)
+dNormal_Gamma(mu=mu1,Sigma_0=Sigma1,shape=4,rate=0.1)
 ```
 
 *Calling the dGamma prior family
@@ -315,7 +315,7 @@ P<-0.1*diag(2)
 # Bayesian Prior Setup and Call-Prior Should Generally be Customized
 p_info=Prior_Setup(weight~group)
 x=p_info$x
-outtemp4=rlmb(n=1000,y=y,x=x,pfamily=dNormal_Gamma(mu=mu,Sigma=solve(P),shape=shape,rate=rate))
+outtemp4=rlmb(n=1000,y=y,x=x,pfamily=dNormal_Gamma(mu=mu,Sigma_0=solve(P),shape=shape,rate=rate))
 
 #summary(outtemp4)
 

@@ -37,7 +37,7 @@ lmb.D9_v2 <- lmb(
   weight ~ group,
   pfamily = dNormal_Gamma(
     ps2$mu,
-    ps2$Sigma_0,
+    Sigma_0 = ps2$Sigma_0,
     shape = ps2$shape,
     rate = ps2$rate
   )

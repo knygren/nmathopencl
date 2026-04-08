@@ -37,10 +37,10 @@ test_that("Bayesian Gaussian regression with Independent Normal-Gamma prior — 
   lmb.boston_v2 <- lmb(
     form,
     data     = Boston_centered,
-    pfamily  = dNormal_Gamma(mu   = ps$mu,
-                             Sigma = ps$Sigma_0,
-                             shape = ps$shape,
-                             rate  = ps$rate)
+    pfamily  = dNormal_Gamma(mu     = ps$mu,
+                             Sigma_0 = ps$Sigma_0,
+                             shape  = ps$shape,
+                             rate   = ps$rate)
   )
   
 
