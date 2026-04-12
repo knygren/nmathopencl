@@ -7,7 +7,7 @@
 ## `dIndependent_Normal_Gamma()`; for the latter, pass `shape = ps$shape + p/2`
 ## with `p = ncol(ps$x)` (see ?Prior_Setup).
 ##
-## Run: demo(Ex_10_Prior_Setup_shape_df, package = "glmbayes")
+## Run: demo(Ex_10_Prior_Setup_gaussian_calibration, package = "glmbayes")
 
 library(glmbayes)
 

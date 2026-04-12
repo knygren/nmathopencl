@@ -16,7 +16,7 @@ compute_gaussian_prior(
   Sigma_0,
   Sigma = NULL,
   n_prior,
-  shape_df = NULL
+  k = 1
 )
 }
 \arguments{
@@ -55,7 +55,12 @@ path is used.}
 
 \item{n_prior}{Positive scalar effective prior sample size.}
 
-\item{shape_df}{Defunct. If non-\code{NULL}, a warning is issued; the argument is ignored.}
+\item{k}{Scalar (default \code{1}), non-negative (\eqn{k \geq 0}), with \eqn{k + p \geq 2}
+where \eqn{p = }\code{ncol(X)}. \code{k} controls the tail behavior and effective degrees of
+freedom of the variance prior. It does not change the posterior mean of \eqn{\sigma^2} or the
+covariance of \eqn{\beta}, but larger \code{k} makes the prior and posterior for
+\eqn{\sigma^2} more concentrated and less heavy-tailed. Not yet used in the calibration
+formulas; reserved for future use.}
 }
 \value{
 A list with elements:

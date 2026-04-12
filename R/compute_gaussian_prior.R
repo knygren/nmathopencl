@@ -96,7 +96,12 @@
 #'   \code{NULL}, the existing calibrated \code{Sigma} / input \code{Sigma_0}
 #'   path is used.
 #' @param n_prior Positive scalar effective prior sample size.
-#' @param shape_df Defunct. If non-\code{NULL}, a warning is issued; the argument is ignored.
+#' @param k Scalar (default \code{1}), non-negative (\eqn{k \geq 0}), with \eqn{k + p \geq 2}
+#'   where \eqn{p = }\code{ncol(X)}. \code{k} controls the tail behavior and effective degrees of
+#'   freedom of the variance prior. It does not change the posterior mean of \eqn{\sigma^2} or the
+#'   covariance of \eqn{\beta}, but larger \code{k} makes the prior and posterior for
+#'   \eqn{\sigma^2} more concentrated and less heavy-tailed. Not yet used in the calibration
+#'   formulas; reserved for future use.
 #'
 #' @return A list with elements:
 #' \itemize{
@@ -122,21 +127,14 @@ compute_gaussian_prior <- function(
     Sigma_0,
     Sigma = NULL,
     n_prior,
-    shape_df = NULL
+    k = 1
 ) {
-  if (!is.null(shape_df)) {
-    warning(
-      "compute_gaussian_prior(): argument shape_df is defunct and ignored; ",
-      "shape and rate use n_prior only.",
-      call. = FALSE
-    )
-  }
   ## ---------------------------------------------------------------------------
   ## Gaussian calibration pipeline:
   ## Step A: Validate inputs and dimensions.
   ## Step B: Compute weighted RSS from (Y, X, bhat, offset, weights).
   ## Step C: Build Gram terms and S_marg using Sigma_0 + (X'WX)^{-1}.
-  ## Step D: Gamma shape = (n_prior + 1) / 2; rate from n_prior (not shape_df).
+  ## Step D: Gamma shape = (n_prior + 1) / 2; rate from n_prior.
   ## Step E: Calibrate dispersion/rate and map to coefficient Sigma.
   ## Step F: Return calibrated terms.
   ## ---------------------------------------------------------------------------
@@ -164,6 +162,15 @@ compute_gaussian_prior <- function(
     stop("compute_gaussian_prior: offset must be a numeric vector with length equal to nrow(X).", call. = FALSE)
   }
   p <- NCOL(X)
+  if (!is.numeric(k) || length(k) != 1L || !is.finite(k) || k < 0) {
+    stop("compute_gaussian_prior: k must be a single non-negative finite numeric value.", call. = FALSE)
+  }
+  if (k + p < 2) {
+    stop(
+      "compute_gaussian_prior: require k + p >= 2, where p = ncol(X). Got k = ", k, ", p = ", p, ".",
+      call. = FALSE
+    )
+  }
   if (!is.numeric(bhat) || length(bhat) != p || any(!is.finite(bhat))) {
     stop("compute_gaussian_prior: bhat must be a finite numeric vector with length ncol(X).", call. = FALSE)
   }
@@ -221,19 +228,21 @@ compute_gaussian_prior <- function(
   }
   S_marg <- rss_weighted + quad
 
-  ## Step D: Gamma shape and rate from n_prior only.
-  shape <- (n_prior + 1L) / 2
+  ## Step D: prior Gamma shape (precision) uses n_prior and k.
+  shape <- (n_prior + k) / 2
   if (!is.finite(shape) || shape <= 0) {
     stop("compute_gaussian_prior: computed shape must be strictly positive.", call. = FALSE)
   }
 
   ## Step E: calibrate Gaussian dispersion/rate and implied Sigma.
-  ## E[sigma^2|y] = b_n/(a_n-1) with a_n = (n_prior + n_effective + 1)/2,
-  ## b_n = b_0 + S_marg/2, dispersion = S_marg/(n_effective - p),
-  ## b_0 = (S_marg/2) * (n_prior + p - 1) / (n_effective - p).
+  ## Prior shape a_0 = (n_prior + k)/2; posterior a_n = a_0 + n_effective/2
+  ##   = (n_prior + k + n_effective)/2. With b_n = b_0 + S_marg/2 and
+  ##   b_0 = (S_marg/2) * (n_prior + k + p - 2) / (n_effective - p),
+  ##   E[sigma^2|y] = b_n/(a_n - 1) = S_marg/(n_effective - p) = dispersion_cal
+  ##   (k cancels between a_n and b_n).
   den_resid_df <- n_effective - p
   dispersion_cal <- S_marg / den_resid_df
-  b_0_S_marg_formula <- 0.5 * S_marg * (n_prior + p - 1L) / den_resid_df
+  b_0_S_marg_formula <- 0.5 * S_marg * (n_prior +k+ p - 2L) / den_resid_df
 
   if (!is.finite(dispersion_cal) || dispersion_cal <= 0) {
     stop("compute_gaussian_prior: calibrated dispersion (S_marg/(n_effective-p)) is missing or not positive.", call. = FALSE)

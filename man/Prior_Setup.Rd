@@ -23,7 +23,7 @@ Prior_Setup(
   intercept_source = c("null_model", "full_model"),
   effects_source = c("null_effects", "full_model"),
   mu = NULL,
-  shape_df = NULL,
+  k = 1,
   ...
 )
 
@@ -97,8 +97,13 @@ For now, this is documented as an optional argument used to scale the
 
 \item{mu}{Optional vector argument with the prior means for the coefficients}
 
-\item{shape_df}{Defunct. If non-\code{NULL}, a warning is issued; the argument is ignored.
-Gamma \code{shape} and \code{rate} use \code{n_prior} only; see \code{\link{compute_gaussian_prior}}.}
+\item{k}{Scalar (default \code{1}), non-negative (\eqn{k \geq 0}), with \eqn{k + p \geq 2}
+where \eqn{p} is the number of coefficients (columns of the model matrix). \code{k}
+controls the tail behavior and effective degrees of freedom of the variance prior. It does
+not change the posterior mean of \eqn{\sigma^2} or the covariance of \eqn{\beta}, but larger
+\code{k} makes the prior and posterior for \eqn{\sigma^2} more concentrated and less
+heavy-tailed. Not yet used in calibration; passed through to \code{\link{compute_gaussian_prior}}
+for future use.}
 
 \item{...}{
     For \code{glm}: arguments to be used to form the default

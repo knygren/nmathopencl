@@ -28,8 +28,13 @@
 #' @param dispersion Optional scalar dispersion override (default \code{NULL}).
 #' For now, this is documented as an optional argument used to scale the
 #' \code{Sigma} (variance-covariance) matrix; see Details for additional context.
-#' @param shape_df Defunct. If non-\code{NULL}, a warning is issued; the argument is ignored.
-#'   Gamma \code{shape} and \code{rate} use \code{n_prior} only; see \code{\link{compute_gaussian_prior}}.
+#' @param k Scalar (default \code{1}), non-negative (\eqn{k \geq 0}), with \eqn{k + p \geq 2}
+#'   where \eqn{p} is the number of coefficients (columns of the model matrix). \code{k}
+#'   controls the tail behavior and effective degrees of freedom of the variance prior. It does
+#'   not change the posterior mean of \eqn{\sigma^2} or the covariance of \eqn{\beta}, but larger
+#'   \code{k} makes the prior and posterior for \eqn{\sigma^2} more concentrated and less
+#'   heavy-tailed. Not yet used in calibration; passed through to \code{\link{compute_gaussian_prior}}
+#'   for future use.
 #' @param intercept_source Specifies the method through which the prior mean for the intercept term is set. Options are based on the null intercept only model (null_model) or full_models. The default is the null model which is safer if variables are not centered. 
 #' @param effects_source Specifies the method through which the prior means for the effects terms are set. Options are null_effects (prior means set to zero) or full_model (effect means set to match maximum likelihood estimates).  
 #' @param mu Optional vector argument with the prior means for the coefficients
@@ -274,7 +279,7 @@ Prior_Setup <- function(
     intercept_source = c("null_model", "full_model"),
     effects_source   = c("null_effects",  "full_model"),
     mu          = NULL,
-    shape_df    = NULL,
+    k           = 1,
     ...
   ) 
   
@@ -286,13 +291,6 @@ Prior_Setup <- function(
   call <- match.call()  
   intercept_source <- match.arg(intercept_source)
   effects_source <- match.arg(effects_source)
-  if (!is.null(shape_df)) {
-    warning(
-      "Prior_Setup(): argument shape_df is defunct and ignored; ",
-      "Gaussian Gamma shape/rate use n_prior only (see ?compute_gaussian_prior).",
-      call. = FALSE
-    )
-  }
   if (!is.null(dispersion)) {
     if (!is.numeric(dispersion) || length(dispersion) != 1L ||
         !is.finite(dispersion) || dispersion <= 0) {
@@ -424,6 +422,16 @@ Prior_Setup <- function(
 ##  x<-model.matrix(formula,mf)
   
   nvar=ncol(x)
+  if (!is.numeric(k) || length(k) != 1L || !is.finite(k) || k < 0) {
+    stop("k must be a single non-negative finite numeric value.", call. = FALSE)
+  }
+  if (k + nvar < 2) {
+    stop(
+      "Prior_Setup: require k + p >= 2, where p is the number of coefficients (ncol of model matrix). ",
+      "Got k = ", k, ", p = ", nvar, ".",
+      call. = FALSE
+    )
+  }
   
   ## ---------------------------------------------------------------------------
   ## Step 4: Resolve prior-weight inputs (pwt, sd, n_prior).
@@ -766,7 +774,8 @@ if (!is.null(sd)) {
         mu = mu,
         Sigma_0 = Sigma_0_h,
         Sigma = if (!is.null(sd)) Sigma_pre_nm else NULL,
-        n_prior = n_prior
+        n_prior = n_prior,
+        k = k
       )
     }
   }
