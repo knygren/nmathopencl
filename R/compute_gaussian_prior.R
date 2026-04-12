@@ -4,8 +4,8 @@
 #' Given Gaussian-model sufficient inputs and a dispersion-independent
 #' coefficient prior covariance \eqn{\Sigma_0} (Chapter 11 framing), this
 #' function computes calibrated Gaussian prior quantities:
-#' \code{dispersion}, \code{shape}, \code{rate}, and \code{Sigma}, and returns
-#' the input \code{Sigma_0} as \code{Sigma_0}.
+#' \code{dispersion}, \code{shape}, \code{rate}, \code{rate_gamma}, and \code{Sigma},
+#' and returns the input \code{Sigma_0} as \code{Sigma_0}.
 #'
 #' The function is structured as a step-wise pipeline:
 #' \enumerate{
@@ -108,6 +108,13 @@
 #'   \item \code{dispersion}: calibrated Gaussian dispersion scalar.
 #'   \item \code{shape}: Gamma shape for residual precision.
 #'   \item \code{rate}: Gamma rate for residual precision.
+#'   \item \code{rate_gamma}: Prior Gamma rate for the \code{\link{dGamma}} / fixed-\eqn{\beta}
+#'     construction, using the same \eqn{(n_{\mathrm{prior}}+k+p-2)/(n_{\mathrm{effective}}-p)}
+#'     scaling as \code{rate} but with weighted RSS at the scalar Zellner blend
+#'     \eqn{\beta_\star=(1-\mathrm{pwt})\hat\beta+\mathrm{pwt}\mu},
+#'     \eqn{\mathrm{pwt}=n_{\mathrm{prior}}/(n_{\mathrm{prior}}+n_{\mathrm{effective}})}.
+#'     Use with \code{shape} for \code{dGamma(..., shape, rate = rate_gamma, beta = coefficients)} when
+#'     pairing prior and likelihood on \eqn{\mathrm{RSS}_w(\beta_\star)}.
 #'   \item \code{Sigma}: calibrated coefficient prior covariance matrix.
 #'   \item \code{Sigma_0}: the dispersion-independent prior covariance matrix passed in
 #'     via argument \code{Sigma_0} (same matrix, with \code{dimnames} taken from
@@ -258,6 +265,25 @@ compute_gaussian_prior <- function(
     )
   }
   rate <- b_0_S_marg_formula
+
+  ## Prior rate for dGamma / fixed-beta path: same scaling as \code{rate}, but with
+  ## RSS at Zellner blend \eqn{\beta_\star=(1-\mathrm{pwt})\hat\beta+\mathrm{pwt}\mu},
+  ## \eqn{\mathrm{pwt}=n_{\mathrm{prior}}/(n_{\mathrm{prior}}+n_{\mathrm{effective}})}.
+  pwt_scalar <- n_prior / (n_prior + n_effective)
+  beta_star <- (1 - pwt_scalar) * bhat + pwt_scalar * mu_num
+  res_star <- as.numeric(Y) - as.numeric(X %*% beta_star) - as.numeric(offset)
+  rss_star <- sum(as.numeric(weights) * res_star^2)
+  if (!is.finite(rss_star) || rss_star <= 0) {
+    stop(
+      "compute_gaussian_prior: weighted RSS at default coefficient blend must be strictly positive.",
+      call. = FALSE
+    )
+  }
+  rate_gamma <- 0.5 * rss_star * (n_prior + k + p - 2L) / den_resid_df
+  if (!is.finite(rate_gamma) || rate_gamma <= 0) {
+    stop("compute_gaussian_prior: computed rate_gamma must be strictly positive.", call. = FALSE)
+  }
+
   Sigma_calibrated <- (n_effective / n_prior) * dispersion_cal * Ginv
   dimnames(Sigma_calibrated) <- list(colnames(X), colnames(X))
 
@@ -288,6 +314,7 @@ compute_gaussian_prior <- function(
     dispersion = dispersion,
     shape = shape,
     rate = rate,
+    rate_gamma = rate_gamma,
     Sigma = Sigma,
     Sigma_0 = Sigma_0_out
   )

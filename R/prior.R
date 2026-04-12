@@ -115,11 +115,13 @@
 #' \code{shape} offset as above, and envelope controls such as \code{max_disp_perc} (see examples).
 #'
 #' #### \code{\link{dGamma}()} (Gamma on precision / dispersion with fixed \eqn{\beta})
-#' \code{Prior_Setup()} supplies \code{shape}, \code{rate}, and \code{coefficients}
-#' (full-model MLE by default). Typical use:
-#' \code{dGamma(shape = ps2$shape, rate = ps2$rate, beta = ps2$coefficients)}.
-#' For \code{\link{rGamma_reg}}, pass
-#' \code{prior_list = list(beta = ps2$coefficients, shape = ps2$shape, rate = ps2$rate)}.
+#' \code{Prior_Setup()} supplies \code{shape}, \code{rate}, \code{rate_gamma} (Gaussian
+#' calibration only), and \code{coefficients} (full-model MLE by default). For
+#' \code{gaussian()}, use \code{rate_gamma} when present so the Gamma rate matches
+#' \eqn{\mathrm{RSS}_w(\beta_\star)} at the Zellner blend (see \code{\link{compute_gaussian_prior}}):
+#' \code{rate_dg <- if (!is.null(ps2$rate_gamma)) ps2$rate_gamma else ps2$rate} then
+#' \code{dGamma(shape = ps2$shape, rate = rate_dg, beta = ps2$coefficients)}.
+#' For \code{\link{rGamma_reg}}, pass the same \code{rate} slot in \code{prior_list}.
 #'
 #' #### References and further reading
 #' Zellner-style scaling of \code{Sigma} from the likelihood
@@ -230,6 +232,9 @@
 #' \item{dispersion}{Empirical bayes estimate for the dispersion (gaussian model only)}
 #' \item{shape}{Derived prior shape parameter (gaussian model only). \eqn{(n_{\mathrm{prior}}+1)/2}{}; after calibration see \code{\link{compute_gaussian_prior}}.}
 #' \item{rate}{Derived prior rate parameter (gaussian model only). Pre-calibration uses \eqn{(n_{\mathrm{prior}}/2)\cdot\texttt{dispersion}}{}; Gaussian output replaces this with the calibrated rate from \code{\link{compute_gaussian_prior}}.}
+#' \item{rate_gamma}{For \code{gaussian()} only, when Gaussian calibration runs: prior Gamma rate
+#'   for \code{\link{dGamma}} / fixed-\eqn{\beta} use, from \code{\link{compute_gaussian_prior}}
+#'   (RSS at the Zellner blend; see that help page). \code{NULL} if not computed.}
 #' \item{coefficients}{Named numeric vector of prior-implied posterior-mean coefficients.
 #'   For \code{gaussian()} this uses the closed-form Zellner blend
 #'   \eqn{(1-\texttt{pwt})\hat\beta+\texttt{pwt}\mu} (scalar or per-coefficient \code{pwt})
@@ -717,6 +722,7 @@ if (!is.null(sd)) {
   rownames(Sigma)=var_names
   colnames(Sigma)=var_names
 
+  rate_gamma <- NULL
   ## ---------------------------------------------------------------------------
   ## Step 9: Build Gamma(shape, rate) hyperparameters when available.
   ## For Gaussian this provides precision-prior terms used in calibration.
@@ -818,6 +824,7 @@ if (!is.null(sd)) {
     dispersion <- .gauss_helper_preview$dispersion
     shape <- .gauss_helper_preview$shape
     rate <- .gauss_helper_preview$rate
+    rate_gamma <- .gauss_helper_preview$rate_gamma
     Sigma <- .gauss_helper_preview$Sigma
     rownames(Sigma) <- var_names
     colnames(Sigma) <- var_names
@@ -846,6 +853,7 @@ if (!is.null(sd)) {
     dispersion = dispersion,
     shape = shape,
     rate = rate,
+    rate_gamma = rate_gamma,
     coefficients = coefficients,
     model = mf,
     x = x,

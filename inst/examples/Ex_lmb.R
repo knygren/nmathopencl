@@ -59,18 +59,18 @@ vcov(lmb.D9)
 vcov(lmb.D9_v2)
 vcov(lmb.D9_v3)
 
-disp_classical
-mean(lmb.D9$dispersion)
-mean(lmb.D9_v2$dispersion)
-mean(lmb.D9_v3$dispersion)
-
-
 ## anova 
 anova(lmb.D9)
 
 ## lmb with dGamma prior (dispersion-only; coefficients fixed)
+rate_dg <- if (!is.null(ps$rate_gamma)) ps$rate_gamma else ps$rate
 out_lmb_dGamma <- lmb(n=1000,
   weight ~ group,
-  pfamily = dGamma(shape = ps$shape, rate = ps$rate, beta = ps$coefficients))
+  pfamily = dGamma(shape = ps$shape, rate = rate_dg, beta = ps$coefficients))
 summary(out_lmb_dGamma)
 
+disp_classical
+mean(lmb.D9$dispersion)
+mean(lmb.D9_v2$dispersion)
+mean(lmb.D9_v3$dispersion)
+mean(out_lmb_dGamma$dispersion)

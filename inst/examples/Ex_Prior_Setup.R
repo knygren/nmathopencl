@@ -109,17 +109,18 @@ prior_list_rindepNormalGamma <- list(
   max_disp_perc = 0.99
 )
 
+rate_dg <- if (!is.null(ps2$rate_gamma)) ps2$rate_gamma else ps2$rate
 prior_list_rGamma <- list(
   beta = ps2$coefficients,
   shape = ps2$shape,
-  rate = ps2$rate
+  rate = rate_dg
 )
 
 ## Note: for a full dGamma run across rGamma_reg/rglmb/rlmb/glmb/lmb, see:
 ## example("summary.rgamma_reg")
 
 ## -------------------------------------------------------------------------
-## dGamma prior illustration: using Prior_Setup(shape, rate) + fixed beta
+## dGamma prior illustration: Prior_Setup(shape, rate_gamma or rate) + fixed beta
 ## -------------------------------------------------------------------------
 ## For gaussian models, Prior_Setup() provides Gamma hyperparameters for the
 ## precision: tau = 1/dispersion ~ Gamma(shape, rate). The lmb() / rGamma_reg()
@@ -129,7 +130,7 @@ prior_list_rGamma <- list(
 ## dGamma via pfamily for lmb()
 lmb.D9_dGamma <- lmb(
   weight ~ group,
-  pfamily = dGamma(shape = ps2$shape, rate = ps2$rate, beta = ps2$coefficients)
+  pfamily = dGamma(shape = ps2$shape, rate = rate_dg, beta = ps2$coefficients)
 )
 
 ## dGamma via prior_list for rGamma_reg()

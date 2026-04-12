@@ -1,4 +1,4 @@
-## mtcars: Prior_Setup() - dNormal, dNormal_Gamma, dIndependent_Normal_Gamma
+## mtcars: Prior_Setup() - dNormal, dNormal_Gamma, dIndependent_Normal_Gamma, dGamma
 ##
 ## Uses `Prior_Setup()` with **`pwt = 0.001`** (weak prior; override defaults). Prior
 ## mean **mu** uses the **full model** MLE for intercept
@@ -10,6 +10,8 @@
 ## `dNormal()` uses `ps$Sigma` and **default** `dispersion = ps$dispersion`. 
 ## `dIndependent_Normal_Gamma()` uses `shape = ps$shape + p/2` with `p = ncol(ps$x)`
 ## (same `ps$rate` as `dNormal_Gamma()`); see `?Prior_Setup`.
+## `dGamma()` uses fixed `ps$coefficients` with `rate = ps$rate_gamma` when present
+## (RSS at the Zellner blend; else `ps$rate`).
 ##
 ## Run: demo(Ex_11_Cars, package = "glmbayes")
 
@@ -63,6 +65,11 @@ V_lm_shrunk <- (1 - pwt) * V_lm
 cat("\n======== Prior_Setup (pwt = 0.001, Gaussian) =========\n")
 print(ps$PriorSettings)
 cat("p =", p, "  ps$shape =", ps$shape, "  ps$shape + p/2 (ING) =", ps$shape + p / 2, "\n")
+cat(
+  "ps$rate (S_marg calibration) =", ps$rate,
+  "  ps$rate_gamma (RSS at blend, dGamma) =", ps$rate_gamma, "\n"
+)
+rate_dg <- if (!is.null(ps$rate_gamma)) ps$rate_gamma else ps$rate
 
 n_mc <- 100000L
 
@@ -101,6 +108,13 @@ fit_ing <- lmb(
   n = n_mc
 )
 
+fit_dg <- lmb(
+  form,
+  data = mt,
+  pfamily = dGamma(shape = ps$shape, rate = rate_dg, beta = ps$coefficients),
+  n = n_mc
+)
+
 
 cat("\n======== Classical vs. Posterior vcov(lmb) =========\n")
 cat("Classical Scaled:\n")
@@ -125,5 +139,6 @@ cat("ps$dispersion (dNormal)  =", ps$dispersion, "\n")
 cat("mean(lmb dNormal dispersion) =", mean(fit_dn$dispersion), "\n")
 cat("mean(lmb NG dispersion)  =", mean(fit_ng$dispersion), "\n")
 cat("mean(lmb ING dispersion) =", mean(fit_ing$dispersion), "\n")
+cat("mean(lmb dGamma dispersion, fixed beta, rate_gamma) =", mean(fit_dg$dispersion), "\n")
 
 invisible(NULL)

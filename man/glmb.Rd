@@ -343,8 +343,9 @@ trt <- c(4.81, 4.17, 4.41, 3.59, 5.87, 3.83, 6.03, 4.89, 4.32, 4.69)
 group <- gl(2, 10, 20, labels = c("Ctl", "Trt"))
 weight <- c(ctl, trt)
 ps_dg <- Prior_Setup(weight ~ group, family = gaussian())
+rate_dg <- if (!is.null(ps_dg$rate_gamma)) ps_dg$rate_gamma else ps_dg$rate
 out_glmb_dGamma <- glmb(weight ~ group, family = gaussian(),
-  pfamily = dGamma(shape = ps_dg$shape, rate = ps_dg$rate, beta = ps_dg$coefficients))
+  pfamily = dGamma(shape = ps_dg$shape, rate = rate_dg, beta = ps_dg$coefficients))
 summary(out_glmb_dGamma)
 
 }

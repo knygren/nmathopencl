@@ -68,6 +68,13 @@ A list with elements:
 \item \code{dispersion}: calibrated Gaussian dispersion scalar.
 \item \code{shape}: Gamma shape for residual precision.
 \item \code{rate}: Gamma rate for residual precision.
+\item \code{rate_gamma}: Prior Gamma rate for the \code{\link{dGamma}} / fixed-\eqn{\beta}
+construction, using the same \eqn{(n_{\mathrm{prior}}+k+p-2)/(n_{\mathrm{effective}}-p)}
+scaling as \code{rate} but with weighted RSS at the scalar Zellner blend
+\eqn{\beta_\star=(1-\mathrm{pwt})\hat\beta+\mathrm{pwt}\mu},
+\eqn{\mathrm{pwt}=n_{\mathrm{prior}}/(n_{\mathrm{prior}}+n_{\mathrm{effective}})}.
+Use with \code{shape} for \code{dGamma(..., shape, rate = rate_gamma, beta = coefficients)} when
+pairing prior and likelihood on \eqn{\mathrm{RSS}_w(\beta_\star)}.
 \item \code{Sigma}: calibrated coefficient prior covariance matrix.
 \item \code{Sigma_0}: the dispersion-independent prior covariance matrix passed in
 via argument \code{Sigma_0} (same matrix, with \code{dimnames} taken from
@@ -79,8 +86,8 @@ Gaussian Normal-Gamma calibration function used by \code{\link{Prior_Setup}}.
 Given Gaussian-model sufficient inputs and a dispersion-independent
 coefficient prior covariance \eqn{\Sigma_0} (Chapter 11 framing), this
 function computes calibrated Gaussian prior quantities:
-\code{dispersion}, \code{shape}, \code{rate}, and \code{Sigma}, and returns
-the input \code{Sigma_0} as \code{Sigma_0}.
+\code{dispersion}, \code{shape}, \code{rate}, \code{rate_gamma}, and \code{Sigma},
+and returns the input \code{Sigma_0} as \code{Sigma_0}.
 }
 \details{
 The function is structured as a step-wise pipeline:

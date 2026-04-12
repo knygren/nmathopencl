@@ -124,6 +124,9 @@ the precision-weighted coefficient scale (same as the \code{Sigma_0} argument to
 \item{dispersion}{Empirical bayes estimate for the dispersion (gaussian model only)}
 \item{shape}{Derived prior shape parameter (gaussian model only). \eqn{(n_{\mathrm{prior}}+1)/2}{}; after calibration see \code{\link{compute_gaussian_prior}}.}
 \item{rate}{Derived prior rate parameter (gaussian model only). Pre-calibration uses \eqn{(n_{\mathrm{prior}}/2)\cdot\texttt{dispersion}}{}; Gaussian output replaces this with the calibrated rate from \code{\link{compute_gaussian_prior}}.}
+\item{rate_gamma}{For \code{gaussian()} only, when Gaussian calibration runs: prior Gamma rate
+for \code{\link{dGamma}} / fixed-\eqn{\beta} use, from \code{\link{compute_gaussian_prior}}
+(RSS at the Zellner blend; see that help page). \code{NULL} if not computed.}
 \item{coefficients}{Named numeric vector of prior-implied posterior-mean coefficients.
 For \code{gaussian()} this uses the closed-form Zellner blend
 \eqn{(1-\texttt{pwt})\hat\beta+\texttt{pwt}\mu} (scalar or per-coefficient \code{pwt})
@@ -220,11 +223,13 @@ uses \strong{undivided} \code{Sigma}, plus \code{dispersion}, \code{Precision = 
 
 \subsection{\code{\link{dGamma}()} (Gamma on precision / dispersion with fixed \eqn{\beta})}{
 
-\code{Prior_Setup()} supplies \code{shape}, \code{rate}, and \code{coefficients}
-(full-model MLE by default). Typical use:
-\code{dGamma(shape = ps2$shape, rate = ps2$rate, beta = ps2$coefficients)}.
-For \code{\link{rGamma_reg}}, pass
-\code{prior_list = list(beta = ps2$coefficients, shape = ps2$shape, rate = ps2$rate)}.
+\code{Prior_Setup()} supplies \code{shape}, \code{rate}, \code{rate_gamma} (Gaussian
+calibration only), and \code{coefficients} (full-model MLE by default). For
+\code{gaussian()}, use \code{rate_gamma} when present so the Gamma rate matches
+\eqn{\mathrm{RSS}_w(\beta_\star)} at the Zellner blend (see \code{\link{compute_gaussian_prior}}):
+\code{rate_dg <- if (!is.null(ps2$rate_gamma)) ps2$rate_gamma else ps2$rate} then
+\code{dGamma(shape = ps2$shape, rate = rate_dg, beta = ps2$coefficients)}.
+For \code{\link{rGamma_reg}}, pass the same \code{rate} slot in \code{prior_list}.
 }
 
 \subsection{References and further reading}{
@@ -452,17 +457,18 @@ prior_list_rindepNormalGamma <- list(
   max_disp_perc = 0.99
 )
 
+rate_dg <- if (!is.null(ps2$rate_gamma)) ps2$rate_gamma else ps2$rate
 prior_list_rGamma <- list(
   beta = ps2$coefficients,
   shape = ps2$shape,
-  rate = ps2$rate
+  rate = rate_dg
 )
 
 ## Note: for a full dGamma run across rGamma_reg/rglmb/rlmb/glmb/lmb, see:
 ## example("summary.rgamma_reg")
 
 ## -------------------------------------------------------------------------
-## dGamma prior illustration: using Prior_Setup(shape, rate) + fixed beta
+## dGamma prior illustration: Prior_Setup(shape, rate_gamma or rate) + fixed beta
 ## -------------------------------------------------------------------------
 ## For gaussian models, Prior_Setup() provides Gamma hyperparameters for the
 ## precision: tau = 1/dispersion ~ Gamma(shape, rate). The lmb() / rGamma_reg()
@@ -472,7 +478,7 @@ prior_list_rGamma <- list(
 ## dGamma via pfamily for lmb()
 lmb.D9_dGamma <- lmb(
   weight ~ group,
-  pfamily = dGamma(shape = ps2$shape, rate = ps2$rate, beta = ps2$coefficients)
+  pfamily = dGamma(shape = ps2$shape, rate = rate_dg, beta = ps2$coefficients)
 )
 
 ## dGamma via prior_list for rGamma_reg()

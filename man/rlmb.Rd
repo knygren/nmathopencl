@@ -213,8 +213,9 @@ summary(lmb.D9)
 
 
 ## rlmb with dGamma prior (dispersion-only; coefficients fixed)
+rate_dg <- if (!is.null(ps$rate_gamma)) ps$rate_gamma else rate
 out_rlmb_dGamma <- rlmb(n = 100, y = y, x = x,
-  pfamily = dGamma(shape = shape, rate = rate, beta = ps$coefficients),
+  pfamily = dGamma(shape = shape, rate = rate_dg, beta = ps$coefficients),
   weights = rep(1, length(y)))
 summary(out_rlmb_dGamma)
 

@@ -438,12 +438,13 @@ This section explains how the outputs of `Prior_Setup()` map into the Gaussian
 prior families and how a single calibration—based on `pwt`,
 \(n_{\mathrm{prior}}\), and the Zellner form of \(\Sigma_0\)—governs all of them.
 
-We proceed in four parts:
+We proceed in five parts:
 
 1. Default calibration of the Gamma prior on \(\tau\) from `n_prior`.  
 2. Conjugate Normal–Gamma posterior (Theorem 1).  
 3. Weak‑prior limit as \(n_{\mathrm{prior}}\to 0^{+}\) (Theorem 2).  
-4. Independent Normal–Gamma analogue (Theorem 3).
+4. Independent Normal–Gamma analogue (Theorem 3).  
+5. `dGamma()` prior with fixed coefficients (Section 3.3.5).
 
 A final subsection states the unified weak‑limit theorem.
 
@@ -976,6 +977,185 @@ Let \(p = \mathrm{ncol}(X)\), and let \(a_0, b_0, S_{\mathrm{marg}}\) be as in S
   \frac{1}{2}(n_{\mathrm{prior}} + p - 1)\,
   \frac{S_{\mathrm{marg}}}{n_w - p}.
   \]
+
+#### 3.3.5 `dGamma()` prior (fixed \(\beta\), Gamma on precision)
+
+The `dGamma()` `pfamily` specifies a **Gamma prior on the precision**
+\(\tau = 1/\phi\) (inverse dispersion) with **fixed** regression coefficients
+\(\beta\). `Prior_Setup()` supplies `shape`, `rate`, and `coefficients` for use
+in `dGamma(shape = ps$shape, rate = ps$rate, beta = ps$coefficients)` (and the
+same triple in `prior_list` for `rGamma_reg()`).
+
+**Default `coefficients`.** For `family = gaussian()`, when the closed-form
+Zellner blend applies, `Prior_Setup()` returns the same default
+`coefficients` vector used elsewhere for Gaussian models—namely
+\((1-\mathrm{pwt})\hat\beta+\mathrm{pwt}\,\mu\) under scalar `pwt` (full-model
+MLE \(\hat\beta\) and prior mean \(\mu\)). For non-Gaussian families (in
+particular `family = Gamma()`), the returned `coefficients` are the
+**full-model MLE** `coef(glm)`; the blend is not applied.
+
+**Prior `shape` and `rate`.** These are built in `Prior_Setup()` whenever scalar
+`n_prior` and a family-specific dispersion are available.
+
+- **Gaussian** (`family = gaussian()`): after the internal call to
+  `compute_gaussian_prior()`, the returned `shape` and `rate` are the
+  calibrated prior hyperparameters on \(\tau\) (Section 3.3.1; prior shape
+  \(a_0=(n_{\mathrm{prior}}+k)/2\) with package default \(k=1\), and `rate`
+  matching that calibration). The returned `dispersion` is the calibrated
+  \(\mathbb{E}[\sigma^2\mid y]\) under that Normal–Gamma fragment.
+
+- **Gamma regression** (`family = Gamma()` with log link): `compute_gaussian_prior()`
+  is not used. With quasi-likelihood dispersion \(\hat\phi\) from
+  `MASS::gamma.dispersion(glm)` stored as `dispersion`,
+  \[
+  a_0 = \frac{n_{\mathrm{prior}}+1}{2},
+  \qquad
+  b_0 = \hat\phi\,\frac{n_{\mathrm{prior}}}{2},
+  \]
+  i.e.\ `shape` \(=(n_{\mathrm{prior}}+1)/2\) and `rate` \(=\texttt{dispersion}\times(n_{\mathrm{prior}}/2)\).
+
+**Posterior for \(\phi\) with \(\beta\) fixed at the default `coefficients`.**
+Write \(\phi\) for the dispersion (for Gaussian data, \(\phi=\sigma^2\); for a
+Gamma GLM, \(\phi\) is the usual mean--variance scaling). Let \(\hat\beta\) be
+the full-model weighted MLE and \(G=X^{\mathsf T}W_{\mathrm{obs}}X\).
+
+**Default `coefficients` \(\beta_\star\).**
+
+- **Gaussian** (`family = gaussian()`), scalar `pwt` and the Zellner setup:
+  \[
+  \beta_\star=(1-\mathrm{pwt})\,\hat\beta+\mathrm{pwt}\,\mu,
+  \]
+  matching the returned `coefficients` when the closed-form blend applies.
+
+- **Gamma regression** (`family = Gamma()`): \(\beta_\star=\hat\beta\) (full-model
+  MLE).
+
+**RSS decomposition.** For any \(\beta\),
+\[
+\mathrm{RSS}_w(\beta)
+=
+\sum_i w_i\bigl(y_i-x_i^{\mathsf T}\beta\bigr)^2
+=
+\mathrm{RSS}_w(\hat\beta)
++
+(\beta-\hat\beta)^{\mathsf T}G(\beta-\hat\beta).
+\]
+In particular, for the Gaussian default \(\beta_\star\) above,
+\[
+\mathrm{RSS}_w(\beta_\star)
+=
+\mathrm{RSS}_w(\hat\beta)
++
+\mathrm{pwt}^2\,(\mu-\hat\beta)^{\mathsf T}G(\mu-\hat\beta).
+\]
+Call the second term the **coefficient-shift correction** (it vanishes when
+\(\mathrm{pwt}=0\)). For Gamma regression, \(\beta_\star=\hat\beta\) so
+\(\mathrm{RSS}_w(\beta_\star)=\mathrm{RSS}_w(\hat\beta)\) with no correction.
+
+**Relation to \(S_{\mathrm{marg}}\).** The marginal quantity from Section 3.1 is
+\[
+S_{\mathrm{marg}}
+=
+\mathrm{RSS}_w(\hat\beta)
++
+(\hat\beta-\mu)^{\mathsf T}\bigl(\Sigma_0+(X^{\mathsf T}W_{\mathrm{obs}}X)^{-1}\bigr)^{-1}(\hat\beta-\mu).
+\]
+Under the default scalar-\(\mathrm{pwt}\) Zellner calibration
+\(\Sigma_0=\frac{1-\mathrm{pwt}}{\mathrm{pwt}}(X^{\mathsf T}W_{\mathrm{obs}}X)^{-1}\),
+one has \(\bigl(\Sigma_0+G^{-1}\bigr)^{-1}=\mathrm{pwt}\,G\), hence
+\[
+S_{\mathrm{marg}}
+=
+\mathrm{RSS}_w(\hat\beta)
++
+\mathrm{pwt}\,(\hat\beta-\mu)^{\mathsf T}G(\hat\beta-\mu).
+\]
+The **prior--mean (marginal) correction** attached to \(\mathrm{RSS}_w(\hat\beta)\)
+in \(S_{\mathrm{marg}}\) is therefore **not** the same as the
+**coefficient-shift correction** in \(\mathrm{RSS}_w(\beta_\star)\): the former
+carries a factor \(\mathrm{pwt}\) on \((\hat\beta-\mu)^{\mathsf T}G(\hat\beta-\mu)\),
+the latter a factor \(\mathrm{pwt}^2\). Except in degenerate cases,
+\(\mathrm{RSS}_w(\beta_\star)\neq S_{\mathrm{marg}}\); keep both names.
+
+With prior \(\tau=1/\phi\sim\mathrm{Gamma}(a_0,b_0)\) in the package shape--rate
+parameterization and \(n_w=\texttt{PriorSettings\$n\_effective}\), the conjugate
+update uses \(\beta=\beta_\star\):
+\[
+a_n = a_0 + \frac{n_w}{2},
+\qquad
+b_n = b_0 + \frac12\,\mathrm{RSS}_w(\beta_\star).
+\]
+
+- **Gaussian** (`family = gaussian()`), calibrated \(a_0,b_0\) from
+  `compute_gaussian_prior()` with default \(k=1\):
+  \[
+  a_n
+  =
+  \frac{n_{\mathrm{prior}}+k+n_w}{2},
+  \qquad
+  b_n
+  =
+  \frac12\,S_{\mathrm{marg}}\,\frac{n_{\mathrm{prior}}+k+p-2}{n_w-p}
+  +
+  \frac12\,\Bigl(
+    \mathrm{RSS}_w(\hat\beta)
+    +
+    \mathrm{pwt}^2(\mu-\hat\beta)^{\mathsf T}G(\mu-\hat\beta)
+  \Bigr).
+  \]
+
+- **Gamma regression** (`family = Gamma()`),
+  \(a_0=(n_{\mathrm{prior}}+1)/2\), \(b_0=\hat\phi\,n_{\mathrm{prior}}/2\):
+  \[
+  a_n
+  =
+  \frac{n_{\mathrm{prior}}+n_w+1}{2},
+  \qquad
+  b_n
+  =
+  \hat\phi\,\frac{n_{\mathrm{prior}}}{2}
+  +
+  \frac12\,\mathrm{RSS}_w(\hat\beta).
+  \]
+
+For the **Gamma** GLM path, the sampler likelihood is not exactly Gaussian; the
+prior \((a_0,b_0)\) is as above while the full conditional for \(\phi\) is
+evaluated inside `rGamma_reg()` / `glmb()`.
+
+**Posterior expected dispersion.** With \(\mathbb{E}[\phi\mid y,\beta_\star]=b_n/(a_n-1)\)
+whenever \(a_n>1\), substitution gives the following **closed forms**.
+
+- **Gaussian**, default \(k=1\), when \(n_{\mathrm{prior}}+k+n_w>2\):
+  \[
+  \mathbb{E}[\sigma^2\mid y,\beta_\star]
+  =
+  \frac{
+    \displaystyle
+    \frac{n_{\mathrm{prior}}+k+p-2}{n_w-p}\,S_{\mathrm{marg}}
+    +
+    \mathrm{RSS}_w(\hat\beta)
+    +
+    \mathrm{pwt}^2(\mu-\hat\beta)^{\mathsf T}G(\mu-\hat\beta)
+  }{
+    n_{\mathrm{prior}}+k+n_w-2
+  }.
+  \]
+
+- **Gamma regression**, when \(n_{\mathrm{prior}}+n_w>1\):
+  \[
+  \mathbb{E}[\phi\mid y,\hat\beta]
+  =
+  \frac{
+    \hat\phi\,n_{\mathrm{prior}}
+    +
+    \mathrm{RSS}_w(\hat\beta)
+  }{
+    n_{\mathrm{prior}}+n_w-1
+  }.
+  \]
+
+When the denominator would be nonpositive or \(a_n\le 1\), the mean is not
+finite; tail summaries may still be computed from simulated draws.
 
 ---
 
