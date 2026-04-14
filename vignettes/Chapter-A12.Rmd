@@ -467,31 +467,33 @@ Under the shape–rate parameterization \(\Gamma(a_0,b_0)\) with density
 \(\propto \tau^{a_0-1}e^{-b_0\tau}\), the default prior on the residual precision
 \(\tau\) is
 \[
-a_0=\frac{n_{\mathrm{prior}}+1}{2},
-\qquad
-b_0
-=
-\frac{1}{2}\,(n_{\mathrm{prior}}+p-1)\,
-\frac{S_{\mathrm{marg}}}{n_w-p},
+a_0 = \frac{n_{\mathrm{prior}}+k}{2},\qquad
+b_0 = \frac{1}{2}(n_{\mathrm{prior}}+k+p-2)\frac{\mathrm{Smarg}}{n_w-p}.
 \]
-where \(S_{\mathrm{marg}}\) is the marginal quadratic term from Section 3.1 and
-\(n_w>p\) is required for propriety.
+where \(S_{\mathrm{marg}}\) is the marginal quadratic term from Section 3.1,  
+\(n_w>p\) ensures propriety of the likelihood contribution,  
+and the conditions \(k \ge 0\) and \(k+p \ge 2\) guarantee that the Gamma prior itself is proper for all \( n_{\mathrm{prior}}>0\).
 
 The posterior hyperparameters and induced moments follow from this calibration
 and are summarized in Theorem 1.
 
-
+---
 
 #### 3.3.2 Conjugate Normal–Gamma posterior (dNormal_Gamma())
 
 ##### **Theorem 1 (Conjugate posterior under the default `dNormal_Gamma()` calibration)**
 
+**Assume:**
 
-Assume:
+1. \(X^{\mathsf T}W_{\mathrm{obs}}X\) is positive definite,
 
-1. \(X^{\mathsf T}W_{\mathrm{obs}}X\) is positive definite,  
-2. \(n_w>p\),  
-3. \(\mathrm{RSS}_w>0\).
+2. \(n_w > p\),
+
+3. \(\mathrm{RSS}_w > 0\),
+
+4. \(k \ge 0\),
+
+5. \(k + p \ge 2\).
 
 Let the prior be
 \[
@@ -549,11 +551,8 @@ For general \(\Sigma_0\), use
 #### **(iii) Posterior Gamma shape**
 
 \[
-a_n
-=
-a_0+\frac{n_w}{2}
-=
-\frac{n_{\mathrm{prior}}+n_w+1}{2}.
+a_n = a_0 + \frac{n_w}{2}
+    = \frac{n_{\mathrm{prior}} + k + n_w}{2}.
 \]
 
 ---
@@ -561,12 +560,8 @@ a_0+\frac{n_w}{2}
 #### **(iv) Posterior Gamma rate**
 
 \[
-b_n
-=
-b_0+\frac{1}{2}S_{\mathrm{marg}}
-=
-\frac{1}{2}\,(n_{\mathrm{prior}}+n_w-1)\,
-\frac{S_{\mathrm{marg}}}{n_w-p}.
+b_n = b_0 + \frac{1}{2}\mathrm{Smarg}
+    = \frac{1}{2}\frac{\mathrm{Smarg}}{n_w-p}\,(n_{\mathrm{prior}} + k + n_w - 2).
 \]
 
 ---
@@ -612,8 +607,8 @@ Then
 \left(X^{\mathsf T}W_{\mathrm{obs}}X\right)^{-1}.
 \]
 
-
 *Proof.* See Appendix B.
+
 ---
 
 #### **Interpretation**
@@ -623,17 +618,24 @@ Then
   \(n_w/(n_w+n_{\mathrm{prior}})\).  
 - The denominator \(n_w-p\) reflects the **residual degrees of freedom** in the weighted Gaussian model.
 
-Together, these determine how prior strength interacts with sample size and model dimension.
-Theorem 1 restates standard conjugate Normal--Gamma posterior formulas under this calibration [@Gelman2013; @Raiffa1961].
+Together, these determine how prior strength interacts with sample size and model dimension.  
+Theorem 1 restates standard conjugate Normal–Gamma posterior formulas under this calibration  
+[@Gelman2013; @Raiffa1961].
 
 
 ### **Theorem 2 (Weak‑prior limit of the `dNormal_Gamma()` posterior)**
 
 Assume the same identifiability conditions as in Theorem 1:
 
-1. \(X^{\mathsf T}W_{\mathrm{obs}}X\) is positive definite,  
-2. \(n_w > p\),  
-3. \(\mathrm{RSS}_w > 0\).
+1. \(X^{\mathsf T}W_{\mathrm{obs}}X\) is positive definite,
+
+2. \(n_w > p\),
+
+3. \(\mathrm{RSS}_w > 0\),
+
+4. \(k \ge 0\),
+
+5. \(k + p \ge 2\).
 
 Under the default calibration of Theorem 1, let  
 \[
@@ -684,12 +686,11 @@ Theorem 1 as \(n_{\mathrm{prior}}\to 0^{+}\).
 #### **(iii) Limiting Gamma shape**
 
 \[
-a_{\Pi_{0}}
+a_{\mathrm{II}}
 =
-\lim_{n_{\mathrm{prior}}\to 0^{+}}
-a_n
+\lim_{n_{\mathrm{prior}}\to 0^+} a_n
 =
-\frac{n_w+1}{2}.
+\frac{k + n_w}{2}.
 \]
 
 ---
@@ -697,14 +698,11 @@ a_n
 #### **(iv) Limiting Gamma rate**
 
 \[
-b_{\Pi_{0}}
+b_{\mathrm{II}}
 =
-\lim_{n_{\mathrm{prior}}\to 0^{+}}
-b_n
+\lim_{n_{\mathrm{prior}}\to 0^+} b_n
 =
-\frac{1}{2}\,
-\frac{n_w-1}{n_w-p}\,
-\mathrm{RSS}_w.
+\frac{1}{2}\frac{\mathrm{RSS}_w}{n_w-p}\,(k + n_w - 2).
 \]
 
 ---
@@ -764,8 +762,9 @@ The independent Normal–Gamma posterior (Theorem 3) converges to this **same*
 \(\Pi_{0}\) under the same assumptions; only the finite‑\(n_{\mathrm{prior}}\)
 joint density differs.
 
+---
 
-*Proof of Theorem 2.*
+### *Proof of Theorem 2.*
 
 By Theorem 1, for each \(n_{\mathrm{prior}}>0\) the dNormal\_Gamma posterior is Normal–Gamma with
 hyperparameters
@@ -786,34 +785,39 @@ given explicitly by
 \[
 \Sigma_{0,\mathrm{post}}(n_{\mathrm{prior}})
 =
-\frac{n_{\mathrm{prior}}+n_w}{n_w}\,G^{-1},
+\frac{n_w}{n_{\mathrm{prior}}+n_w}\,G^{-1},
 \]
 \[
 a_n(n_{\mathrm{prior}})
 =
-\frac{n_{\mathrm{prior}}+n_w+1}{2},
-\qquad
+\frac{n_{\mathrm{prior}}+k+n_w}{2},\qquad
 b_n(n_{\mathrm{prior}})
 =
-\frac{n_{\mathrm{prior}}+n_w-1}{2}\,
+\frac{n_{\mathrm{prior}}+k+n_w-2}{2}\,
 \frac{\mathrm{Smarg}}{n_w-p}.
 \]
 
-As \(n_{\mathrm{prior}}\to 0^+\), each of these converges to a finite, valid Normal–Gamma parameter:
+As \(n_{\mathrm{prior}}\to 0^+\), each of these converges to a finite, valid Normal–Gamma parameter.
+Using assumption **4** (\(k\ge 0\)) together with assumption **2** (\(n_w>p\)),
 \[
-\mu_{\mathrm{post}}(n_{\mathrm{prior}})\to\hat\beta,\quad
-\Sigma_{0,\mathrm{post}}(n_{\mathrm{prior}})\to G^{-1},
+a_n(n_{\mathrm{prior}})\to\frac{k+n_w}{2}>0.
 \]
+Using assumption **5** (\(k+p\ge 2\)) and again **2** (\(n_w>p\)), which together imply
+\(k+n_w>2\),
 \[
-a_n(n_{\mathrm{prior}})\to\frac{n_w+1}{2}>0,\quad
-b_n(n_{\mathrm{prior}})\to\frac{n_w-1}{2}\,\frac{\mathrm{RSS}_w}{n_w-p}>0,
+b_n(n_{\mathrm{prior}})\to
+\frac{k+n_w-2}{2}\,
+\frac{\mathrm{RSS}_w}{n_w-p}>0,
 \]
-using \(\mathrm{Smarg}\to\mathrm{RSS}_w\) as \(n_{\mathrm{prior}}\to 0^+\).
+with \(\mathrm{Smarg}\to\mathrm{RSS}_w\) as \(n_{\mathrm{prior}}\to 0^+\).
+Thus both limiting Gamma parameters are strictly positive, ensuring that the limiting
+Normal–Gamma law is proper.
 
-The Normal–Gamma family is closed under weak limits when its parameters converge in this way, so the
-posteriors \(\Pi^{(\mathrm{NG})}_{n_{\mathrm{prior}}}\) converge weakly to the Normal–Gamma law \(\Pi_0\) with these
-limiting hyperparameters. The stated formulas for the limiting mean, covariance, and variance of \(\beta\) and
-\(\sigma^2=1/\tau\) follow by plugging the limits into the standard Normal–Gamma moment expressions.
+The Normal–Gamma family is closed under weak limits when its parameters converge in this
+way, so the posteriors \(\Pi^{(\mathrm{NG})}_{n_{\mathrm{prior}}}\) converge weakly to the Normal–Gamma
+law \(\Pi_0\) with these limiting hyperparameters. The stated formulas for the limiting mean,
+covariance, and variance of \(\beta\) and \(\sigma^2=1/\tau\) follow by plugging the limits into the
+standard Normal–Gamma moment expressions.
 \(\square\)
 
 
@@ -964,7 +968,7 @@ Let \(p = \mathrm{ncol}(X)\), and let \(a_0, b_0, S_{\mathrm{marg}}\) be as in S
   =
   a_0 + \frac{p}{2}
   =
-  \frac{n_{\mathrm{prior}} + p + 1}{2}.
+  \frac{n_{\mathrm{prior}} + k + p}{2}.
   \]
 
 - Gamma rate:
@@ -973,7 +977,7 @@ Let \(p = \mathrm{ncol}(X)\), and let \(a_0, b_0, S_{\mathrm{marg}}\) be as in S
   =
   b_0
   =
-  \frac{1}{2}(n_{\mathrm{prior}} + p - 1)\,
+  \frac{1}{2}(n_{\mathrm{prior}} + k + p - 2)\,
   \frac{S_{\mathrm{marg}}}{n_w - p}.
   \]
 
@@ -981,11 +985,17 @@ Let \(p = \mathrm{ncol}(X)\), and let \(a_0, b_0, S_{\mathrm{marg}}\) be as in S
 
 ### Theorem 3 (Weak-prior limit of the Independent Normal–Gamma posterior)
 
-Assume:
+**Assume:**
 
-1. \(X^{\mathsf T}W_{\mathrm{obs}}X\) is positive definite  
-2. \(n_w > p\)  
-3. \(\mathrm{RSS}_w > 0\)
+1. \(X^{\mathsf T}W_{\mathrm{obs}}X\) is positive definite,
+
+2. \(n_w > p\),
+
+3. \(\mathrm{RSS}_w > 0\),
+
+4. \(k \ge 0\),
+
+5. \(k + p \ge 2\).
 
 For each \(n_{\mathrm{prior}} > 0\), let  
 \[
@@ -999,8 +1009,8 @@ Let \(\Pi_0(\cdot \mid y)\) be the Normal–Gamma law from Theorem 2 with hyperp
 \Sigma_{0,\Pi_0} = (X^{\mathsf T}W_{\mathrm{obs}}X)^{-1},
 \]
 \[
-a_{\Pi_0} = \frac{n_w + 1}{2}, \qquad
-b_{\Pi_0} = \frac{1}{2}\frac{n_w - 1}{n_w - p}\,\mathrm{RSS}_w.
+a_{\Pi_0} = \frac{k + n_w}{2}, \qquad
+b_{\Pi_0} = \frac{1}{2}\frac{k + n_w - 2}{n_w - p}\,\mathrm{RSS}_w.
 \]
 
 Then, as \(n_{\mathrm{prior}} \to 0^{+}\) (equivalently \(\mathrm{pwt} \to 0^{+}\)),
@@ -1038,20 +1048,21 @@ Moreover, the posterior moments converge:
 
 Thus the ING posterior has the same weak-prior limit as the conjugate Normal–Gamma posterior, even though its finite-\(n_{\mathrm{prior}}\) form is not conjugate and its Gamma shape parameter differs by \(p/2\).
 
-
 *Proof of Theorem 3.*
 
-Fix \(y,X,W_{\mathrm{obs}}\) satisfying Assumptions 1–3. For each \(n_{\mathrm{prior}}>0\), let
-\(\Pi^{(\mathrm{NG})}_{n_{\mathrm{prior}}}\) and \(\Pi^{(\mathrm{ING})}_{n_{\mathrm{prior}}}\) denote, respectively, the NG and ING posteriors on
+Fix \(y,X,W_{\mathrm{obs}}\) satisfying Assumptions 1–3.  
+For each \(n_{\mathrm{prior}}>0\), let
+\(\Pi^{(\mathrm{NG})}_{n_{\mathrm{prior}}}\) and
+\(\Pi^{(\mathrm{ING})}_{n_{\mathrm{prior}}}\) denote, respectively, the NG and ING posteriors on
 \((\beta,\tau)\).
 
-By Theorem 2, the NG posteriors converge weakly to the limiting Normal–Gamma law \(\Pi_0\):
+By Theorem 2, the NG posteriors converge weakly to the limiting Normal–Gamma law \(\Pi_0\):
 \[
 \Pi^{(\mathrm{NG})}_{n_{\mathrm{prior}}} \Rightarrow \Pi_0
 \quad\text{as }n_{\mathrm{prior}}\to 0^+.
 \]
 
-From the posterior ratio identity in A.2 and Lemma B, we have, for each \(n_{\mathrm{prior}}>0\),
+From the posterior ratio identity in A.2 and Lemma B, we have, for each \(n_{\mathrm{prior}}>0\),
 \[
 \Pi^{(\mathrm{ING})}_{n_{\mathrm{prior}}}(\mathrm{d}\beta,\mathrm{d}\tau)
 =
@@ -1079,23 +1090,34 @@ Let \(f\colon\mathbb{R}^p\times(0,\infty)\to\mathbb{R}\) be bounded and continuo
 \int f(\beta,\tau)\,R_{n_{\mathrm{prior}}}(\beta,\tau)\,
 \Pi^{(\mathrm{NG})}_{n_{\mathrm{prior}}}(\mathrm{d}\beta,\mathrm{d}\tau).
 \]
-By Lemma A, the NG path has uniform moment bounds, and together with Claim B.2 this implies that
-\(|f\,R_{n_{\mathrm{prior}}}|\) is dominated by an integrable envelope under \(\Pi^{(\mathrm{NG})}_{n_{\mathrm{prior}}}\) for
-\(0<n_{\mathrm{prior}}<\delta\). Using the pointwise convergence \(R_{n_{\mathrm{prior}}}\to 1\) and the weak convergence
+
+By Lemma A, the NG path has uniform moment bounds.  
+These bounds rely on Assumptions 4–5 (\(k\ge0\) and \(k+p\ge2\)), which ensure that the NG
+Gamma shapes and rates remain in compact subsets of \((0,\infty)\) for all
+\(0<n_{\mathrm{prior}}<\delta\).  
+Together with Claim B.2, this implies that \(|f\,R_{n_{\mathrm{prior}}}|\) is dominated by an
+integrable envelope under \(\Pi^{(\mathrm{NG})}_{n_{\mathrm{prior}}}\) for \(0<n_{\mathrm{prior}}<\delta\).
+
+Using the pointwise convergence \(R_{n_{\mathrm{prior}}}\to 1\) and the weak convergence
 \(\Pi^{(\mathrm{NG})}_{n_{\mathrm{prior}}}\Rightarrow\Pi_0\), we obtain, by dominated convergence,
 \[
 \int f\,\mathrm{d}\Pi^{(\mathrm{ING})}_{n_{\mathrm{prior}}}
 \longrightarrow
 \int f\,\mathrm{d}\Pi_0.
 \]
-Thus \(\Pi^{(\mathrm{ING})}_{n_{\mathrm{prior}}}\Rightarrow\Pi_0\) as \(n_{\mathrm{prior}}\to 0^+\), proving the distributional
-convergence.
+Thus \(\Pi^{(\mathrm{ING})}_{n_{\mathrm{prior}}}\Rightarrow\Pi_0\) as \(n_{\mathrm{prior}}\to 0^+\),
+proving the distributional convergence.
 
-For the moment statements, take \(f(\beta,\tau)=\beta_j\), \(f(\beta,\tau)=\tau^{-1}\), and
-\(f(\beta,\tau)=(\beta-\mathbb{E}_{\Pi_0}[\beta])(\beta-\mathbb{E}_{\Pi_0}[\beta])^\top\) componentwise. Lemma A
-provides uniform integrability of the corresponding NG moments, and the same envelope \(M\) from Claim B.2
-transfers this to the ING path via the ratio representation. Hence dominated convergence applies to these
-(unbounded) test functions as well, yielding
+For the moment statements, take \(f(\beta,\tau)=\beta_j\),
+\(f(\beta,\tau)=\tau^{-1}\), and
+\(f(\beta,\tau)=(\beta-\mathbb{E}_{\Pi_0}[\beta])
+(\beta-\mathbb{E}_{\Pi_0}[\beta])^\top\) componentwise.
+Lemma A again applies because Assumptions 4–5 ensure that the NG Gamma parameters
+stay uniformly bounded away from zero, giving uniform integrability of the corresponding
+NG moments.  
+The same envelope \(M\) from Claim B.2 transfers this to the ING path via the ratio
+representation. Hence dominated convergence applies to these (unbounded) test functions
+as well, yielding
 \[
 \mathbb{E}_{\Pi^{(\mathrm{ING})}_{n_{\mathrm{prior}}}}[\beta]
 \to
@@ -1116,10 +1138,10 @@ and
 \frac{\mathrm{RSS}_w}{n_w-p}\,G^{-1}.
 \]
 
-These limits match the expressions stated in Theorem 3, so the ING posterior has the same weak–prior limit
-\(\Pi_0\) as the conjugate Normal–Gamma posterior, with convergence of the first two moments. \(\square\)
-
----
+These limits match the expressions stated in Theorem 3, so the ING posterior has the same
+weak–prior limit \(\Pi_0\) as the conjugate Normal–Gamma posterior, with convergence of the
+first two moments. 
+\(\square\)
 
 ### 3.3.5 dGamma() Prior (Fixed $\beta$, Gamma Prior on Precision)
 
@@ -1374,17 +1396,24 @@ R_{n_{\mathrm{prior}}}(\beta,\tau)\,
 \]
 
 This identity is the starting point for Lemma B and the ING weak‑prior limit.
+
 ---
 
 ### A.3 Lemma A: Uniform moment bounds for the NG path
 
 #### Lemma A (Uniform moment bounds for the NG posterior)
 
-Assume:
+**Assume:**
 
-1. \(G := X^{\mathsf T}W_{\mathrm{obs}}X\) is positive definite  
-2. \(n_w > p\)  
-3. \(\mathrm{RSS}_w > 0\)
+1. \(X^{\mathsf T}W_{\mathrm{obs}}X\) is positive definite,
+
+2. \(n_w > p\),
+
+3. \(\mathrm{RSS}_w > 0\),
+
+4. \(k \ge 0\),
+
+5. \(k + p \ge 2\).
 
 Fix \(X, W_{\mathrm{obs}}, y, \mu\), and hence \(\hat\beta\), \(\mathrm{RSS}_w\), \(S_{\mathrm{marg}}\), and \(G\).  
 For each \(n_{\mathrm{prior}} > 0\), let \(\Pi^{(\mathrm{NG})}_{n_{\mathrm{prior}}}\) be the conjugate Normal–Gamma posterior
@@ -1398,6 +1427,13 @@ from Section 3.3.2, with hyperparameters
 a_n(n_{\mathrm{prior}}),
 \quad
 b_n(n_{\mathrm{prior}}).
+\]
+
+**With the \(k\)-generalized calibration, these are:**
+\[
+a_n(n_{\mathrm{prior}})=\frac{n_{\mathrm{prior}}+k+n_w}{2},
+\qquad
+b_n(n_{\mathrm{prior}})=\frac{n_{\mathrm{prior}}+k+n_w-2}{2}\frac{S_{\mathrm{marg}}}{n_w-p}.
 \]
 
 Then there exists \(\delta > 0\) and constants \(C_1, C_2 < \infty\) such that for all
@@ -1429,7 +1465,7 @@ and
 
 #### Claim A.1 (Continuity and compactness of NG hyperparameters)
 
-Under Assumptions 1–3 of Theorem 3, the NG hyperparameters satisfy:
+Under Assumptions 1–5 of Theorem 3, the NG hyperparameters satisfy:
 
 - \(n_{\mathrm{prior}} \mapsto \mu_{\mathrm{post}}(n_{\mathrm{prior}})\) is continuous on \((0,\infty)\) and
   \(\mu_{\mathrm{post}}(n_{\mathrm{prior}}) \to \hat\beta\) as \(n_{\mathrm{prior}} \to 0^{+}\).
@@ -1463,39 +1499,37 @@ By Theorem 1 and the prior setup, the NG hyperparameters can be written explici
 \[
 a_n(n_{\mathrm{prior}})
 =
-\frac{n_{\mathrm{prior}}+n_w+1}{2},
-\qquad
+\frac{n_{\mathrm{prior}} + k + n_w}{2},\qquad
 b_n(n_{\mathrm{prior}})
 =
-\frac{1}{2}\bigl(n_{\mathrm{prior}}+n_w-1\bigr)\,
+\frac{1}{2}\bigl(n_{\mathrm{prior}} + k + n_w - 2\bigr)\,
 \frac{S_{\mathrm{marg}}}{n_w-p}.
 \]
 
 Here \(\mu, \hat\beta, G, S_{\mathrm{marg}}, n_w, p\) are fixed and do not depend on \(n_{\mathrm{prior}}\).
 
 Each of these maps is a rational (in fact affine) function of \(n_{\mathrm{prior}}\) with denominator
-\(n_{\mathrm{prior}}+n_w > 0\), so all four are continuous on \((0,\infty)\). Assumption 1
-(\(G\) positive definite) ensures that \(G^{-1}\) exists and is finite, so
-\(\Sigma_{0,\mathrm{post}}(n_{\mathrm{prior}})\) is well defined for all \(n_{\mathrm{prior}}>0\). Assumption 2
-(\(n_w > p\)) implies \(n_w-p>0\), so the denominator in \(b_n(n_{\mathrm{prior}})\) is positive. Assumption 3
-(\(\mathrm{RSS}_w>0\)) implies \(S_{\mathrm{marg}}>0\), so the rate \(b_n(n_{\mathrm{prior}})\) is strictly positive
-for all \(n_{\mathrm{prior}}>0\).
+\(n_{\mathrm{prior}}+n_w > 0\), so all four are continuous on \((0,\infty)\).
+Assumption 1 (\(G\) positive definite) ensures that \(G^{-1}\) exists and is finite, so
+\(\Sigma_{0,\mathrm{post}}(n_{\mathrm{prior}})\) is well defined for all \(n_{\mathrm{prior}}>0\).
+Assumption 2 (\(n_w > p\)) implies \(n_w-p>0\), so the denominator in \(b_n(n_{\mathrm{prior}})\) is positive.
+Assumption 3 (\(\mathrm{RSS}_w>0\)) implies \(S_{\mathrm{marg}}>0\), so the rate \(b_n(n_{\mathrm{prior}})\) is strictly
+positive for all \(n_{\mathrm{prior}}>0\).
 
 Taking the limit \(n_{\mathrm{prior}} \to 0^{+}\) in the explicit formulas gives
 
 \[
-\mu_{\mathrm{post}}(n_{\mathrm{prior}}) \to \hat\beta,
-\qquad
+\mu_{\mathrm{post}}(n_{\mathrm{prior}}) \to \hat\beta,\qquad
 \Sigma_{0,\mathrm{post}}(n_{\mathrm{prior}}) \to G^{-1},
 \]
 
 \[
-a_n(n_{\mathrm{prior}}) \to \frac{n_w+1}{2} > 0,
-\qquad
-b_n(n_{\mathrm{prior}}) \to \frac{1}{2}\frac{n_w-1}{n_w-p}\,S_{\mathrm{marg}} > 0,
+a_n(n_{\mathrm{prior}}) \to \frac{k+n_w}{2} > 0,\qquad
+b_n(n_{\mathrm{prior}}) \to \frac{1}{2}\frac{k+n_w-2}{n_w-p}\,S_{\mathrm{marg}} > 0,
 \]
 
-where the strict positivity of the limits of \(a_n\) and \(b_n\) uses Assumptions 2–3.
+where the strict positivity of the limits of \(a_n\) and \(b_n\) uses Assumptions 2–3 together with
+Assumptions 4–5 (\(k\ge0\) and \(k+p\ge2\)), since \(k+p\ge2\) and \(n_w>p\) imply \(k+n_w>2\).
 
 Since each map is continuous on \((0,\infty)\) and has a finite limit as \(n_{\mathrm{prior}} \to 0^{+}\), there
 exists \(\delta > 0\) such that, for all \(0 < n_{\mathrm{prior}} < \delta\),
@@ -1507,16 +1541,18 @@ exists \(\delta > 0\) such that, for all \(0 < n_{\mathrm{prior}} < \delta\),
 This is exactly the continuity and compactness statement of Claim A.1.
 \(\square\)
 
-
 ---
-
 
 #### Proof of Lemma A
 
 For each \(n_{\mathrm{prior}} > 0\), Theorem 1 gives
 
-- \(\beta \mid \tau, y, n_{\mathrm{prior}} \sim N\bigl(\mu_{\mathrm{post}}(n_{\mathrm{prior}}), \tau^{-1}\Sigma_{0,\mathrm{post}}(n_{\mathrm{prior}})\bigr)\),  
-- \(\tau \mid y, n_{\mathrm{prior}} \sim \Gamma\bigl(a_n(n_{\mathrm{prior}}), b_n(n_{\mathrm{prior}})\bigr)\).
+- \(\beta \mid \tau, y, n_{\mathrm{prior}} \sim 
+   N\bigl(\mu_{\mathrm{post}}(n_{\mathrm{prior}}),
+   \tau^{-1}\Sigma_{0,\mathrm{post}}(n_{\mathrm{prior}})\bigr)\),
+
+- \(\tau \mid y, n_{\mathrm{prior}} \sim 
+   \Gamma\bigl(a_n(n_{\mathrm{prior}}), b_n(n_{\mathrm{prior}})\bigr)\).
 
 By Claim A.1, there exists \(\delta > 0\) such that for all \(0 < n_{\mathrm{prior}} < \delta\),
 
@@ -1524,29 +1560,38 @@ By Claim A.1, there exists \(\delta > 0\) such that for all \(0 < n_{\mathrm{pr
 - \(\mu_{\mathrm{post}}(n_{\mathrm{prior}})\) lies in a compact subset of \(\mathbb{R}^p\),  
 - \(\Sigma_{0,\mathrm{post}}(n_{\mathrm{prior}})\) lies in a compact subset of the positive definite matrices.
 
+These compactness properties rely on Assumptions 4–5 (\(k\ge0\), \(k+p\ge2\)) together with
+Assumptions 2–3 (\(n_w>p\), \(\mathrm{RSS}_w>0\)), which ensure that the limiting Gamma
+shape and rate are strictly positive and therefore bounded away from zero.
+
 ---
 
 ##### Bounds for \(\tau\)
 
-For each \(n_{\mathrm{prior}}\), \(\tau \mid y, n_{\mathrm{prior}} \sim \Gamma(a_n(n_{\mathrm{prior}}), b_n(n_{\mathrm{prior}}))\), so
+For each \(n_{\mathrm{prior}}\),  
+\(\tau \mid y, n_{\mathrm{prior}} \sim 
+\Gamma(a_n(n_{\mathrm{prior}}), b_n(n_{\mathrm{prior}}))\), so
 
 \[
 \mathbb{E}[\tau \mid y, n_{\mathrm{prior}}]
 =
-\frac{a_n(n_{\mathrm{prior}})}{b_n(n_{\mathrm{prior}})},
-\qquad
+\frac{a_n(n_{\mathrm{prior}})}{b_n(n_{\mathrm{prior}})},\qquad
 \mathbb{E}[\tau^2 \mid y, n_{\mathrm{prior}}]
 =
-\frac{a_n(n_{\mathrm{prior}})\bigl(a_n(n_{\mathrm{prior}})+1\bigr)}{b_n(n_{\mathrm{prior}})^2}.
+\frac{a_n(n_{\mathrm{prior}})\bigl(a_n(n_{\mathrm{prior}})+1\bigr)}
+     {b_n(n_{\mathrm{prior}})^2}.
 \]
 
 On \((0,\delta)\), both \(a_n(n_{\mathrm{prior}})\) and \(b_n(n_{\mathrm{prior}})\) stay in compact subsets of
-\((0,\infty)\) by Claim A.1, so the maps
+\((0,\infty)\) by Claim A.1, which uses Assumptions 4–5 to ensure positivity of the limiting
+Gamma parameters. Thus the maps
 
 \[
-n_{\mathrm{prior}} \mapsto \frac{a_n(n_{\mathrm{prior}})}{b_n(n_{\mathrm{prior}})},
-\qquad
-n_{\mathrm{prior}} \mapsto \frac{a_n(n_{\mathrm{prior}})\bigl(a_n(n_{\mathrm{prior}})+1\bigr)}{b_n(n_{\mathrm{prior}})^2}
+n_{\mathrm{prior}} \mapsto 
+\frac{a_n(n_{\mathrm{prior}})}{b_n(n_{\mathrm{prior}})},\qquad
+n_{\mathrm{prior}} \mapsto 
+\frac{a_n(n_{\mathrm{prior}})\bigl(a_n(n_{\mathrm{prior}})+1\bigr)}
+     {b_n(n_{\mathrm{prior}})^2}
 \]
 
 are continuous and bounded on \((0,\delta)\). Hence
@@ -1554,8 +1599,7 @@ are continuous and bounded on \((0,\delta)\). Hence
 \[
 \sup_{0 < n_{\mathrm{prior}} < \delta}
 \mathbb{E}_{\Pi^{(\mathrm{NG})}_{n_{\mathrm{prior}}}}[\tau]
-< \infty,
-\qquad
+< \infty,\qquad
 \sup_{0 < n_{\mathrm{prior}} < \delta}
 \mathbb{E}_{\Pi^{(\mathrm{NG})}_{n_{\mathrm{prior}}}}[\tau^2]
 < \infty.
@@ -1565,7 +1609,8 @@ are continuous and bounded on \((0,\delta)\). Hence
 
 ##### Bounds for \(\beta\)
 
-The marginal distribution of \(\beta \mid y, n_{\mathrm{prior}}\) under \(\Pi^{(\mathrm{NG})}_{n_{\mathrm{prior}}}\) has
+The marginal distribution of \(\beta \mid y, n_{\mathrm{prior}}\) under
+\(\Pi^{(\mathrm{NG})}_{n_{\mathrm{prior}}}\) has
 
 \[
 \mathbb{E}[\beta \mid y, n_{\mathrm{prior}}]
@@ -1590,17 +1635,25 @@ where \(\sigma^2 = 1/\tau\) and, for \(a_n(n_{\mathrm{prior}}) > 1\),
 \frac{b_n(n_{\mathrm{prior}})}{a_n(n_{\mathrm{prior}})-1}.
 \]
 
-By Claim A.1, \(a_n(n_{\mathrm{prior}}) \to (n_w+1)/2 > 0\) as \(n_{\mathrm{prior}} \to 0^{+}\). Shrinking \(\delta\) if
-necessary, we may assume \(a_n(n_{\mathrm{prior}}) > 1\) for all \(0 < n_{\mathrm{prior}} < \delta\). On this interval,
-\(a_n(n_{\mathrm{prior}})\) and \(b_n(n_{\mathrm{prior}})\) lie in compact subsets of \((0,\infty)\), so
+By Claim A.1,  
+\(a_n(n_{\mathrm{prior}}) \to (k+n_w)/2 > 0\) as \(n_{\mathrm{prior}} \to 0^{+}\).  
+Assumptions 4–5 ensure that \((k+n_w)/2>1\) because \(k+p\ge2\) and \(n_w>p\) imply
+\(k+n_w>2\).  
+Shrinking \(\delta\) if necessary, we may therefore assume \(a_n(n_{\mathrm{prior}}) > 1\) for all
+\(0 < n_{\mathrm{prior}} < \delta\).
+
+On this interval, \(a_n(n_{\mathrm{prior}})\) and \(b_n(n_{\mathrm{prior}})\) lie in compact subsets of
+\((0,\infty)\), so
 
 \[
-n_{\mathrm{prior}} \mapsto \frac{b_n(n_{\mathrm{prior}})}{a_n(n_{\mathrm{prior}})-1}
+n_{\mathrm{prior}} \mapsto 
+\frac{b_n(n_{\mathrm{prior}})}{a_n(n_{\mathrm{prior}})-1}
 \]
 
-is continuous and bounded on \((0,\delta)\). By Claim A.1, \(\Sigma_{0,\mathrm{post}}(n_{\mathrm{prior}})\) lies in a
-compact subset of the positive definite matrices, so its operator norm and trace are bounded on
-\((0,\delta)\). Therefore
+is continuous and bounded on \((0,\delta)\).  
+By Claim A.1, \(\Sigma_{0,\mathrm{post}}(n_{\mathrm{prior}})\) lies in a compact subset of the positive
+definite matrices, so its operator norm and trace are bounded on \((0,\delta)\).  
+Therefore
 
 \[
 \sup_{0 < n_{\mathrm{prior}} < \delta}
@@ -1619,8 +1672,8 @@ Now
 \]
 
 By Claim A.1, \(\mu_{\mathrm{post}}(n_{\mathrm{prior}})\) lies in a compact subset of \(\mathbb{R}^p\) for
-\(0 < n_{\mathrm{prior}} < \delta\), so \(\|\mu_{\mathrm{post}}(n_{\mathrm{prior}})\|\) is bounded on \((0,\delta)\). Combined
-with the bound on \(\mathrm{tr}\,\mathrm{Cov}(\beta \mid y, n_{\mathrm{prior}})\), this implies
+\(0 < n_{\mathrm{prior}} < \delta\), so \(\|\mu_{\mathrm{post}}(n_{\mathrm{prior}})\|\) is bounded on \((0,\delta)\).
+Combined with the bound on \(\mathrm{tr}\,\mathrm{Cov}(\beta \mid y, n_{\mathrm{prior}})\), this implies
 
 \[
 \sup_{0 < n_{\mathrm{prior}} < \delta}
@@ -1754,6 +1807,13 @@ with
 (X^\top W_{\mathrm{obs}}X)^{-1}.
 \]
 
+Assumption 1 ensures \(X^\top W_{\mathrm{obs}}X\) is positive definite, so both
+\(\Sigma_0^{-1}\) and \(\Sigma(n_{\mathrm{prior}})^{-1}\) are well defined.
+Assumptions 2–3 (\(n_w>p\), \(\mathrm{RSS}_w>0\)) ensure that the scalar
+multipliers in \(\Sigma(n_{\mathrm{prior}})\) are positive.
+Assumptions 4–5 (\(k\ge0\), \(k+p\ge2\)) ensure that the Gamma shapes and rates
+used in the kernels are strictly positive for all \(n_{\mathrm{prior}}>0\).
+
 The \(\tau\)-powers match (ING shape = NG shape \(+\;p/2\)), so
 \[
 \tilde R_{n_{\mathrm{prior}}}(\beta,\tau)
@@ -1795,8 +1855,9 @@ h_{n_{\mathrm{prior}}}(\beta)\,
 \tau^{c_p}\,
 \exp\!\bigl(-\tfrac{1}{2}\tau\,q_{n_{\mathrm{prior}}}(\beta)\bigr),
 \]
-with \(q_{n_{\mathrm{prior}}}(\beta)\) a quadratic form in \(\beta\) that does **not** depend on \(\tau\) and, in fact, does
-not depend on \(n_{\mathrm{prior}}\) at all. It is therefore continuous in \(n_{\mathrm{prior}}\) and has a finite limit as
+with \(q_{n_{\mathrm{prior}}}(\beta)\) a quadratic form in \(\beta\) that does **not**
+depend on \(\tau\) and, in fact, does not depend on \(n_{\mathrm{prior}}\) at all.
+It is therefore continuous in \(n_{\mathrm{prior}}\) and has a finite limit as
 \(n_{\mathrm{prior}}\to 0^+\).
 
 Using the explicit formula for \(\Sigma(n_{\mathrm{prior}})\),
@@ -1807,7 +1868,9 @@ Using the explicit formula for \(\Sigma(n_{\mathrm{prior}})\),
 \frac{n_w - p}{\mathrm{Smarg}}\,
 (X^\top W_{\mathrm{obs}}X),
 \]
-we see that \(\Sigma(n_{\mathrm{prior}})^{-1}\to 0\) as \(n_{\mathrm{prior}}\to 0^+\). Hence, for each fixed \(\beta\),
+we see that \(\Sigma(n_{\mathrm{prior}})^{-1}\to 0\) as \(n_{\mathrm{prior}}\to 0^+\).
+This uses Assumptions 2–3 to ensure the scalar prefactor is positive.
+Hence, for each fixed \(\beta\),
 \[
 h_{n_{\mathrm{prior}}}(\beta)
 =
@@ -1818,10 +1881,9 @@ h_{n_{\mathrm{prior}}}(\beta)
 \exp(0) = 1.
 \]
 
-This proves the claimed representation of \(\tilde R_{n_{\mathrm{prior}}}\) and the pointwise convergence
-\(h_{n_{\mathrm{prior}}}(\beta)\to 1\).
+This proves the claimed representation of \(\tilde R_{n_{\mathrm{prior}}}\) and the
+pointwise convergence \(h_{n_{\mathrm{prior}}}(\beta)\to 1\).
 \(\square\)
-
 
 
 #### Claim B.2 (Uniform envelope and integrability)
@@ -1880,7 +1942,9 @@ Z^{(\mathrm{ING})}_{n_{\mathrm{prior}}}
 \iint L(y\mid\beta,\tau)\,\pi^{(\mathrm{ING})}_{n_{\mathrm{prior}}}(\beta,\tau)\,\mathrm{d}\beta\,\mathrm{d}\tau.
 \]
 
-**Step 1: Envelope for \(\tilde R_{n_{\mathrm{prior}}}\).**
+---
+
+### **Step 1: Envelope for \(\tilde R_{n_{\mathrm{prior}}}\).**
 
 From Claim B.1 and the explicit formulas in A.2,
 \[
@@ -1889,9 +1953,17 @@ From Claim B.1 and the explicit formulas in A.2,
 -\tfrac12(\beta-\mu)^\top\Sigma(n_{\mathrm{prior}})^{-1}(\beta-\mu)
 +\tfrac12\tau\,(\beta-\mu)^\top\Sigma_0^{-1}(\beta-\mu).
 \]
-For \(0<n_{\mathrm{prior}}<\delta\), Claim A.1 and the explicit expressions for \(\Sigma_0\) and \(\Sigma(n_{\mathrm{prior}})\)
-imply that the operator norms of \(\Sigma_0^{-1}\) and \(\Sigma(n_{\mathrm{prior}})^{-1}\) are uniformly bounded. Hence there
-exists \(C>0\) such that
+
+Assumption 1 ensures \(X^\top W_{\mathrm{obs}}X\) is positive definite, so both
+\(\Sigma_0^{-1}\) and \(\Sigma(n_{\mathrm{prior}})^{-1}\) exist.
+Assumptions 2–3 (\(n_w>p\), \(\mathrm{RSS}_w>0\)) ensure the scalar multipliers in
+\(\Sigma(n_{\mathrm{prior}})\) are positive.
+Assumptions 4–5 (\(k\ge0\), \(k+p\ge2\)) ensure the Gamma shapes and rates used in the
+kernels are strictly positive.
+
+For \(0<n_{\mathrm{prior}}<\delta\), Claim A.1 implies that the operator norms of
+\(\Sigma_0^{-1}\) and \(\Sigma(n_{\mathrm{prior}})^{-1}\) are uniformly bounded.
+Hence there exists \(C>0\) such that
 \[
 \bigl|\log \tilde R_{n_{\mathrm{prior}}}(\beta,\tau)\bigr|
 \le
@@ -1899,17 +1971,20 @@ C\,(1+\tau)\,\|\beta-\mu\|^2
 \le
 C'\,(1+\tau)\,(1+\|\beta\|^2)
 \]
-for all \((\beta,\tau)\) and \(0<n_{\mathrm{prior}}<\delta\). Exponentiating and absorbing constants,
+for all \((\beta,\tau)\) and \(0<n_{\mathrm{prior}}<\delta\).
+Exponentiating and absorbing constants,
 \[
 \bigl|\tilde R_{n_{\mathrm{prior}}}(\beta,\tau)\bigr|
 \le
 C_0\,(1+\tau^{c_1})\,\exp(-c_2\tau)\,\exp\bigl(c_3\|\beta\|^2\bigr)
 =: M_0(\beta,\tau),
 \]
-for suitable \(C_0,c_1,c_2,c_3>0\) independent of \(n_{\mathrm{prior}}\). This gives the desired functional form for
-an envelope of \(\tilde R_{n_{\mathrm{prior}}}\).
+for suitable \(C_0,c_1,c_2,c_3>0\) independent of \(n_{\mathrm{prior}}\).
+This gives the desired functional form for an envelope of \(\tilde R_{n_{\mathrm{prior}}}\).
 
-**Step 2: Boundedness of the normalizing–constant ratio.**
+---
+
+### **Step 2: Boundedness of the normalizing–constant ratio.**
 
 The maps
 \[
@@ -1917,11 +1992,15 @@ n_{\mathrm{prior}}\mapsto Z^{(\mathrm{NG})}_{n_{\mathrm{prior}}},
 \qquad
 n_{\mathrm{prior}}\mapsto Z^{(\mathrm{ING})}_{n_{\mathrm{prior}}}
 \]
-are continuous on \((0,\delta)\) because the integrands depend continuously on \(n_{\mathrm{prior}}\) and are dominated
-by an integrable envelope: the likelihood \(L(y\mid\beta,\tau)\) times the NG prior kernel, together with the
-uniform moment bounds from Lemma A, provide such domination. In particular, both \(Z^{(\mathrm{NG})}_{n_{\mathrm{prior}}}\)
-and \(Z^{(\mathrm{ING})}_{n_{\mathrm{prior}}}\) stay in compact subsets of \((0,\infty)\) for \(0<n_{\mathrm{prior}}<\delta\), so there exists
-\(K>0\) such that
+are continuous on \((0,\delta)\) because the integrands depend continuously on
+\(n_{\mathrm{prior}}\) and are dominated by an integrable envelope.
+The likelihood \(L(y\mid\beta,\tau)\) times the NG prior kernel, together with the
+uniform moment bounds from Lemma A (which rely on Assumptions 2–5 to ensure the
+Gamma parameters remain in compact subsets of \((0,\infty)\)), provide such domination.
+
+In particular, both \(Z^{(\mathrm{NG})}_{n_{\mathrm{prior}}}\) and
+\(Z^{(\mathrm{ING})}_{n_{\mathrm{prior}}}\) stay in compact subsets of \((0,\infty)\) for
+\(0<n_{\mathrm{prior}}<\delta\), so there exists \(K>0\) such that
 \[
 \frac{
 Z^{(\mathrm{NG})}_{n_{\mathrm{prior}}}
@@ -1932,7 +2011,9 @@ Z^{(\mathrm{ING})}_{n_{\mathrm{prior}}}
 \quad\text{for }0<n_{\mathrm{prior}}<\delta.
 \]
 
-**Step 3: Envelope for \(R_{n_{\mathrm{prior}}}\) and integrability under \(\Pi_0\).**
+---
+
+### **Step 3: Envelope for \(R_{n_{\mathrm{prior}}}\) and integrability under \(\Pi_0\).**
 
 Combining Steps 1–2,
 \[
@@ -1945,9 +2026,11 @@ C\,(1+\tau^{c_1})\,\exp(-c_2\tau)\,\exp\bigl(c_3\|\beta\|^2\bigr)
 \]
 for all \((\beta,\tau)\) and \(0<n_{\mathrm{prior}}<\delta\), with \(C=K C_0\).
 
-Under the limiting NG law \(\Pi_0\) from Theorem 2, \(\tau\) has a Gamma distribution with shape \(a_0>1\) and
-rate \(b_0>0\), and \(\beta\mid\tau\) is Gaussian with covariance proportional to \(\tau^{-1}G^{-1}\). For \(c_2>0\) small
-enough and \(c_3>0\) small enough, all mixed moments
+Under the limiting NG law \(\Pi_0\) from Theorem 2, \(\tau\) has a Gamma distribution
+with shape \(a_0>1\) and rate \(b_0>0\), and \(\beta\mid\tau\) is Gaussian with covariance
+proportional to \(\tau^{-1}G^{-1}\).
+Assumptions 2–5 ensure these limiting parameters are strictly positive.
+For \(c_2>0\) small enough and \(c_3>0\) small enough, all mixed moments
 \(\mathbb{E}_{\Pi_0}[\tau^{k}\exp(c_3\|\beta\|^2)]\) with \(k\le c_1\) are finite, so
 \[
 \int M(\beta,\tau)\,\Pi_0(\mathrm{d}\beta,\mathrm{d}\tau)<\infty.
@@ -1957,7 +2040,7 @@ This establishes the claimed envelope and integrability, proving Claim B.2.
 \(\square\)
 
 
-Proof of Lemma B.
+*Proof of Lemma B.*
 
 Write both posteriors as
 \[
@@ -1966,8 +2049,8 @@ Write both posteriors as
 L(y\mid\beta,\tau)\,
 \pi^{(\cdot)}_{n_{\mathrm{prior}}}(\beta,\tau),
 \]
-with the common Gaussian likelihood \(L(y\mid\beta,\tau)\) from Section A.1. The likelihood cancels in the
-posterior ratio, so
+with the common Gaussian likelihood \(L(y\mid\beta,\tau)\) from Section A.1.
+The likelihood cancels in the posterior ratio, so
 \[
 R_{n_{\mathrm{prior}}}(\beta,\tau)
 =
@@ -2013,9 +2096,18 @@ By Claim B.1,
 h_{n_{\mathrm{prior}}}(\beta)\,\tau^{c_p}
 \exp\!\bigl(-\tfrac12\tau\,q_{n_{\mathrm{prior}}}(\beta)\bigr),
 \]
-with \(h_{n_{\mathrm{prior}}}(\beta)\to 1\) for each fixed \(\beta\) and \(q_{n_{\mathrm{prior}}}(\beta)\) a quadratic form whose
-coefficients are continuous in \(n_{\mathrm{prior}}\) and converge pointwise. In our explicit construction,
-\(q_{n_{\mathrm{prior}}}(\beta)\) does not depend on \(n_{\mathrm{prior}}\) at all, and
+with \(h_{n_{\mathrm{prior}}}(\beta)\to 1\) for each fixed \(\beta\) and
+\(q_{n_{\mathrm{prior}}}(\beta)\) a quadratic form whose coefficients are continuous in
+\(n_{\mathrm{prior}}\) and converge pointwise.
+Assumption 1 ensures \(X^\top W_{\mathrm{obs}}X\) is positive definite, so
+\(\Sigma_0^{-1}\) and \(\Sigma(n_{\mathrm{prior}})^{-1}\) are well defined.
+Assumptions 2–3 (\(n_w>p\), \(\mathrm{RSS}_w>0\)) ensure the scalar multipliers in
+\(\Sigma(n_{\mathrm{prior}})\) are positive.
+Assumptions 4–5 (\(k\ge0\), \(k+p\ge2\)) ensure the Gamma shapes and rates in the
+kernels are strictly positive.
+
+In our explicit construction, \(q_{n_{\mathrm{prior}}}(\beta)\) does not depend on
+\(n_{\mathrm{prior}}\) at all, and
 \[
 h_{n_{\mathrm{prior}}}(\beta)
 =
@@ -2024,7 +2116,8 @@ h_{n_{\mathrm{prior}}}(\beta)
 \right)
 \to 1
 \]
-because \(\Sigma(n_{\mathrm{prior}})^{-1}\to 0\) as \(n_{\mathrm{prior}}\to 0^+\). Thus, for each fixed \((\beta,\tau)\),
+because \(\Sigma(n_{\mathrm{prior}})^{-1}\to 0\) as \(n_{\mathrm{prior}}\to 0^+\).
+Thus, for each fixed \((\beta,\tau)\),
 \[
 \tilde R_{n_{\mathrm{prior}}}(\beta,\tau)\to 1.
 \]
@@ -2062,10 +2155,16 @@ Claim B.2 provides a measurable envelope \(M(\beta,\tau)\) such that
 \qquad
 \int M(\beta,\tau)\,\Pi_0(\mathrm{d}\beta,\mathrm{d}\tau)<\infty,
 \]
-where \(\Pi_0\) is the NG weak–prior limit from Theorem 2. In particular, for \(n_{\mathrm{prior}}\) small,
-the normalizing–constant ratio stays in a bounded interval, so \(|\tilde R_{n_{\mathrm{prior}}}|\) is also dominated
-by a multiple of \(M\). Together with the pointwise convergence \(\tilde R_{n_{\mathrm{prior}}}\to 1\) and the uniform
-moment bounds from Lemma A, this yields, by dominated convergence,
+where \(\Pi_0\) is the NG weak–prior limit from Theorem 2.
+Assumptions 2–5 ensure that the limiting Gamma parameters of \(\Pi_0\) are strictly
+positive, which guarantees integrability of the envelope.
+
+In particular, for \(n_{\mathrm{prior}}\) small, the normalizing–constant ratio stays in a
+bounded interval, so \(|\tilde R_{n_{\mathrm{prior}}}|\) is also dominated by a multiple of
+\(M\).
+Together with the pointwise convergence \(\tilde R_{n_{\mathrm{prior}}}\to 1\) and the
+uniform moment bounds from Lemma A (which rely on Assumptions 2–5), this yields, by
+dominated convergence,
 \[
 \mathbb{E}_{\Pi^{(\mathrm{NG})}_{n_{\mathrm{prior}}}}\!\bigl[\tilde R_{n_{\mathrm{prior}}}(\beta,\tau)\bigr]
 \longrightarrow 1,
@@ -2091,7 +2190,8 @@ Z^{(\mathrm{ING})}_{n_{\mathrm{prior}}}
 \longrightarrow 1
 \quad\text{for each fixed }(\beta,\tau),
 \]
-and the same envelope \(M\) from Claim B.2 provides the required domination. This proves Lemma B.
+and the same envelope \(M\) from Claim B.2 provides the required domination.
+This proves Lemma B.
 \(\square\)
 
 ---
@@ -2134,21 +2234,28 @@ G := X^\top W_{\mathrm{obs}}X,\qquad
 \mathrm{RSS}_w := (y-X\hat\beta)^\top W_{\mathrm{obs}}(y-X\hat\beta).
 \]
 
+Assumption 1 ensures \(G\) is positive definite, so \(G^{-1}\) exists.
+Assumption 2 ensures \(n_w>p\), so the weighted Gaussian likelihood is proper.
+Assumption 3 ensures \(\mathrm{RSS}_w>0\), so the marginal quadratic term is strictly positive.
+
 Under the Zellner calibration in §3.3.2,
-\[
-\Sigma_0
-=
-\frac{1-\mathrm{pwt}}{\mathrm{pwt}}\,G^{-1}
-=
-\frac{n_{\mathrm{prior}}}{n_w}\,G^{-1},
-\]
+  \[
+  \Sigma_0
+  =
+  \frac{1-\mathrm{pwt}}{\mathrm{pwt}}\,G^{-1}
+  =
+  \frac{n_w}{n_{\mathrm{prior}}}\,G^{-1}.
+  \]
+
+
 and
 \[
-a_0 = \frac{n_{\mathrm{prior}}+1}{2},
+a_0 = \frac{n_{\mathrm{prior}}+k}{2},
 \qquad
-b_0 = \frac{n_{\mathrm{prior}}+p-1}{2}\,\frac{\mathrm{Smarg}}{n_w-p},
+b_0 = \frac{n_{\mathrm{prior}}+k+p-2}{2}\,\frac{\mathrm{Smarg}}{n_w-p},
 \]
-with \(\mathrm{Smarg}\) as in §3.1.
+
+with \(k\ge0\) and \(k+p\ge2\) by Assumptions 4–5, ensuring \(a_0>0\) and \(b_0>0\).
 
 The joint prior–likelihood kernel in \((\beta,\tau)\) is
 \[
@@ -2168,6 +2275,8 @@ where
 Collecting powers of \(\tau\) gives the Gamma shape update; collecting quadratic forms in \(\beta\) and completing
 the square gives the Normal block.
 
+---
+
 #### B.2 Posterior Normal block: mean and dispersion‑free covariance
 
 The quadratic form in \(\beta\) is
@@ -2179,6 +2288,7 @@ The quadratic form in \(\beta\) is
 (\beta-\mu)^\top\Sigma_0^{-1}(\beta-\mu)
 \Bigr].
 \]
+
 Write
 \[
 G_{\mathrm{post}} := G + \Sigma_0^{-1},
@@ -2213,6 +2323,7 @@ G_{\mathrm{post}}^{-1}
 =
 \frac{n_{\mathrm{prior}}}{n_{\mathrm{prior}}+n_w}\,G^{-1}.
 \]
+
 Substituting into \(\mu_{\mathrm{post}}\),
 \[
 \mu_{\mathrm{post}}
@@ -2233,12 +2344,18 @@ G_{\mathrm{post}}^{-1}
 \]
 which matches item (ii) of Theorem 1.
 
+
+
+
+
+---
+
 #### B.3 Posterior Gamma block: shape and rate
 
 To obtain the posterior Gamma update for \(\tau\), we must work with the **marginal** kernel
-\(\pi(\tau\mid y)\), not the conditional kernel \(\pi(\tau\mid\beta,y)\). The distinction matters because the
-conditional Normal density in \(\beta\mid\tau\) contains a factor \(\tau^{p/2}\), but this factor is exactly
-canceled when we integrate out \(\beta\).
+\(\pi(\tau\mid y)\), not the conditional kernel \(\pi(\tau\mid\beta,y)\).
+This distinction matters because the conditional Normal density in \(\beta\mid\tau\) contains a factor
+\(\tau^{p/2}\), but this factor is exactly canceled when we integrate out \(\beta\).
 
 Start from the joint kernel
 \[
@@ -2278,7 +2395,6 @@ The crucial point is the cancellation:
 \tau^{p/2}\times\tau^{-p/2} = 1.
 \]
 
-The \(\tau^{-p/2}\) factor comes from the normalization constant of the completed‑square Gaussian integral.
 Thus **no \(p/2\) term survives** in the marginal kernel for \(\tau\).
 
 After cancellation, the only remaining powers of \(\tau\) are
@@ -2291,9 +2407,9 @@ a_n
 =
 a_0 + \frac{n_w}{2}
 =
-\frac{n_{\mathrm{prior}}+1}{2} + \frac{n_w}{2}
+\frac{n_{\mathrm{prior}}+k}{2} + \frac{n_w}{2}
 =
-\frac{n_{\mathrm{prior}} + n_w + 1}{2},
+\frac{n_{\mathrm{prior}} + k + n_w}{2},
 \]
 matching item (iii) of Theorem 1.
 
@@ -2301,11 +2417,20 @@ For the rate parameter, the Gaussian integral contributes the marginal quadratic
 \[
 \frac{1}{2}\,\mathrm{Smarg}.
 \]
+
 Thus
 \[
-b_n = b_0 + \frac{1}{2}\,\mathrm{Smarg},
+b_n = b_0 + \frac{1}{2}\,\mathrm{Smarg}
+=
+\frac{1}{2}\,\frac{n_{\mathrm{prior}}+k+p-2}{n_w-p}\,\mathrm{Smarg}
++
+\frac{1}{2}\,\mathrm{Smarg}
+=
+\frac{1}{2}\,\frac{n_{\mathrm{prior}}+k+n_w-2}{n_w-p}\,\mathrm{Smarg},
 \]
 which reduces to the expression in item (iv) under the calibration of §3.3.1.
+
+---
 
 #### B.4 Marginal moments of \(\beta\) and \(\sigma^2\)
 
@@ -2330,11 +2455,11 @@ with
 \[
 a_n
 =
-\frac{n_{\mathrm{prior}}+n_w+1}{2},
+\frac{n_{\mathrm{prior}}+k+n_w}{2},
 \qquad
 b_n
 =
-\frac{n_{\mathrm{prior}}+n_w-1}{2}\,
+\frac{n_{\mathrm{prior}}+k+n_w-2}{2}\,
 \frac{\mathrm{Smarg}}{n_w-p}.
 \]
 
@@ -2377,28 +2502,27 @@ E[\tau^{-1}\mid y]
 \frac{b_n}{a_n-1},
 \quad\text{provided }a_n>1.
 \]
+
+Assumptions 4–5 (\(k\ge0\), \(k+p\ge2\)) together with Assumption 2 (\(n_w>p\)) ensure  
+\[
+a_n=\frac{n_{\mathrm{prior}}+k+n_w}{2}>1,
+\]
+so the expectation is well‑defined.
+
 Substituting the expressions for \(a_n\) and \(b_n\),
 \[
 E[\sigma^2\mid y]
 =
-E[\tau^{-1}\mid y]
-=
 \frac{
-\frac{n_{\mathrm{prior}}+n_w-1}{2}\,\frac{\mathrm{Smarg}}{n_w-p}
+\frac{n_{\mathrm{prior}}+k+n_w-2}{2}\,\frac{\mathrm{Smarg}}{n_w-p}
 }{
-\frac{n_{\mathrm{prior}}+n_w+1}{2}-1
-}
-=
-\frac{
-\frac{n_{\mathrm{prior}}+n_w-1}{2}\,\frac{\mathrm{Smarg}}{n_w-p}
-}{
-\frac{n_{\mathrm{prior}}+n_w-1}{2}
+\frac{n_{\mathrm{prior}}+k+n_w}{2}-1
 }
 =
 \frac{\mathrm{Smarg}}{n_w-p},
 \]
-which is exactly the residual‑variance estimator in item (vi): the prior strength \(n_{\mathrm{prior}}\) cancels, and
-the expectation depends only on \(\mathrm{Smarg}\) and the residual degrees of freedom \(n_w-p\).
+which is exactly the residual‑variance estimator in item (vi).  
+Assumption 3 (\(\mathrm{RSS}_w>0\)) ensures \(\mathrm{Smarg}>0\).
 
 ---
 
@@ -2429,31 +2553,33 @@ From the Gamma block in Theorem 1,
 \[
 \tau\mid y \sim \Gamma(a_n,b_n),
 \qquad
-a_n = \frac{n_{\mathrm{prior}}+n_w+1}{2},
+a_n = \frac{n_{\mathrm{prior}}+k+n_w}{2},
 \quad
-b_n = \frac{n_{\mathrm{prior}}+n_w-1}{2}\,\frac{\mathrm{Smarg}}{n_w-p}.
+b_n = \frac{n_{\mathrm{prior}}+k+n_w-2}{2}\,\frac{\mathrm{Smarg}}{n_w-p}.
 \]
-For a shape–rate Gamma,
+
+Assumptions 4–5 together with Assumption 2 ensure \(a_n>1\), and Assumptions 2–3 ensure \(b_n>0\).  
+Thus the Gamma moment formula applies:
 \[
-E[\tau^{-1}\mid y] = \frac{b_n}{a_n-1}
-\quad\text{when }a_n>1.
+E[\tau^{-1}\mid y] = \frac{b_n}{a_n-1}.
 \]
+
 Substitute:
 \[
 a_n-1
 =
-\frac{n_{\mathrm{prior}}+n_w+1}{2}-1
+\frac{n_{\mathrm{prior}}+k+n_w}{2}-1
 =
-\frac{n_{\mathrm{prior}}+n_w-1}{2},
+\frac{n_{\mathrm{prior}}+k+n_w-2}{2},
 \]
 so
 \[
 E[\tau^{-1}\mid y]
 =
 \frac{
-\frac{n_{\mathrm{prior}}+n_w-1}{2}\,\frac{\mathrm{Smarg}}{n_w-p}
+\frac{n_{\mathrm{prior}}+k+n_w-2}{2}\,\frac{\mathrm{Smarg}}{n_w-p}
 }{
-\frac{n_{\mathrm{prior}}+n_w-1}{2}
+\frac{n_{\mathrm{prior}}+k+n_w-2}{2}
 }
 =
 \frac{\mathrm{Smarg}}{n_w-p}.
@@ -2470,6 +2596,9 @@ By conjugate Normal–Gamma algebra,
 \qquad
 G = X^\top W_{\mathrm{obs}}X.
 \]
+
+Assumption 1 ensures \(G\) is positive definite, so all inverses exist.
+
 Under the Zellner calibration,
 \[
 \Sigma_0
@@ -2480,6 +2609,7 @@ Under the Zellner calibration,
 =
 \frac{\mathrm{pwt}}{1-\mathrm{pwt}}\,G.
 \]
+
 Hence
 \[
 \Sigma_0^{-1} + G
@@ -2491,8 +2621,6 @@ Hence
 and therefore
 \[
 \Sigma_{0,\mathrm{post}}
-=
-\bigl(\Sigma_0^{-1} + G\bigr)^{-1}
 =
 (1-\mathrm{pwt})\,G^{-1}.
 \]
@@ -2507,6 +2635,7 @@ Now use the mapping between \(\mathrm{pwt}\) and \(n_{\mathrm{prior}}\):
 =
 \frac{n_w}{n_{\mathrm{prior}}+n_w}.
 \]
+
 Thus
 \[
 \Sigma_{0,\mathrm{post}}
