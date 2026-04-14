@@ -218,7 +218,7 @@ disp_classical <- s$sigma^2
 cat("Classical lm dispersion (sigma^2 = RSS/(n-p)):", disp_classical, "\n")
 
 ## Conjugate Normal Prior (fixed dispersion)
-lmb.D9 <- lmb(n=1000,
+lmb.D9 <- lmb(
   weight ~ group,
   pfamily = dNormal(mu = ps$mu, ps$Sigma, dispersion = ps$dispersion)
 )
@@ -226,7 +226,7 @@ summary(lmb.D9)
 vcov(lmb.D9)
 
 ## Conjugate Normal_Gamma Prior (second argument is Sigma_0 from Prior_Setup)
-lmb.D9_v2 <- lmb(n=1000,
+lmb.D9_v2 <- lmb(
   weight ~ group,
   pfamily = dNormal_Gamma(
     ps$mu,
@@ -240,7 +240,7 @@ vcov(lmb.D9_v2)
 
 ## Independent_Normal_Gamma_Prior (same mu, Sigma, rate as dNormal_Gamma; shape + p/2)
 
-lmb.D9_v3 <- lmb(n=1000,
+lmb.D9_v3 <- lmb(
   weight ~ group,
   dIndependent_Normal_Gamma(
     ps$mu,
@@ -251,27 +251,17 @@ lmb.D9_v3 <- lmb(n=1000,
 )
 summary(lmb.D9_v3)
 
-vcov(lm.D9)
-0.99*vcov(lm.D9)
-vcov(lmb.D9)
-vcov(lmb.D9_v2)
-vcov(lmb.D9_v3)
 
 ## anova 
 anova(lmb.D9)
 
 ## lmb with dGamma prior (dispersion-only; coefficients fixed)
 rate_dg <- if (!is.null(ps$rate_gamma)) ps$rate_gamma else ps$rate
-out_lmb_dGamma <- lmb(n=1000,
+out_lmb_dGamma <- lmb(
   weight ~ group,
   pfamily = dGamma(shape = ps$shape, rate = rate_dg, beta = ps$coefficients))
 summary(out_lmb_dGamma)
 
-disp_classical
-mean(lmb.D9$dispersion)
-mean(lmb.D9_v2$dispersion)
-mean(lmb.D9_v3$dispersion)
-mean(out_lmb_dGamma$dispersion)
 }
 \references{
 \insertAllCited{}

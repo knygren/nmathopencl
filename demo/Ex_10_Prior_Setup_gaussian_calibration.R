@@ -1,7 +1,7 @@
 ## Prior_Setup Gaussian calibration: dNormal, dNormal_Gamma, dIndependent_Normal_Gamma
 ##
 ## `Prior_Setup()` uses a single Gamma(shape, rate) calibration from `n_prior`
-## (shape = (n_prior+1)/2; see ?compute_gaussian_prior). `dNormal()` uses
+## (shape = (n_prior+k)/2, default k=1; see ?compute_gaussian_prior). `dNormal()` uses
 ## `ps$Sigma` and `dispersion = ps$dispersion`. The same returned `rate`, `mu`,
 ## `Sigma`, and `Sigma_0` apply to both `dNormal_Gamma()` and
 ## `dIndependent_Normal_Gamma()`; for the latter, pass `shape = ps$shape + p/2`

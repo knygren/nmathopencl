@@ -67,6 +67,9 @@ A list with elements:
 \itemize{
 \item \code{dispersion}: calibrated Gaussian dispersion scalar.
 \item \code{shape}: Gamma shape for residual precision.
+\item \code{shape_ING}: dedicated shape for \code{\link{dIndependent_Normal_Gamma}}
+under the Gaussian calibration, \eqn{\texttt{shape} + p/2} where
+\eqn{p = \texttt{ncol}(X)}.
 \item \code{rate}: Gamma rate for residual precision.
 \item \code{rate_gamma}: Prior Gamma rate for the \code{\link{dGamma}} / fixed-\eqn{\beta}
 construction, using the same \eqn{(n_{\mathrm{prior}}+k+p-2)/(n_{\mathrm{effective}}-p)}
@@ -86,7 +89,7 @@ Gaussian Normal-Gamma calibration function used by \code{\link{Prior_Setup}}.
 Given Gaussian-model sufficient inputs and a dispersion-independent
 coefficient prior covariance \eqn{\Sigma_0} (Chapter 11 framing), this
 function computes calibrated Gaussian prior quantities:
-\code{dispersion}, \code{shape}, \code{rate}, \code{rate_gamma}, and \code{Sigma},
+\code{dispersion}, \code{shape}, \code{shape_ING}, \code{rate}, \code{rate_gamma}, and \code{Sigma},
 and returns the input \code{Sigma_0} as \code{Sigma_0}.
 }
 \details{
@@ -118,14 +121,14 @@ alternative prior structure on coefficients.
 The function computes:
 \itemize{
 \item \eqn{S_{marg} = RSS_w + (\hat\beta-\mu)^T(\Sigma_0 + (X^T W X)^{-1})^{-1}(\hat\beta-\mu)}
-\item Prior Gamma \code{shape} is \eqn{(n_{\mathrm{prior}}+1)/2}{}. Posterior Gamma shape is
-\eqn{a_n = (n_{\mathrm{prior}}+n_w+1)/2}{} with \eqn{n_w}{} = \code{n_effective}.
+\item Prior Gamma \code{shape} is \eqn{(n_{\mathrm{prior}}+k)/2}{}. Posterior Gamma shape is
+\eqn{a_n = (n_{\mathrm{prior}}+n_w+k)/2}{} with \eqn{n_w}{} = \code{n_effective}.
 \item Calibrated \code{dispersion} equals \eqn{S_{marg}/(n_w-p)}{} with \eqn{p=\texttt{ncol}(X)}{},
 i.e.\ the usual weighted residual-df denominator.
-\item Prior rate \eqn{b_0 = \frac{1}{2} S_{marg}(n_{\mathrm{prior}}+p-1)/(n_w-p)}{} so that
+\item Prior rate \eqn{b_0 = \frac{1}{2} S_{marg}(n_{\mathrm{prior}}+k+p-2)/(n_w-p)}{} so that
 \eqn{b_n=b_0+S_{marg}/2}{} gives \eqn{E[\sigma^2\mid y]=b_n/(a_n-1)=S_{marg}/(n_w-p)}{}.
-The \eqn{+1}{} in the prior shape and \eqn{p-1}{} in the rate numerator pair so
-\eqn{a_n-1}{} and \eqn{b_n}{} share a factor \eqn{n_{\mathrm{prior}}+n_w-1}{}; this
+The \eqn{k}{} in the prior shape and \eqn{k+p-2}{} in the rate numerator pair so
+\eqn{a_n-1}{} and \eqn{b_n}{} share a factor \eqn{n_{\mathrm{prior}}+n_w+k-2}{}; this
 preserves the posterior mean dispersion while improving prior propriety when
 \eqn{p=1}{} and \eqn{n_{\mathrm{prior}}}{} is small.
 \item \eqn{\Sigma = (n_w/n_{\mathrm{prior}}) E[\sigma^2 \mid y] (X^T W X)^{-1}}{}
@@ -141,8 +144,9 @@ function does not change the mean vector, only scale components.
 \eqn{S_{marg}/(n_{\mathrm{effective}}-p)} when \eqn{n_{\mathrm{effective}}>p}.
 With \eqn{S_{marg}\to \mathrm{RSS}_w}, this matches the usual weighted
 Gaussian unbiased dispersion \eqn{\mathrm{RSS}_w/(n_{\mathrm{effective}}-p)}.
-\item Strict positivity of \eqn{b_0}{} requires \eqn{n_{\mathrm{prior}}+p>1}{}.
-Prior \code{shape} is at least \eqn{1/2}{} because \eqn{\texttt{shape}=(n_{\mathrm{prior}}+1)/2}{}.
+\item Strict positivity of \eqn{b_0}{} requires \eqn{n_{\mathrm{prior}}+k+p>2}{}.
+With \eqn{n_{\mathrm{prior}}>0}{} and \eqn{k\geq 0}{}, prior \code{shape} is
+\eqn{(n_{\mathrm{prior}}+k)/2>0}{}.
 As \eqn{n_{prior}\to 0^+}, terms can become very small; this
 corresponds to a very diffuse precision prior and may be numerically
 delicate near the boundary.

@@ -120,20 +120,32 @@ A list with items related to the prior.
 \item{Sigma}{A prior variance-covariance matrix}
 \item{Sigma_0}{For \code{gaussian()} only: dispersion-independent prior covariance on
 the precision-weighted coefficient scale (same as the \code{Sigma_0} argument to
-\code{\link{compute_gaussian_prior}}). \code{NULL} for other families.}
+\code{\link{compute_gaussian_prior}}). Under default scalar-\code{pwt},
+\eqn{\Sigma_0^{-1}=\frac{\mathrm{pwt}}{1-\mathrm{pwt}}X^\top W X}
+and equivalently
+\eqn{\Sigma_0=\frac{1-\mathrm{pwt}}{\mathrm{pwt}}(X^\top W X)^{-1}.}
+\code{NULL} for other families.}
 \item{dispersion}{Empirical bayes estimate for the dispersion (gaussian model only)}
-\item{shape}{Derived prior shape parameter (gaussian model only). \eqn{(n_{\mathrm{prior}}+1)/2}{}; after calibration see \code{\link{compute_gaussian_prior}}.}
+\item{shape}{Derived prior shape parameter (gaussian model only),
+\eqn{(n_{\mathrm{prior}}+k)/2} with \code{k} from \code{Prior_Setup(..., k = ...)}
+(default \eqn{k=1}; see \code{\link{compute_gaussian_prior}}).}
+\item{shape_ING}{For \code{gaussian()} only when \code{shape} is available: dedicated
+shape parameter for \code{\link{dIndependent_Normal_Gamma}()}, equal to
+\eqn{\texttt{shape} + p/2} with \eqn{p=\texttt{ncol}(x)}. \code{NULL} otherwise.}
 \item{rate}{Derived prior rate parameter (gaussian model only). Pre-calibration uses \eqn{(n_{\mathrm{prior}}/2)\cdot\texttt{dispersion}}{}; Gaussian output replaces this with the calibrated rate from \code{\link{compute_gaussian_prior}}.}
 \item{rate_gamma}{For \code{gaussian()} only, when Gaussian calibration runs: prior Gamma rate
 for \code{\link{dGamma}} / fixed-\eqn{\beta} use, from \code{\link{compute_gaussian_prior}}
 (RSS at the Zellner blend; see that help page). \code{NULL} if not computed.}
-\item{coefficients}{Named numeric vector of prior-implied posterior-mean coefficients.
-For \code{gaussian()} this uses the closed-form Zellner blend
-\eqn{(1-\texttt{pwt})\hat\beta+\texttt{pwt}\mu} (scalar or per-coefficient \code{pwt})
-when available; otherwise it falls back to the internal full-model GLM coefficients
-(same convention as \code{\link[stats]{coef}}).}
+\item{coefficients}{Named numeric vector of returned coefficient values.
+For \code{gaussian()} with scalar \code{pwt}, this is the closed-form posterior
+mean (posterior expectation) under the default Zellner setup,
+\eqn{(1-\texttt{pwt})\hat\beta+\texttt{pwt}\mu}. With vector \code{pwt}, the same
+blend is applied component-wise. Otherwise it falls back to the internal
+full-model GLM coefficients (same convention as \code{\link[stats]{coef}}).}
 \item{model}{The model frame from \code{object} if it exists}
 \item{x}{The design matrix from \code{object} if it exists}
+\item{y}{The response vector used to construct the prior setup.}
+\item{call}{The matched call to \code{Prior_Setup()}.}
 \item{PriorSettings}{A list containing prior configuration details}
 }
 \description{
@@ -147,20 +159,34 @@ Normal-Gamma priors, and independent normal-gamma priors.
 The function returns a list containing:
 \itemize{
 \item \code{mu}: the prior mean vector
-\item \code{Sigma}: the prior variance-covariance matrix
+\item \code{Sigma}: the prior variance-covariance matrix (coefficient scale)
 \item \code{Sigma_0}: for \code{family = gaussian()}, the dispersion-independent coefficient
 prior covariance matrix on the precision-weighted scale (the \eqn{\Sigma_0} passed
-into \code{\link{compute_gaussian_prior}}): the Zellner \code{Sigma} before calibration,
-divided by the classical weighted residual variance
-\eqn{\sum_i w_i r_i^2/(n_{\mathrm{effective}}-2)} from the internal \code{glm.fit}.
+into \code{\link{compute_gaussian_prior}}). Under the default scalar-\code{pwt}
+Zellner mapping,
+\eqn{\Sigma_0^{-1}=\frac{\mathrm{pwt}}{1-\mathrm{pwt}}X^\top W X}
+(equivalently \eqn{\Sigma_0=\frac{1-\mathrm{pwt}}{\mathrm{pwt}}(X^\top W X)^{-1}});
 \code{NULL} for non-Gaussian families.
+\item \code{Sigma} and \code{Sigma_0} are linked by
+\eqn{\Sigma = \texttt{dispersion}\cdot\Sigma_0} under the default Gaussian
+calibration path.
 \item \code{dispersion}: the estimated dispersion (for Gaussian models)
-\item \code{shape}: the shape parameter for Normal-Gamma priors (if applicable)
+\item \code{shape}: the shape parameter for Normal-Gamma priors (if applicable),
+\eqn{(n_{\mathrm{prior}}+k)/2} with \code{k} from the \code{Prior_Setup(..., k = ...)}
+argument (default \eqn{k=1}; see \code{\link{compute_gaussian_prior}}).
+\item \code{shape_ING}: dedicated shape parameter for \code{dIndependent_Normal_Gamma()}
+(Gaussian path), equal to \code{shape + ncol(x)/2} when available
 \item \code{rate}: the rate parameter for Normal-Gamma priors (if applicable)
-\item \code{coefficients}: named numeric vector, same length and names as columns of \code{x}; a point
-estimate for the regression coefficients (currently \code{coef()} of the internal full-model
-GLM fit, i.e. the MLE under that model). Intended mainly as \code{beta} in \code{\link{dGamma}()}
-and related \code{prior_list} entries when updating dispersion with fixed coefficients.
+\item \code{rate_gamma}: dedicated rate parameter for \code{dGamma()} (Gaussian fixed-\code{beta}
+path), using the Zellner-blend RSS calibration from \code{\link{compute_gaussian_prior}}
+\item \code{coefficients}: named numeric vector, same length and names as columns of \code{x}.
+For \code{gaussian()} with scalar \code{pwt}, this is the closed-form posterior mean
+(posterior expectation) under the default Zellner setup,
+\eqn{(1-\texttt{pwt})\hat\beta+\texttt{pwt}\mu}. With vector \code{pwt}, the same
+formula is applied component-wise as a blend. In non-Gaussian paths (or when
+closed-form blend inputs are unavailable), it falls back to the full-model GLM
+coefficient estimate. Intended mainly as \code{beta} in \code{\link{dGamma}()} and
+related \code{prior_list} entries when updating dispersion with fixed coefficients.
 This is distinct from \code{mu}, which holds prior means.
 \item \code{model}: the model frame used to construct the design matrix
 \item \code{x}: the model matrix used
@@ -212,23 +238,25 @@ For \code{\link{rNormalGamma_reg}}, build
 \subsection{\code{\link{dIndependent_Normal_Gamma}()} (Gaussian, non-conjugate joint \eqn{(\beta,\phi)})}{
 
 Here the second argument is the \strong{full} prior covariance on \eqn{\beta}. With
-\eqn{p=\texttt{ncol}(x)} from \code{Prior_Setup()}, pass
-\code{shape = ps2$shape + p/2} (same \code{ps2$rate} as \code{\link{dNormal_Gamma}()}):
-\preformatted{dIndependent_Normal_Gamma(ps2$mu, ps2$Sigma, shape = ps2$shape + ncol(ps2$x)/2, rate = ps2$rate)}
+\eqn{p=\texttt{ncol}(x)} from \code{Prior_Setup()}, use the dedicated
+\code{shape_ING} field (same \code{ps2$rate} as \code{\link{dNormal_Gamma}()}):
+\preformatted{dIndependent_Normal_Gamma(ps2$mu, ps2$Sigma, shape = ps2$shape_ING, rate = ps2$rate)}
 Same pattern for \code{\link{rglmb}} / \code{\link{rlmb}} with that \code{pfamily}.
 For \code{\link{rindepNormalGamma_reg}}, the template \code{prior_list} also
 uses \strong{undivided} \code{Sigma}, plus \code{dispersion}, \code{Precision = solve(Sigma)},
-\code{shape} offset as above, and envelope controls such as \code{max_disp_perc} (see examples).
+\code{shape = ps2$shape_ING}, and envelope controls such as \code{max_disp_perc}
+(see examples).
 }
 
 \subsection{\code{\link{dGamma}()} (Gamma on precision / dispersion with fixed \eqn{\beta})}{
 
-\code{Prior_Setup()} supplies \code{shape}, \code{rate}, \code{rate_gamma} (Gaussian
+\code{Prior_Setup()} supplies \code{shape}, \code{shape_ING}, \code{rate}, \code{rate_gamma} (Gaussian
 calibration only), and \code{coefficients} (full-model MLE by default). For
-\code{gaussian()}, use \code{rate_gamma} when present so the Gamma rate matches
+\code{gaussian()}, use \code{rate_gamma} so the Gamma rate matches
 \eqn{\mathrm{RSS}_w(\beta_\star)} at the Zellner blend (see \code{\link{compute_gaussian_prior}}):
-\code{rate_dg <- if (!is.null(ps2$rate_gamma)) ps2$rate_gamma else ps2$rate} then
-\code{dGamma(shape = ps2$shape, rate = rate_dg, beta = ps2$coefficients)}.
+\code{dGamma(shape = ps2$shape, rate = ps2$rate_gamma, beta = ps2$coefficients)}.
+If code must also support paths where \code{rate_gamma} is unavailable, use
+\code{rate_dg <- if (!is.null(ps2$rate_gamma)) ps2$rate_gamma else ps2$rate}.
 For \code{\link{rGamma_reg}}, pass the same \code{rate} slot in \code{prior_list}.
 }
 
@@ -307,39 +335,78 @@ If \code{n_prior} is provided and \code{pwt} is still scalar and \code{sd} was n
 
 When applicable, \code{Prior_Setup()} computes the shape and rate parameters for a Gamma prior on the residual precision (inverse variance), used in
 compound prior families such as \code{dNormal_Gamma()}, \code{dIndependent_Normal_Gamma()}, and \code{dGamma()}. Let \eqn{p=\texttt{ncol}(x)}.
-The \strong{shape} hyperparameter uses \eqn{n_{\mathrm{prior}}} only:
-\deqn{\text{shape} = \frac{n_{\mathrm{prior}} + 1}{2}.}
-Before Gaussian calibration (internal Step 9), the \strong{rate} uses the \strong{nominal}
-\eqn{n_{\mathrm{prior}}} only: \eqn{\text{rate} = (n_{\mathrm{prior}}/2)\cdot\texttt{dispersion}}.
-After \code{\link{compute_gaussian_prior}} (Gaussian models),
-both \eqn{\texttt{shape}} and \eqn{\texttt{rate}} are replaced so that
-\eqn{E[\sigma^2\mid y]=\texttt{dispersion}}{} with \eqn{\texttt{dispersion}=S_{\mathrm{marg}}/(n_{\mathrm{effective}}-p)}
-(see \code{\link{compute_gaussian_prior}}).
+The Gaussian calibration uses the marginal quadratic
+\deqn{
+S_{\mathrm{marg}}
+=
+\mathrm{RSS}_w(\hat\beta)
++
+(\hat\beta-\mu)^\top\!\left(\Sigma_0 + (X^\top W X)^{-1}\right)^{-1}(\hat\beta-\mu),
+}
+where \eqn{\mathrm{RSS}_w(\hat\beta)=\sum_i w_i (y_i - x_i^\top\hat\beta)^2}.
+Under the default scalar-\code{pwt} Zellner mapping
+\eqn{\Sigma_0=\frac{1-\mathrm{pwt}}{\mathrm{pwt}}(X^\top W X)^{-1}},
+this simplifies to the intuitive form
+\deqn{
+S_{\mathrm{marg}}
+=
+\mathrm{RSS}_w(\hat\beta)
++
+\mathrm{pwt}\,(\hat\beta-\mu)^\top(X^\top W X)(\hat\beta-\mu).
+}
+In the Gaussian calibration path (\code{compute_gaussian_prior}), the prior shape uses \eqn{k}:
+\deqn{\text{shape} = \frac{n_{\mathrm{prior}} + k}{2}.}
+The corresponding calibrated Gaussian prior rate is
+\deqn{\text{rate} = \frac{1}{2}S_{\mathrm{marg}}\frac{n_{\mathrm{prior}}+k+p-2}{n_{\mathrm{effective}}-p},}
+and the dedicated fixed-\eqn{\beta} \code{dGamma()} rate is
+\deqn{\text{rate}_{\gamma} = \frac{1}{2}\mathrm{RSS}_w(\beta_\star)\frac{n_{\mathrm{prior}}+k+p-2}{n_{\mathrm{effective}}-p}.}
+Here \eqn{\beta_\star=(1-\mathrm{pwt})\hat\beta+\mathrm{pwt}\mu} for scalar \code{pwt}.
 }
 
 \subsection{Gaussian dispersion}{
 
-For \code{family = gaussian()}, the function always computes a \strong{classical} weighted
-residual-variance ratio from the internal \code{\link[stats]{glm.fit}} (not \code{\link[stats]{glm}}):
-with \eqn{\mathrm{RSS}_w = \sum_i w_i r_i^2} and \eqn{n_{\mathrm{effective}} = \sum_i w_i},
-\deqn{d_{\mathrm{OLS}} = \frac{\mathrm{RSS}_w}{n_{\mathrm{effective}} - p}}
-requiring \eqn{n_{\mathrm{effective}} > p} with \eqn{p=\texttt{ncol}(x)}. This is \strong{not}
-\code{summary(glm.fit(...))$dispersion}.
+For \code{family = gaussian()}, the classical weighted residual-variance ratio
+\deqn{d_{\mathrm{classical}} = \frac{\mathrm{RSS}_w}{n_{\mathrm{effective}} - p},}
+with \eqn{\mathrm{RSS}_w = \sum_i w_i r_i^2}, \eqn{n_{\mathrm{effective}} = \sum_i w_i},
+and \eqn{p=\texttt{ncol}(x)} (requiring \eqn{n_{\mathrm{effective}} > p}),
+is a reference scale. The default \emph{returned} \code{dispersion} in the Gaussian
+calibrated path is \eqn{S_{\mathrm{marg}}/(n_{\mathrm{effective}}-p)}, not
+\eqn{d_{\mathrm{classical}}} except in the weak-prior limit.
 
 If \code{n_prior} is available so a Gamma prior on precision is defined (\code{shape},
 \code{rate}), the returned \code{dispersion} and \code{rate} are set by the
 Gaussian calibration pipeline and are internally consistent with the prior
 and data.
+In the weak-prior limit (\eqn{\mathrm{pwt}\to 0}, equivalently
+\eqn{n_{\mathrm{prior}}\to 0^+}), the returned Gaussian \code{dispersion}
+matches the classical residual-variance behavior.
 
 The posterior shape and rate for residual precision (Gaussian sampling fragment) are:
 \deqn{\text{shape}_{\mathrm{post}} = \text{shape} + \frac{n_{\mathrm{effective}}}{2}
-      = \frac{n_{\mathrm{prior}} + n_{\mathrm{effective}} + 1}{2}}
-\deqn{\text{rate}_{\mathrm{post}} = \text{rate} + \frac{\mathrm{RSS}_w}{2}.}
-Before \code{\link{compute_gaussian_prior}} one has
-\eqn{\text{rate} = \texttt{dispersion}\,n_{\mathrm{prior}}/2}, hence
-\eqn{\text{rate}_{\mathrm{post}} = \texttt{dispersion}\,n_{\mathrm{prior}}/2 + \mathrm{RSS}_w/2}.
-Gaussian calibration then replaces \code{dispersion}, \code{shape}, and \code{rate} using
-\eqn{S_{\mathrm{marg}}} (see \code{\link{compute_gaussian_prior}}).
+      = \frac{n_{\mathrm{prior}} + k + n_{\mathrm{effective}}}{2}}
+\deqn{\text{rate}_{\mathrm{post}}
+      = \frac{1}{2}\,\frac{S_{\mathrm{marg}}}{n_w-p}\,
+        \bigl(n_{\mathrm{prior}} + k + n_w - 2\bigr),
+      \quad n_w := n_{\mathrm{effective}}.}
+With this calibration, one has
+\eqn{E[\sigma^2\mid y]=\texttt{dispersion}=S_{\mathrm{marg}}/(n_{\mathrm{effective}}-p)}.
+For the \code{\link{dNormal_Gamma}()} (conjugate) prior path, the posterior
+expectation of \eqn{\sigma^2} matches this same value
+\eqn{S_{\mathrm{marg}}/(n_w-p)} under the default Gaussian calibration.
+See Theorem 1 in Chapter A12: Technical Derivations for Priors Returned by
+\code{Prior_Setup()} \insertCite{glmbayesChapterA12}{glmbayes}.
+
+Limiting behavior as \eqn{n_{\mathrm{prior}}\to 0^+} (equivalently \eqn{\mathrm{pwt}\to 0})
+follows Theorems 2 and 3 in that chapter:
+\itemize{
+\item Under \code{dNormal_Gamma()}, posterior moments converge to the weighted
+likelihood limit: \eqn{E[\beta\mid y]\to\hat\beta},
+\eqn{E[\sigma^2\mid y]\to \mathrm{RSS}_w/(n_w-p)}, and
+\eqn{\mathrm{Cov}(\beta\mid y)\to \frac{\mathrm{RSS}_w}{n_w-p}(X^\top W X)^{-1}}.
+\item Under \code{dIndependent_Normal_Gamma()}, the weak-prior limit is the same
+for these key moments, even though the finite-\eqn{n_{\mathrm{prior}}} posterior
+structure differs from the conjugate path.
+}
 
 This structure allows the prior to contribute pseudo-observations to the residual precision estimate, enabling adaptive shrinkage and hierarchical
 regularization---especially valuable in small-sample or high-dimensional settings.
