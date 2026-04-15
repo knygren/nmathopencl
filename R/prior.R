@@ -1,23 +1,23 @@
 #' Setup Prior Objects
-#' 
+#'
 #' Helper function to facilitate the Setup of Prior Distributions for glm models.
 #' @name Prior_Setup
-#' @param na.action how \code{NAs} are treated. The default is first, any \code{\link{na.action}} attribute of 
-#' data, second a \code{na.action} setting of \link{options}, and third \code{na.fail} if that is unset. 
+#' @param na.action how \code{NAs} are treated. The default is first, any \code{\link{na.action}} attribute of
+#' data, second a \code{na.action} setting of \link{options}, and third \code{na.fail} if that is unset.
 #' The \code{factory-fresh} default is \code{na.omit}. Another possible value is \code{NULL}.
 #' @param family a description of the error distribution and link function to be used in the model.
-#' @param pwt Weight on the prior relative to the likelihood function at the maximum likelihood 
-#' estimate. If supplied, this value is used directly (scalar or one value per coefficient). 
+#' @param pwt Weight on the prior relative to the likelihood function at the maximum likelihood
+#' estimate. If supplied, this value is used directly (scalar or one value per coefficient).
 #' If \code{n_prior} is provided and \code{pwt} is still a **scalar** and \code{sd} was **not**
 #' supplied, \code{pwt} is set to \code{n_prior / (n_prior + n_effective)}. If \code{length(pwt) > 1}
 #' (including from \code{sd}) or \code{sd} was supplied, \code{n_prior} does **not** overwrite
 #' \code{pwt}; it is used only as a scalar for Gamma / S_marg steps. If \code{sd} is provided,
 #' \code{pwt} is computed from the prior standard deviations. If none of these are supplied,
-#' \code{pwt} defaults to \code{pwt_default_low} for models with fewer than 14 coefficients, and 
+#' \code{pwt} defaults to \code{pwt_default_low} for models with fewer than 14 coefficients, and
 #' \code{pwt_default_high} otherwise.
-#' @param pwt_default_low Default prior weight used when \code{pwt} is not supplied and the model 
+#' @param pwt_default_low Default prior weight used when \code{pwt} is not supplied and the model
 #' dimension is below 14. Defaults to 0.01.
-#' @param pwt_default_high Default prior weight used when \code{pwt} is not supplied and the model 
+#' @param pwt_default_high Default prior weight used when \code{pwt} is not supplied and the model
 #' dimension is 14 or greater. Defaults to 0.05.
 #' @param n_prior Optional scalar effective prior sample size (on the \code{n_effective} scale).
 #' If provided with scalar \code{pwt} and without \code{sd}, \code{pwt} is recomputed from
@@ -35,281 +35,201 @@
 #'   \code{k} makes the prior and posterior for \eqn{\sigma^2} more concentrated and less
 #'   heavy-tailed. Not yet used in calibration; passed through to \code{\link{compute_gaussian_prior}}
 #'   for future use.
-#' @param intercept_source Specifies the method through which the prior mean for the intercept term is set. Options are based on the null intercept only model (null_model) or full_models. The default is the null model which is safer if variables are not centered. 
-#' @param effects_source Specifies the method through which the prior means for the effects terms are set. Options are null_effects (prior means set to zero) or full_model (effect means set to match maximum likelihood estimates).  
+#' @param intercept_source Specifies the method through which the prior mean for the intercept term is set. Options are based on the null intercept only model (null_model) or full_models. The default is the null model which is safer if variables are not centered.
+#' @param effects_source Specifies the method through which the prior means for the effects terms are set. Options are null_effects (prior means set to zero) or full_model (effect means set to match maximum likelihood estimates).
 #' @param mu Optional vector argument with the prior means for the coefficients
 #' @param x An object of class \code{"PriorSetup"}
 #' @inheritParams stats::glm
 #' @inheritParams stats::model.frame
+#' 
 #' @details
-#' `Prior_Setup()` initializes a structured set of prior parameters for generalized linear models (GLMs), supporting both Gaussian and non-Gaussian families.
-#'  It is designed to provide the full set of inputs required for multiple prior specifications (referred to as "pfamilies"), including conjugate normal priors, 
-#'  Normal-Gamma priors, and independent normal-gamma priors.
-#'
-#' The function returns a list containing:
-#' * `mu`: the prior mean vector
-#' * `Sigma`: the prior variance-covariance matrix (coefficient scale)
-#' * `Sigma_0`: for \code{family = gaussian()}, the dispersion-independent coefficient
-#'   prior covariance matrix on the precision-weighted scale (the \eqn{\Sigma_0} passed
-#'   into \code{\link{compute_gaussian_prior}}). Under the default scalar-\code{pwt}
-#'   Zellner mapping,
-#'   \eqn{\Sigma_0^{-1}=\frac{\mathrm{pwt}}{1-\mathrm{pwt}}X^\top W X}
-#'   (equivalently \eqn{\Sigma_0=\frac{1-\mathrm{pwt}}{\mathrm{pwt}}(X^\top W X)^{-1}});
-#'   \code{NULL} for non-Gaussian families.
-#' * `Sigma` and `Sigma_0` are linked by
-#'   \eqn{\Sigma = \texttt{dispersion}\cdot\Sigma_0} under the default Gaussian
-#'   calibration path.
-#' * `dispersion`: the estimated dispersion (for Gaussian models)
-#' * `shape`: the shape parameter for Normal-Gamma priors (if applicable),
-#'   \eqn{(n_{\mathrm{prior}}+k)/2} with \code{k} from the \code{Prior_Setup(..., k = ...)}
-#'   argument (default \eqn{k=1}; see \code{\link{compute_gaussian_prior}}).
-#' * `shape_ING`: dedicated shape parameter for `dIndependent_Normal_Gamma()`
-#'   (Gaussian path), equal to `shape + ncol(x)/2` when available
-#' * `rate`: the rate parameter for Normal-Gamma priors (if applicable)
-#' * `rate_gamma`: dedicated rate parameter for `dGamma()` (Gaussian fixed-`beta`
-#'   path), using the Zellner-blend RSS calibration from \code{\link{compute_gaussian_prior}}
-#' * `coefficients`: named numeric vector, same length and names as columns of `x`.
-#'   For `gaussian()` with scalar `pwt`, this is the closed-form posterior mean
-#'   (posterior expectation) under the default Zellner setup,
-#'   \eqn{(1-\texttt{pwt})\hat\beta+\texttt{pwt}\mu}. With vector `pwt`, the same
-#'   formula is applied component-wise as a blend. In non-Gaussian paths (or when
-#'   closed-form blend inputs are unavailable), it falls back to the full-model GLM
-#'   coefficient estimate. Intended mainly as `beta` in \code{\link{dGamma}()} and
-#'   related `prior_list` entries when updating dispersion with fixed coefficients.
-#'   This is distinct from `mu`, which holds prior means.
-#' * `model`: the model frame used to construct the design matrix
-#' * `x`: the model matrix used
-#' * `y`: the response used
-#' * `call`: the matched call to `Prior_Setup()`
-#' * `PriorSettings`: a list of metadata including:
-#'   - `pwt`: prior weight (scalar or vector)
-#'   - `n_prior`: effective prior sample size
-#'   - `n_likelihood`: effective likelihood sample size
-#'   - `intercept_source`: method used to set the prior mean for the intercept
-#'   - `effects_source`: method used to set the prior mean for the effects
-#'
-#' ### Connection to \code{pfamily} constructors and \code{prior_list}
-#'
-#' Call \code{Prior_Setup(formula, family = \dots)} (with \code{data},
-#' \code{weights}, etc. as needed) so \code{mu}, \code{Sigma}, and (for
-#' Gaussian families) \code{dispersion}, \code{shape}, and \code{rate} are
-#' on the scale implied by the likelihood and your \code{pwt} / \code{n_prior}.
-#' The recommended mapping from the returned list into a \code{\link{pfamily}}
-#' or into \code{prior_list} for \code{\link{simfuncs}} follows the worked
-#' patterns in \code{example("Prior_Setup")} (\code{inst/examples/Ex_Prior_Setup.R}).
-#' Distinct priors use **different** combinations of coefficient-scale \code{Sigma},
-#' dispersion-free \code{Sigma_0} (Gaussian, for \code{\link{dNormal_Gamma}} /
-#' \code{\link{rNormalGamma_reg}}), and \code{dNormal(..., dispersion = ...)}; mixing
-#' these up is a common error.
-#'
-#' #### \code{\link{dNormal}()}
-#' * **Typical use (e.g. Poisson \code{\link{glmb}}):** \code{dNormal(mu = ps$mu, Sigma = ps$Sigma)}.
-#' * **Gaussian with fixed dispersion (\code{\link{lmb}} / \code{\link{rlmb}}):**
-#'   pass \code{dispersion = ps2$dispersion} as well:
-#'   \code{dNormal(mu = ps2$mu, Sigma = ps2$Sigma, dispersion = ps2$dispersion)}.
-#' * Matrix-input fits use the same \code{pfamily} with \code{y} and \code{x}
-#'   taken from \code{ps$y} and \code{as.matrix(ps$x)} (see examples).
-#'
-#' #### \code{\link{dNormal_Gamma}()} (conjugate Normal--Gamma, Gaussian)
-#' The second argument is the prior covariance on the **precision-weighted**
-#' coefficient scale: use **\code{ps2$Sigma_0}** from \code{\link{Prior_Setup}} (Gaussian
-#' only), not coefficient-scale \code{ps2$Sigma} alone. Recommended call:
-#' \code{dNormal_Gamma(ps2$mu, Sigma_0 = ps2$Sigma_0, shape = ps2$shape, rate = ps2$rate)}.
-#' For \code{\link{rNormalGamma_reg}}, build
-#' \code{prior_list = list(mu = ps2$mu, Sigma = ps2$Sigma_0, shape = ps2$shape, rate = ps2$rate)}.
-#'
-#' #### \code{\link{dIndependent_Normal_Gamma}()} (Gaussian, non-conjugate joint \eqn{(\beta,\phi)})
-#' Here the second argument is the **full** prior covariance on \eqn{\beta}. With
-#' \eqn{p=\texttt{ncol}(x)} from \code{Prior_Setup()}, use the dedicated
-#' \code{shape_ING} field (same \code{ps2$rate} as \code{\link{dNormal_Gamma}()}):
-#' \preformatted{dIndependent_Normal_Gamma(ps2$mu, ps2$Sigma, shape = ps2$shape_ING, rate = ps2$rate)}
-#' Same pattern for \code{\link{rglmb}} / \code{\link{rlmb}} with that \code{pfamily}.
-#' For \code{\link{rindepNormalGamma_reg}}, the template \code{prior_list} also
-#' uses **undivided** \code{Sigma}, plus \code{dispersion}, \code{Precision = solve(Sigma)},
-#' \code{shape = ps2$shape_ING}, and envelope controls such as \code{max_disp_perc}
-#' (see examples).
-#'
-#' #### \code{\link{dGamma}()} (Gamma on precision / dispersion with fixed \eqn{\beta})
-#' \code{Prior_Setup()} supplies \code{shape}, \code{shape_ING}, \code{rate}, \code{rate_gamma} (Gaussian
-#' calibration only), and \code{coefficients} (full-model MLE by default). For
-#' \code{gaussian()}, use \code{rate_gamma} so the Gamma rate matches
-#' \eqn{\mathrm{RSS}_w(\beta_\star)} at the Zellner blend (see \code{\link{compute_gaussian_prior}}):
-#' \code{dGamma(shape = ps2$shape, rate = ps2$rate_gamma, beta = ps2$coefficients)}.
-#' If code must also support paths where \code{rate_gamma} is unavailable, use
-#' \code{rate_dg <- if (!is.null(ps2$rate_gamma)) ps2$rate_gamma else ps2$rate}.
-#' For \code{\link{rGamma_reg}}, pass the same \code{rate} slot in \code{prior_list}.
-#'
-#' #### References and further reading
-#' Zellner-style scaling of \code{Sigma} from the likelihood
-#' \insertCite{zellner1986gprior}{glmbayes}; conjugate Gaussian theory
-#' \insertCite{Raiffa1961}{glmbayes}; envelope sampling for \code{dNormal()}
-#' on non-Gaussian families and for \code{dIndependent_Normal_Gamma()}
-#' \insertCite{Nygren2006}{glmbayes}; Normal--Gamma / GLM background
-#' \insertCite{Gelman2013,Dobson1990,McCullagh1989}{glmbayes}; prior tailoring
-#' \insertCite{glmbayesChapter03}{glmbayes}; technical derivations for priors returned by
-#' \code{Prior_Setup()} \insertCite{glmbayesChapterA12}{glmbayes}.
-#'
-#' ### Inputs to the function
+#' \strong{Inputs to the function}
 #'
 #' The inputs to `Prior_Setup()` fall into three conceptual categories:
 #'
-#' **1. Model specification**
-#' * `formula`: defines the structure of the GLM, including response and predictors.
-#' * `family`: specifies the error distribution and link function (e.g., `gaussian()`, `binomial()`).
-#' * `data`: optional data frame used to evaluate the formula and extract variables.
+#' \emph{1. Model specification}
+#' * \code{formula}: structure of the GLM (response and predictors).
+#' * \code{family}: error distribution and link.
+#' * \code{data}, \code{weights}, \code{subset}, \code{na.action},
+#'   \code{offset}, \code{contrasts}, \code{control}, \code{...}: as in
+#'   \code{\link[stats]{glm}}.
 #'
-#' **2. Prior variance-covariance specification**
-#' * `pwt`: prior weight relative to the likelihood. If scalar, used to compute Zellner's g-prior.
-#' * `n_prior`: optional scalar effective prior sample size. Replaces scalar `pwt` only when
-#'   `pwt` is scalar and `sd` is not used; otherwise supplies precision-prior / calibration only.
-#' * `sd`: optional vector of prior standard deviations. If provided, used to compute `pwt`.
+#' \emph{2. Prior variance–covariance specification}
+#' * \code{pwt}: prior weight relative to the likelihood. If scalar, used to
+#'   construct a Zellner-type g-prior. If vector, applied elementwise.
+#' * \code{n_prior}: optional scalar effective prior sample size. Replaces
+#'   scalar \code{pwt} only when \code{pwt} is scalar and \code{sd} is not
+#'   used; otherwise supplies precision-prior / calibration only.
+#' * \code{sd}: optional vector of prior standard deviations. If provided,
+#'   used to compute \code{pwt} from the diagonal of \code{vcov(glm_full)}.
+#' * \code{pwt_default_low}, \code{pwt_default_high}: defaults for \code{pwt}
+#'   when not supplied.
 #'
-#' **3. Prior mean specification**
-#' * `intercept_source`: method for setting the prior mean of the intercept (`"null_model"` or `"full_model"`).
-#' * `effects_source`: method for setting the prior mean of the effects (`"null_effects"` or `"full_model"`).
-#' * `mu`: optional user-specified prior mean vector. Overrides other centering logic if provided.
+#' \emph{3. Prior mean specification}
+#' * \code{intercept_source}: method for setting the prior mean of the intercept
+#'   (\code{"null_model"} or \code{"full_model"}).
+#' * \code{effects_source}: method for setting the prior mean of the effects
+#'   (\code{"null_effects"} or \code{"full_model"}).
+#' * \code{mu}: optional user-specified prior mean vector; overrides other
+#'   centering logic if provided.
 #'
-#' ### Mathematical structure and interpretation
+#' \strong{Prior covariance and Zellner scaling}
 #'
-#' When `pwt` is a scalar, the prior covariance is scaled from the likelihood covariance using a Zellner g-prior:
-#' \deqn{\Sigma_{Prior} = \frac{1 - pwt}{pwt} \cdot V_{MLE}}
-#' where \eqn{V_{MLE}} is the variance-covariance matrix of the maximum likelihood estimator.
-#'
-#' If the likelihood covariance is not full rank, the function aborts with an error, as a g-prior cannot be constructed.
-#'  While Bayesian models can still be estimated in such cases, users should proceed with caution.
-#'  
-#' The corresponding prior precision is:
-#' \deqn{P_{Prior} = \frac{pwt}{1 - pwt} \cdot P_{MLE}}
-#' and the posterior mean (in the Gaussian case) simplifies to:
-#' \deqn{\mu_{Post} = (1 - pwt) \cdot \widehat{\beta}_{MLE} + pwt \cdot \mu_{Prior}}
-#'
-#' Default prior centering reflects classical reference structures:
-#' \itemize{
-#'   \item The intercept prior is centered at the null model estimate (`intercept_source = "null_model"`), consistent with how R\eqn{^2}, F-tests, and t-statistics are defined.
-#'   \item The effect priors are centered at zero (`effects_source = "null_effects"`), supporting intuitive posterior summaries and direct interpretation of tail probabilities.
-#' }
-#' 
-#' These defaults ensure that posterior means remain close to classical estimates when `pwt` is small, 
-#' while allowing additional flexible prior specifications through `mu`, `sd`, and `n_prior`. 
-#' 
-#' If `n_prior` is not provided, it is derived from `pwt` and `n_effective` (stored as
-#' \code{PriorSettings$n_effective}; for Gaussian with weights, \eqn{n_{\mathrm{effective}}=\sum w_i}):
-#' \deqn{n_{\mathrm{prior}} = \frac{pwt}{1 - pwt} \cdot n_{\mathrm{effective}}.}
-#' The field \code{n_likelihood} in \code{PriorSettings} is set equal to \code{n_effective} for compatibility.
-#'
-#' If `n_prior` is provided and `pwt` is still scalar and `sd` was not used, `pwt` is set to:
-#' \deqn{pwt = \frac{n_{\mathrm{prior}}}{n_{\mathrm{prior}} + n_{\mathrm{effective}}}}
-#' (With vector `pwt` or with `sd`, `pwt` is not overwritten.)
-#'
-#' When applicable, `Prior_Setup()` computes the shape and rate parameters for a Gamma prior on the residual precision (inverse variance), used in
-#' compound prior families such as `dNormal_Gamma()`, `dIndependent_Normal_Gamma()`, and `dGamma()`. Let \eqn{p=\texttt{ncol}(x)}.
-#' The Gaussian calibration uses the marginal quadratic
+#' Let \eqn{V_0 = \mathrm{vcov}(\hat\beta)} be the covariance matrix of the
+#' full-model GLM coefficients. For non-Gaussian families, the prior covariance
+#' is:
 #' \deqn{
-#' S_{\mathrm{marg}}
-#' =
-#' \mathrm{RSS}_w(\hat\beta)
-#' +
-#' (\hat\beta-\mu)^\top\!\left(\Sigma_0 + (X^\top W X)^{-1}\right)^{-1}(\hat\beta-\mu),
+#'   \Sigma =
+#'   \begin{cases}
+#'     \dfrac{1 - \mathrm{pwt}}{\mathrm{pwt}} V_0, & \text{scalar pwt},\\[4pt]
+#'     V_0 \circ \left[\sqrt{\dfrac{1 - \mathrm{pwt}_i}{\mathrm{pwt}_i}}
+#'                    \sqrt{\dfrac{1 - \mathrm{pwt}_j}{\mathrm{pwt}_j}}\right],
+#'     & \text{vector pwt},
+#'   \end{cases}
 #' }
-#' where \eqn{\mathrm{RSS}_w(\hat\beta)=\sum_i w_i (y_i - x_i^\top\hat\beta)^2}.
-#' Under the default scalar-\code{pwt} Zellner mapping
-#' \eqn{\Sigma_0=\frac{1-\mathrm{pwt}}{\mathrm{pwt}}(X^\top W X)^{-1}},
-#' this simplifies to the intuitive form
+#' where \eqn{\circ} denotes elementwise multiplication.
+#'
+#' For Gaussian families, `Prior_Setup()` also constructs the dispersion-free
+#' covariance
 #' \deqn{
-#' S_{\mathrm{marg}}
-#' =
-#' \mathrm{RSS}_w(\hat\beta)
-#' +
-#' \mathrm{pwt}\,(\hat\beta-\mu)^\top(X^\top W X)(\hat\beta-\mu).
+#'   \Sigma_0 = \Sigma / \texttt{dispersion},
 #' }
-#' In the Gaussian calibration path (`compute_gaussian_prior`), the prior shape uses \eqn{k}:
-#' \deqn{\text{shape} = \frac{n_{\mathrm{prior}} + k}{2}.}
-#' The corresponding calibrated Gaussian prior rate is
-#' \deqn{\text{rate} = \frac{1}{2}S_{\mathrm{marg}}\frac{n_{\mathrm{prior}}+k+p-2}{n_{\mathrm{effective}}-p},}
-#' and the dedicated fixed-\eqn{\beta} `dGamma()` rate is
-#' \deqn{\text{rate}_{\gamma} = \frac{1}{2}\mathrm{RSS}_w(\beta_\star)\frac{n_{\mathrm{prior}}+k+p-2}{n_{\mathrm{effective}}-p}.}
-#' Here \eqn{\beta_\star=(1-\mathrm{pwt})\hat\beta+\mathrm{pwt}\mu} for scalar \code{pwt}.
-#'
-#' ### Gaussian dispersion
-#'
-#' For \code{family = gaussian()}, the classical weighted residual-variance ratio
-#' \deqn{d_{\mathrm{classical}} = \frac{\mathrm{RSS}_w}{n_{\mathrm{effective}} - p},}
-#' with \eqn{\mathrm{RSS}_w = \sum_i w_i r_i^2}, \eqn{n_{\mathrm{effective}} = \sum_i w_i},
-#' and \eqn{p=\texttt{ncol}(x)} (requiring \eqn{n_{\mathrm{effective}} > p}),
-#' is a reference scale. The default \emph{returned} \code{dispersion} in the Gaussian
-#' calibrated path is \eqn{S_{\mathrm{marg}}/(n_{\mathrm{effective}}-p)}, not
-#' \eqn{d_{\mathrm{classical}}} except in the weak-prior limit.
-#'
-#' If \code{n_prior} is available so a Gamma prior on precision is defined (\code{shape},
-#' \code{rate}), the returned \code{dispersion} and \code{rate} are set by the
-#' Gaussian calibration pipeline and are internally consistent with the prior
-#' and data.
-#' In the weak-prior limit (\eqn{\mathrm{pwt}\to 0}, equivalently
-#' \eqn{n_{\mathrm{prior}}\to 0^+}), the returned Gaussian \code{dispersion}
-#' matches the classical residual-variance behavior.
-#'
-#' The posterior shape and rate for residual precision (Gaussian sampling fragment) are:
-#' \deqn{\text{shape}_{\mathrm{post}} = \text{shape} + \frac{n_{\mathrm{effective}}}{2}
-#'       = \frac{n_{\mathrm{prior}} + k + n_{\mathrm{effective}}}{2}}
-#' \deqn{\text{rate}_{\mathrm{post}}
-#'       = \frac{1}{2}\,\frac{S_{\mathrm{marg}}}{n_w-p}\,
-#'         \bigl(n_{\mathrm{prior}} + k + n_w - 2\bigr),
-#'       \quad n_w := n_{\mathrm{effective}}.}
-#' With this calibration, one has
-#' \eqn{E[\sigma^2\mid y]=\texttt{dispersion}=S_{\mathrm{marg}}/(n_{\mathrm{effective}}-p)}.
-#' For the \code{\link{dNormal_Gamma}()} (conjugate) prior path, the posterior
-#' expectation of \eqn{\sigma^2} matches this same value
-#' \eqn{S_{\mathrm{marg}}/(n_w-p)} under the default Gaussian calibration.
-#' See Theorem 1 in Chapter A12: Technical Derivations for Priors Returned by
-#' \code{Prior_Setup()} \insertCite{glmbayesChapterA12}{glmbayes}.
-#'
-#' Limiting behavior as \eqn{n_{\mathrm{prior}}\to 0^+} (equivalently \eqn{\mathrm{pwt}\to 0})
-#' follows Theorems 2 and 3 in that chapter:
-#' \itemize{
-#'   \item Under \code{dNormal_Gamma()}, posterior moments converge to the weighted
-#'   likelihood limit: \eqn{E[\beta\mid y]\to\hat\beta},
-#'   \eqn{E[\sigma^2\mid y]\to \mathrm{RSS}_w/(n_w-p)}, and
-#'   \eqn{\mathrm{Cov}(\beta\mid y)\to \frac{\mathrm{RSS}_w}{n_w-p}(X^\top W X)^{-1}}.
-#'   \item Under \code{dIndependent_Normal_Gamma()}, the weak-prior limit is the same
-#'   for these key moments, even though the finite-\eqn{n_{\mathrm{prior}}} posterior
-#'   structure differs from the conjugate path.
+#' which under scalar \code{pwt} and the default calibration reduces to
+#' \deqn{
+#'   \Sigma_0 = \frac{1 - \mathrm{pwt}}{\mathrm{pwt}} (X^\top W X)^{-1}.
 #' }
 #'
-#' This structure allows the prior to contribute pseudo-observations to the residual precision estimate, enabling adaptive shrinkage and hierarchical 
-#' regularization---especially valuable in small-sample or high-dimensional settings.
+#' \strong{Gaussian Normal–Gamma calibration and \eqn{S_{\mathrm{marg}}}}
 #'
-#' @return A list with items related to the prior.
-#' \item{mu}{A prior mean vector}
-#' \item{Sigma}{A prior variance-covariance matrix}
-#' \item{Sigma_0}{For \code{gaussian()} only: dispersion-independent prior covariance on
-#'   the precision-weighted coefficient scale (same as the \code{Sigma_0} argument to
-#'   \code{\link{compute_gaussian_prior}}). Under default scalar-\code{pwt},
-#'   \eqn{\Sigma_0^{-1}=\frac{\mathrm{pwt}}{1-\mathrm{pwt}}X^\top W X}
-#'   and equivalently
-#'   \eqn{\Sigma_0=\frac{1-\mathrm{pwt}}{\mathrm{pwt}}(X^\top W X)^{-1}.}
-#'   \code{NULL} for other families.}
-#' \item{dispersion}{Empirical bayes estimate for the dispersion (gaussian model only)}
-#' \item{shape}{Derived prior shape parameter (gaussian model only),
-#'   \eqn{(n_{\mathrm{prior}}+k)/2} with \code{k} from \code{Prior_Setup(..., k = ...)}
-#'   (default \eqn{k=1}; see \code{\link{compute_gaussian_prior}}).}
-#' \item{shape_ING}{For \code{gaussian()} only when \code{shape} is available: dedicated
-#'   shape parameter for \code{\link{dIndependent_Normal_Gamma}()}, equal to
-#'   \eqn{\texttt{shape} + p/2} with \eqn{p=\texttt{ncol}(x)}. \code{NULL} otherwise.}
-#' \item{rate}{Derived prior rate parameter (gaussian model only). Pre-calibration uses \eqn{(n_{\mathrm{prior}}/2)\cdot\texttt{dispersion}}{}; Gaussian output replaces this with the calibrated rate from \code{\link{compute_gaussian_prior}}.}
-#' \item{rate_gamma}{For \code{gaussian()} only, when Gaussian calibration runs: prior Gamma rate
-#'   for \code{\link{dGamma}} / fixed-\eqn{\beta} use, from \code{\link{compute_gaussian_prior}}
-#'   (RSS at the Zellner blend; see that help page). \code{NULL} if not computed.}
+#' For \code{family = gaussian()}, the function performs the Normal–Gamma
+#' calibration described in Chapter A12. Let:
+#' * \eqn{p = \texttt{ncol}(x)},
+#' * \eqn{n_{\mathrm{effective}} = \sum_i w_i},
+#' * \eqn{\hat\beta} the weighted least-squares estimator,
+#' * \eqn{\Sigma_0} the dispersion-free prior covariance.
+#'
+#' The marginal quadratic term is
+#' \deqn{
+#'   S_{\mathrm{marg}}
+#'     = \mathrm{RSS}_w
+#'       + (\hat\beta - \mu)^\top
+#'         \left(\Sigma_0 + (X^\top W X)^{-1}\right)^{-1}
+#'         (\hat\beta - \mu),
+#' }
+#' where \eqn{\mathrm{RSS}_w} is the weighted residual sum of squares at
+#' \eqn{\hat\beta}. Under the default scalar-\code{pwt} Zellner mapping
+#' \eqn{\Sigma_0 = \frac{1 - \mathrm{pwt}}{\mathrm{pwt}}(X^\top W X)^{-1}},
+#' this simplifies to
+#' \deqn{
+#'   S_{\mathrm{marg}}
+#'     = \mathrm{RSS}_w
+#'       + \mathrm{pwt}\,
+#'         (\hat\beta - \mu)^\top (X^\top W X)(\hat\beta - \mu),
+#' }
+#' which makes the limiting behavior as \eqn{\mathrm{pwt} \to 0} transparent.
+#'
+#' The calibrated dispersion is
+#' \deqn{
+#'   \texttt{dispersion}
+#'     = \frac{S_{\mathrm{marg}}}{n_{\mathrm{effective}} - p},
+#' }
+#' and the Normal–Gamma hyperparameters are
+#' \deqn{
+#'   \text{shape} = \frac{n_{\mathrm{prior}} + k}{2},\qquad
+#'   \text{rate}
+#'     = \frac{1}{2} S_{\mathrm{marg}}
+#'       \frac{n_{\mathrm{prior}} + k + p - 2}{n_{\mathrm{effective}} - p}.
+#' }
+#' The independent Normal–Gamma shape is
+#' \deqn{
+#'   \text{shape}_{ING} = \text{shape} + \frac{p}{2}.
+#' }
+#'
+#' \strong{Posterior summaries for the conjugate Normal–Gamma prior}
+#'
+#' Under the conjugate Normal–Gamma prior (used by \code{dNormal_Gamma()}),
+#' the posterior has:
+#' * Posterior mean
+#'   \deqn{
+#'     E[\beta \mid y]
+#'       = (1 - \mathrm{pwt})\,\hat\beta
+#'         + \mathrm{pwt}\,\mu.
+#'   }
+#' * Posterior expectation of \eqn{\sigma^2}
+#'   \deqn{
+#'     E[\sigma^2 \mid y]
+#'       = \frac{S_{\mathrm{marg}}}{n_{\mathrm{effective}} - p}.
+#'   }
+#' * Posterior covariance
+#'   \deqn{
+#'     \mathrm{Cov}(\beta \mid y)
+#'       = E[\sigma^2 \mid y]\,
+#'         \left(\Sigma_0^{-1} + X^\top W X\right)^{-1}.
+#'   }
+#'
+#' \strong{Weak-prior limits (Theorems 2 and 3)}
+#'
+#' As \eqn{n_{\mathrm{prior}} \to 0^+} (equivalently \eqn{\mathrm{pwt} \to 0}),
+#' \eqn{S_{\mathrm{marg}} \to \mathrm{RSS}_w}, and the conjugate Normal–Gamma
+#' posterior converges to the classical weighted least-squares limit:
+#' \deqn{
+#'   E[\beta \mid y] \to \hat\beta,\qquad
+#'   E[\sigma^2 \mid y] \to \frac{\mathrm{RSS}_w}{n_{\mathrm{effective}} - p},\qquad
+#'   \mathrm{Cov}(\beta \mid y) \to
+#'     \frac{\mathrm{RSS}_w}{n_{\mathrm{effective}} - p}
+#'     (X^\top W X)^{-1}.
+#' }
+#'
+#' For the independent Normal–Gamma prior used by
+#' \code{dIndependent_Normal_Gamma()}, neither the posterior mean nor the
+#' posterior covariance is available in closed form; the posterior must be
+#' obtained by numerical integration or sampling (e.g.,
+#' \code{rindepNormalGamma_reg()}). Theorem 3 in
+#' \insertCite{glmbayesChapterA12}{glmbayes} shows that the ING posterior has
+#' the same weak-prior limit as the conjugate Normal–Gamma posterior:
+#' \deqn{
+#'   E[\beta \mid y] \to \hat\beta,\qquad
+#'   \mathrm{Cov}(\beta \mid y) \to
+#'     \frac{\mathrm{RSS}_w}{n_{\mathrm{effective}} - p}
+#'     (X^\top W X)^{-1}.
+#' }
+#'
+#' @return
+#' A list of class \code{"PriorSetup"} with components:
+#' \item{mu}{Prior mean vector (length equal to the number of coefficients).}
+#' \item{Sigma}{Coefficient-scale prior variance–covariance matrix.}
+#' \item{Sigma_0}{For \code{family = gaussian()} only: dispersion-independent
+#'   prior covariance on the precision-weighted coefficient scale (the
+#'   \code{Sigma_0} passed to \code{\link{compute_gaussian_prior}}). Under
+#'   scalar \code{pwt},
+#'   \eqn{\Sigma_0^{-1} = \frac{\mathrm{pwt}}{1-\mathrm{pwt}} X^\top W X}.}
+#' \item{dispersion}{Calibrated dispersion (Gaussian models only), equal to
+#'   \eqn{S_{\mathrm{marg}}/(n_{\mathrm{effective}} - p)} under the default
+#'   calibration.}
+#' \item{shape}{Derived prior Gamma shape parameter for the Normal–Gamma prior
+#'   on precision (Gaussian only), \eqn{(n_{\mathrm{prior}} + k)/2}.}
+#' \item{shape_ING}{For \code{gaussian()} only when \code{shape} is available:
+#'   dedicated shape parameter for \code{dIndependent_Normal_Gamma()},
+#'   \eqn{\texttt{shape} + p/2}.}
+#' \item{rate}{Derived prior Gamma rate parameter (Gaussian only), using the
+#'   calibrated \eqn{S_{\mathrm{marg}}}.}
+#' \item{rate_gamma}{For \code{gaussian()} only, when Gaussian calibration runs:
+#'   prior Gamma rate for \code{dGamma()} / fixed-\eqn{\beta} use, based on
+#'   \eqn{\mathrm{RSS}_w(\beta_\star)} at the Zellner blend.}
 #' \item{coefficients}{Named numeric vector of returned coefficient values.
-#'   For \code{gaussian()} with scalar \code{pwt}, this is the closed-form posterior
-#'   mean (posterior expectation) under the default Zellner setup,
-#'   \eqn{(1-\texttt{pwt})\hat\beta+\texttt{pwt}\mu}. With vector \code{pwt}, the same
-#'   blend is applied component-wise. Otherwise it falls back to the internal
-#'   full-model GLM coefficients (same convention as \code{\link[stats]{coef}}).}
-#' \item{model}{The model frame from \code{object} if it exists}
-#' \item{x}{The design matrix from \code{object} if it exists}
-#' \item{y}{The response vector used to construct the prior setup.}
+#'   For \code{gaussian()} with scalar or vector \code{pwt}, this is the
+#'   closed-form posterior-mean blend
+#'   \eqn{(1-\mathrm{pwt})\hat\beta + \mathrm{pwt}\mu} when inputs are valid;
+#'   otherwise it falls back to the full-model GLM coefficients.}
+#' \item{model}{The model frame used to construct the design matrix (if
+#'   \code{model = TRUE}).}
+#' \item{x}{The model matrix used (if \code{x = TRUE}).}
+#' \item{y}{The response vector used (if \code{y = TRUE}).}
 #' \item{call}{The matched call to \code{Prior_Setup()}.}
-#' \item{PriorSettings}{A list containing prior configuration details}
+#' \item{PriorSettings}{A list containing prior configuration details, including
+#'   \code{pwt}, \code{n_prior}, \code{n_effective}, \code{n_likelihood},
+#'   \code{intercept_source}, and \code{effects_source}.}
+#'
 #' @family prior
 #' @seealso
 #' \code{\link{pfamily}} for prior-family objects and the constructors
@@ -320,18 +240,19 @@
 #' \code{pfamily} built from \code{Prior_Setup()} output; \code{\link{rglmb}},
 #' \code{\link{rlmb}} for matrix-based sampling that consumes the same prior
 #' structure; \code{\link{simfuncs}} for functions that take a \code{prior_list}
-#' assembled from those components (including \code{\link{rindepNormalGamma_reg}}
-#' for \code{\link{dIndependent_Normal_Gamma}()}).
+#' assembled from those components (including
+#' \code{\link{rindepNormalGamma_reg}} for
+#' \code{\link{dIndependent_Normal_Gamma}()}). 
 #'
-#' \insertCite{glmbayesChapter03}{glmbayes} for prior tailoring and examples;
-#' \insertCite{glmbayesChapterA12}{glmbayes} for full derivations.
-#' @references
-#' \insertAllCited{}
-#' @importFrom Rdpack reprompt
+#' \insertCite{zellner1986gprior}{glmbayes};
+#' \insertCite{Raiffa1961}{glmbayes};
+#' \insertCite{Gelman2013}{glmbayes};
+#' \insertCite{McCullagh1989}{glmbayes};
+#' \insertCite{glmbayesChapter03}{glmbayes};
+#' \insertCite{glmbayesChapterA12}{glmbayes}.
+#'
 #' @example inst/examples/Ex_Prior_Setup.R
 #' @export
-#' @rdname Prior_Setup
-#' @order 1
 
 ## Note arguments outside of first two are currently not used
 
