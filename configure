@@ -41,9 +41,10 @@ fi
 
 # ---- 3. Core flags ----
 OPENCL_FOUND=no
-LAPACK_LIBS="-llapack"
-BLAS_LIBS="-lblas"
-FLIBS="$(R CMD config FLIBS)"
+# Link against the same BLAS/LAPACK as this R (Writing R Extensions). Using
+# -llapack/-lblas breaks on minimal Linux images (e.g. rhub) where those
+# -l names are not on the default linker path.
+R_LAPACK_BLAS_FLIBS='$(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)'
 
 # ---- 4. RcppParallel flags ----
 RPP_CPPFLAGS="-I$RPP_INC_DIR"
@@ -160,7 +161,7 @@ echo "OPENCL_RUNTIME_FOUND = $OPENCL_RUNTIME_FOUND"
 
 # ---- 12. Compose initial flags ----
 FULL_CXXFLAGS="$OPENMP_CFLAGS"
-FULL_LIBS="$OPENMP_LDFLAGS $LAPACK_LIBS $BLAS_LIBS $FLIBS"
+FULL_LIBS="$OPENMP_LDFLAGS $R_LAPACK_BLAS_FLIBS"
 
 # ---- 13. Add OpenCL flags if available ----
 if [ "$OPENCL_FOUND" = "yes" ]; then
@@ -210,19 +211,16 @@ else
     GPU_FOUND=no
 fi
 
-# ---- 15. Append LAPACK/BLAS/FLIBS again (as in original script) ----
-FULL_LIBS="$FULL_LIBS $LAPACK_LIBS $BLAS_LIBS $FLIBS"
-
 echo ">> FULL_CXXFLAGS    = '$FULL_CXXFLAGS'"
 echo ">> FULL_LIBS        = '$FULL_LIBS'"
 
-# ---- 16. Append RcppParallel flags ----
+# ---- 15. Append RcppParallel flags ----
 FULL_LIBS="$FULL_LIBS $RPP_LDFLAGS"
 FULL_CXXFLAGS="$FULL_CXXFLAGS $RPP_CPPFLAGS"
 
 echo ">> FULL_CXXFLAGS    = '$FULL_CXXFLAGS'"
 echo ">> FULL_LIBS        = '$FULL_LIBS'"
 
-# ---- 17. Write final Makevars ----
+# ---- 16. Write final Makevars ----
 echo "PKG_CXXFLAGS = $FULL_CXXFLAGS" > src/Makevars
 echo "PKG_LIBS = $FULL_LIBS" >> src/Makevars
