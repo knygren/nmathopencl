@@ -261,7 +261,6 @@ print.summary.glmb<-function(x,digits = max(3, getOption("digits") - 3),...){
   } else {
     cat("\nExpected Residuals:\n")  # fallback for unknown class
   }
-#  cat("\nExpected Deviance Residuals:\n")
   if (length(x$residuals) > 5) {
     fn   <- fivenum(x$residuals)
     names(fn) <- c("Min", "1Q", "Median", "3Q", "Max")

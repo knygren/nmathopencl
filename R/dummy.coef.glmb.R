@@ -23,7 +23,6 @@
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
 #' @example inst/examples/Ex_dummy.coef.glmb.R
-# #' @exportClass  dummy.coef.glmb # temporarily disabled -no current exportclass
 #' @method dummy.coef glmb
 #' @export
 

@@ -119,7 +119,6 @@ rlmb <- function(
 ){
   ## Pull in information from the pfamily  
   pf         <- pfamily$pfamily
-  # okfamilies <- pfamily$okfamilies
   okfamilies <- c("gaussian")    # Only gaussian is okfamily for rlmb (different from rglmb)
   plinks     <- pfamily$plinks
   prior_list <- pfamily$prior_list 
@@ -127,12 +126,7 @@ rlmb <- function(
   
   family <- gaussian()
   
-  #  if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
-  #     is.numeric(mu)==FALSE||is.numeric(P)==FALSE) stop("non-numeric argument to numeric function")
-  
   x <- as.matrix(x)
-  # mu <- as.matrix(as.vector(prior_list$mu))
-  # P  <- as.matrix(P)    
   xnames <- dimnames(x)[[2L]]
   ynames <- if (is.matrix(y)) rownames(y) else names(y)
   
@@ -144,12 +138,6 @@ rlmb <- function(
   if (is.null(offset)) 
     offset <- rep(0, nobs)
   
-  # nvars2 <- length(mu)	
-  # if(!nvars==nvars2) stop("incompatible dimensions")
-  # if (!all(dim(P) == c(nvars2, nvars2))) 
-  #   stop("incompatible dimensions")
-  # if(!isSymmetric(P))stop("matrix P must be symmetric")
-  
   if (is.null(weights)) weights <- rep(1, nobs)
   if (length(weights) == 1) weights <- rep(weights, nobs)
   nobs2 <- length(weights)
@@ -160,14 +148,6 @@ rlmb <- function(
   if (nobs3 != nobs) stop("matrix X must have same number of rows as y")
   if (nobs4 != nobs) stop("offset vector must have same number of rows as y")
   
-  # tol <- 1e-06 # Link this to Magnitude of P	
-  # eS <- eigen(P, symmetric = TRUE,only.values = FALSE)
-  # ev <- eS$values
-  # if (!all(ev >= -tol * abs(ev[1L]))) 
-  #   stop("'P' is not positive definite")
-  
-  # if (is.null(start)) 
-  #   start <- mu
   if (is.null(offset)) 
     offset <- rep.int(0, nobs)
   if (is.character(family)) 

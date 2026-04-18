@@ -169,14 +169,8 @@ summary.rglmb<-function(object,...){
   rownames(Tab1) <- coef_names
   rownames(TAB)  <- coef_names
   rownames(TAB2) <- coef_names
-    
-  ##
-  
-  
-  
-#3  glm_temp=glm(y~x-1,family=object$family)
-  
-    res<-list(
+
+  res<-list(
     coefficients=object$coefficients,
     coef.means=colMeans(object$coefficients),
     coef.mode=object$mode,

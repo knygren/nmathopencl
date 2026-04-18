@@ -155,22 +155,6 @@ glmbfamfunc<-function(family){
       #dispersion*(2*f1(b,y,x,alpha,wt)+2*sum(dpois(y, y,log=TRUE)*wt))
       (2*f1(b,y,x,alpha,wt/dispersion)+2*sum(dpois2(y, y,log=TRUE)*(wt/dispersion)))
     }
-    #  f5<-f2_poisson
-    #  f6<-f3_poisson
-    
-    #    f7<-function(b,y,x,mu,P,alpha=0,wt=1){
-    #      l2<-length(y)
-    #      ltemp<-length(wt)
-    #      yxb2<-NULL
-    #      if(ltemp==1){
-    #        Ptemp<-wt*diag(l2)
-    #      }
-    #      else {
-    #        Ptemp<-diag(wt)      
-    #      }
-    #      Pout<-t(x)%*%(Ptemp)%*%x*exp(alpha+x%*%b)
-    #      Pout
-    #    }
     
     f7<-function(b, y, x, mu, P, alpha = 0, wt = 1) {
       l2 <- length(y)
@@ -225,9 +209,6 @@ glmbfamfunc<-function(family){
       #dispersion*(2*f1(b,y,x,alpha,wt)+2*sum(dbinom(round(wt*y),round(wt),y,log=TRUE)))
       (2*f1(b,y,x,alpha,wt/dispersion)+2*sum(dbinom(round((wt/dispersion)*y),round(wt/dispersion),y,log=TRUE)))
     }
-    #  f5<-f2_binomial_logit
-    #  f6<-f3_binomial_logit
-    
     
     f7<-function(b,y,x,mu,P,alpha=0,wt=1){
       
@@ -278,11 +259,6 @@ glmbfamfunc<-function(family){
       #dispersion*(2*f1(b,y,x,alpha,wt)+2*sum(dbinom(round(wt*y),round(wt),y,log=TRUE)))
       (2*f1(b,y,x,alpha,wt/dispersion)+2*sum(dbinom(round((wt/dispersion)*y),round(wt/dispersion),y,log=TRUE)))
     }
-    #  f5<-f2_binomial_probit
-    #  f6<-f3_binomial_probit
-    
-    
-    ##########  This should be replaced!
     
     f7<-function(b,y,x,mu,P,alpha=0,wt=1){
       
@@ -336,10 +312,6 @@ glmbfamfunc<-function(family){
       dispersion*(2*f1(b,y,x,alpha,wt)+2*sum(dbinom(round(wt*y),round(wt),y,log=TRUE)))
       (2*f1(b,y,x,alpha,wt/dispersion)+2*sum(dbinom(round((wt/dispersion)*y),round(wt/dispersion),y,log=TRUE)))
     }
-    #  f5<-f2_binomial_cloglog
-    #  f6<-f3_binomial_cloglog
-    
-    ##########  This should be replaced!
     
     f7<-function(b,y,x,mu,P,alpha=0,wt=1){
       
@@ -384,15 +356,6 @@ glmbfamfunc<-function(family){
       scale2 <- t(exp(eta - log(wt)))
       disp2  <- 1 / wt
       
-      ## TEMPORARY DIAGNOSTIC (optional)
-      #      if (any(!is.finite(scale2)) || any(scale2 == 0)) {
-      #        cat("\n*** scale2 is zero or non-finite in f2 ***\n")
-      #        cat("alpha:\n")
-      #        print(alpha)
-      #        cat("range(eta):", range(eta), "\n")
-      #        cat("range(scale2):", range(scale2), "\n")
-      #      }
-      
       -sum(dgamma(y, shape = 1/disp2, scale = scale2, log = TRUE)) +
         0.5 * t((b - mu)) %*% P %*% (b - mu)
     }
@@ -409,11 +372,6 @@ glmbfamfunc<-function(family){
       (2*f1(b,y,x,alpha,wt/dispersion)+2*sum(dgamma(y,shape=1/disp2,scale=y*disp2,log=TRUE)))
       
     }
-    
-    #  f5<-f2_gamma
-    #  f6<-f3_gamma
-    
-    ##########  This should be replaced!
     
     f7<-function(b,y,x,mu,P,alpha=0,wt=1){
       

@@ -63,7 +63,6 @@ anova.glmb<-function(object,...){
 
   mf_all=model.frame(ff_all,data)  
   nvar_all=ncol(mf_all)
-#  terms_all=terms(ff_all)
   terms_all=terms(mf_all)
   tl_all=attr(terms_all,"term.labels") ## terms
   nterms_all=length(tl_all)
@@ -113,16 +112,7 @@ anova.glmb<-function(object,...){
     
     ## Update the formula with one less term
     
-    #if(nterms_left>1){
-    #  tt2=drop.terms(tt2,nterms_left,keep.response=TRUE)
-    #  newff=formula(tt2)
-    #}
-    #else{ newff[3]=1}
-    
     if(nterms_left > 1){
-##      tt2 = drop.terms(tt2, nterms_left, keep.response = TRUE)
-##      newff = formula(tt2)
-      
       tt2 = drop.terms(tt2, nterms_left, keep.response = TRUE)
       newff = update(ff_all, paste(". ~", paste(attr(tt2, "term.labels"), collapse = " + ")))
       
@@ -137,8 +127,6 @@ anova.glmb<-function(object,...){
     attr(terms_noy, "response") <- 0
 
     mm <- model.matrix(terms_noy, mf)
-    
-##    mm=model.matrix(mf)
 
     nvar=ncol(mm)
     mu2=matrix(as.matrix(mu[1:nvar,1],ncol=1),ncol=1)
@@ -149,9 +137,6 @@ anova.glmb<-function(object,...){
   
     message("Running model: ", deparse(newff))
     
-
-        
-#    object2<-glmb(n=n,newff, family = obj_family,prior=prior,Gridtype=2)
     object2<-glmb(n=n,newff, family = obj_family,pfamily=dNormal(mu2,V2,dispersion),data=data, Gridtype = 2,
                   use_parallel = TRUE,
                   use_opencl = TRUE,

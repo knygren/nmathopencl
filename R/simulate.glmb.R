@@ -24,8 +24,6 @@
 #' @export
 #' @method  simulate glmb
 
-#### Note: need to add way of handling passed weight
-
 simulate.glmb<-function(object,nsim=1,seed=NULL,...){
   
   family=object$family$family
@@ -35,56 +33,14 @@ simulate.glmb<-function(object,nsim=1,seed=NULL,...){
   else{pred=predict(object)}
   if(!is.null(method_args[['prior.weights']])) { wt=method_args[['prior.weights']]}
   else{prior.weights=object$prior.weights}
- 
   
-  
-   ##  print(pred)
-#  stop()
-  #wt=method_args$wt
-  
-  
-#  print(method_args)
-  #stop()
-    ## pred
-  ## family
-  ## wt
-  
-  ## For Poisson and binomial, dispersion2=1
-  ## wt2=wt/dispersion
-  
-  ## Note:
-  ## gaussian
-  ## Xb<-alpha+x%*%b
-  ## --> sd=sqrt(1/(wt))
-  
-  
-  ## binomial
-  ## size=round(wt)
-  ## y = sim/size
-  
-  
-  ##  gamma
-  ##  dispersion2=1/wt 
-  ##  shape=1/dispersion2
-  ##  scale=mu*dispersion2
-  
-  ## Set up temporary matrix to hold these elements
   nvars=ncol(pred)
   nsims=nrow(pred)
   y_temp<-matrix(0,nrow=nrow(pred),ncol=ncol(pred))
   
-#  print(nvars)
-#  print(nsims)
-#  print(y_temp)
-  
   for(i in 1:nsims){
     
-    #rgamma(n, shape, rate = 1, scale = 1/rate)
-    #rnorm(n, mean = 0, sd = 1)
-    #rbinom(n, size, prob)
-    ## Unclear about quasibinomial
-    
-    if(family=="poisson") y_temp[i,1:nvars]=rpois(n=nvars,pred[i,1:nvars])              
+    if(family=="poisson") y_temp[i,1:nvars]=rpois(n=nvars,pred[i,1:nvars])
     if(family=="quasipoisson") y_temp[i,1:nvars]=rpois(n=nvars,pred[i,1:nvars])             
     ### Verify this part - rather complicated
     if(family=="Gamma") y_temp[i,1:nvars]=rgamma(n=nvars,shape=wt,(1/wt)*pred[i,1:nvars])              

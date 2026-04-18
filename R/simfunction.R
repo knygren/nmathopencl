@@ -553,7 +553,7 @@ rindepNormalGamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=ga
   
 
   
-  # Reconstruct P from Sigma (needed by the temporary core)
+  # Reconstruct P from Sigma
   R <- chol(Sigma)
   P <- chol2inv(R)
   P <- 0.5 * (P + t(P))
@@ -1020,8 +1020,6 @@ rNormal_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
     betastar=outlist$coef.mode  # Posterior mode from optim
     x=outlist$x
     y=outlist$y
-    #offset=glmb.D93$offset   # not present in the output --> For now set to 0 vector
-    #offset=offset2   # Should return this from lower level functions
     weights=outlist$prior.weights
     
     
@@ -1037,22 +1035,15 @@ rNormal_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
       res_temp=matrix(0,nrow=n,ncol=m)
       fit_temp=x%*%t(outlist$coefficients)
       for(l in 1:n){
-        #fit_temp[1:m,l]=exp(offset2+fit_temp[1:m,l])
         fit_temp[1:m,l]=linkinv(offset2+fit_temp[1:m,l])
         res_temp[l,1:m]=(y-fit_temp[1:m,l])
         disp_temp[l]=(1/(m-k))*sum(res_temp[l,1:m]^2*wt/fit_temp[1:m,l])
         
       }
       
-      #  stop("Inputs to function above")
-      # Rerun model with updated dispersion    
-      
       outlist<-.rNormalGLM_cpp(n=n,y=y,x=x,mu=mu,P=P,offset=offset2,
-                               #                             wt=wt/mean(disp_temp),
                                wt=wt,
                                dispersion=mean(disp_temp),
-                               #                              dispersion=dispersion2,
-                               ##famfunc=famfunc,f1=f1,
                                f2=f2,f3=f3,
                                start=start,family=family$family,link=family$link,Gridtype=Gridtype,
                                n_envopt = n_envopt,       # pass through

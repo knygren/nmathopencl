@@ -158,7 +158,6 @@
 #'
 #' @example inst/examples/Ex_pfamily.R
 #' @export 
-# #' @exportClass pfamily # Temporarily disabled - No Current exportclass
 #' @rdname pfamily
 #' @order 1
 
@@ -170,7 +169,6 @@ pfamily <- function(object, ...) UseMethod("pfamily")
 pfamily.default <- function(object, ...){
 
   if(is.null(object$pfamily)) stop("no pfamily object found")
-#  if(!class(object$pfamily)=="pfamily") stop("Object named pfamily is not of class pfamily")
   if (!inherits(object$pfamily, "pfamily"))  stop("Object named pfamily is not of class pfamily")
   
   return(object$pfamily)

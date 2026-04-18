@@ -403,13 +403,6 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
   # Only update this here so that DIC calculation above works
   dispersion2<-sim$dispersion
   
-  # Set dispersion and DIC to null if quasipoisson or quasibinomial
-  
-#  if(family$family=="quasipoisson"||family$family=="quasibinomial"){
-#    dispersion2=NULL		
-#    DICinfo$DIC=NULL
-#  }
-  
   linkinv<-fit$family$linkinv
   fitted.values<-linkinv(linear.predictors)
   
@@ -517,19 +510,9 @@ DIC_Info<-function(coefficients,y,x,alpha=0,f1,f4,wt=1,dispersion=1){
   D<-matrix(0,nrow=l2,ncol=1)
   D2<-matrix(0,nrow=l2,ncol=1)
   
-  #disp_temp=dispersion
-  #if(length(dispersion)==1) disp_temp=rep(dispersion,length(y))
-  
-  
-  
   if(length(dispersion)==1){
     for(i in 1:l2){
       b<-as.vector(coefficients[i,])
-      # No offset! [Edit to multiply by dispersion to get residual deviance]
-      
-      # This calculation likely has cancellation effects
-      #  Passing dispersion as both     
-      #D[i,1]<-dispersion*f4(b=b,y=y,x=x,alpha=alpha,wt=wt/dispersion,dispersion=dispersion)
       D[i,1]<-f4(b=b,y=y,x=x,alpha=alpha,wt=wt,dispersion=dispersion)
       
       D2[i,1]<-2*f1(b=b,y=y,x=x,alpha=alpha,wt=wt)
@@ -546,7 +529,6 @@ DIC_Info<-function(coefficients,y,x,alpha=0,f1,f4,wt=1,dispersion=1){
   if(length(dispersion)>1){
     for(i in 1:l2){
       b<-as.vector(coefficients[i,])
-      #D[i,1]<-f4(b=b,y=y,x=x,alpha=alpha,wt=wt/dispersion[i],dispersion=dispersion[i])
       D[i,1]<-f4(b=b,y=y,x=x,alpha=alpha,wt=wt,dispersion=dispersion[i])
       
       D2[i,1]<-2*f1(b=b,y=y,x=x,alpha=alpha,wt=wt/dispersion[i])
@@ -555,8 +537,6 @@ DIC_Info<-function(coefficients,y,x,alpha=0,f1,f4,wt=1,dispersion=1){
     Dbar<-mean(D2)
     
     b<-colMeans(coefficients)
-    # Use the mean for the dispersion in Dthetabar calculation
-    # using mean for 1/dispersion (precision) would change the DIC
     dispbar<-mean(dispersion)
     Dthetabar<-2*f1(b=b,y=y,x=x,alpha=alpha,wt=wt/dispbar)
     
