@@ -236,6 +236,9 @@ jobs:
           Rscript -e "cat('R:', R.version.string, '\n')"
           Rscript -e "if (requireNamespace('Rcpp', quietly=TRUE)) cat('Rcpp:', as.character(packageVersion('Rcpp')), '\n') else cat('Rcpp: <not installed>\\n')"
 
+      # Rcpp: for R 4.5.x the #elif branch in Function.h still uses R_NamespaceRegistry while R-devel
+      # may not declare it — include path is correct but headers are incompatible. install_github +
+      # tools/patch_rcpp_function_h.R replaces that line with R_getRegisteredNamespace (Rcpp #else).
       - name: Install Rcpp from GitHub (Windows R-devel)
         if: ${{ matrix.config.label == 'windows' }}
         shell: bash
@@ -244,9 +247,12 @@ jobs:
         run: |
           set -eux
           Rscript -e "install.packages('remotes', repos='https://cloud.r-project.org')"
-          Rscript -e 'tok <- Sys.getenv("GITHUB_TOKEN"); ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; message("Replacing Rcpp in: ", ul); for (L in unique(c(ul, .libPaths()))) { ip <- tryCatch(rownames(installed.packages(lib.loc = L, noCache = TRUE)), error = function(e) character()); if ("Rcpp" %in% ip) try(remove.packages("Rcpp", lib = L), silent = TRUE) }; remotes::install_github("RcppCore/Rcpp", lib = ul, upgrade = "never", auth_token = tok, force = TRUE)'
-          Rscript -e 'ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; p <- system.file("include/Rcpp/Function.h", package = "Rcpp", lib.loc = ul); cat("Rcpp Function.h:", p, "\n"); if (nzchar(p)) cat(any(grepl("R_NamespaceRegistry", readLines(p, warn = FALSE))), "\n")'
-          Rscript -e 'ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; cat(paste0("GLMBAYES_RCPP_LIB=", ul, "\n"), file = Sys.getenv("GITHUB_ENV"), append = TRUE)'
+          Rscript -e 'tok <- Sys.getenv("GITHUB_TOKEN"); ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; message("Installing Rcpp into: ", ul); for (L in unique(c(ul, .libPaths()))) { ip <- tryCatch(rownames(installed.packages(lib.loc = L, noCache = TRUE)), error = function(e) character()); if ("Rcpp" %in% ip) try(remove.packages("Rcpp", lib = L), silent = TRUE) }; if (dir.exists(file.path(ul, "Rcpp"))) unlink(file.path(ul, "Rcpp"), recursive = TRUE); remotes::install_github("RcppCore/Rcpp", lib = ul, ref = "master", upgrade = "always", auth_token = tok, force = TRUE)'
+          # Same-step GITHUB_ENV is not visible to Rscript; export for patch + write for later steps.
+          export GLMBAYES_RCPP_LIB="$(Rscript -e 'ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; cat(ul)')"
+          echo "GLMBAYES_RCPP_LIB=${GLMBAYES_RCPP_LIB}" >> "$GITHUB_ENV"
+          Rscript tools/patch_rcpp_function_h.R
+          Rscript -e 'p <- file.path(Sys.getenv("GLMBAYES_RCPP_LIB"), "Rcpp", "include", "Rcpp", "Function.h"); if (file.exists(p)) { h <- readLines(p, warn = FALSE); cat("Function.h still has R_getVarEx+Registry:", any(grepl("R_getVarEx.*R_NamespaceRegistry", h, perl = TRUE)), "\n") }'
 
       # ubuntu-next: CRAN rlang vs R-devel (SETLENGTH) breaks vignette rebuild. Skip vignettes via
       # BUILD_ARGS/CHECK_ARGS in GITHUB_ENV (see nosuggests comment — nested check-r-package needs it).
