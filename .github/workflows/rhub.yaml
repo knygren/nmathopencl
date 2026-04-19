@@ -97,10 +97,11 @@ jobs:
           Rscript -e "cat('R:', R.version.string, '\n')"
           Rscript -e "if (requireNamespace('Rcpp', quietly=TRUE)) cat('Rcpp:', as.character(packageVersion('Rcpp')), '\n') else cat('Rcpp: <not installed>\\n')"
 
-      # nosuggests: setup-deps does not install Suggests — prepend one lib via R_LIBS so run-check
-      # sees rmarkdown/knitr. Do NOT set R_LIBS_USER to that path: it replaces the default user
-      # library and hides packages setup-deps installed (e.g. rcmdcheck for run-check).
-      - name: Nosuggests — library path for Rcpp + vignette toolchain
+      # nosuggests: setup-deps does not install Suggests — prepend one lib via R_LIBS for source Rcpp
+      # (R-devel). Do NOT set R_LIBS_USER to that path: it replaces the default user library and
+      # hides packages setup-deps installed (e.g. rcmdcheck for run-check). Vignettes are skipped
+      # on run-check (no knitr/rmarkdown); see BUILD_ARGS/CHECK_ARGS on that step.
+      - name: Nosuggests — library path for Rcpp (source)
         if: ${{ matrix.config.label == 'nosuggests' }}
         env:
           RHUB_NS_LIB: ${{ format('{0}/rhub-nosuggests-lib', runner.temp) }}
@@ -130,27 +131,30 @@ jobs:
         run: |
           Rscript -e "lib <- .libPaths()[1L]; if ('RcppArmadillo' %in% rownames(installed.packages(lib.loc=lib, noCache=TRUE))) remove.packages('RcppArmadillo', lib=lib); install.packages('RcppArmadillo', lib=lib, repos='https://cloud.r-project.org', type='source', Ncpus=2L)"
 
-      # nosuggests omits Suggests, but vignette re-build still needs VignetteBuilder packages (not glmbayes code).
-      - name: Install vignette toolchain (nosuggests)
-        if: ${{ matrix.config.label == 'nosuggests' }}
-        run: |
-          Rscript -e 'lib <- Sys.getenv("R_LIBS"); stopifnot(nzchar(lib)); install.packages(c("knitr", "rmarkdown"), lib = lib, repos = "https://cloud.r-project.org", dependencies = TRUE); cat("rmarkdown:", system.file(package = "rmarkdown"), "\n")'
-
-      # Force sanitizer env on this step so R CMD build / vignettes inherit (GITHUB_ENV alone is unreliable).
-      - uses: r-hub/actions/run-check@v1
+      # clang-asan / gcc-asan: use r-lib check-r-package directly — r-hub run-check adds a post-step
+      # "Fail for UBSAN errors" that greps *.Rout for "runtime error:" / "SUMMARY: UndefinedBehaviorSanitizer:".
+      # TBB/RcppParallel still prints those even when rcmdcheck exits OK, so the rhub step fails spuriously.
+      # Args match r-hub/actions/run-check (empty CHECK_ARGS / BUILD_ARGS).
+      - uses: r-lib/actions/check-r-package@v2
         if: ${{ matrix.config.label == 'clang-asan' || matrix.config.label == 'gcc-asan' }}
         env:
           ASAN_OPTIONS: detect_odr_violation=0:detect_leaks=0
           UBSAN_OPTIONS: halt_on_error=0:abort_on_error=0
+          R_KEEP_PKG_SOURCE: yes
         with:
-          token: ${{ secrets.RHUB_TOKEN }}
-          job-config: ${{ matrix.config.job-config }}
+          args: 'c("--no-manual", "--as-cran", "--install-args=--build", "--no-stop-on-test-error")'
+          build_args: 'c("--no-manual")'
+          upload-results: never
+          upload-snapshots: false
 
       # nosuggests: must pass R_LIBS on the step (same path as prep); generic run-check does not inherit GITHUB_ENV reliably.
+      # Skip vignettes: Suggests (e.g. rmarkdown) are not installed — same idea as ubuntu-next.
       - uses: r-hub/actions/run-check@v1
         if: ${{ matrix.config.label == 'nosuggests' }}
         env:
           R_LIBS: ${{ format('{0}/rhub-nosuggests-lib', runner.temp) }}
+          BUILD_ARGS: --no-build-vignettes
+          CHECK_ARGS: --no-build-vignettes --ignore-vignettes
         with:
           token: ${{ secrets.RHUB_TOKEN }}
           job-config: ${{ matrix.config.job-config }}
@@ -197,8 +201,9 @@ jobs:
           job-config: ${{ matrix.config.job-config }}
           token: ${{ secrets.RHUB_TOKEN }}
 
-      # Workaround for: R_NamespaceRegistry in Rcpp/Function.h on Windows R-devel (CRAN Rcpp can lag R-devel).
-      # Prepend a clean R_LIBS so GitHub Rcpp shadows any stale install on another path (common CI footgun).
+      # Workaround for: R_NamespaceRegistry (Windows R-devel vs CRAN Rcpp). setup-r sets R_LIBS_USER to
+      # D:/a/_temp/Library — R CMD build resolves LinkingTo Rcpp to THAT path (-I.../Library/Rcpp/include).
+      # Installing GitHub Rcpp under RUNNER_TEMP/rhub-windows-Rcpp was ignored; replace Rcpp in R_LIBS_USER.
       - name: Diagnostics (R / Rcpp)
         if: ${{ matrix.config.label == 'windows' }}
         shell: bash
@@ -213,46 +218,24 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -eux
-          CLEAN="${RUNNER_TEMP}/rhub-windows-Rcpp"
-          mkdir -p "$CLEAN"
-          export R_LIBS="$CLEAN"
-          echo "R_LIBS=$CLEAN" >> "$GITHUB_ENV"
-          Rscript -e "install.packages('remotes', lib = Sys.getenv('R_LIBS'), repos='https://cloud.r-project.org')"
-          Rscript -e 'libs <- .libPaths(); tok <- Sys.getenv("GITHUB_TOKEN"); for (L in libs) { ip <- tryCatch(rownames(installed.packages(lib.loc = L, noCache = TRUE)), error = function(e) character()); if ("Rcpp" %in% ip) try(remove.packages("Rcpp", lib = L), silent = TRUE) }; remotes::install_github("RcppCore/Rcpp", lib = Sys.getenv("R_LIBS"), upgrade = "never", auth_token = tok, force = TRUE)'
-          Rscript -e 'p <- system.file("include/Rcpp/Function.h", package = "Rcpp"); cat("Rcpp Function.h:", p, "\n"); if (nzchar(p)) cat(any(grepl("R_NamespaceRegistry", readLines(p, warn = FALSE))), "\n")'
+          Rscript -e "install.packages('remotes', repos='https://cloud.r-project.org')"
+          Rscript -e 'tok <- Sys.getenv("GITHUB_TOKEN"); ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; message("Replacing Rcpp in: ", ul); for (L in unique(c(ul, .libPaths()))) { ip <- tryCatch(rownames(installed.packages(lib.loc = L, noCache = TRUE)), error = function(e) character()); if ("Rcpp" %in% ip) try(remove.packages("Rcpp", lib = L), silent = TRUE) }; remotes::install_github("RcppCore/Rcpp", lib = ul, upgrade = "never", auth_token = tok, force = TRUE)'
+          Rscript -e 'ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; p <- system.file("include/Rcpp/Function.h", package = "Rcpp", lib.loc = ul); cat("Rcpp Function.h:", p, "\n"); if (nzchar(p)) cat(any(grepl("R_NamespaceRegistry", readLines(p, warn = FALSE))), "\n")'
 
-      # Force compiler -I to GitHub Rcpp headers (R_LIBS alone is not always used for CPPFLAGS on Windows).
       - name: Export PKG_CPPFLAGS for Rcpp include (windows)
         if: ${{ matrix.config.label == 'windows' }}
         shell: bash
         run: |
           set -eux
-          INC=$(Rscript -e "cat(gsub('\\\\', '/', normalizePath(system.file('include', package = 'Rcpp', lib.loc = Sys.getenv('R_LIBS')), winslash = '/', mustWork = TRUE)))")
+          INC=$(Rscript -e "ul <- Sys.getenv('R_LIBS_USER'); if (!nzchar(ul)) ul <- .libPaths()[1L]; cat(gsub('\\\\', '/', normalizePath(system.file('include', package = 'Rcpp', lib.loc = ul), winslash = '/', mustWork = TRUE)))")
           echo "PKG_CPPFLAGS=-I${INC}" >> "$GITHUB_ENV"
 
-      # Workaround for: ubuntu-next — undefined symbol SETLENGTH (stale rlang.so from another lib on path).
-      # Prepend a clean library via R_LIBS for this job + run-check; r-lib/rlang from GitHub; rest from source.
-      - name: Force rebuild vignette toolchain from source (ubuntu-next)
-        if: ${{ matrix.config.label == 'ubuntu-next' }}
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          set -eux
-          CLEAN="${RUNNER_TEMP}/rhub-ubuntu-next-lib"
-          mkdir -p "$CLEAN"
-          export R_LIBS="$CLEAN"
-          echo "R_LIBS=$CLEAN" >> "$GITHUB_ENV"
-          Rscript -e "cat('R:', R.version.string, '\n'); message('Clean lib: ', Sys.getenv('R_LIBS'))"
-          Rscript -e "install.packages('remotes', lib = Sys.getenv('R_LIBS'), repos='https://cloud.r-project.org')"
-          Rscript -e 'tok <- Sys.getenv("GITHUB_TOKEN"); lib <- Sys.getenv("R_LIBS"); pkgs <- c("rmarkdown","knitr","yaml","xfun","lifecycle","vctrs","glue","cli","rlang"); for (L in .libPaths()) { ip <- tryCatch(rownames(installed.packages(lib.loc = L, noCache = TRUE)), error = function(e) character()); for (p in intersect(pkgs, ip)) try(remove.packages(p, lib = L), silent = TRUE) }; remotes::install_github(c("r-lib/rlang","r-lib/cli","r-lib/vctrs","r-lib/lifecycle"), lib = lib, upgrade = "never", auth_token = tok, force = TRUE); pkgs_rest <- setdiff(pkgs, c("rlang","cli","vctrs","lifecycle")); install.packages(rev(pkgs_rest), lib = lib, repos = "https://cloud.r-project.org", type = "source", Ncpus = 2L)'
-          Rscript -e 'p <- system.file("libs/rlang.so", package = "rlang"); cat("rlang.so:", p, "\n")'
-
-      # run-check: force same R_LIBS as install steps; Windows also needs PKG_CPPFLAGS (see Export step).
+      # ubuntu-next: CRAN rlang vs R-devel (SETLENGTH) breaks vignette rebuild. Skip building/checking
+      # vignettes on this platform via BUILD_ARGS/CHECK_ARGS (r-hub run-check reads these — see r-hub/actions run-check action.yaml).
+      # Re-enable when CRAN/GitHub rlang matches ubuntu-next R.
+      # run-check: Windows uses PKG_CPPFLAGS from GitHub Rcpp in R_LIBS_USER; other platforms use defaults.
       - uses: r-hub/actions/run-check@v1
         if: ${{ matrix.config.label == 'windows' }}
-        env:
-          R_LIBS: ${{ format('{0}/rhub-windows-Rcpp', runner.temp) }}
         with:
           job-config: ${{ matrix.config.job-config }}
           token: ${{ secrets.RHUB_TOKEN }}
@@ -260,7 +243,8 @@ jobs:
       - uses: r-hub/actions/run-check@v1
         if: ${{ matrix.config.label == 'ubuntu-next' }}
         env:
-          R_LIBS: ${{ format('{0}/rhub-ubuntu-next-lib', runner.temp) }}
+          BUILD_ARGS: --no-build-vignettes
+          CHECK_ARGS: --no-build-vignettes --ignore-vignettes
         with:
           job-config: ${{ matrix.config.job-config }}
           token: ${{ secrets.RHUB_TOKEN }}
