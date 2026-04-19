@@ -59,43 +59,6 @@ https://knygren.r-universe.dev/articles/glmbayes/Chapter-12.html
 
 ## Supported families, links, and pfamilies
 
-As with the glm() function, models are specified by providing a symbolic description of the linear predictor
-(using a formula) and a description of the error distribution (using a family and a link function). In addition, glmb()
-also requires a prior specification, provided through a pfamily object. The available combinations of likelihood families,
-link functions, and compatible pfamilies are:
-
-| family                     | Available Link Functions           | Compatible pfamilies                                      |
-|----------------------------|------------------------------------|------------------------------------------------------------|
-| Gaussian                   | identity                           | dNormal, dGamma, dNormal_Gamma, dIndependent_Normal_Gamma |
-| Poisson / Quasi-Poisson    | log                                | dNormal                                                    |
-| Binomial / Quasi-Binomial  | logit, probit, cloglog             | dNormal                                                    |
-| Gamma                      | log                                | dNormal, dGamma                                            |
-
-More specifically, each pfamily constructor requires parameters associated with the prior. The available pfamilies and their usage signatures are:
-
-- dNormal(mu, Sigma, dispersion = NULL)
-- dGamma(shape, rate, beta, disp_lower = NULL, disp_upper = NULL)
-- dNormal_Gamma(mu, Sigma_0, shape, rate) — for Gaussian models, pass **`Prior_Setup()$Sigma_0`** as `Sigma_0`
-- dIndependent_Normal_Gamma(
-    mu,
-    Sigma,
-    shape,
-    rate,
-    max_disp_perc = 0.99,
-    disp_lower = NULL,
-    disp_upper = NULL
-  )
-
-To facilitate prior specification, the package provides a Prior_Setup() function, which extracts the needed prior parameters based on the same
-symbolic model description and family specification used by glm(). By default, Prior_Setup() returns a reasonable prior specification
-(described elsewhere), and optional arguments allow users to request alternative prior structures.
-
-All supported models feature log-concave likelihoods, enabling efficient iid sampling via enveloping functions and
-subgradient-based accept-reject algorithms (for models where other standard iid sampling algorithms are unavailable).
-
-
-## Supported families, links, and pfamilies
-
 As with `glm()`, models are defined by a formula for the linear predictor and a `family()` describing the likelihood and 
 link. In addition, `glmb()` requires a **pfamily** object specifying the prior.
 
@@ -140,7 +103,8 @@ Assuming `ps <- Prior_Setup(...)`:
   Use `dIndependent_Normal_Gamma(mu = ps$mu, Sigma = ps$Sigma, shape = ps$shape_ING, rate = ps$rate)`.
 
 - **Gaussian — dispersion via dGamma (coefficients fixed):**  
-  Use `dGamma(shape = ps$shape, rate = ps$rate_gamma, beta = ps$coefficients)`.
+  With `rate_dg <- if (!is.null(ps$rate_gamma)) ps$rate_gamma else ps$rate`, use  
+  `dGamma(shape = ps$shape, rate = rate_dg, beta = ps$coefficients)`.
 
 The default priors have limiting behaviors that produce estimates resembling classical estimates as priors get weak 
 (see documentation and vignettes for details).

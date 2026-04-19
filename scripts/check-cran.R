@@ -31,11 +31,17 @@ devtools::check_win_release()
 devtools::check_win_devel()
 devtools::check_win_oldrelease()
 
+# Submit source package to mac-builder (results arrive by email; runs can be long).
+# Comment out any of the following if you only want a subset.
+devtools::check_mac_release()
+devtools::check_mac_devel()
+devtools::check_mac_oldrelease()
+
 # rhub::rhub_check() needs a GitHub token — set GITHUB_PAT in .Renviron or the shell, never in source.
 if (!nzchar(Sys.getenv("GITHUB_PAT", ""))) {
   message("Skipping rhub::rhub_check(): set environment variable GITHUB_PAT (do not commit tokens).")
 } else {
-  rhub::rhub_check(platforms = c( "windows", "linux", "macos-arm64", "ubuntu-release", "ubuntu-next","atlas", "clang-asan", "valgrind","nosuggests","intel"))
+  rhub::rhub_check(platforms = c( "linux", "macos-arm64", "ubuntu-release", "ubuntu-next","atlas", "clang-asan", "valgrind","nosuggests","intel"))
 }
 
 # Optional: reproduce CRAN-like installed size locally (with vignettes).
