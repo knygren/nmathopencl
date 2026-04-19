@@ -245,9 +245,8 @@ jobs:
           Rscript -e "cat('R:', R.version.string, '\n')"
           Rscript -e "if (requireNamespace('Rcpp', quietly=TRUE)) cat('Rcpp:', as.character(packageVersion('Rcpp')), '\n') else cat('Rcpp: <not installed>\\n')"
 
-      # Rcpp: for R 4.5.x the #elif branch in Function.h still uses R_NamespaceRegistry while R-devel
-      # may not declare it — include path is correct but headers are incompatible. install_github +
-      # tools/patch_rcpp_function_h.R replaces that line with R_getRegisteredNamespace (Rcpp #else).
+      # Rcpp: Windows R-devel may need optional Function.h patch (opt-in: GLMBAYES_PATCH_RCPP_FUNCTION_H).
+      # Default patch is OFF so configure does not mutate Rcpp on r-universe / R 4.6+ (R_getRegisteredNamespace).
       - name: Install Rcpp from GitHub (Windows R-devel)
         if: ${{ matrix.config.label == 'windows' }}
         shell: bash
@@ -260,6 +259,8 @@ jobs:
           # Same-step GITHUB_ENV is not visible to Rscript; export for patch + write for later steps.
           export GLMBAYES_RCPP_LIB="$(Rscript -e 'ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; cat(ul)')"
           echo "GLMBAYES_RCPP_LIB=${GLMBAYES_RCPP_LIB}" >> "$GITHUB_ENV"
+          echo "GLMBAYES_PATCH_RCPP_FUNCTION_H=1" >> "$GITHUB_ENV"
+          export GLMBAYES_PATCH_RCPP_FUNCTION_H=1
           Rscript tools/patch_rcpp_function_h.R
           Rscript -e 'p <- file.path(Sys.getenv("GLMBAYES_RCPP_LIB"), "Rcpp", "include", "Rcpp", "Function.h"); if (file.exists(p)) { h <- readLines(p, warn = FALSE); cat("Function.h still has R_getVarEx+Registry:", any(grepl("R_getVarEx.*R_NamespaceRegistry", h, perl = TRUE)), "\n") }'
 
@@ -278,6 +279,7 @@ jobs:
         run: |
           set -eux
           export GLMBAYES_RCPP_LIB="${GLMBAYES_RCPP_LIB:-$(Rscript -e 'ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; cat(ul)')}"
+          export GLMBAYES_PATCH_RCPP_FUNCTION_H=1
           Rscript tools/patch_rcpp_function_h.R
           Rscript -e 'if (Sys.getenv("_R_CHECK_FORCE_SUGGESTS_", "") == "") Sys.setenv("_R_CHECK_FORCE_SUGGESTS_" = "false"); if (Sys.getenv("_R_CHECK_CRAN_INCOMING_", "") == "") Sys.setenv("_R_CHECK_CRAN_INCOMING_" = "false"); options(crayon.enabled = TRUE); rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran", "--install-args=--build", "--no-stop-on-test-error"), build_args = c("--no-manual"), error_on = "warning", check_dir = "check", install_deps = FALSE)'
 
