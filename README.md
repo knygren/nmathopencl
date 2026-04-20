@@ -143,7 +143,7 @@ Use `example()` and `demo()` to explore built-in examples and demos for supporte
     example("summary.rGamma_reg")
 
     ## High-dimensional Gaussian model (14 predictors) with GPU acceleration (requires OpenCL)
-    demo("Ex_08_Boston")
+    example("Boston_centered")
 
     ## High-dimensional binomial model (14 predictors) with GPU acceleration (requires OpenCL)
     example("Cleveland")
