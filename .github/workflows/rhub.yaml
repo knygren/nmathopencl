@@ -55,9 +55,10 @@ jobs:
 
       # Sanitizer tuning (must be before setup-deps). clang-ubsan uses ASan too; without
       # detect_odr_violation=0, RcppParallel/TBB can abort with ODR-violation during lazy-load.
+      # clang21/clang22 use ASan-instrumented R: detect_leaks=0 avoids LSAN noise from sed/tar/etc.
       # Also set on check-r-package step — rhub/pkgbuild subprocesses do not always inherit GITHUB_ENV.
-      - name: ASan / UBSan env (clang-asan / gcc-asan / clang-ubsan)
-        if: ${{ matrix.config.label == 'clang-asan' || matrix.config.label == 'gcc-asan' || matrix.config.label == 'clang-ubsan' }}
+      - name: ASan / UBSan env (clang-asan / gcc-asan / clang-ubsan / clang21 / clang22)
+        if: ${{ matrix.config.label == 'clang-asan' || matrix.config.label == 'gcc-asan' || matrix.config.label == 'clang-ubsan' || matrix.config.label == 'clang21' || matrix.config.label == 'clang22' }}
         run: |
           echo "ASAN_OPTIONS=detect_odr_violation=0:detect_leaks=0" >> "$GITHUB_ENV"
           echo "UBSAN_OPTIONS=halt_on_error=0:abort_on_error=0" >> "$GITHUB_ENV"
@@ -71,9 +72,9 @@ jobs:
           token: ${{ secrets.RHUB_TOKEN }}
           job-config: ${{ matrix.config.job-config }}
 
-      # clang21+ rhub images use ASan-instrumented R; RcppParallel's bundled TBB is built with R's
-      # -fsanitize=address flags, so libtbb.so references __asan_* symbols. Those are not always
-      # visible to dlopen() without preloading the matching libclang_rt.asan (LLVM 21+; clang16–20 OK).
+      # clang21+ rhub images: optional LD_PRELOAD of libclang_rt.asan so RcppParallel's libtbb resolves
+      # __asan_* under dlopen. The path must be real and loadable into R; a broken symlink or wrong
+      # arch makes ld.so print "cannot be preloaded ... ignored" and does not help TBB.
       - name: LD_PRELOAD Clang ASan runtime (clang21 / clang22 — RcppParallel libtbb)
         if: ${{ matrix.config.label == 'clang21' || matrix.config.label == 'clang22' }}
         env:
@@ -81,17 +82,23 @@ jobs:
         run: |
           set -eux
           m="${RHUB_LABEL#clang}"
-          # Path is often .../lib/clang/21.1.2/lib/linux/... not .../clang/21/...
-          ASAN_SO=$(find "/usr/lib/llvm-${m}" \( -name 'libclang_rt.asan-x86_64.so' -o -name 'libclang_rt.asan.so' \) -path '*/linux/*' 2>/dev/null | head -n1 || true)
-          if [ -z "$ASAN_SO" ] || [ ! -f "$ASAN_SO" ]; then
-            ASAN_SO=$(find "/usr/lib/llvm-${m}" -name 'libclang_rt.asan*.so' 2>/dev/null | head -n1 || true)
+          mapfile -t cand_list < <(find "/usr/lib/llvm-${m}" \( -name 'libclang_rt.asan-x86_64.so' -o -name 'libclang_rt.asan.so' \) 2>/dev/null | sort -V)
+          ok=""
+          for cand in "${cand_list[@]}"; do
+            [ -r "$cand" ] || continue
+            real=$(readlink -f "$cand" 2>/dev/null || echo "$cand")
+            [ -r "$real" ] || continue
+            if env LD_PRELOAD="$real" Rscript --vanilla -e "invisible(NULL)" >/dev/null 2>&1; then
+              ok="$real"
+              break
+            fi
+          done
+          if [ -n "$ok" ]; then
+            echo "LD_PRELOAD=${ok}" >> "$GITHUB_ENV"
+            echo "Set LD_PRELOAD=${ok}"
+          else
+            echo "::warning::No verified libclang_rt.asan preload for LLVM ${m}; continuing without LD_PRELOAD (TBB dyn.load may still fail)."
           fi
-          if [ -z "$ASAN_SO" ] || [ ! -f "$ASAN_SO" ]; then
-            echo "Could not find libclang_rt.asan under /usr/lib/llvm-${m}" >&2
-            exit 1
-          fi
-          echo "LD_PRELOAD=${ASAN_SO}" >> "$GITHUB_ENV"
-          echo "Set LD_PRELOAD=${ASAN_SO}"
 
       # Compare runner R to current CRAN release (via rversions). When R is not ahead of that release,
       # skip R-devel workarounds (GitHub Rcpp, ubuntu-next rlang rebuild, etc.).
@@ -179,14 +186,17 @@ jobs:
           Rscript -e "lib <- Sys.getenv('R_LIBS'); stopifnot(nzchar(lib)); ahead <- identical(Sys.getenv('R_AHEAD_OF_RELEASE'), 'true'); if (ahead) { install.packages('remotes', repos='https://cloud.r-project.org'); try(remove.packages('Rcpp', lib=lib), silent=TRUE); remotes::install_github('RcppCore/Rcpp', lib=lib, upgrade='never', auth_token=Sys.getenv('GITHUB_TOKEN')) } else { install.packages('Rcpp', lib=lib, repos='https://cloud.r-project.org', type='source') }"
 
       # Skip ubuntu-next: CRAN Rcpp + rlang rebuild suffices there. Skip nosuggests: dedicated step above.
+      # Skip clang21/clang22: ASan R + remotes/pkgbuild often breaks on install_github (tar/build-tools);
+      # setup-deps CRAN Rcpp is enough when headers match; if not, use a non-sanitizer rhub label for Rcpp.
       # Use R_LIBS_USER first (same as Windows): rhub setup-deps installs there; .libPaths()[1] can differ
       # (e.g. Intel/Fedora), so reinstalling only into [1] leaves no Rcpp visible to R CMD build.
       - name: Install Rcpp from GitHub (R ahead of CRAN release)
-        if: ${{ steps.r-release.outputs.r_ahead_of_release == 'true' && matrix.config.label != 'ubuntu-next' && matrix.config.label != 'nosuggests' }}
+        if: ${{ steps.r-release.outputs.r_ahead_of_release == 'true' && matrix.config.label != 'ubuntu-next' && matrix.config.label != 'nosuggests' && matrix.config.label != 'clang21' && matrix.config.label != 'clang22' }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -eux
+          export TAR="${TAR:-/usr/bin/tar}"
           Rscript -e "install.packages('remotes', repos='https://cloud.r-project.org')"
           Rscript -e 'tok <- Sys.getenv("GITHUB_TOKEN"); ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; message("Installing Rcpp into: ", ul); for (L in unique(c(ul, .libPaths()))) { ip <- tryCatch(rownames(installed.packages(lib.loc = L, noCache = TRUE)), error = function(e) character()); if ("Rcpp" %in% ip) try(remove.packages("Rcpp", lib = L), silent = TRUE) }; if (dir.exists(file.path(ul, "Rcpp"))) unlink(file.path(ul, "Rcpp"), recursive = TRUE); remotes::install_github("RcppCore/Rcpp", lib = ul, ref = "master", upgrade = "always", auth_token = tok, force = TRUE)'
           export GLMBAYES_RCPP_LIB="$(Rscript -e 'ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; cat(ul)')"
