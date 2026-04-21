@@ -89,7 +89,7 @@ jobs:
           Rscript -e 'lib <- .libPaths()[1L]; if ("RcppParallel" %in% rownames(installed.packages(lib.loc = lib, noCache = TRUE))) remove.packages("RcppParallel", lib = lib); Sys.setenv(RCPP_PARALLEL_BACKEND = "tinythread", RCPP_PARALLEL_USE_TBB = "0"); install.packages("RcppParallel", lib = lib, repos = "https://cloud.r-project.org", type = "source", Ncpus = 2L); cat("RcppParallel backend env:", Sys.getenv("RCPP_PARALLEL_BACKEND"), "\n")'
 
       # Compare runner R to current CRAN release (via rversions). When R is not ahead of that release,
-      # skip R-devel workarounds (GitHub Rcpp, ubuntu-next rlang rebuild, etc.).
+      # skip R-devel workarounds (ubuntu-next rlang rebuild, etc.); Rcpp is handled by Ensure step.
       # Use a temp .R file (not multiline Rscript -e): Windows Git Bash + R-devel can segfault on -e.
       - name: R vs CRAN release (for workarounds)
         id: r-release
@@ -166,7 +166,8 @@ jobs:
             exit 1
           fi
 
-      # When R is ahead of CRAN release, R-devel headers need GitHub Rcpp (R_NamespaceRegistry / Function.h).
+      # R-devel vs Rcpp headers: CRAN Rcpp >= 1.1.1-1 (Ensure step) aligns with Imports; optional
+      # Function.h patch remains for clang21 / clang22 / rchk when needed.
       - name: Diagnostics (R / Rcpp)
         if: ${{ matrix.config.label == 'valgrind' || matrix.config.label == 'nosuggests' || matrix.config.label == 'clang-asan' || matrix.config.label == 'gcc-asan' }}
         run: |
@@ -192,10 +193,25 @@ jobs:
           mkdir -p "$RHUB_NS_LIB"
           echo "R_LIBS=$RHUB_NS_LIB" >> "$GITHUB_ENV"
 
+      # Layered Rcpp: CRAN 1.1.1-1 → CRAN 1.1.1 → GitHub master; Function.h patch if installed < 1.1.1-1.
+      # See scripts/rhub-ensure-rcpp.R. Matches DESCRIPTION Rcpp (>= 1.1.1-1) when CRAN provides it.
+      # Runs after setup-deps (and after nosuggests sets R_LIBS) but before R CMD build/check.
+      # Skip intel: rhub devel-intel image often cannot compile Rcpp from source (toolchain); keep
+      # setup-deps Rcpp as before (same rationale as the old "skip intel" GitHub Rcpp step).
+      - name: Ensure Rcpp (CRAN → GitHub fallback, patch if needed)
+        if: ${{ matrix.config.label != 'intel' }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -eux
+          Rscript "${GITHUB_WORKSPACE}/scripts/rhub-ensure-rcpp.R"
+
+      # DISABLED (2026-04): superseded by scripts/rhub-ensure-rcpp.R — CRAN / GitHub layering; CRAN has 1.1.1-1 as
+      # source; remotes::install_github("RcppCore/Rcpp") no longer needed for R-devel vs headers drift.
       # nosuggests: R_LIBS is only the extra lib — Rcpp must live there. Use GitHub Rcpp when R is ahead
       # of CRAN release; otherwise CRAN source is enough.
-      - name: Nosuggests — install Rcpp (GitHub if R ahead of CRAN release, else CRAN source)
-        if: ${{ matrix.config.label == 'nosuggests' }}
+      - name: Nosuggests — install Rcpp (GitHub if R ahead of CRAN release, else CRAN source) [disabled]
+        if: false
         env:
           GITHUB_TOKEN: ${{ github.token }}
           R_AHEAD_OF_RELEASE: ${{ steps.r-release.outputs.r_ahead_of_release }}
@@ -210,8 +226,8 @@ jobs:
       # (R_BindingType_t / R_getRegisteredNamespace errors), so keep setup-deps Rcpp untouched.
       # Use R_LIBS_USER first (same as Windows): rhub setup-deps installs there; .libPaths()[1] can differ
       # (e.g. Intel/Fedora), so reinstalling only into [1] leaves no Rcpp visible to R CMD build.
-      - name: Install Rcpp from GitHub (R ahead of CRAN release)
-        if: ${{ steps.r-release.outputs.r_ahead_of_release == 'true' && matrix.config.label != 'ubuntu-next' && matrix.config.label != 'nosuggests' && matrix.config.label != 'clang21' && matrix.config.label != 'clang22' && matrix.config.label != 'c23' && matrix.config.label != 'noremap' && matrix.config.label != 'intel' }}
+      - name: Install Rcpp from GitHub (R ahead of CRAN release) [disabled]
+        if: false
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
@@ -222,8 +238,8 @@ jobs:
           export GLMBAYES_RCPP_LIB="$(Rscript -e 'ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; cat(ul)')"
           echo "GLMBAYES_RCPP_LIB=${GLMBAYES_RCPP_LIB}" >> "$GITHUB_ENV"
 
-      # For labels where GitHub Rcpp reinstall is skipped, R-devel snapshots can still expose
-      # Rcpp/Function.h's R_NamespaceRegistry branch at compile-time. Patch only when pattern exists.
+      # For selected labels, R-devel snapshots can still expose Rcpp/Function.h's
+      # R_NamespaceRegistry branch at compile-time. Patch only when pattern exists.
       - name: Patch Rcpp Function.h (clang21 / clang22 / rchk)
         if: ${{ matrix.config.label == 'clang21' || matrix.config.label == 'clang22' || matrix.config.label == 'rchk' }}
         run: |
@@ -233,7 +249,7 @@ jobs:
           export GLMBAYES_PATCH_RCPP_FUNCTION_H=1
           Rscript tools/patch_rcpp_function_h.R
 
-      # After GitHub Rcpp: lazy-load fails on RcppArmadillo.so — libflexiblas.so.3 (CRAN binary links FlexiBLAS).
+      # Valgrind image: lazy-load can fail on RcppArmadillo.so — libflexiblas.so.3 (CRAN binary links FlexiBLAS).
       # Rebuild RcppArmadillo from source against R's BLAS (no FlexiBLAS runtime on image).
       - name: Rebuild RcppArmadillo from source (valgrind)
         if: ${{ matrix.config.label == 'valgrind' }}
@@ -327,6 +343,15 @@ jobs:
           job-config: ${{ matrix.config.job-config }}
           token: ${{ secrets.RHUB_TOKEN }}
 
+      # Same layering as linux-containers (scripts/rhub-ensure-rcpp.R).
+      - name: Ensure Rcpp (CRAN → GitHub fallback, patch if needed)
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -eux
+          Rscript "${GITHUB_WORKSPACE}/scripts/rhub-ensure-rcpp.R"
+
       - name: R vs CRAN release (for workarounds)
         id: r-release
         shell: bash
@@ -379,12 +404,14 @@ jobs:
           Rscript "$f"
           rm -f "$f"
 
+      # DISABLED (2026-04): superseded by scripts/rhub-ensure-rcpp.R — remotes::install_github
+      # ("RcppCore/Rcpp") kept for reference only.
       # macOS / Linux VM / m1-san: R-devel headers vs CRAN Rcpp (R_NamespaceRegistry). Windows uses
       # R_LIBS_USER + configure.win (step below). install_github into default library.
       # Remove Rcpp from every .libPaths() entry (same as Windows); set GLMBAYES_RCPP_LIB so
       # tools/rcpp_include.R cannot pick another CRAN tree when versions tie.
-      - name: Install Rcpp from GitHub (macOS / Linux VM, R ahead of CRAN release)
-        if: ${{ steps.r-release.outputs.r_ahead_of_release == 'true' && matrix.config.label != 'windows' }}
+      - name: Install Rcpp from GitHub (macOS / Linux VM, R ahead of CRAN release) [disabled]
+        if: false
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -395,7 +422,8 @@ jobs:
           export GLMBAYES_RCPP_LIB="$(Rscript -e 'ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; cat(ul)')"
           echo "GLMBAYES_RCPP_LIB=${GLMBAYES_RCPP_LIB}" >> "$GITHUB_ENV"
 
-      # When R is ahead of CRAN release: GitHub Rcpp + GLMBAYES_RCPP_LIB + rcmdcheck(install_deps=FALSE).
+      # When R is ahead of CRAN release: GLMBAYES_RCPP_LIB + rcmdcheck(install_deps=FALSE) avoids
+      # dependency reinstall downgrading Rcpp; CRAN Rcpp (>= 1.1.1-1) is installed by Ensure step.
       - name: Diagnostics (R / Rcpp)
         if: ${{ matrix.config.label == 'windows' && steps.r-release.outputs.r_ahead_of_release == 'true' }}
         shell: bash
@@ -404,8 +432,9 @@ jobs:
           Rscript -e "if (requireNamespace('Rcpp', quietly=TRUE)) cat('Rcpp:', as.character(packageVersion('Rcpp')), '\n') else cat('Rcpp: <not installed>\\n')"
 
       # Rcpp: optional Function.h patch (opt-in: GLMBAYES_PATCH_RCPP_FUNCTION_H). Default OFF.
-      - name: Install Rcpp from GitHub (Windows, R ahead of CRAN release)
-        if: ${{ matrix.config.label == 'windows' && steps.r-release.outputs.r_ahead_of_release == 'true' }}
+      # DISABLED (2026-04): superseded by scripts/rhub-ensure-rcpp.R (see linux-containers job).
+      - name: Install Rcpp from GitHub (Windows, R ahead of CRAN release) [disabled]
+        if: false
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -425,7 +454,8 @@ jobs:
       # Windows: r-lib check-r-package (r-hub run-check nested rcmdcheck was fragile for env).
       # Rcpp headers: src/Makevars.win from configure.win + tools/rcpp_include.R (not PKG_CPPFLAGS in GITHUB_ENV).
 
-      # R ahead of CRAN: rcmdcheck(install_deps=TRUE) reinstalls CRAN Rcpp and breaks the GitHub fix.
+      # R ahead of CRAN: rcmdcheck(install_deps=TRUE) can reinstall dependencies; install_deps=FALSE
+      # keeps the CRAN Rcpp (>= 1.1.1-1) from the Ensure step visible to the build.
       - name: R-CMD-check (windows, install_deps=FALSE)
         if: ${{ matrix.config.label == 'windows' && steps.r-release.outputs.r_ahead_of_release == 'true' }}
         shell: bash
