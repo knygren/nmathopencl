@@ -87,36 +87,6 @@ jobs:
           set -eux
           Rscript -e 'lib <- .libPaths()[1L]; if ("RcppParallel" %in% rownames(installed.packages(lib.loc = lib, noCache = TRUE))) remove.packages("RcppParallel", lib = lib); Sys.setenv(RCPP_PARALLEL_BACKEND = "tinythread", RCPP_PARALLEL_USE_TBB = "0"); install.packages("RcppParallel", lib = lib, repos = "https://cloud.r-project.org", type = "source", Ncpus = 2L); cat("RcppParallel backend env:", Sys.getenv("RCPP_PARALLEL_BACKEND"), "\n")'
 
-      # clang21+ rhub images: optional LD_PRELOAD of libclang_rt.asan so RcppParallel's libtbb resolves
-      # __asan_* under dlopen. The path must be real and loadable into R; a broken symlink or wrong
-      # arch makes ld.so print "cannot be preloaded ... ignored" and does not help TBB.
-      - name: LD_PRELOAD Clang ASan runtime (clang21 / clang22 — RcppParallel libtbb)
-        if: ${{ matrix.config.label == 'clang21' || matrix.config.label == 'clang22' }}
-        shell: bash
-        env:
-          RHUB_LABEL: ${{ matrix.config.label }}
-        run: |
-          set -eux
-          m="${RHUB_LABEL#clang}"
-          mapfile -t cand_list < <(find "/usr/lib/llvm-${m}" \( -name 'libclang_rt.asan-x86_64.so' -o -name 'libclang_rt.asan.so' \) 2>/dev/null | sort -V)
-          ok=""
-          for cand in "${cand_list[@]}"; do
-            [ -r "$cand" ] || continue
-            real=$(readlink -f "$cand" 2>/dev/null) || continue
-            [ -r "$real" ] || continue
-            preload_err="$(env LD_PRELOAD="$real" Rscript --vanilla -e "invisible(NULL)" 2>&1 || true)"
-            if ! echo "$preload_err" | grep -q "cannot be preloaded"; then
-              ok="$real"
-              break
-            fi
-          done
-          if [ -n "$ok" ]; then
-            echo "LD_PRELOAD=${ok}" >> "$GITHUB_ENV"
-            echo "Set LD_PRELOAD=${ok}"
-          else
-            echo "::warning::No verified libclang_rt.asan preload for LLVM ${m}; continuing without LD_PRELOAD (TBB dyn.load may still fail)."
-          fi
-
       # Compare runner R to current CRAN release (via rversions). When R is not ahead of that release,
       # skip R-devel workarounds (GitHub Rcpp, ubuntu-next rlang rebuild, etc.).
       # Use a temp .R file (not multiline Rscript -e): Windows Git Bash + R-devel can segfault on -e.
@@ -247,7 +217,7 @@ jobs:
           set -eux
           export TAR="${TAR:-/usr/bin/tar}"
           Rscript -e "install.packages('remotes', repos='https://cloud.r-project.org')"
-          Rscript -e 'tok <- Sys.getenv("GITHUB_TOKEN"); ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; message("Installing Rcpp into: ", ul); for (L in unique(c(ul, .libPaths()))) { ip <- tryCatch(rownames(installed.packages(lib.loc = L, noCache = TRUE)), error = function(e) character()); if ("Rcpp" %in% ip) try(remove.packages("Rcpp", lib = L), silent = TRUE) }; if (dir.exists(file.path(ul, "Rcpp"))) unlink(file.path(ul, "Rcpp"), recursive = TRUE); gh_err <- NULL; github_ok <- FALSE; tryCatch({ remotes::install_github("RcppCore/Rcpp", lib = ul, ref = "master", upgrade = "always", auth_token = tok, force = TRUE) }, error = function(e) { gh_err <<- conditionMessage(e) }); ip_ul <- tryCatch(rownames(installed.packages(lib.loc = ul, noCache = TRUE)), error = function(e) character()); if ("Rcpp" %in% ip_ul) { d <- tryCatch(read.dcf(file.path(ul, "Rcpp", "DESCRIPTION")), error = function(e) NULL); if (!is.null(d) && nrow(d) > 0) github_ok <- isTRUE(tolower(d[1, "RemoteType"]) == "github") }; if (!github_ok) { message("GitHub Rcpp install not usable", if (!is.null(gh_err)) paste0(" (", gh_err, ")") else "", "; falling back to CRAN source Rcpp + Function.h patch"); install.packages("Rcpp", lib = ul, repos = "https://cloud.r-project.org", type = "source", Ncpus = 2L); fh <- file.path(ul, "Rcpp", "include", "Rcpp", "Function.h"); if (file.exists(fh)) { z <- readLines(fh, warn = FALSE); idx <- which(grepl("R_getVarEx", z, fixed = TRUE) & grepl("R_NamespaceRegistry", z, fixed = TRUE)); if (length(idx)) { i <- idx[[1L]]; indent <- sub("^([[:space:]]*).*", "\\1", z[i], perl = TRUE); z[i] <- paste0(indent, "Shield env(R_getRegisteredNamespace(ns.c_str()));"); writeLines(z, fh); message("Patched Rcpp Function.h after CRAN fallback: ", fh) } } }; ip_ul <- tryCatch(rownames(installed.packages(lib.loc = ul, noCache = TRUE)), error = function(e) character()); if (!("Rcpp" %in% ip_ul)) stop("Rcpp missing after install attempts in lib=", ul)'
+          Rscript -e 'tok <- Sys.getenv("GITHUB_TOKEN"); ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; message("Installing Rcpp into: ", ul); for (L in unique(c(ul, .libPaths()))) { ip <- tryCatch(rownames(installed.packages(lib.loc = L, noCache = TRUE)), error = function(e) character()); if ("Rcpp" %in% ip) try(remove.packages("Rcpp", lib = L), silent = TRUE) }; if (dir.exists(file.path(ul, "Rcpp"))) unlink(file.path(ul, "Rcpp"), recursive = TRUE); gh_err <- NULL; github_ok <- FALSE; tryCatch({ remotes::install_github("RcppCore/Rcpp", lib = ul, ref = "master", upgrade = "always", auth_token = tok, force = TRUE) }, error = function(e) { gh_err <<- conditionMessage(e) }); ip_ul <- tryCatch(rownames(installed.packages(lib.loc = ul, noCache = TRUE)), error = function(e) character()); if ("Rcpp" %in% ip_ul) { d <- tryCatch(read.dcf(file.path(ul, "Rcpp", "DESCRIPTION")), error = function(e) NULL); if (!is.null(d) && nrow(d) > 0) github_ok <- isTRUE(tolower(d[1, "RemoteType"]) == "github") }; if (!github_ok) { message("GitHub Rcpp install not usable", if (!is.null(gh_err)) paste0(" (", gh_err, ")") else "", "; falling back to CRAN source Rcpp + Function.h patch"); install.packages("Rcpp", lib = ul, repos = "https://cloud.r-project.org", type = "source", Ncpus = 2L); fh <- file.path(ul, "Rcpp", "include", "Rcpp", "Function.h"); if (file.exists(fh)) { z <- readLines(fh, warn = FALSE); idx <- which(grepl("R_getVarEx", z, fixed = TRUE) & grepl("R_NamespaceRegistry", z, fixed = TRUE)); if (length(idx)) { i <- idx[[1L]]; indent <- sub("^([[:space:]]*).*", "\\1", z[i], perl = TRUE); z[i] <- paste0(indent, "Shield<SEXP> env(R_getRegisteredNamespace(ns.c_str()));"); writeLines(z, fh); message("Patched Rcpp Function.h after CRAN fallback: ", fh) } } }; ip_ul <- tryCatch(rownames(installed.packages(lib.loc = ul, noCache = TRUE)), error = function(e) character()); if (!("Rcpp" %in% ip_ul)) stop("Rcpp missing after install attempts in lib=", ul)'
           export GLMBAYES_RCPP_LIB="$(Rscript -e 'ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; cat(ul)')"
           echo "GLMBAYES_RCPP_LIB=${GLMBAYES_RCPP_LIB}" >> "$GITHUB_ENV"
 

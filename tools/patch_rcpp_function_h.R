@@ -46,7 +46,7 @@ if (length(idx)) {
   } else {
     indent <- indent[1L]
   }
-  lines[i] <- paste0(indent, "Shield env(R_getRegisteredNamespace(ns.c_str()));")
+  lines[i] <- paste0(indent, "Shield<SEXP> env(R_getRegisteredNamespace(ns.c_str()));")
   writeLines(lines, fh)
   message("patch_rcpp_function_h: patched line ", i, " in ", fh)
   quit(status = 0L)
@@ -62,7 +62,7 @@ pat <- paste0(
   "R_(?:UnboundValue|NilValue)",
   "\\)\\)[[:space:]]*;"
 )
-repl <- "Shield env(R_getRegisteredNamespace(ns.c_str()));"
+repl <- "Shield<SEXP> env(R_getRegisteredNamespace(ns.c_str()));"
 
 if (!grepl(pat, txt, perl = TRUE)) {
   message("patch_rcpp_function_h: no R_getVarEx/R_NamespaceRegistry pattern matched — skip")
