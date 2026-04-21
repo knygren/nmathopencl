@@ -39,7 +39,6 @@ applicable — adjust as needed).
 
 ---
 
-This file is **not** listed in `.Rbuildignore`, so it is included in the
-source tarball for transparency. If you prefer to keep submission notes
-repository-only, add `^cran-comments\.md$` to `.Rbuildignore` and paste
-these comments into the submission form instead.
+This file is listed in `.Rbuildignore`, so it is **not** included in the
+built source tarball. Paste these comments into the CRAN submission form
+(or attach as instructed by CRAN).

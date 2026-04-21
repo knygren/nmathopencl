@@ -25,4 +25,5 @@
 ^\.RDataTmp$
 ^data-raw$
 ^scripts$
+^cran-comments\.md$
 ^\.github$
