@@ -321,7 +321,7 @@ jobs:
             append_summary(c(log, resolved_line))
             if (oldrel && nzchar(ge)) cat("_R_CHECK_FORCE_SUGGESTS_=FALSE\n", file = ge, append = TRUE)
           }
-          log <<- c(log, paste0("- **Context**: label=", label, ", R=", rv, ", CRAN release=", if (is.na(rel)) "unknown" else rel, ", preferred=", preferred))
+          log <- c(log, paste0("- **Context**: label=", label, ", R=", rv, ", CRAN release=", if (is.na(rel)) "unknown" else rel, ", preferred=", preferred))
           ensure_remotes()
           strip_rcpp()
           ok1 <- try_install(paste0("CRAN Rcpp ", preferred, " (source)"), {
@@ -618,7 +618,7 @@ jobs:
             append_summary(c(log, resolved_line))
             if (oldrel && family != "mac" && nzchar(ge)) cat("_R_CHECK_FORCE_SUGGESTS_=FALSE\n", file = ge, append = TRUE)
           }
-          log <<- c(log, paste0("- **Context**: label=", label, ", family=", family, ", R=", rv, ", CRAN release=", if (is.na(rel)) "unknown" else rel, ", preferred=", preferred))
+          log <- c(log, paste0("- **Context**: label=", label, ", family=", family, ", R=", rv, ", CRAN release=", if (is.na(rel)) "unknown" else rel, ", preferred=", preferred))
           ensure_remotes()
           strip_rcpp()
           ok1 <- try_install(paste0("CRAN Rcpp ", preferred, " (source)"), {
