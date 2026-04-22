@@ -75,10 +75,7 @@ jobs:
       - name: Rhub — relax DESCRIPTION for setup-deps (temporary)
         if: ${{ matrix.config.label != 'rchk' }}
         run: |
-          set -eux
-          cp -f DESCRIPTION DESCRIPTION.rhub-orig
-          sed -i '/^[[:space:]]*Rcpp (>= [0-9.]\+\(-[0-9]\+\)\?),$/d' DESCRIPTION
-          echo "Rhub DESCRIPTION patched for setup-deps (removed temporary Rcpp entries)"
+          Rscript -e "f <- 'DESCRIPTION'; b <- 'DESCRIPTION.rhub-orig'; file.copy(f, b, overwrite = TRUE); x <- readLines(f, warn = FALSE); x <- x[!grepl('^[[:space:]]*Rcpp \\(>= [0-9.]+(-[0-9]+)?\\),$', x, perl = TRUE)]; writeLines(x, f); cat('Rhub DESCRIPTION patched for setup-deps (removed temporary Rcpp entries)\\n')"
 
       - uses: r-hub/actions/setup-deps@v1
         with:
@@ -88,23 +85,20 @@ jobs:
       - name: Rhub — restore DESCRIPTION after setup-deps
         if: ${{ matrix.config.label != 'rchk' }}
         run: |
-          set -eux
-          test -f DESCRIPTION.rhub-orig
-          mv -f DESCRIPTION.rhub-orig DESCRIPTION
-          echo "DESCRIPTION restored to repository version"
+          Rscript -e "stopifnot(file.exists('DESCRIPTION.rhub-orig')); file.copy('DESCRIPTION.rhub-orig', 'DESCRIPTION', overwrite = TRUE); unlink('DESCRIPTION.rhub-orig'); cat('DESCRIPTION restored to repository version\\n')"
 
-      # c23/noremap can fail loading RcppParallel's TBB (`libtbb.so.2`) due to libc++ runtime symbol
-      # mismatch. clang21/clang22 can fail on TBB requiring ASan runtime symbols
+      # c23/noremap/clang16/clang17 can fail loading RcppParallel's TBB (`libtbb.so.2`) due to libc++
+      # runtime symbol mismatch. clang21/clang22 can fail on TBB requiring ASan runtime symbols
       # (__asan_option_detect_stack_use_after_return). Use tinythread backend there to avoid TBB.
-      - name: RcppParallel backend workaround (c23 / noremap / clang21 / clang22)
-        if: ${{ matrix.config.label == 'c23' || matrix.config.label == 'noremap' || matrix.config.label == 'clang21' || matrix.config.label == 'clang22' }}
+      - name: RcppParallel backend workaround (c23 / noremap / clang16 / clang17 / clang21 / clang22)
+        if: ${{ matrix.config.label == 'c23' || matrix.config.label == 'noremap' || matrix.config.label == 'clang16' || matrix.config.label == 'clang17' || matrix.config.label == 'clang21' || matrix.config.label == 'clang22' }}
         run: |
           echo "RCPP_PARALLEL_BACKEND=tinythread" >> "$GITHUB_ENV"
 
       # On these images, prebuilt RcppParallel+TBB may fail at namespace load (libc++ mismatch or
       # missing ASan symbols). Rebuild RcppParallel in tinythread mode.
-      - name: Reinstall RcppParallel (tinythread, no TBB) for c23 / noremap / clang21 / clang22
-        if: ${{ matrix.config.label == 'c23' || matrix.config.label == 'noremap' || matrix.config.label == 'clang21' || matrix.config.label == 'clang22' }}
+      - name: Reinstall RcppParallel (tinythread, no TBB) for c23 / noremap / clang16 / clang17 / clang21 / clang22
+        if: ${{ matrix.config.label == 'c23' || matrix.config.label == 'noremap' || matrix.config.label == 'clang16' || matrix.config.label == 'clang17' || matrix.config.label == 'clang21' || matrix.config.label == 'clang22' }}
         run: |
           set -eux
           Rscript -e 'lib <- .libPaths()[1L]; if ("RcppParallel" %in% rownames(installed.packages(lib.loc = lib, noCache = TRUE))) remove.packages("RcppParallel", lib = lib); Sys.setenv(RCPP_PARALLEL_BACKEND = "tinythread", RCPP_PARALLEL_USE_TBB = "0"); install.packages("RcppParallel", lib = lib, repos = "https://cloud.r-project.org", type = "source", Ncpus = 2L); cat("RcppParallel backend env:", Sys.getenv("RCPP_PARALLEL_BACKEND"), "\n")'
@@ -495,10 +489,7 @@ jobs:
 
       - name: Rhub — relax DESCRIPTION for setup-deps (temporary)
         run: |
-          set -eux
-          cp -f DESCRIPTION DESCRIPTION.rhub-orig
-          sed -i '/^[[:space:]]*Rcpp (>= [0-9.]\+\(-[0-9]\+\)\?),$/d' DESCRIPTION
-          echo "Rhub DESCRIPTION patched for setup-deps (removed temporary Rcpp entries)"
+          Rscript -e "f <- 'DESCRIPTION'; b <- 'DESCRIPTION.rhub-orig'; file.copy(f, b, overwrite = TRUE); x <- readLines(f, warn = FALSE); x <- x[!grepl('^[[:space:]]*Rcpp \\(>= [0-9.]+(-[0-9]+)?\\),$', x, perl = TRUE)]; writeLines(x, f); cat('Rhub DESCRIPTION patched for setup-deps (removed temporary Rcpp entries)\\n')"
 
       - uses: r-hub/actions/setup-deps@v1
         with:
@@ -507,10 +498,7 @@ jobs:
 
       - name: Rhub — restore DESCRIPTION after setup-deps
         run: |
-          set -eux
-          test -f DESCRIPTION.rhub-orig
-          mv -f DESCRIPTION.rhub-orig DESCRIPTION
-          echo "DESCRIPTION restored to repository version"
+          Rscript -e "stopifnot(file.exists('DESCRIPTION.rhub-orig')); file.copy('DESCRIPTION.rhub-orig', 'DESCRIPTION', overwrite = TRUE); unlink('DESCRIPTION.rhub-orig'); cat('DESCRIPTION restored to repository version\\n')"
 
       # Same layering as linux-containers (inlined below; no repo script file).
       - name: Ensure Rcpp (CRAN → GitHub fallback, patch if needed)
