@@ -244,11 +244,11 @@ jobs:
           if (!lib %in% .libPaths()) .libPaths(c(lib, .libPaths()))
           ge <- Sys.getenv("GITHUB_ENV", "")
           rcpp_desc_version <- function() {
-            d <- file.path(lib, "Rcpp", "DESCRIPTION")
-            if (!file.exists(d)) return(NA)
-            dv <- tryCatch(read.dcf(d, fields = "Version"), error = function(e) NULL)
-            if (is.null(dv) || !nrow(dv) || !nzchar(dv[1L, 1L])) return(NA)
-            package_version(dv[1L, 1L])
+            ok <- tryCatch(requireNamespace("Rcpp", quietly = TRUE), error = function(e) FALSE)
+            if (!ok) return(NA)
+            v <- tryCatch(as.character(utils::packageVersion("Rcpp")), error = function(e) NA_character_)
+            if (is.na(v) || !nzchar(v)) return(NA)
+            package_version(v)
           }
           strip_rcpp <- function() {
             try(utils::remove.packages("Rcpp", lib = lib), silent = TRUE)
@@ -269,13 +269,13 @@ jobs:
             block <- paste(c("", "### Rcpp install (rhub Ensure step)", lines), collapse = "\n")
             cat(block, file = gs, append = file.exists(gs))
           }
-          log <- character()
+          step_log <- character()
           try_install <- function(label, expr) {
             err <- NULL
             ok <- tryCatch({ expr; TRUE }, error = function(e) { err <<- conditionMessage(e); FALSE })
             line <- if (ok) paste0("- **", label, "**: OK") else paste0("- **", label, "**: FAILED — ", gsub("\n", " ", err, fixed = TRUE))
             message(if (ok) "OK: " else "FAILED: ", label, if (!ok) paste0(" — ", err) else "")
-            log <<- c(log, line)
+            step_log <<- c(step_log, line)
             ok
           }
           # "OK" on install is not enough: we require a readable Rcpp Version under `lib` before adopting preferred.
@@ -283,31 +283,30 @@ jobs:
             if (isTRUE(ok1) && !is.na(ver)) {
               return(invisible())
             }
-            desc_p <- file.path(lib, "Rcpp", "DESCRIPTION")
             if (identical(as.character(preferred), "1.1.1-1")) {
               if (!isTRUE(ok1)) {
-                log <<- c(
-                  log,
+                step_log <<- c(
+                  step_log,
                   "- **1.1.1-1 installation error**: preferred CRAN install failed (see FAILED line)."
                 )
                 message("Ensure Rcpp: 1.1.1-1 installation error.")
               } else {
-                log <<- c(
-                  log,
-                  "- **1.1.1-1 not verified**: install returned OK but target lib did not contain a readable `Rcpp/DESCRIPTION`."
+                step_log <<- c(
+                  step_log,
+                  "- **1.1.1-1 not verified**: install returned OK but session does not report a loadable Rcpp version."
                 )
-                message("Ensure Rcpp: 1.1.1-1 not verified in target lib.")
+                message("Ensure Rcpp: 1.1.1-1 not verified in session.")
               }
             } else {
               if (!isTRUE(ok1)) {
-                log <<- c(
-                  log,
+                step_log <<- c(
+                  step_log,
                   paste0("- **Preferred CRAN ", preferred, " installation error**: see FAILED line.")
                 )
               } else {
-                log <<- c(
-                  log,
-                  paste0("- **Preferred CRAN ", preferred, " not verified**: no readable `Version` at `", desc_p, "`.")
+                step_log <<- c(
+                  step_log,
+                  paste0("- **Preferred CRAN ", preferred, " not verified**: session does not report a loadable Rcpp version.")
                 )
               }
             }
@@ -332,15 +331,15 @@ jobs:
 
           maybe_patch <- function(ver) {
             if (!ahead || !is.na(ver) && ver >= target_min) {
-              log <<- c(log, paste0("- **Function.h patch**: skipped (ahead=", ahead, ", Rcpp=", if (is.na(ver)) "unknown" else ver, ")"))
+              step_log <<- c(step_log, paste0("- **Function.h patch**: skipped (ahead=", ahead, ", Rcpp=", if (is.na(ver)) "unknown" else ver, ")"))
               return(invisible())
             }
-            log <<- c(log, paste0("- **Function.h patch**: running (ahead=true, Rcpp ", if (is.na(ver)) "unknown" else ver, " < ", target_min, ")"))
+            step_log <<- c(step_log, paste0("- **Function.h patch**: running (ahead=true, Rcpp ", if (is.na(ver)) "unknown" else ver, " < ", target_min, ")"))
             repo <- Sys.getenv("GITHUB_WORKSPACE", "")
             if (!nzchar(repo)) repo <- getwd()
             patch <- file.path(repo, "tools", "patch_rcpp_function_h.R")
             if (!file.exists(patch)) {
-              log <<- c(log, "- **Function.h patch**: skipped (tools/patch_rcpp_function_h.R not found)")
+              step_log <<- c(step_log, "- **Function.h patch**: skipped (tools/patch_rcpp_function_h.R not found)")
               return(invisible())
             }
             rscript <- file.path(Sys.getenv("R_HOME"), "bin", "Rscript")
@@ -351,18 +350,18 @@ jobs:
             out <- system2(rscript, c(patch), env = env, stdout = TRUE, stderr = TRUE)
             st <- attr(out, "status")
             if (!is.null(st) && !identical(as.integer(st), 0L)) {
-              log <<- c(log, paste("- **Function.h patch**: Rscript exit code", st))
+              step_log <<- c(step_log, paste("- **Function.h patch**: Rscript exit code", st))
             } else {
-              log <<- c(log, "- **Function.h patch**: completed (no-op if pattern absent)")
+              step_log <<- c(step_log, "- **Function.h patch**: completed (no-op if pattern absent)")
             }
           }
           finish_ok <- function(resolved_line) {
             write_glmbayes_lib()
-            append_summary(c(log, resolved_line))
+            append_summary(c(step_log, resolved_line))
             if (oldrel && nzchar(ge)) cat("_R_CHECK_FORCE_SUGGESTS_=FALSE\n", file = ge, append = TRUE)
           }
-          log <- c(log, paste0("- **Context**: label=", label, ", R=", rv, ", CRAN release=", if (is.na(rel)) "unknown" else rel, ", preferred=", preferred))
-          log <- c(log, "- **Note on OK**: A CRAN line marked **OK** only means `remotes::install_version` did not throw. The run **adopts** a tree when `Rcpp` is found and `Version` is read under `lib` (see **Resolved** = verified, or a **not adopted** line if not).")
+          step_log <- c(step_log, paste0("- **Context**: label=", label, ", R=", rv, ", CRAN release=", if (is.na(rel)) "unknown" else rel, ", preferred=", preferred))
+          step_log <- c(step_log, "- **Note on OK**: A CRAN line marked **OK** only means `remotes::install_version` did not throw. The run **adopts** a tree when `Rcpp` is found and `Version` is read under `lib` (see **Resolved** = verified, or a **not adopted** line if not).")
           ensure_remotes()
           strip_rcpp()
           ok1 <- try_install(paste0("CRAN Rcpp ", preferred, " (source)"), {
@@ -372,7 +371,7 @@ jobs:
           if (ok1 && !is.na(ver)) {
             message("Using Rcpp ", ver, " (CRAN preferred install path)")
             maybe_patch(ver)
-            log <<- c(log, paste0("- **", preferred, " verified**: `Rcpp/DESCRIPTION` present in target lib; `Version`=", ver, "."))
+            step_log <<- c(step_log, paste0("- **", preferred, " verified**: `Rcpp/DESCRIPTION` present in target lib; `Version`=", ver, "."))
             finish_ok(paste0("- **Resolved**: ", ver, " (CRAN ", preferred, ", verified under lib)"))
             quit(status = 0L)
           }
@@ -394,19 +393,19 @@ jobs:
                 "- **Resolved**: ", ver, " (CRAN ", alternate, " — **fallback** after preferred ", preferred, " was not adopted; see `not adopted` line above. Patch if needed."
               )
             }
-            log <<- c(log, paste0("- **", alternate, " verified**: `Rcpp/DESCRIPTION` present in target lib; `Version`=", ver, "."))
+            step_log <<- c(step_log, paste0("- **", alternate, " verified**: `Rcpp/DESCRIPTION` present in target lib; `Version`=", ver, "."))
             finish_ok(rline)
             quit(status = 0L)
           }
           strip_rcpp()
-          log <<- c(
-            log,
+          step_log <<- c(
+            step_log,
             "- **CRAN alternate not adopted**: Rcpp still missing or unverifiable after both CRAN attempts; see FAILED lines. Trying GitHub."
           )
           ok3 <- try_install("GitHub RcppCore/Rcpp (master)", { install_github_rcpp() })
           ver <- rcpp_desc_version()
           if (!ok3 || is.na(ver)) {
-            append_summary(log)
+            append_summary(step_log)
             stop("Could not install Rcpp after preferred CRAN, alternate CRAN, and GitHub. See Rcpp install summary in the job.")
           }
           message("Using Rcpp ", ver, " from GitHub (fallback)")
@@ -591,11 +590,11 @@ jobs:
           if (!lib %in% .libPaths()) .libPaths(c(lib, .libPaths()))
           ge <- Sys.getenv("GITHUB_ENV", "")
           rcpp_desc_version <- function() {
-            d <- file.path(lib, "Rcpp", "DESCRIPTION")
-            if (!file.exists(d)) return(NA)
-            dv <- tryCatch(read.dcf(d, fields = "Version"), error = function(e) NULL)
-            if (is.null(dv) || !nrow(dv) || !nzchar(dv[1L, 1L])) return(NA)
-            package_version(dv[1L, 1L])
+            ok <- tryCatch(requireNamespace("Rcpp", quietly = TRUE), error = function(e) FALSE)
+            if (!ok) return(NA)
+            v <- tryCatch(as.character(utils::packageVersion("Rcpp")), error = function(e) NA_character_)
+            if (is.na(v) || !nzchar(v)) return(NA)
+            package_version(v)
           }
           strip_rcpp <- function() {
             try(utils::remove.packages("Rcpp", lib = lib), silent = TRUE)
@@ -616,44 +615,43 @@ jobs:
             block <- paste(c("", "### Rcpp install (rhub Ensure step)", lines), collapse = "\n")
             cat(block, file = gs, append = file.exists(gs))
           }
-          log <- character()
+          step_log <- character()
           try_install <- function(label, expr) {
             err <- NULL
             ok <- tryCatch({ expr; TRUE }, error = function(e) { err <<- conditionMessage(e); FALSE })
             line <- if (ok) paste0("- **", label, "**: OK") else paste0("- **", label, "**: FAILED — ", gsub("\n", " ", err, fixed = TRUE))
             message(if (ok) "OK: " else "FAILED: ", label, if (!ok) paste0(" — ", err) else "")
-            log <<- c(log, line)
+            step_log <<- c(step_log, line)
             ok
           }
           log_if_preferred_not_adopted <- function(ok1, ver) {
             if (isTRUE(ok1) && !is.na(ver)) {
               return(invisible())
             }
-            desc_p <- file.path(lib, "Rcpp", "DESCRIPTION")
             if (identical(as.character(preferred), "1.1.1-1")) {
               if (!isTRUE(ok1)) {
-                log <<- c(
-                  log,
+                step_log <<- c(
+                  step_log,
                   "- **1.1.1-1 installation error**: preferred CRAN install failed (see FAILED line)."
                 )
                 message("Ensure Rcpp: 1.1.1-1 installation error.")
               } else {
-                log <<- c(
-                  log,
-                  "- **1.1.1-1 not verified**: install returned OK but target lib did not contain a readable `Rcpp/DESCRIPTION`."
+                step_log <<- c(
+                  step_log,
+                  "- **1.1.1-1 not verified**: install returned OK but session does not report a loadable Rcpp version."
                 )
-                message("Ensure Rcpp: 1.1.1-1 not verified in target lib.")
+                message("Ensure Rcpp: 1.1.1-1 not verified in session.")
               }
             } else {
               if (!isTRUE(ok1)) {
-                log <<- c(
-                  log,
+                step_log <<- c(
+                  step_log,
                   paste0("- **Preferred CRAN ", preferred, " installation error**: see FAILED line.")
                 )
               } else {
-                log <<- c(
-                  log,
-                  paste0("- **Preferred CRAN ", preferred, " not verified**: no readable `Version` at `", desc_p, "`.")
+                step_log <<- c(
+                  step_log,
+                  paste0("- **Preferred CRAN ", preferred, " not verified**: session does not report a loadable Rcpp version.")
                 )
               }
             }
@@ -678,15 +676,15 @@ jobs:
 
           maybe_patch <- function(ver) {
             if (family == "mac" || !ahead || !is.na(ver) && ver >= target_min) {
-              log <<- c(log, paste0("- **Function.h patch**: skipped (family=", family, ", ahead=", ahead, ", Rcpp=", if (is.na(ver)) "unknown" else ver, ")"))
+              step_log <<- c(step_log, paste0("- **Function.h patch**: skipped (family=", family, ", ahead=", ahead, ", Rcpp=", if (is.na(ver)) "unknown" else ver, ")"))
               return(invisible())
             }
-            log <<- c(log, paste0("- **Function.h patch**: running (family=", family, ", ahead=true, Rcpp ", if (is.na(ver)) "unknown" else ver, " < ", target_min, ")"))
+            step_log <<- c(step_log, paste0("- **Function.h patch**: running (family=", family, ", ahead=true, Rcpp ", if (is.na(ver)) "unknown" else ver, " < ", target_min, ")"))
             repo <- Sys.getenv("GITHUB_WORKSPACE", "")
             if (!nzchar(repo)) repo <- getwd()
             patch <- file.path(repo, "tools", "patch_rcpp_function_h.R")
             if (!file.exists(patch)) {
-              log <<- c(log, "- **Function.h patch**: skipped (tools/patch_rcpp_function_h.R not found)")
+              step_log <<- c(step_log, "- **Function.h patch**: skipped (tools/patch_rcpp_function_h.R not found)")
               return(invisible())
             }
             rscript <- file.path(Sys.getenv("R_HOME"), "bin", "Rscript")
@@ -697,18 +695,18 @@ jobs:
             out <- system2(rscript, c(patch), env = env, stdout = TRUE, stderr = TRUE)
             st <- attr(out, "status")
             if (!is.null(st) && !identical(as.integer(st), 0L)) {
-              log <<- c(log, paste("- **Function.h patch**: Rscript exit code", st))
+              step_log <<- c(step_log, paste("- **Function.h patch**: Rscript exit code", st))
             } else {
-              log <<- c(log, "- **Function.h patch**: completed (no-op if pattern absent)")
+              step_log <<- c(step_log, "- **Function.h patch**: completed (no-op if pattern absent)")
             }
           }
           finish_ok <- function(resolved_line) {
             write_glmbayes_lib()
-            append_summary(c(log, resolved_line))
+            append_summary(c(step_log, resolved_line))
             if (oldrel && family != "mac" && nzchar(ge)) cat("_R_CHECK_FORCE_SUGGESTS_=FALSE\n", file = ge, append = TRUE)
           }
-          log <- c(log, paste0("- **Context**: label=", label, ", family=", family, ", R=", rv, ", CRAN release=", if (is.na(rel)) "unknown" else rel, ", preferred=", preferred))
-          log <- c(log, "- **Note on OK**: A CRAN line marked **OK** only means `remotes::install_version` did not throw. The run **adopts** a tree when `Rcpp` is found and `Version` is read under `lib` (see **Resolved** = verified, or a **not adopted** line if not).")
+          step_log <- c(step_log, paste0("- **Context**: label=", label, ", family=", family, ", R=", rv, ", CRAN release=", if (is.na(rel)) "unknown" else rel, ", preferred=", preferred))
+          step_log <- c(step_log, "- **Note on OK**: A CRAN line marked **OK** only means `remotes::install_version` did not throw. The run **adopts** a tree when `Rcpp` is found and `Version` is read under `lib` (see **Resolved** = verified, or a **not adopted** line if not).")
           ensure_remotes()
           strip_rcpp()
           ok1 <- try_install(paste0("CRAN Rcpp ", preferred, " (source)"), {
@@ -718,7 +716,7 @@ jobs:
           if (ok1 && !is.na(ver)) {
             message("Using Rcpp ", ver, " (CRAN preferred install path)")
             maybe_patch(ver)
-            log <<- c(log, paste0("- **", preferred, " verified**: `Rcpp/DESCRIPTION` present in target lib; `Version`=", ver, "."))
+            step_log <<- c(step_log, paste0("- **", preferred, " verified**: `Rcpp/DESCRIPTION` present in target lib; `Version`=", ver, "."))
             finish_ok(paste0("- **Resolved**: ", ver, " (CRAN ", preferred, ", verified under lib)"))
             quit(status = 0L)
           }
@@ -740,19 +738,19 @@ jobs:
                 "- **Resolved**: ", ver, " (CRAN ", alternate, " — **fallback** after preferred ", preferred, " was not adopted; see `not adopted` line above. Patch if needed."
               )
             }
-            log <<- c(log, paste0("- **", alternate, " verified**: `Rcpp/DESCRIPTION` present in target lib; `Version`=", ver, "."))
+            step_log <<- c(step_log, paste0("- **", alternate, " verified**: `Rcpp/DESCRIPTION` present in target lib; `Version`=", ver, "."))
             finish_ok(rline)
             quit(status = 0L)
           }
           strip_rcpp()
-          log <<- c(
-            log,
+          step_log <<- c(
+            step_log,
             "- **CRAN alternate not adopted**: Rcpp still missing or unverifiable after both CRAN attempts; see FAILED lines. Trying GitHub."
           )
           ok3 <- try_install("GitHub RcppCore/Rcpp (master)", { install_github_rcpp() })
           ver <- rcpp_desc_version()
           if (!ok3 || is.na(ver)) {
-            append_summary(log)
+            append_summary(step_log)
             stop("Could not install Rcpp after preferred CRAN, alternate CRAN, and GitHub. See Rcpp install summary in the job.")
           }
           message("Using Rcpp ", ver, " from GitHub (fallback)")
