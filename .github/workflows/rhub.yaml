@@ -538,6 +538,7 @@ jobs:
         env:
           PLATFORM: ${{ matrix.config.label }}
           JOB_STATUS: ${{ job.status }}
+          ACTIONS_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -eu
           mkdir -p platform-report
@@ -551,12 +552,30 @@ jobs:
           }
           plat <- Sys.getenv("PLATFORM", "unknown")
           job_status <- Sys.getenv("JOB_STATUS", "unknown")
+          lib_user <- Sys.getenv("R_LIBS_USER", "")
+          if (nzchar(lib_user) && dir.exists(lib_user)) {
+            .libPaths(c(lib_user, .libPaths()))
+          }
+          lib_run <- Sys.getenv("R_LIBS", "")
+          if (nzchar(lib_run) && dir.exists(lib_run)) {
+            .libPaths(c(lib_run, .libPaths()))
+          }
           rver <- as.character(getRversion())
           rcpp <- if (requireNamespace("Rcpp", quietly = TRUE)) {
             as.character(packageVersion("Rcpp"))
           } else "not-installed"
+          pkg_name <- tryCatch({
+            if (file.exists("DESCRIPTION")) {
+              d <- read.dcf("DESCRIPTION")
+              trimws(as.character(d[1L, "Package"]))
+            } else {
+              "pkg"
+            }
+          }, error = function(e) "pkg")
           r_cmd <- "no-check-log"
-          if (dir.exists("check")) {
+          if (identical(plat, "rchk")) {
+            r_cmd <- "n/a (rchk.sh — not R CMD check)"
+          } else if (dir.exists("check")) {
             logs <- list.files("check", pattern = "^00check\\.log$", full.names = TRUE, recursive = TRUE)
             if (length(logs)) {
               mt <- file.info(logs)$mtime
@@ -581,8 +600,110 @@ jobs:
             r_version = rver,
             rcpp_version = rcpp,
             r_cmd_check_status = r_cmd,
-            job_status = job_status
+            job_status = job_status,
+            actions_run_url = Sys.getenv("ACTIONS_RUN_URL", "")
           )
+          if (identical(plat, "rchk")) {
+            report$rchk_check_kind <- "rchk.sh static analysis (not CRAN R CMD check)"
+            native_ok <- NA
+            native_hint <- ""
+            ins_logs <- if (dir.exists("check")) {
+              list.files("check", pattern = "00install\\.out$", full.names = TRUE, recursive = TRUE)
+            } else {
+              character()
+            }
+            done_re <- paste0("^\\* DONE \\(", pkg_name, "\\)")
+            for (inf in ins_logs) {
+              ll <- tryCatch(readLines(inf, warn = FALSE), error = function(e) character())
+              if (any(grepl(done_re, ll, perl = TRUE))) {
+                native_ok <- TRUE
+                native_hint <- inf
+                break
+              }
+            }
+            if (is.na(native_ok) && length(ins_logs)) {
+              native_ok <- FALSE
+            }
+            report$rchk_native_install_done <- if (isTRUE(native_ok)) {
+              "yes"
+            } else if (isFALSE(native_ok)) {
+              "no"
+            } else {
+              "unknown"
+            }
+            report$rchk_install_log_path <- native_hint
+            ws <- Sys.getenv("GITHUB_WORKSPACE", ".")
+            if (!nzchar(ws) || !dir.exists(ws)) {
+              ws <- "."
+            }
+            cand <- tryCatch(
+              list.files(
+                ws,
+                pattern = "rchk|bcheck|Rchk|checks\\.txt",
+                full.names = TRUE,
+                recursive = TRUE,
+                ignore.case = TRUE
+              ),
+              error = function(e) character()
+            )
+            cand <- cand[!dir.exists(cand)]
+            logs_all <- tryCatch(
+              list.files(
+                ws,
+                pattern = "\\.(log|out)$",
+                full.names = TRUE,
+                recursive = TRUE,
+                ignore.case = TRUE
+              ),
+              error = function(e) character()
+            )
+            logs_all <- logs_all[!dir.exists(logs_all)]
+            fi <- tryCatch(file.info(logs_all), error = function(e) NULL)
+            if (!is.null(fi) && length(logs_all) && nrow(fi) == length(logs_all)) {
+              logs_all <- logs_all[!is.na(fi$size) & fi$size > 0L & fi$size < 250000L]
+            }
+            logs_all <- utils::head(logs_all, 45L)
+            cand2 <- character()
+            for (pp in logs_all) {
+              ll <- tryCatch(readLines(pp, n = 120L, warn = FALSE), error = function(e) character())
+              if (length(ll) && any(grepl("bcheck|rchk|Running bcheck", ll, ignore.case = TRUE))) {
+                cand2 <- c(cand2, pp)
+              }
+            }
+            cand <- unique(c(cand, cand2))
+            cand <- utils::head(cand, 24L)
+            report$rchk_artifact_paths <- if (length(cand)) {
+              paste(gsub(paste0("^", ws, "/"), "", cand, fixed = TRUE), collapse = "; ")
+            } else {
+              ""
+            }
+            ex_lim <- 6000L
+            lines_h <- character()
+            for (pp in cand) {
+              if (!file.exists(pp)) next
+              sz <- tryCatch(file.info(pp)$size, error = function(e) NA_real_)
+              if (is.na(sz) || sz <= 0L || sz > 250000L) next
+              ll <- tryCatch(readLines(pp, warn = FALSE), error = function(e) character())
+              hit <- grep(
+                "[\\[](PB|UP)[\\]]|^ERROR:|Running bcheck|====[[:space:]]*rchk|bcheck|objdump:",
+                ll,
+                ignore.case = TRUE,
+                value = TRUE
+              )
+              if (length(hit)) {
+                rel <- gsub(paste0("^", ws, "/"), "", pp, fixed = TRUE)
+                lines_h <- c(lines_h, paste0("--- ", rel, " ---"), utils::head(hit, 40L))
+              }
+              if (nchar(paste(lines_h, collapse = "\n")) > ex_lim) {
+                break
+              }
+            }
+            rchk_excerpt <- paste(lines_h, collapse = "\n")
+            if (nchar(rchk_excerpt) > ex_lim) {
+              rchk_excerpt <- substr(rchk_excerpt, 1L, ex_lim)
+            }
+            report$rchk_log_excerpt <- rchk_excerpt
+          }
           jsonlite::write_json(report, out_file, auto_unbox = TRUE, pretty = TRUE)
           PRR
           Rscript "$f"
@@ -977,6 +1098,7 @@ jobs:
         env:
           PLATFORM: ${{ matrix.config.label }}
           JOB_STATUS: ${{ job.status }}
+          ACTIONS_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -eu
           mkdir -p platform-report
@@ -990,12 +1112,30 @@ jobs:
           }
           plat <- Sys.getenv("PLATFORM", "unknown")
           job_status <- Sys.getenv("JOB_STATUS", "unknown")
+          lib_user <- Sys.getenv("R_LIBS_USER", "")
+          if (nzchar(lib_user) && dir.exists(lib_user)) {
+            .libPaths(c(lib_user, .libPaths()))
+          }
+          lib_run <- Sys.getenv("R_LIBS", "")
+          if (nzchar(lib_run) && dir.exists(lib_run)) {
+            .libPaths(c(lib_run, .libPaths()))
+          }
           rver <- as.character(getRversion())
           rcpp <- if (requireNamespace("Rcpp", quietly = TRUE)) {
             as.character(packageVersion("Rcpp"))
           } else "not-installed"
+          pkg_name <- tryCatch({
+            if (file.exists("DESCRIPTION")) {
+              d <- read.dcf("DESCRIPTION")
+              trimws(as.character(d[1L, "Package"]))
+            } else {
+              "pkg"
+            }
+          }, error = function(e) "pkg")
           r_cmd <- "no-check-log"
-          if (dir.exists("check")) {
+          if (identical(plat, "rchk")) {
+            r_cmd <- "n/a (rchk.sh — not R CMD check)"
+          } else if (dir.exists("check")) {
             logs <- list.files("check", pattern = "^00check\\.log$", full.names = TRUE, recursive = TRUE)
             if (length(logs)) {
               mt <- file.info(logs)$mtime
@@ -1020,8 +1160,110 @@ jobs:
             r_version = rver,
             rcpp_version = rcpp,
             r_cmd_check_status = r_cmd,
-            job_status = job_status
+            job_status = job_status,
+            actions_run_url = Sys.getenv("ACTIONS_RUN_URL", "")
           )
+          if (identical(plat, "rchk")) {
+            report$rchk_check_kind <- "rchk.sh static analysis (not CRAN R CMD check)"
+            native_ok <- NA
+            native_hint <- ""
+            ins_logs <- if (dir.exists("check")) {
+              list.files("check", pattern = "00install\\.out$", full.names = TRUE, recursive = TRUE)
+            } else {
+              character()
+            }
+            done_re <- paste0("^\\* DONE \\(", pkg_name, "\\)")
+            for (inf in ins_logs) {
+              ll <- tryCatch(readLines(inf, warn = FALSE), error = function(e) character())
+              if (any(grepl(done_re, ll, perl = TRUE))) {
+                native_ok <- TRUE
+                native_hint <- inf
+                break
+              }
+            }
+            if (is.na(native_ok) && length(ins_logs)) {
+              native_ok <- FALSE
+            }
+            report$rchk_native_install_done <- if (isTRUE(native_ok)) {
+              "yes"
+            } else if (isFALSE(native_ok)) {
+              "no"
+            } else {
+              "unknown"
+            }
+            report$rchk_install_log_path <- native_hint
+            ws <- Sys.getenv("GITHUB_WORKSPACE", ".")
+            if (!nzchar(ws) || !dir.exists(ws)) {
+              ws <- "."
+            }
+            cand <- tryCatch(
+              list.files(
+                ws,
+                pattern = "rchk|bcheck|Rchk|checks\\.txt",
+                full.names = TRUE,
+                recursive = TRUE,
+                ignore.case = TRUE
+              ),
+              error = function(e) character()
+            )
+            cand <- cand[!dir.exists(cand)]
+            logs_all <- tryCatch(
+              list.files(
+                ws,
+                pattern = "\\.(log|out)$",
+                full.names = TRUE,
+                recursive = TRUE,
+                ignore.case = TRUE
+              ),
+              error = function(e) character()
+            )
+            logs_all <- logs_all[!dir.exists(logs_all)]
+            fi <- tryCatch(file.info(logs_all), error = function(e) NULL)
+            if (!is.null(fi) && length(logs_all) && nrow(fi) == length(logs_all)) {
+              logs_all <- logs_all[!is.na(fi$size) & fi$size > 0L & fi$size < 250000L]
+            }
+            logs_all <- utils::head(logs_all, 45L)
+            cand2 <- character()
+            for (pp in logs_all) {
+              ll <- tryCatch(readLines(pp, n = 120L, warn = FALSE), error = function(e) character())
+              if (length(ll) && any(grepl("bcheck|rchk|Running bcheck", ll, ignore.case = TRUE))) {
+                cand2 <- c(cand2, pp)
+              }
+            }
+            cand <- unique(c(cand, cand2))
+            cand <- utils::head(cand, 24L)
+            report$rchk_artifact_paths <- if (length(cand)) {
+              paste(gsub(paste0("^", ws, "/"), "", cand, fixed = TRUE), collapse = "; ")
+            } else {
+              ""
+            }
+            ex_lim <- 6000L
+            lines_h <- character()
+            for (pp in cand) {
+              if (!file.exists(pp)) next
+              sz <- tryCatch(file.info(pp)$size, error = function(e) NA_real_)
+              if (is.na(sz) || sz <= 0L || sz > 250000L) next
+              ll <- tryCatch(readLines(pp, warn = FALSE), error = function(e) character())
+              hit <- grep(
+                "[\\[](PB|UP)[\\]]|^ERROR:|Running bcheck|====[[:space:]]*rchk|bcheck|objdump:",
+                ll,
+                ignore.case = TRUE,
+                value = TRUE
+              )
+              if (length(hit)) {
+                rel <- gsub(paste0("^", ws, "/"), "", pp, fixed = TRUE)
+                lines_h <- c(lines_h, paste0("--- ", rel, " ---"), utils::head(hit, 40L))
+              }
+              if (nchar(paste(lines_h, collapse = "\n")) > ex_lim) {
+                break
+              }
+            }
+            rchk_excerpt <- paste(lines_h, collapse = "\n")
+            if (nchar(rchk_excerpt) > ex_lim) {
+              rchk_excerpt <- substr(rchk_excerpt, 1L, ex_lim)
+            }
+            report$rchk_log_excerpt <- rchk_excerpt
+          }
           jsonlite::write_json(report, out_file, auto_unbox = TRUE, pretty = TRUE)
           PRR
           Rscript "$f"
@@ -1075,8 +1317,12 @@ jobs:
           }
           plat_key <- function(x) {
             v <- x[["platform"]]
-            if (is.null(v)) "" else as.character(v)
+            if (is.null(v)) "" else trimws(as.character(v))
           }
+          plat_label <- function(x) {
+            tryCatch(trimws(as.character(x[["platform"]])), error = function(e) "")
+          }
+          is_rchk_row <- function(x) identical(plat_label(x), "rchk")
           if (length(rows)) {
             ord <- order(vapply(rows, plat_key, ""))
             rows <- rows[ord]
@@ -1097,12 +1343,43 @@ jobs:
             }
           }
           rcmd_stat <- function(x) {
-            if (!is.null(x[["r_cmd_check_status"]])) as.character(x[["r_cmd_check_status"]]) else "unknown"
+            if (is_rchk_row(x)) {
+              return("n/a (rchk.sh — not R CMD check)")
+            }
+            v <- if (!is.null(x[["r_cmd_check_status"]])) {
+              as.character(x[["r_cmd_check_status"]])
+            } else {
+              "unknown"
+            }
+            v
+          }
+          rcpp_stat <- function(x) {
+            v <- getf(x, "rcpp_version")
+            if (is_rchk_row(x) && identical(v, "not-installed")) {
+              return("not-installed (re-run with current workflow for libPaths fix)")
+            }
+            v
           }
           lines <- character()
           lines <- c(lines, "## Cross-Platform Summary", "")
+          run_u <- ""
+          if (length(rows)) {
+            for (z in rows) {
+              u <- z[["actions_run_url"]]
+              if (!is.null(u)) {
+                uu <- trimws(as.character(u))
+                if (length(uu) && nzchar(uu[[1L]])) {
+                  run_u <- uu[[1L]]
+                  break
+                }
+              }
+            }
+          }
+          if (nzchar(run_u)) {
+            lines <- c(lines, paste0("[Open this workflow run on GitHub](", run_u, ") (choose the matrix job to see full **rchk** / **bcheck** logs)."), "")
+          }
           lines <- c(lines, paste0(
-            "_R CMD check_ column is parsed from `check/**/00check.log` (`Status:` line). ",
+            "_R CMD check_ column is parsed from `check/**/00check.log` (`Status:` line), except **rchk** (see **rchk** subsection). ",
             "_Job_ column is the GitHub Actions job outcome after all steps (e.g. Valgrind grep can fail after `Status: OK`)."
           ))
           lines <- c(lines, "")
@@ -1114,11 +1391,67 @@ jobs:
             for (x in rows) {
               lines <- c(lines, sprintf(
                 "| %s | %s | %s | %s | %s |",
-                getf(x, "platform"), getf(x, "r_version"), getf(x, "rcpp_version"),
+                getf(x, "platform"), getf(x, "r_version"), rcpp_stat(x),
                 rcmd_stat(x), job_outcome(x)
               ))
             }
             lines <- c(lines, "")
+            rchk_rows <- Filter(is_rchk_row, rows)
+            if (length(rchk_rows)) {
+              lines <- c(lines, "### rchk (static analysis)", "")
+              if (any(vapply(rchk_rows, function(x) is.null(x[["rchk_check_kind"]]), logical(1L)))) {
+                lines <- c(lines, paste0(
+                  "> _Note:_ This run’s `rchk` JSON was produced **without** the newer `rchk_*` collector fields. ",
+                  "Confirm the default branch includes the latest `.github/workflows/rhub.yaml`, then re-run; ",
+                  "the main-table `R CMD check` cell for **rchk** is still overridden below for readability."
+                ))
+                lines <- c(lines, "")
+              }
+              lines <- c(lines, paste0(
+                "The **rchk** rhub image runs **`rchk.sh`** (instrumented native compile, then static analysis). ",
+                "It is **not** a standard `R CMD check` run, so the main table uses **`n/a (rchk.sh — not R CMD check)`** instead of a `Status:` line from `00check.log`. ",
+                "The table below records whether we saw a completed native install marker `* DONE(<pkg>)` in any `check/**/00install.out`, plus optional paths that look like rchk/bcheck outputs under the workspace."
+              ))
+              lines <- c(lines, "")
+              lines <- c(lines, "| Platform | R | Rcpp | `* DONE(pkg)*` in 00install.out | Job | install log / artifacts |",
+                         "|---|---:|---:|---|---|---|")
+              rkget <- function(x, nm, alt = "") {
+                v <- x[[nm]]
+                if (is.null(v)) return(alt)
+                as.character(v)[[1L]]
+              }
+              for (x in rchk_rows) {
+                ilog <- rkget(x, "rchk_install_log_path", "")
+                arts <- rkget(x, "rchk_artifact_paths", "")
+                cell_parts <- character()
+                if (nzchar(ilog)) cell_parts <- c(cell_parts, paste0("`", ilog, "`"))
+                if (nzchar(arts)) cell_parts <- c(cell_parts, arts)
+                cell <- if (length(cell_parts)) paste(cell_parts, collapse = " — ") else "—"
+                lines <- c(lines, sprintf(
+                  "| %s | %s | %s | %s | %s | %s |",
+                  getf(x, "platform"), getf(x, "r_version"), getf(x, "rcpp_version"),
+                  rkget(x, "rchk_native_install_done", "unknown"),
+                  job_outcome(x),
+                  cell
+                ))
+              }
+              lines <- c(lines, "")
+              for (x in rchk_rows) {
+                ex <- rkget(x, "rchk_log_excerpt", "")
+                if (nzchar(ex)) {
+                  ex2 <- gsub("```", "'''", ex, fixed = TRUE)
+                  lines <- c(lines, paste0("**rchk / bcheck excerpt (truncated)** for `", getf(x, "platform"), "`:"), "")
+                  lines <- c(lines, "```text")
+                  lines <- c(lines, strsplit(ex2, "\n", fixed = TRUE)[[1L]], "```", "")
+                } else if (nzchar(run_u)) {
+                  lines <- c(lines, paste0(
+                    "_No on-disk excerpt was captured for **", getf(x, "platform"),
+                    "** (bcheck output may exist only in the job log). Use the workflow run link above._"
+                  ), "")
+                }
+              }
+              lines <- c(lines, "")
+            }
           }
           md <- paste(lines, collapse = "\n")
           writeLines(lines, "platform-summary.md", useBytes = TRUE)
