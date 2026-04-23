@@ -213,10 +213,10 @@ The output is summarized by producing both means and *credible set* information 
 
 pred_m=colMeans(pred_menarche)
 pred_y_m=colMeans(pred_y/obs_size)
-quant1_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.025))
-quant2_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.975))
-quant1_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.025))
-quant2_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.975))
+quant1_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.025),na.rm=TRUE)
+quant2_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.975),na.rm=TRUE)
+quant1_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.025),na.rm=TRUE)
+quant2_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.975),na.rm=TRUE)
 
 ```
 
@@ -262,8 +262,8 @@ res_out=residuals(glmb.out1)
 res_mean=colMeans(res_out)
 sqrt(mean(res_mean^2))
 
-res_low1=apply(res_out,2,FUN=quantile,probs=c(0.025))
-res_high1=apply(res_out,2,FUN=quantile,probs=c(0.975))
+res_low1=apply(res_out,2,FUN=quantile,probs=c(0.025),na.rm=TRUE)
+res_high1=apply(res_out,2,FUN=quantile,probs=c(0.975),na.rm=TRUE)
 ```
 To understand whether any of the above residuals might be unexpected outliers, we now use the simulated predictions in order to simulate new data for each observation in the original dataset to see what construct a credible set for the residuals.  
 
@@ -558,10 +558,10 @@ for(i in 1:n){
 
 pred_m=colMeans(pred_menarche)
 pred_y_m=colMeans(pred_y/obs_size)
-quant1_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.025))
-quant2_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.975))
-quant1_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.025))
-quant2_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.975))
+quant1_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.025),na.rm=TRUE)
+quant2_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.975),na.rm=TRUE)
+quant1_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.025),na.rm=TRUE)
+quant2_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.975),na.rm=TRUE)
 
 ```
 
@@ -582,8 +582,8 @@ lines(Age_New, quant2_m_y,lty=2)
 res_out=residuals(glmb.out2)
 res_mean=colMeans(res_out)
 sqrt(mean(res_mean^2))
-res_low1=apply(res_out,2,FUN=quantile,probs=c(0.025))
-res_high1=apply(res_out,2,FUN=quantile,probs=c(0.975))
+res_low1=apply(res_out,2,FUN=quantile,probs=c(0.025),na.rm=TRUE)
+res_high1=apply(res_out,2,FUN=quantile,probs=c(0.975),na.rm=TRUE)
 ```
 
 ```{r Simulate_New_Residuals2}
@@ -634,10 +634,10 @@ for(i in 1:n){
 
 pred_m=colMeans(pred_menarche)
 pred_y_m=colMeans(pred_y/obs_size)
-quant1_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.025))
-quant2_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.975))
-quant1_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.025))
-quant2_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.975))
+quant1_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.025),na.rm=TRUE)
+quant2_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.975),na.rm=TRUE)
+quant1_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.025),na.rm=TRUE)
+quant2_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.975),na.rm=TRUE)
 
 ```
 
@@ -658,8 +658,8 @@ lines(Age_New, quant2_m_y,lty=2)
 res_out=residuals(glmb.out3)
 res_mean=colMeans(res_out)
 sqrt(mean(res_mean^2))
-res_low1=apply(res_out,2,FUN=quantile,probs=c(0.025))
-res_high1=apply(res_out,2,FUN=quantile,probs=c(0.975))
+res_low1=apply(res_out,2,FUN=quantile,probs=c(0.025),na.rm=TRUE)
+res_high1=apply(res_out,2,FUN=quantile,probs=c(0.975),na.rm=TRUE)
 ```
 
 ```{r Simulate_New_Residuals3}
@@ -710,10 +710,10 @@ for(i in 1:n){
 
 pred_m=colMeans(pred_menarche)
 pred_y_m=colMeans(pred_y/obs_size)
-quant1_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.025))
-quant2_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.975))
-quant1_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.025))
-quant2_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.975))
+quant1_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.025),na.rm=TRUE)
+quant2_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.975),na.rm=TRUE)
+quant1_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.025),na.rm=TRUE)
+quant2_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.975),na.rm=TRUE)
 
 ```
 
@@ -734,8 +734,8 @@ lines(Age_New, 1-quant2_m_y,lty=2)
 res_out=residuals(glmb.out4)
 res_mean=colMeans(res_out)
 sqrt(mean(res_mean^2))
-res_low1=apply(res_out,2,FUN=quantile,probs=c(0.025))
-res_high1=apply(res_out,2,FUN=quantile,probs=c(0.975))
+res_low1=apply(res_out,2,FUN=quantile,probs=c(0.025),na.rm=TRUE)
+res_high1=apply(res_out,2,FUN=quantile,probs=c(0.975),na.rm=TRUE)
 ```
 
 ```{r Simulate_New_Residuals4}
