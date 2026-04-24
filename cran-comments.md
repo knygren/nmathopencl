@@ -1,44 +1,73 @@
 # CRAN submission comments — glmbayes 0.9.0
 
+## Package summary
+
+glmbayes provides iid sampling for Bayesian Generalized Linear Models
+(Gaussian, Poisson, Binomial, Gamma) via accept-reject methods based on
+likelihood subgradients (Nygren & Nygren, 2006). It mirrors the interface
+of base R's glm() and lm(), and optionally accelerates envelope
+construction via OpenCL for high-dimensional models. OpenCL is an optional
+capability; the package detects its absence at build time and disables that
+code path gracefully — all checks pass on platforms without OpenCL.
+
 ## Test environments
 
-- Local: `R CMD check` / `devtools::check()` on Windows (R version as
-  used for release).
-- CI: R-hub GitHub Actions workflow (`.github/workflows/rhub.yaml`) for
-  additional platforms.
+### Local (developer machine)
+- Windows 11, ASUS TUF F16, GeForce RTX GPU, OpenCL installed
+- R [version], glmbayes built with OpenCL enabled
+- Result: 0 errors, 0 warnings, 2 notes (see Notes section)
 
-Please update the bullets above with the exact R versions and any rhub
-labels you ran before submit.
+### Win-builder
+- R release: 0 errors, 0 warnings, N notes
+- R devel:   0 errors, 0 warnings, N notes
+- R oldrel:  0 errors, 0 warnings, N notes
 
-## R CMD check results
+### Mac-builder
+- macOS release (mac.R-project.org): 0 errors, 0 warnings, N notes
+- macOS devel  (mac.R-project.org): 0 errors, 0 warnings, N notes
 
-There were 0 ERRORs, 0 WARNINGs, and 0 NOTEs (or paste the final summary
-line from your check log).
+### R-universe
+- All platforms pass except wasm (WebAssembly), which is expected:
+  the package includes compiled C/C++ code that is not compatible
+  with the wasm toolchain.
 
-If your run produced NOTEs, briefly explain each one here.
+### rhub (via rhub::rhub_check())
+- linux, macos-arm64, windows, m1-san, atlas, c23,
+  clang16–clang22, gcc13–gcc16, intel, lto, mkl,
+  nold, noremap, ubuntu-clang, ubuntu-gcc12,
+  ubuntu-release, donttest:
+  0 errors, 0 warnings, N notes
+  [Note: Rcpp was pre-installed manually on some rhub platforms —
+  see Rcpp note below]
+- valgrind, clang-asan, clang-ubsan, gcc-asan:
+  0 errors, 0 warnings, N notes
+- rchk: [describe outcome and explain here]
 
-## Downstream dependencies
+### GPU / OpenCL on Linux (Vast.ai virtual machine)
+- Ubuntu [version], OpenCL enabled, R [version]
+- Confirms OpenCL code path builds and runs correctly outside Windows
+- Result: 0 errors, 0 warnings, N notes
 
-There are no reverse dependencies on CRAN (or: revdepcheck was run / not
-applicable — adjust as needed).
+## Notes
 
-## Notes for the CRAN team
+### Note 1: New submission
+This is the first submission of glmbayes to CRAN.
 
-- **Rcpp**: `DESCRIPTION` requires `Rcpp (>= 1.1.1-1)` for compatibility
-  with current `Rcpp` headers and static analysis expectations. If CRAN’s
-  Windows binary for `Rcpp` is still at `1.1.1`, users may need a source
-  install of `Rcpp` until the Windows binary catches up; that is
-  acceptable for this release.
+### Note 2: [Rcpp versioning note]
+[Your explanation here — e.g. whether this is a known upstream issue,
+whether it affects functionality, and any relevant Rcpp version details]
 
-- **OpenCL**: `SystemRequirements` states optional OpenCL; the package
-  runs on CPU when OpenCL is unavailable. CRAN’s check farm is expected to
-  exercise CPU paths only.
+### Note 3: [New note you mentioned]
+[Explanation here]
 
-- **Compiled code**: Recent changes address `rchk`-reported protection
-  patterns in C++ code; no change to the public R API.
+### Note on rchk
+[rchk checks for PROTECT issues in C code. Describe what rchk flagged,
+whether it is a false positive, and what you did to investigate or
+mitigate it. If the flag is in Rcpp-generated code rather than your
+own C, say so explicitly.]
 
 ---
-
-This file is listed in `.Rbuildignore`, so it is **not** included in the
-built source tarball. Paste these comments into the CRAN submission form
-(or attach as instructed by CRAN).
+_This file is listed in `.Rbuildignore` and is not included in the built
+source tarball. When submitting, paste the content above into the
+"Optional comments" field on the CRAN submission form at
+https://cran.r-project.org/submit.html._
