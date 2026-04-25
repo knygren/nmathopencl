@@ -606,10 +606,14 @@ jobs:
           export GLMBAYES_RCPP_LIB="$(Rscript -e 'ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; cat(ul)')"
           echo "GLMBAYES_RCPP_LIB=${GLMBAYES_RCPP_LIB}" >> "$GITHUB_ENV"
 
-      # For selected labels, R-devel snapshots can still expose Rcpp/Function.h's
-      # R_NamespaceRegistry branch at compile-time. Patch only when pattern exists.
-      - name: Patch Rcpp Function.h (clang21 / clang22 / rchk)
-        if: ${{ matrix.config.label == 'clang21' || matrix.config.label == 'clang22' || matrix.config.label == 'rchk' }}
+      # Post-step: run tools/patch_rcpp_function_h.R after Ensure for clang21 / clang22 / rchk (belt-and-
+      # suspenders when R-devel + older Rcpp still had R_getVarEx/R_NamespaceRegistry in Function.h;
+      # script no-ops if pattern absent). Historically: strict ASan/UBSan clang images + rchk (Ensure differs).
+      #
+      # TEMPORARILY DISABLED — restore by removing `if: false` and using the line below as `if:`.
+      # if: ${{ matrix.config.label == 'clang21' || matrix.config.label == 'clang22' || matrix.config.label == 'rchk' }}
+      - name: Patch Rcpp Function.h (clang21 / clang22 / rchk) [DISABLED for testing]
+        if: false
         run: |
           set -eux
           export GLMBAYES_RCPP_LIB="${GLMBAYES_RCPP_LIB:-$(Rscript -e 'ul <- Sys.getenv("R_LIBS_USER"); if (!nzchar(ul)) ul <- .libPaths()[1L]; cat(ul)')}"
