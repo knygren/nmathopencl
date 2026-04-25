@@ -256,6 +256,8 @@ RCPP_META=$(printf '%s\n' "$RCPP_OUT" | head -n 1)
 RCPP_CPPFLAGS=$(printf '%s\n' "$RCPP_OUT" | tail -n 1)
 RCPP_PKG_VERSION=$(printf '%s\n' "$RCPP_META" | cut -f1)
 RCPP_PKG_LIB=$(printf '%s\n' "$RCPP_META" | cut -f2)
+R_ID_LINE=$("$RSCRIPT" -e 'rv <- as.character(getRversion()); v <- R.version; s <- if (!is.null(v[["svn.rev"]])) v[["svn.rev"]] else v[["svn rev"]]; s <- as.character(s); if (!length(s) || !nzchar(s)) s <- "unknown"; cat(sprintf("configure: R version: %s (svn: %s)", rv, s))')
+echo "$R_ID_LINE"
 echo "configure: confirmed Rcpp package version ${RCPP_PKG_VERSION} (library: ${RCPP_PKG_LIB})"
 echo ">> RCPP_CPPFLAGS    = '$RCPP_CPPFLAGS'"
 

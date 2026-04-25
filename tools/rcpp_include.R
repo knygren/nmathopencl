@@ -67,6 +67,18 @@ parse_rcpp_minimum_version <- function() {
 
 rcpp_configure_version_info <- function(lib) {
   # Version + library are echoed by configure / configure.win from stdout line 1 (see below).
+  rv <- getRversion()
+  r_svn <- tryCatch({
+    v <- R.version
+    s <- if (!is.null(v[["svn.rev"]])) v[["svn.rev"]] else v[["svn rev"]]
+    s <- as.character(s)
+    if (!length(s) || !nzchar(s)) "unknown" else s
+  }, error = function(e) "unknown")
+  writeLines(
+    sprintf("configure: R version: %s (svn: %s)", as.character(rv), r_svn),
+    con = stderr()
+  )
+
   pd <- tryCatch(
     suppressWarnings(packageDescription("Rcpp", lib.loc = lib)),
     error = function(e) NULL
@@ -103,6 +115,11 @@ rcpp_configure_version_info <- function(lib) {
 
 rcpp_configure_warnings <- function(lib) {
   rv <- getRversion()
+  r_svn <- tryCatch({
+    v <- R.version
+    s <- if (!is.null(v[["svn.rev"]])) v[["svn.rev"]] else v[["svn rev"]]
+    as.integer(as.character(s))
+  }, error = function(e) NA_integer_)
   r_devel <- nzchar(R.version$status) && grepl("devel|Under development", R.version$status, ignore.case = TRUE)
   r_ge_45 <- rv >= "4.5.0"
 
@@ -115,6 +132,20 @@ rcpp_configure_warnings <- function(lib) {
         as.character(v_inst), as.character(vmin)
       ), con = stderr())
     }
+  }
+
+  if (identical(as.character(rv), "4.6.0") && !is.na(r_svn) && r_svn < 89746L) {
+    writeLines(
+      sprintf(
+        "configure: WARNING: R 4.6.0 snapshot r%d is older than the Rcpp 1.1.1-1 compatibility cutoff (r89746).",
+        r_svn
+      ),
+      con = stderr()
+    )
+    writeLines(
+      "configure: WARNING: Recommendation: update R to >= 4.6.0 r89746 (or current release) before building with recent Rcpp.",
+      con = stderr()
+    )
   }
 
   pd <- tryCatch(
@@ -137,15 +168,11 @@ rcpp_configure_warnings <- function(lib) {
   repo_unknown <- is.null(repo) || !nzchar(as.character(repo))
 
   if ((r_devel || r_ge_45) && !has_remote && (repo_cran || repo_unknown)) {
-    writeLines(
-      paste0(
-        "configure: WARNING: Rcpp looks like a CRAN install (no GitHub Remote* fields). ",
-        "On R-devel / R >= 4.5, a stale CRAN tree can leave Rcpp headers incompatible with R ",
-        "(e.g. R_NamespaceRegistry). Consider remotes::install_github(\"RcppCore/Rcpp\") ",
-        "or ensure install_github actually replaced the library."
-      ),
-      con = stderr()
-    )
+    writeLines("configure: WARNING: Rcpp looks like a CRAN install (no GitHub Remote* fields).", con = stderr())
+    writeLines("configure: WARNING: On R-devel / R >= 4.5, stale CRAN headers can be incompatible", con = stderr())
+    writeLines("configure: WARNING: with R (e.g. R_NamespaceRegistry). Consider", con = stderr())
+    writeLines("configure: WARNING: remotes::install_github(\"RcppCore/Rcpp\") or ensure", con = stderr())
+    writeLines("configure: WARNING: install_github actually replaced the library.", con = stderr())
   }
 
   fh <- file.path(lib, "Rcpp", "include", "Rcpp", "Function.h")
