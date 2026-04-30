@@ -3,7 +3,24 @@ Type: Package
 Title: Bayesian Generalized Linear Models (IID Samples)
 Version: 0.9.2
 Date: 2026-04-29
-Authors@R: person("Kjell", "Nygren", role = c("aut","cre"), email = "kjell.a.nygren@gmail.com")
+Authors@R: c(
+    person("Kjell", "Nygren", role = c("aut", "cre"),
+           email = "kjell.a.nygren@gmail.com"),
+    person("The R Core Team", role = c("ctb", "cph"),
+           comment = "R Mathlib sources, R stats modeling code, and derived/adapted routines"),
+    person("The R Foundation", role = "cph",
+           comment = "Portions of R Mathlib and R source code"),
+    person("Ross", "Ihaka", role = c("ctb", "cph"),
+           comment = "R Mathlib and original R modeling infrastructure"),
+    person("Robert", "Gentleman", role = c("ctb", "cph"),
+           comment = "Portions of R Mathlib"),
+    person("Simon", "Davies", role = "ctb",
+           comment = "Original R glm implementation"),
+    person("Morten", "Welinder", role = c("ctb", "cph"),
+           comment = "Portions of R Mathlib"),
+    person("Martin", "Maechler", role = "ctb",
+           comment = "Portions of R Mathlib")
+    )
 Description: Provides Bayesian linear and generalized linear model fitting
     with independent and identically distributed (iid) posterior samples. The
     main functions mirror R's 'lm()' and 'glm()' interfaces while adding prior
