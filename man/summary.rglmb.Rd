@@ -70,7 +70,7 @@ summary(out)
 
 }
 \seealso{
-\code{\link{rglmb}}; \code{\link{glmb}}, \code{\link{glmbayes-package}},
+\code{\link{rglmb}}; \code{\link{glmb}}, \code{\link{nmathopencl-package}},
 \code{\link{rlmb}}, \code{\link{lmb}}, \code{\link{summary}},
 \code{\link[stats]{summary.lm}}, \code{\link[stats]{summary.glm}}.
 }

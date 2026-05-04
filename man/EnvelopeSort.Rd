@@ -80,7 +80,7 @@ fails (e.g. for very large grids), the function returns the unsorted envelope
 with \code{sort_ok = FALSE}; the sampler remains valid but may have poorer acceptance.
 
 Used after \code{\link{EnvelopeBuild}} and (for Normal--Gamma models)
-\code{\link{EnvelopeDispersionBuild}}; see \insertCite{Nygren2006,glmbayesChapterA08}{glmbayes}.
+\code{\link{EnvelopeDispersionBuild}}; see \insertCite{Nygren2006,glmbayesChapterA08}{nmathopencl}.
 }
 \examples{
 data(menarche,package="MASS")

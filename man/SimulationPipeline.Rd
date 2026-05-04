@@ -7,7 +7,7 @@
 A detailed overview of the low-level simulation pipeline used by
 \code{rglmb()} and related functions. These routines implement the
 optimization -> standardization -> envelope sizing -> envelope construction ->
-sampling -> back-transformation workflow described in \insertCite{Nygren2006}{glmbayes}.
+sampling -> back-transformation workflow described in \insertCite{Nygren2006}{nmathopencl}.
 }
 \details{
 (summaries of each step)

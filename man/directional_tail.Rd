@@ -31,7 +31,7 @@ Computes the directional tail probability based on posterior draws and prior mea
 using whitening transformation and projection onto the direction of disagreement.
 This diagnostic identifies directional disagreement between posterior and prior,
 and is especially useful for visualizing rejection regions in whitened space.
-The whitening uses Mahalanobis distance \insertCite{Mahalanobis1936}{glmbayes} in
+The whitening uses Mahalanobis distance \insertCite{Mahalanobis1936}{nmathopencl} in
 posterior-precision-scaled coordinates.
 }
 \details{
@@ -39,7 +39,7 @@ Whitening is performed using the posterior precision matrix.
 The direction vector is computed as the mean shift in whitened space.
 Tail probability is the proportion of draws with negative projection onto this direction.
 For theory, interpretation, and relation to t/F statistics, see
-\insertCite{glmbayesChapterA04}{glmbayes}.
+\insertCite{glmbayesChapterA04}{nmathopencl}.
 }
 \examples{
 ## Annette Dobson (1990) "An Introduction to Generalized Linear Models".

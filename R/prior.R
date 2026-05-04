@@ -1,4 +1,4 @@
-#' Setup Prior Objects
+﻿#' Setup Prior Objects
 #'
 #' Helper function to facilitate the Setup of Prior Distributions for glm models.
 #' @name Prior_Setup
@@ -54,7 +54,7 @@
 #'   \code{offset}, \code{contrasts}, \code{control}, \code{...}: as in
 #'   \code{\link[stats]{glm}}.
 #'
-#' \emph{2. Prior variance–covariance specification}
+#' \emph{2. Prior varianceâ€“covariance specification}
 #' * \code{pwt}: prior weight relative to the likelihood. If scalar, used to
 #'   construct a Zellner-type g-prior. If vector, applied elementwise.
 #' * \code{n_prior}: optional scalar effective prior sample size. Replaces
@@ -99,10 +99,10 @@
 #'   \Sigma_0 = \frac{1 - \mathrm{pwt}}{\mathrm{pwt}} (X^\top W X)^{-1}.
 #' }
 #'
-#' \strong{Gaussian Normal–Gamma calibration and \eqn{S_{\mathrm{marg}}}}
+#' \strong{Gaussian Normalâ€“Gamma calibration and \eqn{S_{\mathrm{marg}}}}
 #'
-#' For \code{family = gaussian()}, the function performs the Normal–Gamma
-#' calibration described in \insertCite{glmbayesChapterA12}{glmbayes}. Let:
+#' For \code{family = gaussian()}, the function performs the Normalâ€“Gamma
+#' calibration described in \insertCite{glmbayesChapterA12}{nmathopencl}. Let:
 #' * \eqn{p = \texttt{ncol}(x)},
 #' * \eqn{n_{\mathrm{effective}} = \sum_i w_i},
 #' * \eqn{\hat\beta} the weighted least-squares estimator,
@@ -133,21 +133,21 @@
 #'   \texttt{dispersion}
 #'     = \frac{S_{\mathrm{marg}}}{n_{\mathrm{effective}} - p},
 #' }
-#' and the Normal–Gamma hyperparameters are
+#' and the Normalâ€“Gamma hyperparameters are
 #' \deqn{
 #'   \text{shape} = \frac{n_{\mathrm{prior}} + k}{2},\qquad
 #'   \text{rate}
 #'     = \frac{1}{2} S_{\mathrm{marg}}
 #'       \frac{n_{\mathrm{prior}} + k + p - 2}{n_{\mathrm{effective}} - p}.
 #' }
-#' The independent Normal–Gamma shape is
+#' The independent Normalâ€“Gamma shape is
 #' \deqn{
 #'   \text{shape}_{ING} = \text{shape} + \frac{p}{2}.
 #' }
 #'
-#' \strong{Posterior summaries for the conjugate Normal–Gamma prior}
+#' \strong{Posterior summaries for the conjugate Normalâ€“Gamma prior}
 #'
-#' Under the conjugate Normal–Gamma prior (used by \code{dNormal_Gamma()}),
+#' Under the conjugate Normalâ€“Gamma prior (used by \code{dNormal_Gamma()}),
 #' the posterior has:
 #' * Posterior mean
 #'   \deqn{
@@ -170,7 +170,7 @@
 #' \strong{Weak-prior limits (Theorems 2 and 3)}
 #'
 #' As \eqn{n_{\mathrm{prior}} \to 0^+} (equivalently \eqn{\mathrm{pwt} \to 0}),
-#' \eqn{S_{\mathrm{marg}} \to \mathrm{RSS}_w}, and the conjugate Normal–Gamma
+#' \eqn{S_{\mathrm{marg}} \to \mathrm{RSS}_w}, and the conjugate Normalâ€“Gamma
 #' posterior converges to the classical weighted least-squares limit:
 #' \deqn{
 #'   E[\beta \mid y] \to \hat\beta,\qquad
@@ -180,13 +180,13 @@
 #'     (X^\top W X)^{-1}.
 #' }
 #'
-#' For the independent Normal–Gamma prior used by
+#' For the independent Normalâ€“Gamma prior used by
 #' \code{dIndependent_Normal_Gamma()}, neither the posterior mean nor the
 #' posterior covariance is available in closed form; the posterior must be
 #' obtained by numerical integration or sampling (e.g.,
 #' \code{rindepNormalGamma_reg()}). Theorem 3 in
-#' \insertCite{glmbayesChapterA12}{glmbayes} shows that the ING posterior has
-#' the same weak-prior limit as the conjugate Normal–Gamma posterior:
+#' \insertCite{glmbayesChapterA12}{nmathopencl} shows that the ING posterior has
+#' the same weak-prior limit as the conjugate Normalâ€“Gamma posterior:
 #' \deqn{
 #'   E[\beta \mid y] \to \hat\beta,\qquad
 #'   \mathrm{Cov}(\beta \mid y) \to
@@ -197,7 +197,7 @@
 #' @return
 #' A list of class \code{"PriorSetup"} with components:
 #' \item{mu}{Prior mean vector (length equal to the number of coefficients).}
-#' \item{Sigma}{Coefficient-scale prior variance–covariance matrix.}
+#' \item{Sigma}{Coefficient-scale prior varianceâ€“covariance matrix.}
 #' \item{Sigma_0}{For \code{family = gaussian()} only: dispersion-independent
 #'   prior covariance on the precision-weighted coefficient scale (the
 #'   \code{Sigma_0} passed to \code{\link{compute_gaussian_prior}}). Under
@@ -206,7 +206,7 @@
 #' \item{dispersion}{Calibrated dispersion (Gaussian models only), equal to
 #'   \eqn{S_{\mathrm{marg}}/(n_{\mathrm{effective}} - p)} under the default
 #'   calibration.}
-#' \item{shape}{Derived prior Gamma shape parameter for the Normal–Gamma prior
+#' \item{shape}{Derived prior Gamma shape parameter for the Normalâ€“Gamma prior
 #'   on precision (Gaussian only), \eqn{(n_{\mathrm{prior}} + k)/2}.}
 #' \item{shape_ING}{For \code{gaussian()} only when \code{shape} is available:
 #'   dedicated shape parameter for \code{dIndependent_Normal_Gamma()},
@@ -244,12 +244,12 @@
 #' \code{\link{rindepNormalGamma_reg}} for
 #' \code{\link{dIndependent_Normal_Gamma}()}). 
 #'
-#' \insertCite{zellner1986gprior}{glmbayes};
-#' \insertCite{Raiffa1961}{glmbayes};
-#' \insertCite{Gelman2013}{glmbayes};
-#' \insertCite{McCullagh1989}{glmbayes};
-#' \insertCite{glmbayesChapter03}{glmbayes};
-#' \insertCite{glmbayesChapterA12}{glmbayes}.
+#' \insertCite{zellner1986gprior}{nmathopencl};
+#' \insertCite{Raiffa1961}{nmathopencl};
+#' \insertCite{Gelman2013}{nmathopencl};
+#' \insertCite{McCullagh1989}{nmathopencl};
+#' \insertCite{glmbayesChapter03}{nmathopencl};
+#' \insertCite{glmbayesChapterA12}{nmathopencl}.
 #'
 #' @references
 #' \insertAllCited{}
@@ -1021,15 +1021,15 @@ print.PriorSetup <- function(x, ...) {
 #'
 #' Checks if the credible intervals for the prior overlap with the implied confidence intervals
 #' from the classical model (obtained via \code{\link[stats]{glm}}). The approach relates to
-#' prior-data conflict checks \insertCite{EvansMoshonov2006}{glmbayes}.
+#' prior-data conflict checks \insertCite{EvansMoshonov2006}{nmathopencl}.
 #'
 #' @param level the confidence level at which the Prior-data conflict should be checked.
 #' @inheritParams glmb
 #' @return A vector where each item provided the ratio of the absolue value for the difference between the 
 #' prior and maximum likelihood estimate divided by the length of the sum of half of the two intervals 
 #' (where normality is assumed)
-#' @seealso \code{\link{Prior_Setup}}, \code{\link{glmb}}; see \insertCite{glmbayesChapter03}{glmbayes} for prior tailoring;
-#' \insertCite{glmbayesChapterA12}{glmbayes} for full derivations.
+#' @seealso \code{\link{Prior_Setup}}, \code{\link{glmb}}; see \insertCite{glmbayesChapter03}{nmathopencl} for prior tailoring;
+#' \insertCite{glmbayesChapterA12}{nmathopencl} for full derivations.
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt

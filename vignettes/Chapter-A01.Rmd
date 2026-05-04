@@ -1,4 +1,4 @@
----
+﻿---
 title: "Chapter A01: A detailed overview of the glmbayes package"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
@@ -25,30 +25,30 @@ For users who are interested in the details of how the simulation is performed t
 
 | Function Type | Functions | Vignettes |
 |---------------|-----------|-----------|
-| **Prior Setup function**| **Prior_Setup** | Chapter 01 — Getting Started with glmbayes  |
-|**Main Model Interfaces (GLM / LM)**|**glmb** | Chapter 01 — Getting Started with glmbayes |
-|**Methods**|**print.glmb** | Chapter 01 — Getting Started with glmbayes |
-| **pfamilies** | **dNormal**|Chapter 02 — Estimating Bayesian Linear Models|
-| **Main Model Interfaces (GLM / LM)**| **lmb**  |Chapter 02 — Estimating Bayesian Linear Models |
-| **Methods**| **summary.lmb**  |Chapter 02 — Estimating Bayesian Linear Models |
-| **Prior Setup function**| **Prior_Setup** | Chapter 03 — Tailoring Priors - Leveraging the Prior_Setup Function; Chapter A12 — Technical Derivations for Priors Returned by Prior_Setup  |
+| **Prior Setup function**| **Prior_Setup** | Chapter 01 â€” Getting Started with glmbayes  |
+|**Main Model Interfaces (GLM / LM)**|**glmb** | Chapter 01 â€” Getting Started with glmbayes |
+|**Methods**|**print.glmb** | Chapter 01 â€” Getting Started with glmbayes |
+| **pfamilies** | **dNormal**|Chapter 02 â€” Estimating Bayesian Linear Models|
+| **Main Model Interfaces (GLM / LM)**| **lmb**  |Chapter 02 â€” Estimating Bayesian Linear Models |
+| **Methods**| **summary.lmb**  |Chapter 02 â€” Estimating Bayesian Linear Models |
+| **Prior Setup function**| **Prior_Setup** | Chapter 03 â€” Tailoring Priors - Leveraging the Prior_Setup Function; Chapter A12 â€” Technical Derivations for Priors Returned by Prior_Setup  |
 | **Methods** | **print.PriorSetup** | Chapter 03 - Tailoring Priors - Leveraging the Prior_Setup Function  |
-| **Methods**| **predict.glmb, residuals.glmb, extractAIC.glmb** | Chapter 04 — Predictions, Deviance Residuals, Model Statistics |
-|**Main Model Interfaces (GLM / LM)**|**glmb** | Chapter 06 — Estimating Bayesian Generalized Linear Models |
-|**Methods**|**summary.glmb** | Chapter 06 — Estimating Bayesian Generalized Linear Models |
-|**Main Model Interfaces (GLM / LM)**|**glmb** | Chapter 07 — Models for the Binomial Family|
-|**Main Model Interfaces (GLM / LM)**|**glmb** | Chapter 08 — Models for the Poisson Family |
-|**Main Model Interfaces (GLM / LM)**|**glmb** | Chapter 09 — Models for the Gamma Family |
-| **Lower-Level Interfaces (GLM / LM)** | **rlmb** | Chapter 13 — Hierarchical Linear Models |
-| **Lower-Level Interfaces (GLM / LM)** | **rglmb** | Chapter 14 — Hierarchical Generalized Linear Models |
+| **Methods**| **predict.glmb, residuals.glmb, extractAIC.glmb** | Chapter 04 â€” Predictions, Deviance Residuals, Model Statistics |
+|**Main Model Interfaces (GLM / LM)**|**glmb** | Chapter 06 â€” Estimating Bayesian Generalized Linear Models |
+|**Methods**|**summary.glmb** | Chapter 06 â€” Estimating Bayesian Generalized Linear Models |
+|**Main Model Interfaces (GLM / LM)**|**glmb** | Chapter 07 â€” Models for the Binomial Family|
+|**Main Model Interfaces (GLM / LM)**|**glmb** | Chapter 08 â€” Models for the Poisson Family |
+|**Main Model Interfaces (GLM / LM)**|**glmb** | Chapter 09 â€” Models for the Gamma Family |
+| **Lower-Level Interfaces (GLM / LM)** | **rlmb** | Chapter 13 â€” Hierarchical Linear Models |
+| **Lower-Level Interfaces (GLM / LM)** | **rglmb** | Chapter 14 â€” Hierarchical Generalized Linear Models |
 | **Model-Specific Simulation Functions** | **rNormal_reg, rGamma_reg, rNormal_Gamma_reg, rindependent_norm_gamma_reg** | Chapter A02: Overview of Estimation Procedures |
-| **pfamilies** |**dGamma, dNormal_Gamma, dIndependent_Normal_Gamma** | Chapter 11 — Estimating Models with Unknown Dispersion Parameters |
-| **Methods**| **Various method functions for glmbayes** | Chapter A03 — Methods Available in glmbayes |
-| **Envelope Related Functions** | Various Functions | Chapter A08 — Overview of Envelope Related Functions |
+| **pfamilies** |**dGamma, dNormal_Gamma, dIndependent_Normal_Gamma** | Chapter 11 â€” Estimating Models with Unknown Dispersion Parameters |
+| **Methods**| **Various method functions for glmbayes** | Chapter A03 â€” Methods Available in glmbayes |
+| **Envelope Related Functions** | Various Functions | Chapter A08 â€” Overview of Envelope Related Functions |
 | **Parallel Simulation Related Functions** | Various Functions | Chapter A09: Parallel Sampling Implementation using RcppParallel |
 | **Accelerated EnvelopedBuild Related Functions** | Various Functions | Chapter A10: Accelerated EnvelopeBuild Implementation using OpenCL |
-| **Utilities** | add_to_libpath_linux, add_to_path, add_to_path_linux, add_to_path_windows| Chapter 00 — Introduction<br>Chapter 01 — Getting Started |
-| **Datasets** | AMI, carinsca, Cleveland | Chapter 01 — Getting Started |
+| **Utilities** | add_to_libpath_linux, add_to_path, add_to_path_linux, add_to_path_windows| Chapter 00 â€” Introduction<br>Chapter 01 â€” Getting Started |
+| **Datasets** | AMI, carinsca, Cleveland | Chapter 01 â€” Getting Started |
 
 
 
@@ -66,18 +66,18 @@ knitr::opts_chunk$set(
 The package curently requires the MASS package so it also needs to be installed and gets loaded as part of the loading of the glmbayes package (see below).
 
 ```{r setup,results = "hide"}
-library(glmbayes)
+library(nmathopencl)
 ```
 
 ## Accessing package information, general documentation, and demos
 
-To access information for the package outside of the information contained in these vignettes, we suggest users review three sets of help pages. A call to help(glmbayes) yields a page with a detailed discussion of the package with an example at the bottom.   Calling help(package="glmbayes") brings the user to a list of Help pages for specific functions as well as links to a general description file, code demos, and these vignettes. Part of the objective of this vignette is to provide more organized layout of the functions than the general list of help pages provided on the documentation page.
+To access information for the package outside of the information contained in these vignettes, we suggest users review three sets of help pages. A call to help(nmathopencl) yields a page with a detailed discussion of the package with an example at the bottom.   Calling help(package = "nmathopencl") brings the user to a list of Help pages for specific functions as well as links to a general description file, code demos, and these vignettes. Part of the objective of this vignette is to provide more organized layout of the functions than the general list of help pages provided on the documentation page.
 
-A call to demo(package="glmbayes"), finally, brings up a list of available demos for the package. A useful start for users might be to go through the specific demos as they are set up to illustrate the functionality of the package.
+A call to demo(package = "nmathopencl"), finally, brings up a list of available demos for the package. A useful start for users might be to go through the specific demos as they are set up to illustrate the functionality of the package.
 
-* help(glmbayes)
-* help(package="glmbayes")
-* demo(package="glmbayes")
+* help(nmathopencl)
+* help(package = "nmathopencl")
+* demo(package = "nmathopencl")
 * data(package="glmbayes)
 
 # Using the *lmb* and *glmb* functions and their methods

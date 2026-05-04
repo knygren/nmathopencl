@@ -29,7 +29,7 @@ whether individual residuals represent outliers or not.
 \description{
 Extract deviance residuals from fitted Bayesian GLM objects. The residuals
 use the family's deviance residuals function as in \code{\link[stats]{residuals.glm}}
-\insertCite{McCullagh1989}{glmbayes}.
+\insertCite{McCullagh1989}{nmathopencl}.
 }
 \details{
 These functions are all \link{methods} for class \code{glmb}, \code{lmb}, or \code{summary.glmb} objects.
@@ -103,6 +103,6 @@ par(oldpar)
 }
 \seealso{
 \code{\link{predict.glmb}}, \code{\link{summary.glmb}}, \code{\link{glmb}},
-\code{\link{glmbayes-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
+\code{\link{nmathopencl-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
 \code{\link[stats]{residuals.glm}}
 }

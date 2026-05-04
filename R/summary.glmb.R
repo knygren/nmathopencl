@@ -1,4 +1,4 @@
-#' Summarizing Bayesian Generalized Linear Model Fits
+﻿#' Summarizing Bayesian Generalized Linear Model Fits
 #'
 #' These functions are all \code{\link{methods}} for class \code{glmb} or \code{summary.glmb} objects.
 #' 
@@ -29,10 +29,10 @@
 #' Key output includes mean residuals, information related to the prior, mean coefficients
 #' with associated stats, percentiles for the coefficients, as well as the effective number of
 #' parameters and the DIC statistic. The \code{dir_tail} component reports the directional tail
-#' diagnostic; see \code{\link{directional_tail}} and \insertCite{glmbayesChapterA04}{glmbayes}
+#' diagnostic; see \code{\link{directional_tail}} and \insertCite{glmbayesChapterA04}{nmathopencl}
 #' for interpretation.
 #'
-#' @seealso \code{\link{directional_tail}}, \code{\link{glmb}}, \code{\link{glmbayes-package}},
+#' @seealso \code{\link{directional_tail}}, \code{\link{glmb}}, \code{\link{nmathopencl-package}},
 #'   \code{\link{lmb}}, \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{summary}},
 #'   \code{\link[stats]{summary.lm}}, \code{\link[stats]{summary.glm}}
 #' @references

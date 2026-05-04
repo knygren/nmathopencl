@@ -1,4 +1,4 @@
-#' The Central Inverse-Gamma Distribution
+﻿#' The Central Inverse-Gamma Distribution
 #'
 #' Distribution function, quantile function, and random generation for the
 #' inverse-Gamma distribution on the dispersion scale. These functions provide
@@ -50,7 +50,7 @@
 #' They provide a stable alternative to direct manipulation of the Gamma
 #' distribution when working on the dispersion scale is more natural or more
 #' numerically robust. They are used in envelope-based dispersion sampling
-#' \insertCite{Nygren2006}{glmbayes}.
+#' \insertCite{Nygren2006}{nmathopencl}.
 #'
 #' @seealso \code{\link{Gamma_ct}}, \code{\link{Normal_ct}}, \code{\link{EnvelopeDispersionBuild}}
 #' @references

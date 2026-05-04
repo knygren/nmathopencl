@@ -1,4 +1,4 @@
-#' Fitting Bayesian Linear Models
+﻿#' Fitting Bayesian Linear Models
 #'
 #' \code{lmb} is used to fit Bayesian linear models, specified by giving a symbolic descriptions of the linear 
 #' predictor and the prior distribution.
@@ -78,10 +78,10 @@
 #' posterior simulation and prior specification via the \code{\link{pfamily}} argument. Internally, 
 #' \code{lmb} calls \code{lm} to obtain the classical least squares fit, then generates independent 
 #' draws from the posterior distribution using either multivariate normal simulation (for Gaussian priors) 
-#' or accept-reject sampling via likelihood-subgradient envelopes \insertCite{Nygren2006}{glmbayes}.
+#' or accept-reject sampling via likelihood-subgradient envelopes \insertCite{Nygren2006}{nmathopencl}.
 #'
-#' The symbolic formula interface follows \insertCite{WilkinsonRogers1973}{glmbayes}, and the overall design of \code{lm} was inspired by the S system 
-#' \insertCite{Chambers1992}{glmbayes}. \code{lmb} comes with many of the same types of generic methods 
+#' The symbolic formula interface follows \insertCite{WilkinsonRogers1973}{nmathopencl}, and the overall design of \code{lm} was inspired by the S system 
+#' \insertCite{Chambers1992}{nmathopencl}. \code{lmb} comes with many of the same types of generic methods 
 #' that are available to \code{lm} and \code{glm}, including \code{predict}, \code{residuals}, \code{extractAIC}, 
 #' and \code{summary}. Many of these are inherited from \code{glmb}.
 #'
@@ -95,14 +95,14 @@
 #'
 #' Posterior draws are generated using the prior specification provided via \code{pfamily}. For Gaussian models 
 #' with conjugate priors, draws are obtained directly from the posterior distribution using standard simulation 
-#' procedures for multivariate normal densities \insertCite{Raiffa1961}{glmbayes}. For non-conjugate setups, the 
+#' procedures for multivariate normal densities \insertCite{Raiffa1961}{nmathopencl}. For non-conjugate setups, the 
 #' function uses envelope-based accept-reject sampling, where the \code{Gridtype} parameter controls the granularity 
 #' of the envelope construction. The number of candidates generated before acceptance is returned in the 
 #' \code{iters} component.
 #'
 #' The output includes both the classical \code{lm} fit and Bayesian diagnostics such as the Deviance 
 #' Information Criterion (DIC), effective number of parameters (pD), and posterior summaries. 
-#' The DIC, introduced by \insertCite{Spiegelhalter2002}{glmbayes}, provides a Bayesian analog to AIC 
+#' The DIC, introduced by \insertCite{Spiegelhalter2002}{nmathopencl}, provides a Bayesian analog to AIC 
 #' by balancing model fit and complexity using posterior expectations. This dual structure allows users 
 #' to compare classical and Bayesian fits side-by-side, and to leverage familiar modeling workflows 
 #' while gaining access to richer inferential tools.
@@ -137,9 +137,9 @@
 #' 
 #' \code{\link{Prior_Setup}}, \code{\link{Prior_Check}} for functions used to initialize and to check priors,  
 #'
-#' Further reading: \insertCite{Nygren2006}{glmbayes};
-#' \insertCite{glmbayesSimmethods,glmbayesChapterA08}{glmbayes};
-#' independent Normal--Gamma sampler: \insertCite{glmbayesIndNormGammaVignette}{glmbayes}.
+#' Further reading: \insertCite{Nygren2006}{nmathopencl};
+#' \insertCite{glmbayesSimmethods,glmbayesChapterA08}{nmathopencl};
+#' independent Normal--Gamma sampler: \insertCite{glmbayesIndNormGammaVignette}{nmathopencl}.
 #'
 #' \code{\link{summary.glmb}}, \code{\link{predict.glmb}}, \code{\link{simulate.glmb}}, 
 #' \code{\link{extractAIC.glmb}}, \code{\link{dummy.coef.glmb}} and methods(class="glmb") for methods 

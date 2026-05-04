@@ -1,4 +1,4 @@
----
+﻿---
 title: "Chapter 10: Informative Priors: Centering and priors with differential prior weights"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(glmbayes)
+library(nmathopencl)
 ```
 
 

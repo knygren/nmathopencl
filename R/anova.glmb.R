@@ -1,9 +1,9 @@
-#' Analysis of Deviance for Bayesian Generalized Linear Model Fits
+﻿#' Analysis of Deviance for Bayesian Generalized Linear Model Fits
 #'
 #' Compute an analysis of deviance table for one (current implementation) or more (future)
 #' Bayesian generalized linear model fits. The structure follows the sequential analysis
-#' of deviance \insertCite{McCullagh1989}{glmbayes}, with Bayesian extensions for DIC, pD,
-#' Mahalanobis shift, and directional tail probability \insertCite{Spiegelhalter2002}{glmbayes}.
+#' of deviance \insertCite{McCullagh1989}{nmathopencl}, with Bayesian extensions for DIC, pD,
+#' Mahalanobis shift, and directional tail probability \insertCite{Spiegelhalter2002}{nmathopencl}.
 #'
 #' @param object an object of class \code{glmb}, typically the result of a call to \link{glmb}
 #' @param \ldots Other arguments passed to or from other methods.
@@ -13,9 +13,9 @@
 #' term of the formula is added in turn are given as the rows of a table, plus the residual
 #' deviances themselves. The Mahalanobis shift and pDirectional columns report prior-posterior
 #' disagreement diagnostics; see \code{\link{directional_tail}} and
-#' \insertCite{glmbayesChapterA04}{glmbayes}.
+#' \insertCite{glmbayesChapterA04}{nmathopencl}.
 #' @seealso \code{\link{directional_tail}}, \code{\link{summary.glmb}}, \code{\link{glmb}},
-#'   \code{\link{glmbayes-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
+#'   \code{\link{nmathopencl-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
 #'   \code{\link[stats]{anova.glm}}
 #' @references
 #' \insertAllCited{}

@@ -44,7 +44,7 @@ The \code{summary.glmb} function summarizes the output from the \code{glmb} func
 Key output includes mean residuals, information related to the prior, mean coefficients
 with associated stats, percentiles for the coefficients, as well as the effective number of
 parameters and the DIC statistic. The \code{dir_tail} component reports the directional tail
-diagnostic; see \code{\link{directional_tail}} and \insertCite{glmbayesChapterA04}{glmbayes}
+diagnostic; see \code{\link{directional_tail}} and \insertCite{glmbayesChapterA04}{nmathopencl}
 for interpretation.
 }
 \examples{
@@ -120,7 +120,7 @@ lines(menarche$Age, pred1_m, col = "blue", lwd = 2)
 \insertAllCited{}
 }
 \seealso{
-\code{\link{directional_tail}}, \code{\link{glmb}}, \code{\link{glmbayes-package}},
+\code{\link{directional_tail}}, \code{\link{glmb}}, \code{\link{nmathopencl-package}},
 \code{\link{lmb}}, \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{summary}},
 \code{\link[stats]{summary.lm}}, \code{\link[stats]{summary.glm}}
 }

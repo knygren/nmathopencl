@@ -1,4 +1,4 @@
----
+﻿---
 title: "Chapter 09: Models for the Gamma Family"
 output: rmarkdown::html_vignette
 bibliography: REFERENCES.bib
@@ -17,12 +17,12 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(glmbayes)
+library(nmathopencl)
 ```
 
 ## 1. Introductory Discussion
 
-Gamma regression models are used when the response variable is strictly positive and right‑skewed.  
+Gamma regression models are used when the response variable is strictly positive and rightâ€‘skewed.  
 Typical applications include:
 
 - insurance claim severities  
@@ -30,7 +30,7 @@ Typical applications include:
 - reaction times and waiting times  
 - positive continuous measurements with heteroskedasticity
 
-Gamma regression is a standard GLM for positive, right‑skewed responses [@NelderWedderburn1972; @McCullagh1989; @Agresti2015].
+Gamma regression is a standard GLM for positive, rightâ€‘skewed responses [@NelderWedderburn1972; @McCullagh1989; @Agresti2015].
 
 In classical statistics, these models are fit using
 
@@ -130,7 +130,7 @@ The variance is
 \]
 
 Under the **log link**, the canonical parameter is a monotone transformation of the linear predictor, and the resulting log-likelihood is **log-concave in \(\eta_i\)**.  
-This property is essential for stable envelope construction and accept–reject sampling in *glmbayes*.
+This property is essential for stable envelope construction and acceptâ€“reject sampling in *glmbayes*.
 
 
 ### 2.3 Log Link and Its Properties
@@ -152,7 +152,7 @@ It is the preferred link for Gamma GLMs because:
 - it is the only link supported by `glmb()` when dispersion is fixed.
 
 Other links (inverse, identity) do not preserve log-concavity and are therefore not used in this chapter.  
-Models with **estimated dispersion** or **non-log links** are covered in Chapter 11.
+Models with **estimated dispersion** or **non-log links** are covered in Chapterâ€¯11.
 
 
 ### 2.4 Likelihood, Prior, and Posterior (Normal Prior on \(\beta\))
@@ -195,7 +195,7 @@ w_i\left[
 + \text{const}.
 \]
 
-Because both terms are concave in \(\beta\), the posterior is **log-concave**, enabling efficient iid sampling via the envelope-based accept–reject sampler implemented in *glmbayes*.
+Because both terms are concave in \(\beta\), the posterior is **log-concave**, enabling efficient iid sampling via the envelope-based acceptâ€“reject sampler implemented in *glmbayes*.
 ## 3. Link Functions for Gamma GLMs
 
 The link function relates the mean \(\mu\) to the linear predictor \(\eta = X\beta\):
@@ -217,7 +217,7 @@ In practice, the log link is usually preferred because:
 - it enforces \(\mu > 0\) automatically  
 - it gives multiplicative interpretations for coefficients  
 - it tends to be numerically stable  
-- it preserves log‑concavity of the likelihood
+- it preserves logâ€‘concavity of the likelihood
 
 At present (due to the need for log-concavity), only the log link is implemented in the **glmb** function.
 
@@ -270,12 +270,12 @@ We fit a classical Gamma GLM with a log link. As `glm()` only crudely estimates 
 
 The summary shows:
 
-- regression coefficients on the log mean‑cost scale  
-- standard errors and z‑statistics  
+- regression coefficients on the log meanâ€‘cost scale  
+- standard errors and zâ€‘statistics  
 - deviance and AIC  
 - an estimated dispersion parameter (phi)
 
-Under the log link, exp(\(\beta_{j}\)) can be interpreted as a multiplicative factor on the expected cost ratio for a one‑unit change in the corresponding covariate (or a change in factor level).
+Under the log link, exp(\(\beta_{j}\)) can be interpreted as a multiplicative factor on the expected cost ratio for a oneâ€‘unit change in the corresponding covariate (or a change in factor level).
 
 
 ## 5. Bayesian Gamma Regression (fixed dispersion) with glmb()
@@ -302,7 +302,7 @@ This value will be treated as known in our Bayesian model, so that the Bayesian 
 
 ### 5.2 Prior Setup Using Prior_Setup()
 
-Next we use `Prior_Setup()` to construct a Zellner‑type g‑prior [@GriffinBrown2010] for the coefficients, aligned with the Gamma log‑link model and weighting structure:
+Next we use `Prior_Setup()` to construct a Zellnerâ€‘type gâ€‘prior [@GriffinBrown2010] for the coefficients, aligned with the Gamma logâ€‘link model and weighting structure:
 
 ```{r carinsca_prior}
     ps <- Prior_Setup(Cost/Claims ~ Merit + Class,
@@ -368,7 +368,7 @@ Because dispersion is fixed at the same value in both models, differences betwee
 
 Under the log link, coefficient interpretations are multiplicative:
 
-- exp(\(\beta_{j}\)) is the multiplicative change in expected cost for a one‑unit change in the covariate (or for a change from baseline to a given factor level).
+- exp(\(\beta_{j}\)) is the multiplicative change in expected cost for a oneâ€‘unit change in the covariate (or for a change from baseline to a given factor level).
 
 With a weak prior, posterior means in out_glmb will be close to the MLEs in out, but with slightly more regularization and smaller posterior standard deviations.
 
@@ -378,10 +378,10 @@ By fixing dispersion at disp from the classical model, the Bayesian and classica
 
 This allows:
 
-- direct comparison of log‑likelihood based quantities,  
+- direct comparison of logâ€‘likelihood based quantities,  
 - a clean assessment of how the prior affects coefficient estimates.
 
-If desired, a more advanced model can estimate dispersion by switching to a pfamily such as dNormal_Gamma, but that is covered in more detail in the dispersion‑focused vignettes.
+If desired, a more advanced model can estimate dispersion by switching to a pfamily such as dNormal_Gamma, but that is covered in more detail in the dispersionâ€‘focused vignettes.
 
 
 ### 6.3 DIC and Model Fit
@@ -403,7 +403,7 @@ In this chapter, we have:
 - introduced the Gamma GLM and its link functions,  
 - shown how to fit a classical Gamma regression using glm(),  
 - demonstrated how to estimate dispersion with gamma.dispersion(),  
-- used Prior_Setup() to construct a default Zellner‑type prior,  
+- used Prior_Setup() to construct a default Zellnerâ€‘type prior,  
 - fit a Bayesian Gamma regression with glmb() using a dNormal prior with fixed dispersion,  
 - and compared classical and Bayesian summaries in a realistic insurance setting.
 
@@ -411,4 +411,4 @@ In later vignettes, we extend these ideas to:
 
 - Gamma models with unknown dispersion and hierarchical priors,  
 - Gamma regression combined with other components in larger GLM systems,  
-- and specialized accept‑reject schemes for dispersion parameters.
+- and specialized acceptâ€‘reject schemes for dispersion parameters.

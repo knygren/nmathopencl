@@ -1,7 +1,7 @@
-Package: glmbayes
+Package: nmathopencl
 Type: Package
 Title: Bayesian Generalized Linear Models (IID Samples)
-Version: 0.9.3
+Version: 0.1.0
 Date: 2026-04-30
 Authors@R: c(
     person("Kjell", "Nygren", role = c("aut", "cre"),
@@ -32,8 +32,8 @@ Description: Provides Bayesian linear and generalized linear model fitting
     diagnostics, simulation, vignettes, and optional 'OpenCL' acceleration for
     larger models.
 License: GPL-2
-URL: https://github.com/knygren/glmbayes, https://knygren.r-universe.dev/glmbayes
-BugReports: https://github.com/knygren/glmbayes/issues
+URL: https://github.com/knygren/nmathopencl, https://knygren.r-universe.dev/nmathopencl
+BugReports: https://github.com/knygren/nmathopencl/issues
 Imports:
     stats,
     coda,

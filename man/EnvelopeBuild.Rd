@@ -109,7 +109,7 @@ GPU-Accelerated Envelope Construction for Posterior Simulation
 Constructs an enveloping function for posterior simulation using a grid of
 tangency points. The envelope is used in accept-reject sampling to guarantee
 iid draws from the posterior distribution. The implementation follows
-\insertCite{Nygren2006}{glmbayes}, with extensions for GPU acceleration
+\insertCite{Nygren2006}{nmathopencl}, with extensions for GPU acceleration
 (via OpenCL), dynamic grid optimization, and parallelized evaluation.
 
 The envelope is typically built around the posterior mode \eqn{\theta^\star} for a model in standard
@@ -125,8 +125,8 @@ envelope function that dominates the posterior density.
 
 
 The standard-form restriction and its closed-form truncated-normal integrals
-follow \insertCite{Nygren2006}{glmbayes}. See
-\insertCite{glmbayesChapterA08}{glmbayes} for the full theoretical details (standard form restriction,
+follow \insertCite{Nygren2006}{nmathopencl}. See
+\insertCite{glmbayesChapterA08}{nmathopencl} for the full theoretical details (standard form restriction,
 closed-form truncated-normal integrals, and the resulting log-scale tractability).
 
 In the implementation, these standard-form quantities determine the grid-based
@@ -138,7 +138,7 @@ that drive the mixture weights used by the envelope sampler.
 
 
 For the full restricted density construction and the resulting envelope
-constants, see \insertCite{glmbayesChapterA08}{glmbayes}.
+constants, see \insertCite{glmbayesChapterA08}{nmathopencl}.
 
 In the implementation, these theory objects become the precomputed
 region log-constants (via closed-form CDF pieces) that are used to normalize
@@ -149,7 +149,7 @@ the envelope mixture weights for the accept-reject sampler.
 
 
 The mixture construction and its tractable region probabilities are derived
-in \insertCite{glmbayesChapterA08}{glmbayes}. In the implementation, these theory objects become the
+in \insertCite{glmbayesChapterA08}{nmathopencl}. In the implementation, these theory objects become the
 precomputed region log-constants and the mixture weights (\code{PLSD}) used by
 the envelope-based accept-reject sampler.
 }
@@ -158,7 +158,7 @@ the envelope-based accept-reject sampler.
 
 
 The log-scale form of the envelope factor and the subgradient inequality that
-imply envelope dominance are given in \insertCite{glmbayesChapterA08}{glmbayes}. In the implementation, these
+imply envelope dominance are given in \insertCite{glmbayesChapterA08}{nmathopencl}. In the implementation, these
 properties allow pointwise evaluation in the log-domain and provide the
 theoretical basis for the rejection test inside the sampler.
 }
@@ -251,7 +251,7 @@ dimension and region, guiding how each coordinate is simulated.
 
 
 The implementation of \code{EnvelopeBuild} follows the envelope construction
-in \insertCite{Nygren2006}{glmbayes} for models in standard form (see Section 3--3.3 there).
+in \insertCite{Nygren2006}{nmathopencl} for models in standard form (see Section 3--3.3 there).
 Each computational step corresponds to a theoretical guarantee:
 \enumerate{
 \item \strong{Compute width parameters \eqn{\omega_i} from the diagonal precision matrix.}  In particular,
@@ -319,7 +319,7 @@ densities described in the paper, ensuring coverage of the full parameter space.
 likelihood subgradient densities and to facilitate accept rejection sampling}
 
 The subgradients \eqn{c(\bar{\theta})} enter the likelihood-subgradient density construction
-(\insertCite{Nygren2006}{glmbayes}; see also \insertCite{glmbayesChapterA08}{glmbayes}), and both subgradients and
+(\insertCite{Nygren2006}{nmathopencl}; see also \insertCite{glmbayesChapterA08}{nmathopencl}), and both subgradients and
 negative log-likelihoods (through \eqn{h_{\bar{\theta}}(\cdot)}) are used in the accept-reject procedure.
 CPU and GPU routines compute these values efficiently.
 \itemize{
@@ -328,7 +328,7 @@ CPU and GPU routines compute these values efficiently.
 }
 \item \strong{Call \code{EnvelopeSet_Grid_C2_pointwise} to evaluate restricted multivariate normal log-densities.}
 Each restricted density corresponds to a subset of the partition, normalized
-as in Remark 5 of \insertCite{Nygren2006}{glmbayes}.
+as in Remark 5 of \insertCite{Nygren2006}{nmathopencl}.
 \item \strong{Call \code{EnvelopeSet_LogP_C2} to compute component log-probabilities and constants.}
 The constants \eqn{\tilde{a}} and mixture weights \eqn{\tilde{p}_i} are computed
 explicitly as in Remark 6 of the paper, ensuring that the mixture envelope is properly normalized.
@@ -343,8 +343,8 @@ improve sampling efficiency.
 
 Definitions, claims, theorems, remarks, and examples through Remark 16
 (including standard form, the \eqn{3^p} partition, and sampling remarks) are in
-\insertCite{Nygren2006}{glmbayes}. An expanded narrative is in
-\code{vignette("Chapter-A08", package = "glmbayes")}.
+\insertCite{Nygren2006}{nmathopencl}. An expanded narrative is in
+\code{vignette("Chapter-A08", package = "nmathopencl")}.
 }
 
 \section{Subgradient density formulation}{
@@ -531,6 +531,6 @@ Env2
 \seealso{
 \code{\link{EnvelopeSize}}, \code{\link{EnvelopeEval}}, \code{\link{EnvelopeSort}},
 \code{\link{glmb_Standardize_Model}}; \code{\link{rNormal_reg}}, \code{\link{rglmb}}, \code{\link{glmb}}.
-Theory and vignettes: \insertCite{Nygren2006}{glmbayes};
-\insertCite{glmbayesChapterA08,glmbayesSimmethods,glmbayesChapterA10,glmbayesChapter12}{glmbayes}.
+Theory and vignettes: \insertCite{Nygren2006}{nmathopencl};
+\insertCite{glmbayesChapterA08,glmbayesSimmethods,glmbayesChapterA10,glmbayesChapter12}{nmathopencl}.
 }

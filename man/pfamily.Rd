@@ -155,7 +155,7 @@ sampling and analytical tractability. The returned \code{prior_list} includes \c
 \code{dispersion} was supplied explicitly (including \code{1}).
 
 For models with log-concave likelihood functions-such as Poisson, Binomial, and Gamma families-
-posterior sampling under a \code{dNormal} prior is performed using a \insertCite{Nygren2006}{glmbayes}
+posterior sampling under a \code{dNormal} prior is performed using a \insertCite{Nygren2006}{nmathopencl}
 likelihood subgradient approach. This method constructs tight enveloping functions around the posterior
 using subgradients of the log-likelihood, enabling efficient accept-reject sampling even in high dimensions.
 
@@ -164,17 +164,17 @@ area under the enveloping function is bounded above by a constant factor-approxi
 in the univariate case, and \eqn{(2 / \sqrt{\pi})^k} in \eqn{k}-dimensional models. These bounds ensure that
 the rejection rate remains manageable and that the sampler remains computationally efficient.
 
-The concept of conjugate priors was first formalized by \insertCite{Raiffa1961}{glmbayes}, and further
-developed for regression models using g-prior structures by \insertCite{zellner1986gprior}{glmbayes}.
+The concept of conjugate priors was first formalized by \insertCite{Raiffa1961}{nmathopencl}, and further
+developed for regression models using g-prior structures by \insertCite{zellner1986gprior}{nmathopencl}.
 \item \strong{\code{dGamma()}}: Defines a gamma prior over a scalar precision parameter, often used in hierarchical models
 or variance components. This prior is particularly relevant for Gamma likelihoods and dispersion modeling
-in exponential families \insertCite{Gelman2013,Dobson1990,McCullagh1989}{glmbayes}.
+in exponential families \insertCite{Gelman2013,Dobson1990,McCullagh1989}{nmathopencl}.
 With Gaussian \code{\link{Prior_Setup}} output, prefer \code{rate_gamma} for \code{rate} when updating
 dispersion with fixed \code{beta} (see Details above).
 \item \strong{\code{dNormal_Gamma()}}: Combines a multivariate normal prior on coefficients with a gamma prior on precision,
 forming a conjugate structure for Gaussian models with unknown variance. The second argument is \code{Sigma_0}
 (precision-weighted scale); it is aliased internally to \code{Sigma} in \code{prior_list}.
-This formulation parallels classical Normal-Gamma models and is compatible with hierarchical extensions \insertCite{Gelman2013,Raiffa1961}{glmbayes}.
+This formulation parallels classical Normal-Gamma models and is compatible with hierarchical extensions \insertCite{Gelman2013,Raiffa1961}{nmathopencl}.
 \item \strong{\code{dIndependent_Normal_Gamma()}}: Similar to \code{dNormal_Gamma()}, but assumes independence between the
 coefficient and precision priors. This structure is useful for models where prior independence is desired
 or analytically convenient. With \code{\link{Prior_Setup}} on a Gaussian model, pass \code{shape_ING} as the
@@ -260,9 +260,9 @@ pfamily(lmb.D9_v3)
 
 \code{\link{Prior_Setup}}, \code{\link{Prior_Check}} for initializing and validating prior specifications.
 
-\code{\link{EnvelopeBuild}} for envelope construction methods used in likelihood subgradient sampling \insertCite{Nygren2006}{glmbayes}.
+\code{\link{EnvelopeBuild}} for envelope construction methods used in likelihood subgradient sampling \insertCite{Nygren2006}{nmathopencl}.
 
-See also \insertCite{Hastie1992}{glmbayes} for the original S modeling framework that inspired the design of \code{pfamily}.
+See also \insertCite{Hastie1992}{nmathopencl} for the original S modeling framework that inspired the design of \code{pfamily}.
 }
 \author{
 The design of the \code{pfamily} set of functions was developed by Kjell Nygren and was

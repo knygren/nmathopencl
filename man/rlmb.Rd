@@ -102,9 +102,9 @@ the design matrix, response vector, and prior specification via the \code{\link{
 Internally, \code{rlmb} generates independent draws from the posterior distribution using multivariate
 normal simulation when conjugate priors are specified.
 
-The modeling framework follows \insertCite{WilkinsonRogers1973}{glmbayes}, and the prior structure builds on the S system
-\insertCite{Chambers1992}{glmbayes}, Zellner's g-prior \insertCite{zellner1986gprior}{glmbayes}, and
-the conjugate prior formulation of Raiffa and Schlaifer \insertCite{Raiffa1961}{glmbayes}.
+The modeling framework follows \insertCite{WilkinsonRogers1973}{nmathopencl}, and the prior structure builds on the S system
+\insertCite{Chambers1992}{nmathopencl}, Zellner's g-prior \insertCite{zellner1986gprior}{nmathopencl}, and
+the conjugate prior formulation of Raiffa and Schlaifer \insertCite{Raiffa1961}{nmathopencl}.
 
 Prior specification is handled via the \code{\link{pfamily}} argument, which defines the prior mean,
 covariance, and dispersion. The design of the \code{pfamily} family of functions was created by Kjell Nygren
@@ -114,9 +114,9 @@ also allows full customization. Available priors include the  \code{dNormal}, \c
 \code{dIndependent_Normal_Gamma} priors. The last of these allows for more flexible prior structures
 including independent priors on variance components.
 
-Posterior draws are generated using standard simulation procedures for conjugate priors \insertCite{Raiffa1961}{glmbayes}.
+Posterior draws are generated using standard simulation procedures for conjugate priors \insertCite{Raiffa1961}{nmathopencl}.
 For non-conjugate setups, the function uses envelope-based accept-reject sampling via the
-likelihood-subgradient method \insertCite{Nygren2006}{glmbayes}. The \code{Gridtype} parameter controls
+likelihood-subgradient method \insertCite{Nygren2006}{nmathopencl}. The \code{Gridtype} parameter controls
 how many tangent points are used to construct the envelope-trading off tightness against computational cost-
 and the \code{iters} component reports the number of candidate samples generated before acceptance.
 
@@ -233,8 +233,8 @@ used in non-conjugate Gaussian sampling.
 
 \code{\link{Prior_Setup}}, \code{\link{Prior_Check}} for functions used to initialize and to check priors,
 
-Further reading: \insertCite{Nygren2006}{glmbayes};
-\insertCite{glmbayesSimmethods,glmbayesChapterA08,glmbayesIndNormGammaVignette}{glmbayes}.
+Further reading: \insertCite{Nygren2006}{nmathopencl};
+\insertCite{glmbayesSimmethods,glmbayesChapterA08,glmbayesIndNormGammaVignette}{nmathopencl}.
 
 \code{\link{summary.glmb}}, \code{\link{predict.glmb}}, \code{\link{simulate.glmb}},
 \code{\link{extractAIC.glmb}}, \code{\link{dummy.coef.glmb}} and methods(class="glmb") for methods

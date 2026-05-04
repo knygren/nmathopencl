@@ -1,4 +1,4 @@
-#' The Central Normal Distribution
+﻿#' The Central Normal Distribution
 #'
 #' Distribution function and random generation for the center (between a lower and an upper bound)
 #' of the normal distribution with mean equal to mu and standard deviation equal to sigma.
@@ -36,7 +36,7 @@
 #' between the upper and lower bounds \code{b-a} are small. In such cases,
 #' using \code{pnorm(b)-pnorm(a)} may result in 0 being returned even when the
 #' difference is supposed to be positive. They are used in envelope-based
-#' accept-reject sampling for Bayesian GLMs \insertCite{Nygren2006}{glmbayes}.
+#' accept-reject sampling for Bayesian GLMs \insertCite{Nygren2006}{nmathopencl}.
 #' @seealso \code{\link{Gamma_ct}}, \code{\link{EnvelopeBuild}}
 #' @references
 #' \insertAllCited{}

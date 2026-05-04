@@ -1,4 +1,4 @@
- #' Plot posterior draws for objects of class `glmb`.
+﻿ #' Plot posterior draws for objects of class `glmb`.
  #'
  #' This converts `x$coefficients` to a `coda::mcmc` object. If `x$dispersion` is a
  #' draw vector (length equal to the number of draws), it is appended and plotted too.
@@ -7,7 +7,7 @@
  #' @param which One of `"coefficients"`, `"dispersion"`, or `"both"`.
  #' @param ... Forwarded to `coda::plot.mcmc`.
  #' @return Invisibly `NULL`.
- #' @seealso \code{\link{glmb}}, \code{\link{glmbayes-package}}; \code{\link{rglmb}}, \code{\link{rlmb}},
+ #' @seealso \code{\link{glmb}}, \code{\link{nmathopencl-package}}; \code{\link{rglmb}}, \code{\link{rlmb}},
  #'   \code{\link{lmb}}; \code{\link[coda]{plot.mcmc}};
  #'   \code{\link[stats]{plot.lm}} and \code{\link[stats]{termplot}} for classical diagnostic plots of \code{lm}/\code{glm} fits.
  #' @export

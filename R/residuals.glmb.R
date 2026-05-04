@@ -1,8 +1,8 @@
-#' Accessing Bayesian Generalized Linear Model Fits
+﻿#' Accessing Bayesian Generalized Linear Model Fits
 #'
 #' Extract deviance residuals from fitted Bayesian GLM objects. The residuals
 #' use the family's deviance residuals function as in \code{\link[stats]{residuals.glm}}
-#' \insertCite{McCullagh1989}{glmbayes}.
+#' \insertCite{McCullagh1989}{nmathopencl}.
 #'
 #' These functions are all \link{methods} for class \code{glmb}, \code{lmb}, or \code{summary.glmb} objects.
 #' @param object an object of class \code{glmb}, typically the result of a call to \link{glmb}
@@ -14,7 +14,7 @@
 #' for residuals based on simulated data should be a more appropriate measure of
 #' whether individual residuals represent outliers or not.
 #' @seealso \code{\link{predict.glmb}}, \code{\link{summary.glmb}}, \code{\link{glmb}},
-#'   \code{\link{glmbayes-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
+#'   \code{\link{nmathopencl-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
 #'   \code{\link[stats]{residuals.glm}}
 #' @references
 #' \insertAllCited{}

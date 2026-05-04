@@ -56,8 +56,8 @@ on a pilot subset of the grid to estimate runtime before full evaluation.
 
 These functions implement the grid evaluation logic used in envelope
 construction for rejection sampling. They make use of the theory described
-in \insertCite{Nygren2006}{glmbayes} and the general implementation outlined
-in \insertCite{glmbayesSimmethods}{glmbayes}.
+in \insertCite{Nygren2006}{nmathopencl} and the general implementation outlined
+in \insertCite{glmbayesSimmethods}{nmathopencl}.
 
 The evaluation workflow has several layers:
 \strong{1. High-level dispatch (\code{EnvelopeEval})}
@@ -285,5 +285,5 @@ eval_out$cbars
 \seealso{
 \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeSize}}, \code{\link{EnvelopeSort}};
 \code{\link{rNormal_reg}}, \code{\link{rglmb}}. Vignettes:
-\insertCite{glmbayesSimmethods,glmbayesChapterA08,glmbayesChapterA10,glmbayesChapter12}{glmbayes}.
+\insertCite{glmbayesSimmethods,glmbayesChapterA08,glmbayesChapterA10,glmbayesChapter12}{nmathopencl}.
 }

@@ -1,4 +1,4 @@
----
+﻿---
 title: "Chapter A10: Accelerated EnvelopeBuild Implementation using OpenCL"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
@@ -17,14 +17,14 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(glmbayes)
+library(nmathopencl)
 ```
 
 # Chapter A10: Accelerated EnvelopeBuild Implementation using OpenCL
 
 ## 1. Introduction
 
-The `glmbayes` package constructs envelopes for accept–reject sampling by evaluating the negative log posterior (f2) and its gradient (f3) at each point of a **tangency grid**. The grid size grows with dimension (e.g., \(3^\ell\) points for \(\ell\) coefficients), and each grid point can be evaluated independently. These evaluations are **embarrassingly parallel** and are a natural target for GPU acceleration.
+The `glmbayes` package constructs envelopes for acceptâ€“reject sampling by evaluating the negative log posterior (f2) and its gradient (f3) at each point of a **tangency grid**. The grid size grows with dimension (e.g., \(3^\ell\) points for \(\ell\) coefficients), and each grid point can be evaluated independently. These evaluations are **embarrassingly parallel** and are a natural target for GPU acceleration.
 
 The optional **OpenCL** implementation accelerates these evaluations by running them on a GPU (or OpenCL-capable CPU). OpenCL is vendor-neutral and works across NVIDIA, AMD, and Intel hardware. When OpenCL is available and `use_opencl = TRUE`, the package uses GPU-accelerated evaluation inside `EnvelopeEval`, which is called by `EnvelopeBuild` and `EnvelopeDispersionBuild`. If OpenCL is not available or `use_opencl = FALSE`, the CPU path (`f2_f3_non_opencl`) is used instead. The package runs correctly in either case.
 
@@ -69,16 +69,16 @@ all_src = OPENCL.cl
         + kernel file (load_kernel_source, e.g. "src/f2_f3_binomial_logit.cl")
 ```
 
-1. **OPENCL.cl** – Global configuration: extensions (`cl_khr_fp64`, `cl_khr_printf`), IEEE constants (`ML_NAN`, `ML_POSINF`), feature detection for `expm1`/`log1p`, and utility macros.
-2. **rmath** – Mathematical constants (M_E, M_PI, etc.) and distribution function declarations.
-3. **dpq** – R-style density/CDF macros (`R_D__0`, `R_DT_val`, etc.) used in give_log/lower_tail logic.
-4. **nmath** – Ported numerical routines (bd0, stirlerr, lgamma, dbinom, dpois, pnorm, etc.).
-5. **Kernel file** – The model-specific kernel (e.g., `f2_f3_binomial_logit.cl`) that computes f2 and f3 for each grid point.
+1. **OPENCL.cl** â€“ Global configuration: extensions (`cl_khr_fp64`, `cl_khr_printf`), IEEE constants (`ML_NAN`, `ML_POSINF`), feature detection for `expm1`/`log1p`, and utility macros.
+2. **rmath** â€“ Mathematical constants (M_E, M_PI, etc.) and distribution function declarations.
+3. **dpq** â€“ R-style density/CDF macros (`R_D__0`, `R_DT_val`, etc.) used in give_log/lower_tail logic.
+4. **nmath** â€“ Ported numerical routines (bd0, stirlerr, lgamma, dbinom, dpois, pnorm, etc.).
+5. **Kernel file** â€“ The model-specific kernel (e.g., `f2_f3_binomial_logit.cl`) that computes f2 and f3 for each grid point.
 
 ### 3.2 load_kernel_source and load_kernel_library
 
-- **`load_kernel_source(relative_path)`** – Loads a single `.cl` file from `inst/cl/` via `system.file("cl", relative_path, package = "glmbayes")`.
-- **`load_kernel_library(subdir)`** – Loads all `.cl` files in a subdirectory (e.g., `"nmath"`, `"rmath"`, `"dpq"`), parses `@provides` and `@depends` annotations, performs a **dependency-aware topological sort**, and concatenates the files so that dependents appear after their dependencies.
+- **`load_kernel_source(relative_path)`** â€“ Loads a single `.cl` file from `inst/cl/` via `system.file("cl", relative_path, package = "nmathopencl")`.
+- **`load_kernel_library(subdir)`** â€“ Loads all `.cl` files in a subdirectory (e.g., `"nmath"`, `"rmath"`, `"dpq"`), parses `@provides` and `@depends` annotations, performs a **dependency-aware topological sort**, and concatenates the files so that dependents appear after their dependencies.
 
 The `@provides` and `@depends` tags allow modular, maintainable kernel code: each file declares what it provides and what it needs. See `?load_kernel_library` for details.
 
@@ -135,11 +135,11 @@ Each supported family/link has a dedicated kernel file that implements the f2/f3
 
 Each kernel follows the same pattern:
 
-1. **Work-item mapping** – `int j = get_global_id(0)`; one work item per grid point \(j\).
-2. **Prior term** – Compute \(P(\beta_j - \mu)\) and the quadratic form \(\tfrac{1}{2}(\beta_j - \mu)' P (\beta_j - \mu)\), accumulate into `qf[j]`.
-3. **Prior gradient** – Initialize local gradient with \(P(\beta_j - \mu)\).
-4. **Data loop** – For each observation \(i\), compute linear predictor, link, likelihood contribution, and gradient contribution. Use ported functions (`dbinom_raw`, `dpois_raw`, `lgamma`, `pnorm5`, etc.) as needed.
-5. **Write outputs** – `qf[j]` = negative log posterior; `grad[k*m1 + j]` = gradient (column-major layout).
+1. **Work-item mapping** â€“ `int j = get_global_id(0)`; one work item per grid point \(j\).
+2. **Prior term** â€“ Compute \(P(\beta_j - \mu)\) and the quadratic form \(\tfrac{1}{2}(\beta_j - \mu)' P (\beta_j - \mu)\), accumulate into `qf[j]`.
+3. **Prior gradient** â€“ Initialize local gradient with \(P(\beta_j - \mu)\).
+4. **Data loop** â€“ For each observation \(i\), compute linear predictor, link, likelihood contribution, and gradient contribution. Use ported functions (`dbinom_raw`, `dpois_raw`, `lgamma`, `pnorm5`, etc.) as needed.
+5. **Write outputs** â€“ `qf[j]` = negative log posterior; `grad[k*m1 + j]` = gradient (column-major layout).
 
 The kernels use a fixed `MAX_L2` for local arrays (e.g., 64); this limits the number of coefficients when using OpenCL. See the source for current limits.
 
@@ -148,11 +148,11 @@ The kernels use a fixed `MAX_L2` for local arrays (e.g., 64); this limits the nu
 
 The wrapper `f2_f3_opencl` in `kernel_wrappers.cpp` performs:
 
-1. **Input flattening** – Convert R matrices/vectors (x, b, mu, P, alpha, y, wt) to contiguous C++ vectors in the layout expected by the runner.
-2. **Kernel selection** – Map `(family, link)` to `kernel_name` and `kernel_file` (e.g., binomial + logit → `f2_f3_binomial_logit`, `src/f2_f3_binomial_logit.cl`).
-3. **Program assembly** – Load OPENCL.cl, rmath, nmath, dpq, and the kernel file; concatenate into `all_src`.
-4. **Runner call** – Invoke `f2_f3_kernel_runner(all_src, kernel_name, l1, l2, m1, ...)` with flattened inputs and output buffers.
-5. **Output reshaping** – Copy `qf_flat` into an R vector; wrap `grad_flat` as an Armadillo matrix (m1 × l2) for return.
+1. **Input flattening** â€“ Convert R matrices/vectors (x, b, mu, P, alpha, y, wt) to contiguous C++ vectors in the layout expected by the runner.
+2. **Kernel selection** â€“ Map `(family, link)` to `kernel_name` and `kernel_file` (e.g., binomial + logit â†’ `f2_f3_binomial_logit`, `src/f2_f3_binomial_logit.cl`).
+3. **Program assembly** â€“ Load OPENCL.cl, rmath, nmath, dpq, and the kernel file; concatenate into `all_src`.
+4. **Runner call** â€“ Invoke `f2_f3_kernel_runner(all_src, kernel_name, l1, l2, m1, ...)` with flattened inputs and output buffers.
+5. **Output reshaping** â€“ Copy `qf_flat` into an R vector; wrap `grad_flat` as an Armadillo matrix (m1 Ã— l2) for return.
 
 The returned list has components `qf` (negative log posterior per grid point) and `grad` (gradient matrix).
 
@@ -161,15 +161,15 @@ The returned list has components `qf` (negative log posterior per grid point) an
 
 The runner in `kernel_runners.cpp` handles the low-level OpenCL API:
 
-1. **Platform and device** – `clGetPlatformIDs`, `clGetDeviceIDs` (CL_DEVICE_TYPE_DEFAULT).
-2. **Context and queue** – `clCreateContext`, `clCreateCommandQueueWithProperties`.
-3. **Program** – `clCreateProgramWithSource` with the concatenated string, `clBuildProgram`.
-4. **Kernel** – `clCreateKernel` with the kernel name.
-5. **Buffers** – Create read-only buffers for X, B, mu, P, alpha, y, wt; write-only for qf and grad. Copy host data for inputs.
-6. **Launch** – `clEnqueueNDRangeKernel` with `global = m1` (one work item per grid point).
-7. **Readback** – `clEnqueueReadBuffer` for qf and grad.
-8. **Sanity check** – If both outputs are all zeros, throw (likely kernel failure).
-9. **Cleanup** – Release buffers, kernel, program, queue, context.
+1. **Platform and device** â€“ `clGetPlatformIDs`, `clGetDeviceIDs` (CL_DEVICE_TYPE_DEFAULT).
+2. **Context and queue** â€“ `clCreateContext`, `clCreateCommandQueueWithProperties`.
+3. **Program** â€“ `clCreateProgramWithSource` with the concatenated string, `clBuildProgram`.
+4. **Kernel** â€“ `clCreateKernel` with the kernel name.
+5. **Buffers** â€“ Create read-only buffers for X, B, mu, P, alpha, y, wt; write-only for qf and grad. Copy host data for inputs.
+6. **Launch** â€“ `clEnqueueNDRangeKernel` with `global = m1` (one work item per grid point).
+7. **Readback** â€“ `clEnqueueReadBuffer` for qf and grad.
+8. **Sanity check** â€“ If both outputs are all zeros, throw (likely kernel failure).
+9. **Cleanup** â€“ Release buffers, kernel, program, queue, context.
 
 The runner is GLM-specific and lives in the `glmbayes::opencl` namespace; the general OpenCL utilities (kernel loading, device enumeration) are in `openclPort`.
 
@@ -180,10 +180,10 @@ For large grids (e.g., \(m_1 > 50{,}000\)), `EnvelopeEval` runs `f2_f3_opencl_pi
 
 ### 8.1 Pilot Logic
 
-- **Warm-up** – Run `f2_f3_opencl` on a small grid slice.
-- **Calibration** – Run on slices of ~1% and ~2% of the grid to estimate fixed cost and per-grid cost.
-- **Refined estimate** – Compute `refined_est_total_sec = per_grid_sec × m1`.
-- **5-minute safeguard** – If `refined_est_total_sec > 300`:
+- **Warm-up** â€“ Run `f2_f3_opencl` on a small grid slice.
+- **Calibration** â€“ Run on slices of ~1% and ~2% of the grid to estimate fixed cost and per-grid cost.
+- **Refined estimate** â€“ Compute `refined_est_total_sec = per_grid_sec Ã— m1`.
+- **5-minute safeguard** â€“ If `refined_est_total_sec > 300`:
   - **Interactive session**: Prompt `"Do you want to continue? [y/N]: "`.
   - **Non-interactive session**: Proceed automatically (e.g., CI, batch).
 
@@ -209,10 +209,10 @@ Use `has_opencl()` to check availability and `diagnose_glmbayes()` for a full di
 
 ## 10. Cross-References
 
-- **Chapter A05** – Simulation pipeline (optimization, standardization, envelope build, sampling)
-- **Chapter A08** – Envelope-related functions
-- **Chapter A09** – Parallel sampling (pilot pattern, 5-minute safeguard)
-- **Chapter 12** – GPU acceleration: installation, `has_opencl`, `diagnose_glmbayes`
-- **`?EnvelopeBuild`**, **`?EnvelopeEval`** – use_opencl argument
-- **`?load_kernel_library`**, **`?load_kernel_source`** – Program assembly
-- **`?glmb`**, **`?rglmb`** – use_opencl argument
+- **Chapter A05** â€“ Simulation pipeline (optimization, standardization, envelope build, sampling)
+- **Chapter A08** â€“ Envelope-related functions
+- **Chapter A09** â€“ Parallel sampling (pilot pattern, 5-minute safeguard)
+- **Chapter 12** â€“ GPU acceleration: installation, `has_opencl`, `diagnose_glmbayes`
+- **`?EnvelopeBuild`**, **`?EnvelopeEval`** â€“ use_opencl argument
+- **`?load_kernel_library`**, **`?load_kernel_source`** â€“ Program assembly
+- **`?glmb`**, **`?rglmb`** â€“ use_opencl argument

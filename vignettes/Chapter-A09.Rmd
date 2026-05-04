@@ -1,4 +1,4 @@
----
+﻿---
 title: "Chapter A09: Parallel Sampling Implementation using RcppParallel"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(glmbayes)
+library(nmathopencl)
 ```
 
 # Chapter A09: Parallel Sampling Implementation using RcppParallel
@@ -38,7 +38,7 @@ Parallel sampling is used in two main C++ paths:
 | Entry point | When | Notes |
 |-------------|------|-------|
 | `rNormalGLM_cpp` | Non-Gaussian GLMs (Poisson, binomial, Gamma, etc.) with `use_parallel = TRUE` and `n > 1` | Called by `rNormal_reg` |
-| `rIndepNormalGammaReg_cpp` | Gaussian with independent Normal–Gamma prior, `use_parallel = TRUE` and `n > 1` | Uses `rIndepNormalGammaReg_std_parallel_cpp` |
+| `rIndepNormalGammaReg_cpp` | Gaussian with independent Normalâ€“Gamma prior, `use_parallel = TRUE` and `n > 1` | Uses `rIndepNormalGammaReg_std_parallel_cpp` |
 
 **Serial fallback:** When `use_parallel = FALSE` or `n == 1`, the serial path is used instead. The serial path includes `Rcpp::checkUserInterrupt()` in its loop, so it can be interrupted (e.g., with Ctrl+C).
 
@@ -57,17 +57,17 @@ The pilot phase mitigates this by estimating runtime *before* the full parallel 
 
 The pilot flow consists of:
 
-1. **Pilot run** – A small serial or parallel batch (e.g., 1 draw or a few draws) to measure per-draw or per-observation time.
-2. **Calibration run** – A larger parallel batch (typically up to ~1% of `n`, capped so it takes at most ~5 minutes) to refine the time estimate.
-3. **Time estimate** – Extrapolation to the full sample size `n`.
-4. **Interactive safeguard** – If the estimate exceeds 5 minutes, the user is prompted in interactive sessions.
-5. **Non-interactive behavior** – In non-interactive sessions (e.g., R CMD check, batch jobs), the run proceeds automatically without prompting.
+1. **Pilot run** â€“ A small serial or parallel batch (e.g., 1 draw or a few draws) to measure per-draw or per-observation time.
+2. **Calibration run** â€“ A larger parallel batch (typically up to ~1% of `n`, capped so it takes at most ~5 minutes) to refine the time estimate.
+3. **Time estimate** â€“ Extrapolation to the full sample size `n`.
+4. **Interactive safeguard** â€“ If the estimate exceeds 5 minutes, the user is prompted in interactive sessions.
+5. **Non-interactive behavior** â€“ In non-interactive sessions (e.g., R CMD check, batch jobs), the run proceeds automatically without prompting.
 
 **Threshold:** 300 seconds (5 minutes). Above this, the user is asked whether to continue.
 
 **Prompt:** `"Estimated simulation exceeds 5 minutes. Continue? [y/N]: "` (or similar).
 
-**Responses:** `y`, `yes`, `1`, or `continue` → proceed; `n`, `no`, `2`, or empty → stop with an informative error.
+**Responses:** `y`, `yes`, `1`, or `continue` â†’ proceed; `n`, `no`, `2`, or empty â†’ stop with an informative error.
 
 
 ## 5. rNormalGLM Pilot Logic (Non-Gaussian GLMs)
@@ -106,8 +106,8 @@ where 300000 ms $\approx$ 5 minutes. The calibration run uses `parallelFor(0, m_
 From the calibration:
 
 - `per_candidate_sec` = calibration elapsed time / total candidates used
-- `est_per_draw_sec` = `per_candidate_sec` × `E_draws` (expected candidates per accepted draw)
-- `est_total_sec` = `est_per_draw_sec` × `n`
+- `est_per_draw_sec` = `per_candidate_sec` Ã— `E_draws` (expected candidates per accepted draw)
+- `est_total_sec` = `est_per_draw_sec` Ã— `n`
 
 ### 5.4 Five-Minute Safeguard
 
@@ -129,7 +129,7 @@ With `verbose = TRUE`, the pilot reports:
 
 ## 6. rIndepNormalGammaReg Pilot Logic
 
-For Gaussian regression with independent Normal–Gamma priors, the pilot logic is similar in spirit but tailored to joint \((\beta, \phi)\) sampling:
+For Gaussian regression with independent Normalâ€“Gamma priors, the pilot logic is similar in spirit but tailored to joint \((\beta, \phi)\) sampling:
 
 ### 6.1 Single-Draw Test
 
@@ -146,7 +146,7 @@ The calibration run is parallel: `parallelFor(0, m_stage, worker)`.
 ### 6.3 Time Estimate
 
 - `per_obs_sec` = calibration elapsed time / `m_stage`
-- `est_total_sec` = `per_obs_sec` × `n`
+- `est_total_sec` = `per_obs_sec` Ã— `n`
 
 ### 6.4 Five-Minute Safeguard
 
@@ -168,8 +168,8 @@ Since minimization/pilots are disabled, the time-estimate safeguard is not used.
 
 | Scenario | Recommendation |
 |----------|----------------|
-| **Debugging or small runs** | `use_parallel = FALSE` – serial path is interruptible |
-| **Large production runs** | `use_parallel = TRUE` – faster; rely on the pilot and prompt |
+| **Debugging or small runs** | `use_parallel = FALSE` â€“ serial path is interruptible |
+| **Large production runs** | `use_parallel = TRUE` â€“ faster; rely on the pilot and prompt |
 | **Scripts / non-interactive** | No prompt; runs proceed automatically |
 
 To disable parallel sampling:
@@ -201,8 +201,8 @@ The parallel samplers use the standard RcppParallel `Worker` pattern:
 
 ### 9.3 Dependencies
 
-- **RcppParallel** – Provides TBB and the `parallelFor` interface
-- **TBB** – Bundled with RcppParallel; no separate installation required
+- **RcppParallel** â€“ Provides TBB and the `parallelFor` interface
+- **TBB** â€“ Bundled with RcppParallel; no separate installation required
 
 
 ## 10. Troubleshooting
@@ -217,8 +217,8 @@ The parallel samplers use the standard RcppParallel `Worker` pattern:
 
 ## 11. Cross-References
 
-- **Chapter A05** – Simulation pipeline (optimization, standardization, envelope, sampling)
-- **Chapter A08** – Envelope-related functions
-- **Chapter A10** – OpenCL acceleration for envelope construction
-- **`?glmb`**, **`?rglmb`**, **`?lmb`**, **`?rlmb`** – `use_parallel` argument
-- **NEWS.md** – Parallel sampling and pilot-related changes
+- **Chapter A05** â€“ Simulation pipeline (optimization, standardization, envelope, sampling)
+- **Chapter A08** â€“ Envelope-related functions
+- **Chapter A10** â€“ OpenCL acceleration for envelope construction
+- **`?glmb`**, **`?rglmb`**, **`?lmb`**, **`?rlmb`** â€“ `use_parallel` argument
+- **NEWS.md** â€“ Parallel sampling and pilot-related changes

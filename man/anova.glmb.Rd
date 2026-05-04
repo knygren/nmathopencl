@@ -17,8 +17,8 @@ An object of class \code{"anova"} inheriting from class \code{"data.frame"}.
 \description{
 Compute an analysis of deviance table for one (current implementation) or more (future)
 Bayesian generalized linear model fits. The structure follows the sequential analysis
-of deviance \insertCite{McCullagh1989}{glmbayes}, with Bayesian extensions for DIC, pD,
-Mahalanobis shift, and directional tail probability \insertCite{Spiegelhalter2002}{glmbayes}.
+of deviance \insertCite{McCullagh1989}{nmathopencl}, with Bayesian extensions for DIC, pD,
+Mahalanobis shift, and directional tail probability \insertCite{Spiegelhalter2002}{nmathopencl}.
 }
 \details{
 Specifying a single object (currently only implementation) gives a sequential
@@ -26,7 +26,7 @@ analysis of deviance table for that fit. The reductions in residual deviance as 
 term of the formula is added in turn are given as the rows of a table, plus the residual
 deviances themselves. The Mahalanobis shift and pDirectional columns report prior-posterior
 disagreement diagnostics; see \code{\link{directional_tail}} and
-\insertCite{glmbayesChapterA04}{glmbayes}.
+\insertCite{glmbayesChapterA04}{nmathopencl}.
 }
 \examples{
 set.seed(333)
@@ -64,6 +64,6 @@ anova(glm.D93)
 }
 \seealso{
 \code{\link{directional_tail}}, \code{\link{summary.glmb}}, \code{\link{glmb}},
-\code{\link{glmbayes-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
+\code{\link{nmathopencl-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
 \code{\link[stats]{anova.glm}}
 }

@@ -1,16 +1,16 @@
-#' GPU and OpenCL Diagnostics for glmbayes
+﻿#' GPU and OpenCL Diagnostics for glmbayes
 #'
 #' @description
 #' A collection of tools for detecting GPU hardware, verifying OpenCL
 #' availability, checking driver installation, validating environment
 #' configuration, and diagnosing whether \pkg{glmbayes} can use GPU
-#' acceleration. These functions provide both high‑level diagnostic
-#' summaries and low‑level checks of system components such as PATH,
+#' acceleration. These functions provide both highâ€‘level diagnostic
+#' summaries and lowâ€‘level checks of system components such as PATH,
 #' library directories, OpenCL headers, and the ICD loader.
 #'
 #' The diagnostic workflow is centered around
 #' \code{diagnose_glmbayes()}, which orchestrates all other checks and
-#' prints a detailed, human‑readable report. Lower‑level helpers can be
+#' prints a detailed, humanâ€‘readable report. Lowerâ€‘level helpers can be
 #' called individually for programmatic inspection or automated testing.
 #' @param info A list returned by `detect_environment_and_gpus()`. The list must
 #'   contain the following elements:
@@ -31,28 +31,28 @@
 #'     \item missing_lib_dirs: directories that should be added to LD_LIBRARY_PATH
 #'     \item include_dirs: include directories detected for headers
 #'   }
-#' @section High‑level diagnostic:
+#' @section Highâ€‘level diagnostic:
 #' \itemize{
-#'   \item \code{diagnose_glmbayes()} — full GPU/OpenCL diagnostic report.
+#'   \item \code{diagnose_glmbayes()} â€” full GPU/OpenCL diagnostic report.
 #' }
 #'
 #' @section Environment and hardware detection:
 #' \itemize{
-#'   \item \code{detect_environment_and_gpus()} — detect OS and GPU vendor.
-#'   \item \code{gpu_names()} — enumerate available GPU device names.
-#'   \item \code{detect_compute_runtimes()} — detect CUDA/OpenCL runtimes.
+#'   \item \code{detect_environment_and_gpus()} â€” detect OS and GPU vendor.
+#'   \item \code{gpu_names()} â€” enumerate available GPU device names.
+#'   \item \code{detect_compute_runtimes()} â€” detect CUDA/OpenCL runtimes.
 #' }
 #'
 #' @section OpenCL availability and runtime checks:
 #' \itemize{
-#'   \item \code{has_opencl()} — quick check for OpenCL support.
-#'   \item \code{verify_opencl_runtime()} — probe OpenCL platform/device availability.
-#'   \item \code{check_runtime_env()} — validate PATH and library directories.
+#'   \item \code{has_opencl()} â€” quick check for OpenCL support.
+#'   \item \code{verify_opencl_runtime()} â€” probe OpenCL platform/device availability.
+#'   \item \code{check_runtime_env()} â€” validate PATH and library directories.
 #' }
 #'
 #' @section Driver installation helpers:
 #' \itemize{
-#'   \item \code{detect_or_install_gpu_drivers()} — detect driver presence and issues.
+#'   \item \code{detect_or_install_gpu_drivers()} â€” detect driver presence and issues.
 #' }
 #'
 #' @section PATH and library path utilities:
@@ -80,7 +80,7 @@
 #' \code{r-base-dev} on Linux, Xcode CLT plus GCC on macOS for source installs).
 #' Vendor-specific notes (CUDA Toolkit vs Intel SDK vs Khronos headers on
 #' Windows, \code{opencl-headers} and \code{ocl-icd} packages on Linux, etc.)
-#' are spelled out in \insertCite{glmbayesChapter12}{glmbayes}.
+#' are spelled out in \insertCite{glmbayesChapter12}{nmathopencl}.
 #'
 #' **What this help page checks.** A usable OpenCL environment requires:
 #' \enumerate{
@@ -114,9 +114,9 @@
 #' Modeling with \code{use_opencl}: \code{\link{glmb}}, \code{\link{rglmb}}.
 #' Envelope helpers: \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeEval}}.
 #'
-#' Full install and troubleshooting: \code{vignette("Chapter-12", package = "glmbayes")}
-#' (\insertCite{glmbayesChapter12}{glmbayes}); implementation notes:
-#' \insertCite{glmbayesChapterA10}{glmbayes}.
+#' Full install and troubleshooting: \code{vignette("Chapter-12", package = "nmathopencl")}
+#' (\insertCite{glmbayesChapter12}{nmathopencl}); implementation notes:
+#' \insertCite{glmbayesChapterA10}{nmathopencl}.
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt

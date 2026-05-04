@@ -1,4 +1,4 @@
----
+﻿---
 title: "Chapter 13: Hierarchical Linear Models"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
@@ -19,15 +19,15 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(glmbayes)
+library(nmathopencl)
 ```
 
 # Chapter 13: Hierarchical Linear Models
 
-This chapter focuses on **hierarchical linear models**—Gaussian models with random effects—and related use cases that rely on **`rlmb`** for block Gibbs sampling. The function **`rlmb`** is a minimal Bayesian simulation engine for linear (Gaussian) models: it takes a response vector, design matrix, and prior specification, and returns draws from the posterior. It is intended for settings where you need **repeated draws with updated conditioning** inside a Gibbs sampler (e.g., alternating between blocks for coefficients and dispersion, or for population and unit-level parameters).
+This chapter focuses on **hierarchical linear models**â€”Gaussian models with random effectsâ€”and related use cases that rely on **`rlmb`** for block Gibbs sampling. The function **`rlmb`** is a minimal Bayesian simulation engine for linear (Gaussian) models: it takes a response vector, design matrix, and prior specification, and returns draws from the posterior. It is intended for settings where you need **repeated draws with updated conditioning** inside a Gibbs sampler (e.g., alternating between blocks for coefficients and dispersion, or for population and unit-level parameters).
 
 - **Use `lmb` or `glmb`** when you want a single fit or repeated standalone fits: formula interface, full object, `summary`, `predict`, etc.
-- **Use `rlmb`** when you are **building your own MCMC** for linear models, such as a two-block Gibbs sampler: you alternate between blocks, each time calling `rlmb` with the current values of the other block. The low-overhead, matrix-in/matrix-out interface is then a better fit. For hierarchical **generalized** linear models (e.g., Poisson), use **`rglmb`**—see Chapter 14.
+- **Use `rlmb`** when you are **building your own MCMC** for linear models, such as a two-block Gibbs sampler: you alternate between blocks, each time calling `rlmb` with the current values of the other block. The low-overhead, matrix-in/matrix-out interface is then a better fit. For hierarchical **generalized** linear models (e.g., Poisson), use **`rglmb`**â€”see Chapter 14.
 
 We illustrate two use cases for **`rlmb`** in the context of **linear (Gaussian)** models: (1) estimating **dispersion and regression coefficients** when the prior is non-conjugate, and (2) **hierarchical (random effects)** models. All examples use data already available in the package. For hierarchical **generalized** linear models (e.g., Poisson), see Chapter 14.
 
@@ -35,8 +35,8 @@ We illustrate two use cases for **`rlmb`** in the context of **linear (Gaussian)
 
 In the Gaussian linear model \(y = X\beta + \varepsilon\) with \(\varepsilon \sim \text{N}(0, \phi I)\), the likelihood depends on the residual variance \(\phi\). If the prior on \((\beta, \phi)\) is not conjugate (e.g., you want independent priors on \(\beta\) and \(\phi\)), you can still sample from the posterior by a **two-block Gibbs sampler**:
 
-1. **Block 1:** Draw \(\beta \mid \phi, y\) — Gaussian posterior given fixed \(\phi\).
-2. **Block 2:** Draw \(\phi \mid \beta, y\) — Gamma posterior given fixed \(\beta\).
+1. **Block 1:** Draw \(\beta \mid \phi, y\) â€” Gaussian posterior given fixed \(\phi\).
+2. **Block 2:** Draw \(\phi \mid \beta, y\) â€” Gamma posterior given fixed \(\beta\).
 
 **`rlmb`** implements both conditionals: use **`dNormal(..., dispersion = phi)`** for the \(\beta\)-step and **`dGamma(shape, rate, beta = beta_current)`** for the \(\phi\)-step; then take the returned **`dispersion`** as the new \(\phi\).
 
@@ -103,7 +103,7 @@ knitr::kable(tbl, digits = 4, caption = "Dobson plant weight: Gibbs sampler vs c
 
 The Gibbs posterior means and standard deviations for \(\beta\) and \(\phi\) should be close to the conjugate **`lmb`** fit. In practice, use longer burn-in and more stored draws.
 
-**Gamma regression.** The same idea—alternating draws of coefficients given dispersion and dispersion given coefficients—can be applied to **gamma regression** when the dispersion (shape) of the Gamma response is unknown and must be estimated. The conditioning steps are then implemented with **`rglmb`** (family `Gamma`) and an appropriate prior for the dispersion block. The package does not currently provide a ready-made example for gamma regression in this setting; typical textbook datasets often imply large weights that make the Gibbs steps costly. A future vignette or example may use an alternate dataset once a suitable one is identified.
+**Gamma regression.** The same ideaâ€”alternating draws of coefficients given dispersion and dispersion given coefficientsâ€”can be applied to **gamma regression** when the dispersion (shape) of the Gamma response is unknown and must be estimated. The conditioning steps are then implemented with **`rglmb`** (family `Gamma`) and an appropriate prior for the dispersion block. The package does not currently provide a ready-made example for gamma regression in this setting; typical textbook datasets often imply large weights that make the Gibbs steps costly. A future vignette or example may use an alternate dataset once a suitable one is identified.
 
 
 ## 2. Use Case 2: Hierarchical (Random Effects) Models
@@ -139,7 +139,7 @@ Stored draws are loaded in **`chapter13-load-schools-gibbs`** from
 ```{r chapter13-load-schools-gibbs}
 ch13_path <- system.file(
   "extdata", "Chapter13_Eight_Schools_two_gibbs.rds",
-  package = "glmbayes"
+  package = "nmathopencl"
 )
 stopifnot(nzchar(ch13_path), file.exists(ch13_path))
 ch13 <- readRDS(ch13_path)
@@ -220,11 +220,11 @@ This prior triggers repeated envelope minimization (RSS and UB2) on each
 population-block draw, making it slower and less suitable for long Gibbs runs.
 
 The Gibbs chunks below are **not evaluated** at vignette build time (`eval = FALSE`);
-results for this block are loaded from the same RDS as in §2.1
+results for this block are loaded from the same RDS as in Â§2.1
 (**`chapter13-load-schools-gibbs`**).
 
 1. **Population block:** Draw \((\mu, \sigma_\theta^2) \mid \theta\) using **`rlmb`** with **`dIndependent_Normal_Gamma(mu_mu, sigma_mu, shape, rate)`**.
-2. **School block:** Same as above—draw \(\theta_j \mid \mu, \sigma_\theta^2, y_j\) using **`dNormal(...)`**.
+2. **School block:** Same as aboveâ€”draw \(\theta_j \mid \mu, \sigma_\theta^2, y_j\) using **`dNormal(...)`**.
 
 ```{r schools-indep-setup, eval = FALSE}
 theta <- estimate

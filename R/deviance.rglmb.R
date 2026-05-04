@@ -1,10 +1,10 @@
-#' Model Deviance
+﻿#' Model Deviance
 #'
 #' Returns the deviance of a fitted Bayesian Generalized Linear Model
 #' @param object an object of class \code{"rglmb"}, typically the result of a call to \link{rglmb}
 #' @param ... further arguments to or from other methods
 #' @return A vector with the deviance extracted from the \code{object}.
-#' @seealso \code{\link{rglmb}}; \code{\link{glmb}}, \code{\link{glmbayes-package}};
+#' @seealso \code{\link{rglmb}}; \code{\link{glmb}}, \code{\link{nmathopencl-package}};
 #'   \code{\link{rlmb}}, \code{\link{lmb}}; \code{\link[stats]{deviance}}.
 #' @example inst/examples/Ex_deviance.rglmb.R
 #' @export

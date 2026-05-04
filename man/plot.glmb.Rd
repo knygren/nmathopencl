@@ -21,7 +21,7 @@ This converts \code{x$coefficients} to a \code{coda::mcmc} object. If \code{x$di
 draw vector (length equal to the number of draws), it is appended and plotted too.
 }
 \seealso{
-\code{\link{glmb}}, \code{\link{glmbayes-package}}; \code{\link{rglmb}}, \code{\link{rlmb}},
+\code{\link{glmb}}, \code{\link{nmathopencl-package}}; \code{\link{rglmb}}, \code{\link{rlmb}},
 \code{\link{lmb}}; \code{\link[coda]{plot.mcmc}};
 \code{\link[stats]{plot.lm}} and \code{\link[stats]{termplot}} for classical diagnostic plots of \code{lm}/\code{glm} fits.
 }

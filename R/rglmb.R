@@ -1,4 +1,4 @@
-#' The Bayesian Generalized Linear Model Distribution
+﻿#' The Bayesian Generalized Linear Model Distribution
 #'
 #' \code{rglmb} is used to generate iid samples for Bayesian Generalized Linear Models.
 #' The model is specified by providing a data vector, a design matrix, 
@@ -46,8 +46,8 @@
 #'
 #' The original R implementation of \code{glm} was written by Simon Davies (under Ross Ihaka at the University of Auckland) 
 #' and has since been extensively rewritten by members of the R Core Team; its design was inspired by the S function 
-#' described in \insertCite{Hastie1992}{glmbayes}, which in turn relies on the formula framework described in 
-#' \insertCite{WilkinsonRogers1973}{glmbayes}.
+#' described in \insertCite{Hastie1992}{nmathopencl}, which in turn relies on the formula framework described in 
+#' \insertCite{WilkinsonRogers1973}{nmathopencl}.
 #'
 #' The design of the \code{pfamily} family of functions was created by Kjell Nygren and is modeled on how 
 #' \code{glm} uses \code{family} to specify the likelihood. For any implemented combination of family, link, and 
@@ -55,7 +55,7 @@
 #'
 #' A helper, \code{\link{Prior_Setup}}, assists users in choosing prior parameters. It ships with sensible defaults 
 #' but also allows full customization. In particular, the default for \code{dNormal} is a reparameterization of 
-#' Zellner's g-prior \insertCite{zellner1986gprior}{glmbayes}.
+#' Zellner's g-prior \insertCite{zellner1986gprior}{nmathopencl}.
 #'
 #' Currently supported response families are \code{gaussian} (identity link), \code{poisson} and \code{quasipoisson} 
 #' (log link), \code{gamma} (log link), and \code{binomial} and \code{quasibinomial} (logit, probit, cloglog). 
@@ -63,9 +63,9 @@
 #' \code{dIndependent_Normal_Gamma}.
 #'
 #' For the Gaussian family, draws under \code{dNormal} and \code{dNormalGamma} come from posterior distributions 
-#' resulting from conjugate prior distributions \insertCite{Raiffa1961}{glmbayes}. For all other priors or response families, 
+#' resulting from conjugate prior distributions \insertCite{Raiffa1961}{nmathopencl}. For all other priors or response families, 
 #' we use an accept-reject sampler built on the likelihood-subgradient envelope method 
-#' \insertCite{Nygren2006}{glmbayes}. The \code{Gridtype} argument controls how many tangent points are used 
+#' \insertCite{Nygren2006}{nmathopencl}. The \code{Gridtype} argument controls how many tangent points are used 
 #' in the envelope-trading off envelope tightness against construction cost-and \code{iters} reports candidate 
 #' counts before acceptance.
 #'
@@ -93,9 +93,9 @@
 #' 
 #' \code{\link{Prior_Setup}}, \code{\link{Prior_Check}} for functions used to initialize and to check priors,  
 #'
-#' Further reading: \insertCite{Nygren2006}{glmbayes};
-#' \insertCite{glmbayesSimmethods,glmbayesChapterA08}{glmbayes};
-#' OpenCL/GPU: \insertCite{glmbayesChapter12,glmbayesChapterA10}{glmbayes}.
+#' Further reading: \insertCite{Nygren2006}{nmathopencl};
+#' \insertCite{glmbayesSimmethods,glmbayesChapterA08}{nmathopencl};
+#' OpenCL/GPU: \insertCite{glmbayesChapter12,glmbayesChapterA10}{nmathopencl}.
 #'
 #' \code{\link{summary.glmb}}, \code{\link{predict.glmb}}, \code{\link{residuals.glmb}}, \code{\link{simulate.glmb}}, 
 #' \code{\link{extractAIC.glmb}}, \code{\link{dummy.coef.glmb}} and methods(class="glmb") for \code{glmb} 

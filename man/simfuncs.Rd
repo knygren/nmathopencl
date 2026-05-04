@@ -176,22 +176,22 @@ These functions are used internally by \code{pfamily} constructors and model fit
 \item \strong{\code{rNormal_reg()}}: Produces iid draws for regression coefficients in models with
 multivariate normal priors and log-concave likelihood functions. For Gaussian likelihoods,
 these are conjugate priors and standard simulation procedures for multivariate normal
-distributions are utilized \insertCite{LindleySmith1972,DiaconisYlvisaker1979}{glmbayes}.
+distributions are utilized \insertCite{LindleySmith1972,DiaconisYlvisaker1979}{nmathopencl}.
 For all other families/link functions, the likelihood subgradient approach of
-\insertCite{Nygren2006}{glmbayes} is used to generate iid samples.
+\insertCite{Nygren2006}{nmathopencl} is used to generate iid samples.
 \item \strong{\code{rNormalGamma_reg()}}: Produces iid draws for regression coefficients and the
 dispersion parameter in models with Normal-Gamma priors and Gaussian likelihoods, where
 this is a conjugate prior distribution. Standard simulation procedures for gamma and
 multivariate normal distributions are utilized
-\insertCite{Raiffa1961,LindleySmith1972}{glmbayes}.
+\insertCite{Raiffa1961,LindleySmith1972}{nmathopencl}.
 \item \strong{\code{rindepNormalGamma_reg()}}: Produces iid draws for regression coefficients
 and the dispersion parameter in models with independent Normal and truncated Gamma priors.
 This is a non-conjugate specification but can still be sampled using accept-reject procedures
 based on an enveloping approach (see vignette
-\insertCite{glmbayesIndNormGammaVignette}{glmbayes}).
+\insertCite{glmbayesIndNormGammaVignette}{nmathopencl}).
 \item \strong{\code{rGamma_reg()}}: Simulates dispersion parameters for Gaussian and Gamma families
 using either standard gamma sampling or accept-reject methods based on likelihood
-subgradients \insertCite{Chen1979,glmbayesGammaVignette}{glmbayes}.
+subgradients \insertCite{Chen1979,glmbayesGammaVignette}{nmathopencl}.
 }
 }
 }
@@ -390,10 +390,10 @@ for modeling functions that consume simulation functions.
 \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeEval}}, \code{\link{EnvelopeSize}} for envelope construction
 and grid evaluation used in likelihood-subgradient sampling.
 
-Theory and implementation narrative: \insertCite{Nygren2006}{glmbayes};
-\insertCite{glmbayesSimmethods,glmbayesChapterA08}{glmbayes}.
+Theory and implementation narrative: \insertCite{Nygren2006}{nmathopencl};
+\insertCite{glmbayesSimmethods,glmbayesChapterA08}{nmathopencl}.
 }
 \author{
-The simulation framework was developed by Kjell Nygren as part of the \pkg{glmbayes} package. It builds on the likelihood subgradient approach described in \insertCite{Nygren2006}{glmbayes}, and extends classical Bayesian GLM sampling techniques.
+The simulation framework was developed by Kjell Nygren as part of the \pkg{glmbayes} package. It builds on the likelihood subgradient approach described in \insertCite{Nygren2006}{nmathopencl}, and extends classical Bayesian GLM sampling techniques.
 }
 \concept{simfuncs}

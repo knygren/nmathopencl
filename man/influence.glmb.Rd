@@ -21,8 +21,8 @@ the quality of Bayesian regression fits. These methods delegate to \code{\link[s
 package, applied to the fitted GLM component stored in the model object.
 }
 \details{
-Cook's distance was introduced by \insertCite{Cook1977}{glmbayes}. The dfbetas, dffits, and covratio
-diagnostics follow the framework of \insertCite{BelsleyKuhWelsch1980}{glmbayes}. Because \code{glmb}
+Cook's distance was introduced by \insertCite{Cook1977}{nmathopencl}. The dfbetas, dffits, and covratio
+diagnostics follow the framework of \insertCite{BelsleyKuhWelsch1980}{nmathopencl}. Because \code{glmb}
 and \code{lmb} store coefficient draws rather than a single mode, these methods use the fitted
 \code{fit} component (from the underlying \code{glm}/\code{lm} fit at the posterior mode) for
 influence calculations.
@@ -142,7 +142,7 @@ hat2
 \insertAllCited{}
 }
 \seealso{
-\code{\link{glmb}}, \code{\link{glmbayes-package}}; \code{\link{lmb}}, \code{\link{rglmb}},
+\code{\link{glmb}}, \code{\link{nmathopencl-package}}; \code{\link{lmb}}, \code{\link{rglmb}},
 \code{\link{rlmb}}; \code{\link{summary.glmb}};
 \code{\link[stats]{influence}}, \code{\link[stats]{influence.measures}},
 \code{\link[stats]{cooks.distance}}, \code{\link[stats]{dfbetas}}

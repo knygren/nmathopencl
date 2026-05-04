@@ -1,4 +1,4 @@
-#' @aliases glmbayes
+﻿#' @aliases glmbayes
 #'
 #' @title glmbayes: Bayesian Generalized Linear Models with iid Sampling
 #'
@@ -26,14 +26,14 @@
 #'
 #' IID posterior simulation for non-Gaussian GLMs and several non-conjugate
 #' linear-model setups uses the likelihood-subgradient envelope method of
-#' \insertCite{Nygren2006}{glmbayes}. Introductory material and worked
-#' examples are in \insertCite{glmbayesChapter00,glmbayesChapterA01}{glmbayes};
+#' \insertCite{Nygren2006}{nmathopencl}. Introductory material and worked
+#' examples are in \insertCite{glmbayesChapter00,glmbayesChapterA01}{nmathopencl};
 #' estimation and simulation background in
-#' \insertCite{glmbayesChapterA02,glmbayesSimmethods,glmbayesChapterA08}{glmbayes};
+#' \insertCite{glmbayesChapterA02,glmbayesSimmethods,glmbayesChapterA08}{nmathopencl};
 #' prior derivations for \code{Prior_Setup()} in
-#' \insertCite{glmbayesChapterA12}{glmbayes};
+#' \insertCite{glmbayesChapterA12}{nmathopencl};
 #' GPU/OpenCL topics in
-#' \insertCite{glmbayesChapter12,glmbayesChapterA10}{glmbayes}.
+#' \insertCite{glmbayesChapter12,glmbayesChapterA10}{nmathopencl}.
 #'
 #' @example inst/examples/Ex_glmbayes-package.R
 #'
@@ -59,5 +59,5 @@
 #' @importFrom MASS mvrnorm
 #' @importFrom Rdpack reprompt
 #' @importFrom RcppParallel RcppParallelLibs
-#' @useDynLib glmbayes, .registration = TRUE
+#' @useDynLib nmathopencl, .registration = TRUE
 "_PACKAGE"

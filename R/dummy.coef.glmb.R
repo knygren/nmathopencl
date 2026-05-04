@@ -1,8 +1,8 @@
-#' Extract Coefficients in Original Coding
+﻿#' Extract Coefficients in Original Coding
 #'
 #' Extracts coefficients in terms of the original factor levels rather than the
 #' coded variables. The logic mirrors \code{\link[stats]{dummy.coef}} for \code{lm}
-#' objects \insertCite{Chambers1992,VenablesRipley2002}{glmbayes}.
+#' objects \insertCite{Chambers1992,VenablesRipley2002}{nmathopencl}.
 #'
 #' @param object a \code{glmb} model fit
 #' @param use.na logical flag for coefficients in a singular model. If use.na is true,
@@ -16,7 +16,7 @@
 #' will be respected. There will be little point in using dummy.coef for contr.treatment
 #' contrasts, as the missing coefficients are by definition zero.
 #' @return A list giving for each term the draws for the coefficients.
-#' @seealso \code{\link{summary.glmb}}, \code{\link{glmb}}, \code{\link{glmbayes-package}};
+#' @seealso \code{\link{summary.glmb}}, \code{\link{glmb}}, \code{\link{nmathopencl-package}};
 #'   \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
 #'   \code{\link[stats]{dummy.coef}}
 #' @references

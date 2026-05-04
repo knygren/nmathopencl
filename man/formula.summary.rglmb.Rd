@@ -19,6 +19,6 @@ This function is a method function for the \code{"summary.rglmb"} class used to
 Extract a formulae for the objective and the family
 }
 \seealso{
-\code{\link{rglmb}}, \code{\link{summary.rglmb}}; \code{\link{glmb}}, \code{\link{glmbayes-package}};
+\code{\link{rglmb}}, \code{\link{summary.rglmb}}; \code{\link{glmb}}, \code{\link{nmathopencl-package}};
 \code{\link{rlmb}}, \code{\link{lmb}}; \code{\link[stats]{formula}}.
 }

@@ -57,15 +57,15 @@ Gamma distribution under one-sided or two-sided truncation. It handles:
 \item numerical degeneracy when the Gamma CDF collapses in floating point
 }
 
-All computations are performed on the log scale using stable log–CDF and
-log–sum–exp transformations. This avoids the catastrophic cancellation that
+All computations are performed on the log scale using stable logâ€“CDF and
+logâ€“sumâ€“exp transformations. This avoids the catastrophic cancellation that
 occurs when the Gamma CDF values at the truncation points are extremely close.
 
 These functions are primarily intended for use in hierarchical Bayesian
 models where precision parameters are updated under tight truncation
 constraints, and where numerical stability is essential for reliable sampling
 performance. They are used in envelope-based dispersion sampling
-\insertCite{Nygren2006}{glmbayes}.
+\insertCite{Nygren2006}{nmathopencl}.
 }
 \examples{
 ############################### Start of Gamma_ct example ####################

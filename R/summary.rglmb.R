@@ -1,4 +1,4 @@
-#' Summarizing Bayesian Generalized Linear Model Distribution Functions
+﻿#' Summarizing Bayesian Generalized Linear Model Distribution Functions
 #'
 #' These functions are all \code{\link{methods}} for class \code{rglmb} or \code{summary.rglmb} objects.
 #' 
@@ -24,7 +24,7 @@
 #' function. This is particularly true for the print output from the function 
 #' (i.e. the output of the function \code{\link{print.summary.rglmb}}).
 #' 
-#' @seealso \code{\link{rglmb}}; \code{\link{glmb}}, \code{\link{glmbayes-package}},
+#' @seealso \code{\link{rglmb}}; \code{\link{glmb}}, \code{\link{nmathopencl-package}},
 #'   \code{\link{rlmb}}, \code{\link{lmb}}, \code{\link{summary}},
 #'   \code{\link[stats]{summary.lm}}, \code{\link[stats]{summary.glm}}.
 #' @example inst/examples/Ex_summary.rglmb.R

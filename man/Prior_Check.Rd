@@ -119,7 +119,7 @@ prior and maximum likelihood estimate divided by the length of the sum of half o
 \description{
 Checks if the credible intervals for the prior overlap with the implied confidence intervals
 from the classical model (obtained via \code{\link[stats]{glm}}). The approach relates to
-prior-data conflict checks \insertCite{EvansMoshonov2006}{glmbayes}.
+prior-data conflict checks \insertCite{EvansMoshonov2006}{nmathopencl}.
 }
 \examples{
 ## Dobson (1990) Page 93: Randomized Controlled Trial :
@@ -143,8 +143,8 @@ Prior_Check(counts ~ outcome + treatment,family = poisson(),
 \insertAllCited{}
 }
 \seealso{
-\code{\link{Prior_Setup}}, \code{\link{glmb}}; see \insertCite{glmbayesChapter03}{glmbayes} for prior tailoring;
-\insertCite{glmbayesChapterA12}{glmbayes} for full derivations.
+\code{\link{Prior_Setup}}, \code{\link{glmb}}; see \insertCite{glmbayesChapter03}{nmathopencl} for prior tailoring;
+\insertCite{glmbayesChapterA12}{nmathopencl} for full derivations.
 
 Other prior: 
 \code{\link{Prior_Setup}()}

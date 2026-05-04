@@ -1,7 +1,7 @@
-#' Calculate Variance-Covariance Matrix for a Fitted Model Object
+﻿#' Calculate Variance-Covariance Matrix for a Fitted Model Object
 #'
 #' Returns the posterior variance-covariance matrix of the regression coefficients
-#' from a fitted Bayesian GLM object \insertCite{Gelman2013}{glmbayes}.
+#' from a fitted Bayesian GLM object \insertCite{Gelman2013}{nmathopencl}.
 #'
 #' @param object fitted model object, typically the result of a call to \code{\link{glmb}}.
 #' @param \ldots additional arguments for method functions.
@@ -10,7 +10,7 @@
 #' row and column names corresponding to the parameter names given by the
 #' \code{\link{coef}} method.
 #' @seealso \code{\link{confint.glmb}}, \code{\link{summary.glmb}}, \code{\link{glmb}},
-#'   \code{\link{glmbayes-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
+#'   \code{\link{nmathopencl-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
 #'   \code{\link[stats]{vcov}}
 #' @references
 #' \insertAllCited{}

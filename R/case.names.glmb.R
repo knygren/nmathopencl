@@ -1,11 +1,11 @@
-#' Case and Variable Names of Fitted Models
+﻿#' Case and Variable Names of Fitted Models
 #'
 #' Simple utilities returning (non-missing) case names, and (non-eliminated) variable names.
 #' @param object a fitted model object, typically of class \code{"glmb"}. 
 #' @param full logical; if \code{TRUE}, all names (including zero weights, ...) are returned.
 #' @param \ldots further arguments passed to or from other methods.
 #' @return A character vector
-#' @seealso \code{\link{glmb}}, \code{\link{glmbayes-package}}; \code{\link{rglmb}}, \code{\link{rlmb}},
+#' @seealso \code{\link{glmb}}, \code{\link{nmathopencl-package}}; \code{\link{rglmb}}, \code{\link{rlmb}},
 #'   \code{\link{lmb}}; \code{\link[stats]{case.names}}.
 #' @example inst/examples/Ex_case.names.glmb.R
 #' @rdname case.names.glmb

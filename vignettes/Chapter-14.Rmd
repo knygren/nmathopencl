@@ -1,4 +1,4 @@
----
+﻿---
 title: "Chapter 14: Hierarchical Generalized Linear Models"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(glmbayes)
+library(nmathopencl)
 library(coda)
 ```
 
@@ -38,10 +38,10 @@ Let $y_i$ denote the count (hourly bike rentals) for observation $i$, and $x_i$ 
 
 The two-block Gibbs sampler alternates:
 
-1. **Block 1 (population):** Draw $(\beta, \sigma_\theta^2) \mid \theta$ — conjugate Normal-Gamma given $\theta$, implemented with **`rglmb`** (family `gaussian()`).
-2. **Block 2 (observations):** For each $i$, draw $\theta_i \mid \beta, \sigma_\theta^2, y_i$ — Poisson likelihood with normal prior, implemented with **`rglmb`** (family `poisson()`).
+1. **Block 1 (population):** Draw $(\beta, \sigma_\theta^2) \mid \theta$ â€” conjugate Normal-Gamma given $\theta$, implemented with **`rglmb`** (family `gaussian()`).
+2. **Block 2 (observations):** For each $i$, draw $\theta_i \mid \beta, \sigma_\theta^2, y_i$ â€” Poisson likelihood with normal prior, implemented with **`rglmb`** (family `poisson()`).
 
-With $n$ observations, Block 2 requires $n$ calls to **`rglmb`** per iteration. To keep run time manageable for the vignette, we use a 1% random subset of the data for training and reserve the rest for out-of-sample prediction. The chain used in Sections 4–5 is **precomputed** with the same settings as **`demo("Ex_09_BikeSharingPoisson")`** (`n_burn = 200`, `n_sim = 1000`) and stored as **`inst/extdata/BikeSharing_ch14_gibbs.rds`**. Section 3 still shows the full Gibbs code for reference; it is not re-run when this vignette is built.
+With $n$ observations, Block 2 requires $n$ calls to **`rglmb`** per iteration. To keep run time manageable for the vignette, we use a 1% random subset of the data for training and reserve the rest for out-of-sample prediction. The chain used in Sections 4â€“5 is **precomputed** with the same settings as **`demo("Ex_09_BikeSharingPoisson")`** (`n_burn = 200`, `n_sim = 1000`) and stored as **`inst/extdata/BikeSharing_ch14_gibbs.rds`**. Section 3 still shows the full Gibbs code for reference; it is not re-run when this vignette is built.
 
 ## 2. Data and Setup
 
@@ -65,7 +65,7 @@ form2 <- cnt ~ part_of_day + quarter + holiday + workingday + weathersit +
 # Train/test split: indices bundled with precomputed Gibbs output (matches demo, set.seed(42))
 pct_train <- 0.01
 n <- nrow(BikeSharing_c)
-ch14_path <- system.file("extdata", "BikeSharing_ch14_gibbs.rds", package = "glmbayes")
+ch14_path <- system.file("extdata", "BikeSharing_ch14_gibbs.rds", package = "nmathopencl")
 stopifnot(nzchar(ch14_path), file.exists(ch14_path))
 ch14_saved <- readRDS(ch14_path)
 stopifnot(length(ch14_saved$idx_train) == round(pct_train * n))

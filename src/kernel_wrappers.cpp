@@ -66,9 +66,9 @@ Rcpp::List f2_f3_opencl(
 #ifdef USE_OPENCL
   
   std::string OPENCL_source     = load_kernel_source("OPENCL.cl");
-  std::string rmath_source     = load_kernel_library("rmath","glmbayes", false);
-  std::string nmath_source     = load_kernel_library("nmath","glmbayes", false);
-  std::string dpq_source     = load_kernel_library("dpq","glmbayes", false);
+  std::string rmath_source     = load_kernel_library("rmath","nmathopencl", false);
+  std::string nmath_source     = load_kernel_library("nmath","nmathopencl", false);
+  std::string dpq_source     = load_kernel_library("dpq","nmathopencl", false);
   
   
   if (family == "binomial"||family == "quasibinomial") {

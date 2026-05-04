@@ -1,4 +1,4 @@
----
+﻿---
 title: "Chapter A03: Methods available in glmbayes"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup,echo = FALSE}
-library(glmbayes)
+library(nmathopencl)
 ```
 
 The **glmb** function and related *method functions* that handle the output are designed to be Bayesian versions of the **glm** function and many of its *method functions*. This vignette shows how the basic setup/calling of the functions compare and then walks through how the method functions for glmb can be called to generate similar outputs to those from the glm functions.

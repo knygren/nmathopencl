@@ -165,7 +165,7 @@ Rcpp::NumericVector logP_vec = Env3_raw["logP"];
 Rcpp::NumericMatrix logP_mat(logP_vec.size(), 1, logP_vec.begin());
 
 // Look up EnvelopeSort in the glmbayes namespace
-Rcpp::Environment pkg = Rcpp::Environment::namespace_env("glmbayes");
+Rcpp::Environment pkg = Rcpp::Environment::namespace_env("nmathopencl");
 Rcpp::Function EnvelopeSort = pkg["EnvelopeSort"];
 
 

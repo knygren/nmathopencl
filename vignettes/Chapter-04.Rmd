@@ -1,4 +1,4 @@
----
+﻿---
 title: "Chapter 04: Reviewing Model Predictions, Deviance Residuals and Model Statistics"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup,results="hide",echo = FALSE}
-library(glmbayes)
+library(nmathopencl)
 ```
 
 

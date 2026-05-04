@@ -56,8 +56,8 @@ performs the adaptive optimization used when \code{Gridtype = 2}.
 \details{
 These functions implement the grid sizing logic used in envelope construction
 for rejection sampling. They make use of the theory described in
-\insertCite{Nygren2006}{glmbayes} and the general implementation outlined in
-\insertCite{glmbayesSimmethods}{glmbayes}.
+\insertCite{Nygren2006}{nmathopencl} and the general implementation outlined in
+\insertCite{glmbayesSimmethods}{nmathopencl}.
 
 \code{EnvelopeSize()} returns the constructed grid (\code{G2}),
 index vectors (\code{GIndex1}), expected draw count (\code{E_draws}),
@@ -70,7 +70,7 @@ promoting them to three-point tangents when the tradeoff is favorable.
 \section{Gridtype Logic and Candidates per Draw}{
 
 
-The envelope sizing logic follows the analysis of \insertCite{Nygren2006}{glmbayes}.
+The envelope sizing logic follows the analysis of \insertCite{Nygren2006}{nmathopencl}.
 
 \describe{
 
@@ -102,14 +102,14 @@ Every dimension uses a symmetric three-point envelope.
 Expected candidates per draw:
 \deqn{\left(\tfrac{2}{\sqrt{\pi}}\right)^k}
 for \eqn{k} dimensions, as shown in Theorem 3 of
-\insertCite{Nygren2006}{glmbayes}.
+\insertCite{Nygren2006}{nmathopencl}.
 }
 
 \item{Gridtype 4: Always Single-Point}{
 Every dimension uses a single tangent at the posterior mode.
 Expected candidates per draw:
 \deqn{\prod_{i=1}^k \sqrt{1 + a_i}}
-(Example 1 in \insertCite{Nygren2006}{glmbayes}).
+(Example 1 in \insertCite{Nygren2006}{nmathopencl}).
 }
 
 }
@@ -233,5 +233,5 @@ Env_3
 \seealso{
 \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeEval}}, \code{\link{EnvelopeSort}};
 \code{\link{rNormal_reg}}, \code{\link{rglmb}} for user-facing sampling that uses these grids.
-Vignettes: \insertCite{glmbayesSimmethods,glmbayesChapterA08}{glmbayes}.
+Vignettes: \insertCite{glmbayesSimmethods,glmbayesChapterA08}{nmathopencl}.
 }

@@ -1,4 +1,4 @@
----
+﻿---
 title: "Chapter A02: Overview of Estimation Procedures"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(glmbayes)
+library(nmathopencl)
 ```
 
 # Chapter A02: Overview of Estimation Procedures
@@ -210,7 +210,7 @@ section provides tables showing how likelihood families and pfamilies map to the
 ### 1.6 Inspecting the Simulation Function Used: the `simfunction()` Generic
 
 The glmbayes package provides an S3 interface for inspecting which low-level simulation
-function (“simfunction”) was used during a call to `rglmb()` or `rlmb()`. This interface is
+function (â€œsimfunctionâ€) was used during a call to `rglmb()` or `rlmb()`. This interface is
 accessed through the exported generic:
 
 ```
@@ -589,13 +589,13 @@ evaluation, and sampling. These routines are located in the following source fil
 
 **Coefficient samplers (Normal priors):**
 - `rNormalReg.cpp`  
-  Backend for Gaussian–Normal conjugate sampling.
+  Backend for Gaussianâ€“Normal conjugate sampling.
 - `rNormalGLM.cpp`  
   Backend for non-Gaussian Normal-prior envelope sampling.
 
-**Joint Normal–Gamma samplers:**
+**Joint Normalâ€“Gamma samplers:**
 - `rIndepNormalGammaReg.cpp`  
-  Standard joint sampler for independent Normal–Gamma priors.
+  Standard joint sampler for independent Normalâ€“Gamma priors.
 - `rIndepNormalGammaReg.cpp`  
   Parallelized version of the joint sampler.
 

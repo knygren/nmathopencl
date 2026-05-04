@@ -1,4 +1,4 @@
-#' Envelope Centering for Bayesian Gaussian Regression
+﻿#' Envelope Centering for Bayesian Gaussian Regression
 #'
 #' @description
 #' `EnvelopeCentering()` computes an initial dispersion and the expected
@@ -38,8 +38,8 @@
 #' (e.g., \code{\link{EnvelopeOrchestrator}}).
 #'
 #' This anchors the joint Normal--Gamma accept--reject construction in
-#' \insertCite{Nygren2006}{glmbayes}; see vignettes \code{Chapter-A07},
-#' \code{Chapter-A11}, and \insertCite{glmbayesChapterA08,glmbayesIndNormGammaVignette}{glmbayes}.
+#' \insertCite{Nygren2006}{nmathopencl}; see vignettes \code{Chapter-A07},
+#' \code{Chapter-A11}, and \insertCite{glmbayesChapterA08,glmbayesIndNormGammaVignette}{nmathopencl}.
 #'
 #' @seealso
 #' \code{\link{EnvelopeOrchestrator}} for envelope construction;
@@ -64,15 +64,15 @@ EnvelopeCentering <- function(y, x, mu, P, offset, wt, shape, rate,
 #'
 #' @description
 #' `EnvelopeOrchestrator()` provides a unified interface for constructing the
-#' fixed‑dispersion and dispersion‑aware envelopes used in likelihood‑subgradient
-#' simulation for Bayesian Gaussian regression with Normal–Gamma priors.
+#' fixedâ€‘dispersion and dispersionâ€‘aware envelopes used in likelihoodâ€‘subgradient
+#' simulation for Bayesian Gaussian regression with Normalâ€“Gamma priors.
 #'
 #' This function coordinates:
 #'
-#' * fixed‑dispersion envelope construction via \link[glmbayes]{EnvelopeBuild},
-#' * dispersion‑refined envelope construction via \link[glmbayes]{EnvelopeDispersionBuild},
+#' * fixedâ€‘dispersion envelope construction via \link[glmbayes]{EnvelopeBuild},
+#' * dispersionâ€‘refined envelope construction via \link[glmbayes]{EnvelopeDispersionBuild},
 #' * envelope sorting and reindexing via \link[glmbayes]{EnvelopeSort}, and
-#' * UB‑list alignment (reordered `lg_prob_factor` and `UB2min`).
+#' * UBâ€‘list alignment (reordered `lg_prob_factor` and `UB2min`).
 #'
 #' It is typically used inside *.cpp routines such as
 #' \code{rIndepNormalGammaReg()}, but may also be called directly for
@@ -82,11 +82,11 @@ EnvelopeCentering <- function(y, x, mu, P, offset, wt, shape, rate,
 #'   coefficients (from the standardized model).
 #' @param A Numeric matrix. Posterior precision matrix (Hessian) at the mode.
 #' @param y Numeric response vector of length \code{m}.
-#' @param x2 Numeric matrix of standardized predictors (\code{m × p}).
+#' @param x2 Numeric matrix of standardized predictors (\code{m Ã— p}).
 #' @param mu2 Numeric vector. Standardized prior mean (typically a zero vector).
 #' @param P2 Numeric matrix. Standardized prior precision component moved into
-#'   the log‑likelihood.
-#' @param alpha Numeric vector. Offset‑adjusted mean component.
+#'   the logâ€‘likelihood.
+#' @param alpha Numeric vector. Offsetâ€‘adjusted mean component.
 #' @param wt Numeric vector of prior weights.
 #' @param n Integer. Number of envelope grid points or simulation draws.
 #' @param Gridtype Integer specifying the envelope grid construction method for
@@ -101,11 +101,11 @@ EnvelopeCentering <- function(y, x, mu, P, offset, wt, shape, rate,
 #'   dispersion axis (typically \code{centering_out$RSS_post} from
 #'   \code{\link{EnvelopeCentering}} inside \code{\link{rindepNormalGamma_reg}};
 #'   see vignette \code{Chapter-A11}).
-#' @param RSS_ML Numeric. Maximum‑likelihood residual sum of squares.
+#' @param RSS_ML Numeric. Maximumâ€‘likelihood residual sum of squares.
 #' @param max_disp_perc Numeric in \code{(0,1)}. Tail probability used to
 #'   determine dispersion bounds when not explicitly supplied.
 #' @param disp_lower Optional numeric. Lower bound for the dispersion
-#'   (\eqn{\sigma^2}). If supplied, overrides quantile‑based bounds.
+#'   (\eqn{\sigma^2}). If supplied, overrides quantileâ€‘based bounds.
 #' @param disp_upper Optional numeric. Upper bound for the dispersion
 #'   (\eqn{\sigma^2}). Must be strictly greater than \code{disp_lower}.
 #' @param use_parallel Logical. Whether to allow parallel computation inside
@@ -120,10 +120,10 @@ EnvelopeCentering <- function(y, x, mu, P, offset, wt, shape, rate,
 #'
 #' \describe{
 #'   \item{\code{Env}}{The fully constructed and sorted envelope, including the
-#'     PLSD component inserted by the dispersion‑aware refinement step.}
-#'   \item{\code{gamma_list}}{Updated Gamma‑prior parameters for the dispersion
+#'     PLSD component inserted by the dispersionâ€‘aware refinement step.}
+#'   \item{\code{gamma_list}}{Updated Gammaâ€‘prior parameters for the dispersion
 #'     (shape, rate, and dispersion bounds).}
-#'   \item{\code{UB_list}}{Updated UB‑list including reordered
+#'   \item{\code{UB_list}}{Updated UBâ€‘list including reordered
 #'     \code{lg_prob_factor} and \code{UB2min}.}
 #'   \item{\code{diagnostics}}{Diagnostic quantities returned by
 #'     \link[glmbayes]{EnvelopeDispersionBuild}, useful for debugging or envelope
@@ -157,7 +157,7 @@ EnvelopeCentering <- function(y, x, mu, P, offset, wt, shape, rate,
 #' accept--reject procedure over \eqn{(\beta, \phi)}. Theory for the dispersion
 #' envelope and bounding arguments is in vignette \code{Chapter-A07}; the
 #' end-to-end implementation map is in \code{Chapter-A11}. The coefficient-only
-#' likelihood-subgradient envelope (\insertCite{Nygren2006}{glmbayes}) is
+#' likelihood-subgradient envelope (\insertCite{Nygren2006}{nmathopencl}) is
 #' documented under \code{\link{EnvelopeBuild}} and vignette \code{Chapter-A08}.
 #'
 #' The function does **not** perform simulation. Simulation is carried out
@@ -182,8 +182,8 @@ EnvelopeCentering <- function(y, x, mu, P, offset, wt, shape, rate,
 #' constants are adjusted so that, together with a **truncated inverse-Gamma**
 #' (dispersion) proposal derived from \code{gamma_list}, the joint proposal
 #' dominates the target posterior on the truncated dispersion interval
-#' \code{[low, upp]}. \code{vignette("Chapter-A07", package = "glmbayes")} derives
-#' the dispersion-related bounds; \code{vignette("Chapter-A11", package = "glmbayes")}
+#' \code{[low, upp]}. \code{vignette("Chapter-A07", package = "nmathopencl")} derives
+#' the dispersion-related bounds; \code{vignette("Chapter-A11", package = "nmathopencl")}
 #' records how \code{UB_list} entries enter the code.
 #'
 #' **One accept--reject iteration** (standardized coordinates) proceeds as follows:
@@ -269,7 +269,7 @@ EnvelopeCentering <- function(y, x, mu, P, offset, wt, shape, rate,
 #'
 #' The orchestrator implements the **independent Normal--Gamma** envelope
 #' pipeline: first a **coefficient** envelope at a **dispersion anchor**
-#' (\insertCite{Nygren2006}{glmbayes}; vignette \code{Chapter-A08}), then
+#' (\insertCite{Nygren2006}{nmathopencl}; vignette \code{Chapter-A08}), then
 #' **dispersion-aware** refinement (\code{Chapter-A07}), then sorting. Steps 3--8
 #' repeat the internal logic of \code{\link{EnvelopeBuild}} (same formulas on that
 #' help page); here the likelihood is **Gaussian** with **identity** link, weights
@@ -334,7 +334,7 @@ EnvelopeCentering <- function(y, x, mu, P, offset, wt, shape, rate,
 #'
 #' 6. **Evaluate negative log-likelihood and gradient at each grid point.**
 #'    Subgradients \eqn{c(\bar{\theta}_j)} and negative log-likelihoods define
-#'    the likelihood-subgradient envelope pieces (\insertCite{Nygren2006}{glmbayes};
+#'    the likelihood-subgradient envelope pieces (\insertCite{Nygren2006}{nmathopencl};
 #'    \code{Chapter-A08}). CPU: \code{f2_f3_non_opencl}; GPU (optional):
 #'    \code{f2_f3_opencl}.
 #'
@@ -372,15 +372,15 @@ EnvelopeCentering <- function(y, x, mu, P, offset, wt, shape, rate,
 #' \insertAllCited{}
 #'
 #' @seealso
-#' * \link[glmbayes]{EnvelopeBuild} – fixed‑dispersion envelope construction
-#' * \link[glmbayes]{EnvelopeDispersionBuild} – dispersion‑aware envelope refinement
-#' * \link[glmbayes]{EnvelopeSort} – envelope sorting and reindexing
-#' * \link[glmbayes]{EnvelopeCentering} – \code{RSS_Post2} and dispersion anchor
-#' * \link[glmbayes]{glmb_Standardize_Model} – standardized inputs for the orchestrator
-#' * \code{\link{rindepNormalGamma_reg}} – full Normal–Gamma workflow (R + C++)
-#' * \code{\link{rlmb}}, \code{\link{rglmb}}, \code{\link{simfuncs}} – higher-level sampling entry points
+#' * \link[glmbayes]{EnvelopeBuild} â€“ fixedâ€‘dispersion envelope construction
+#' * \link[glmbayes]{EnvelopeDispersionBuild} â€“ dispersionâ€‘aware envelope refinement
+#' * \link[glmbayes]{EnvelopeSort} â€“ envelope sorting and reindexing
+#' * \link[glmbayes]{EnvelopeCentering} â€“ \code{RSS_Post2} and dispersion anchor
+#' * \link[glmbayes]{glmb_Standardize_Model} â€“ standardized inputs for the orchestrator
+#' * \code{\link{rindepNormalGamma_reg}} â€“ full Normalâ€“Gamma workflow (R + C++)
+#' * \code{\link{rlmb}}, \code{\link{rglmb}}, \code{\link{simfuncs}} â€“ higher-level sampling entry points
 #' * Vignettes \code{Chapter-A07}, \code{Chapter-A08}, \code{Chapter-A11}; cited as
-#'   \insertCite{Nygren2006,glmbayesChapterA08,glmbayesIndNormGammaVignette}{glmbayes}
+#'   \insertCite{Nygren2006,glmbayesChapterA08,glmbayesIndNormGammaVignette}{nmathopencl}
 #'
 #' @example inst/examples/Ex_EnvelopeOrchestrator.R
 #'

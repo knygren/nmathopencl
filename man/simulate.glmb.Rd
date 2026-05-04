@@ -26,7 +26,7 @@ to the original data or to a \code{newdata} data frame provided to the predict f
 }
 \description{
 Simulate responses from the posterior predictive distribution corresponding to a
-fitted \code{glmb} object \insertCite{Gelman2013}{glmbayes}.
+fitted \code{glmb} object \insertCite{Gelman2013}{nmathopencl}.
 }
 \examples{
 data(menarche,package="MASS")
@@ -96,8 +96,8 @@ par(oldpar)
 \insertAllCited{}
 }
 \seealso{
-\code{\link{predict.glmb}}, \code{\link{glmb}}, \code{\link{glmbayes-package}};
+\code{\link{predict.glmb}}, \code{\link{glmb}}, \code{\link{nmathopencl-package}};
 \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
 \code{\link[stats]{simulate}} (e.g. \code{simulate.glm}, \code{simulate.lm} for classical fits);
-see \insertCite{glmbayesChapter04}{glmbayes} for model statistics.
+see \insertCite{glmbayesChapter04}{nmathopencl} for model statistics.
 }

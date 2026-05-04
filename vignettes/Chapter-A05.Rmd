@@ -1,4 +1,4 @@
----
+﻿---
 title: "Chapter A05: Simulation Methods - Likelihood Subgradient Densities"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(glmbayes)
+library(nmathopencl)
 ```
 
 
@@ -112,7 +112,7 @@ This preprocessing step ensures that the model is well-posed and that the optimi
 Once the inputs are validated, the function proceeds to estimate the posterior mode using numerical optimization:
 
 (i) **Objective and Gradient Functions**  
-The user supplies two functions — `f2` for the **negative** log-posterior and `f3` for the corresponding gradient — which are passed to the `optim()` routine.
+The user supplies two functions â€” `f2` for the **negative** log-posterior and `f3` for the corresponding gradient â€” which are passed to the `optim()` routine.
 
 (ii) **Optimization Method**  
 The BFGS algorithm is used to minimize the negative log-posterior. The starting point is `start - mu`, reflecting the zero-centered prior.
@@ -132,7 +132,7 @@ The theoretical results and formulas in the Nygren and Nygren (2006) paper assum
 
 (i) **Definition 3**: A probability model with a multivariate normal prior and log-concave likelihood function is in standard form if:
 
-- The prior variance–covariance matrix is the identity matrix.  
+- The prior varianceâ€“covariance matrix is the identity matrix.  
 - The Hessian of the log-posterior density evaluated at the posterior mode is a diagonal matrix.
 
 (ii) **Remark 11**: If the log-likelihood function is concave and twice continuously differentiable, then a Cholesky decomposition of the posterior precision at the unique posterior mode (which always exists) can be used to reparameterize a model into one for which the posterior precision at the posterior mode is a diagonal matrix.
@@ -148,7 +148,7 @@ The theoretical results and formulas in the Nygren and Nygren (2006) paper assum
   LL^{*}(\theta) = -0.5\,(\theta - \mu)^{T}(P - D)(\theta - \mu) + LL(\theta).
   \]
 
-(v) **Remark 14**: Suppose that a model has a multivariate normal prior with a diagonal variance–covariance matrix. Also assume that the posterior precision at the posterior mode is a diagonal matrix. Then the model can be reparameterized into a model in standard form.
+(v) **Remark 14**: Suppose that a model has a multivariate normal prior with a diagonal varianceâ€“covariance matrix. Also assume that the posterior precision at the posterior mode is a diagonal matrix. Then the model can be reparameterized into a model in standard form.
 
 (vi) **Remark 15**: If a probability model with a multivariate normal prior and log-concave likelihood function has a twice continuously differentiable log-likelihood function, then it can be reparameterized into a model in standard form.
 
@@ -233,7 +233,7 @@ where `k` is the number of dimensions. More generally, if the data are "normal-l
 
 ---
 
-### Deep Dive: Gridtype 1 — Static Threshold Envelope
+### Deep Dive: Gridtype 1 â€” Static Threshold Envelope
 
 Gridtype 1 uses a simple threshold test to decide whether a single-point or three-point envelope should be constructed for each dimension. The key quantity is the posterior precision \( 1 + a_i \), and the threshold \( \frac{2}{\sqrt{\pi}} \approx 1.128379 \) arises from bounding the expected number of candidate draws per accepted sample.
 
@@ -265,7 +265,7 @@ and hence is essentially proportional to the standard deviation.
 
 ---
 
-### Deep Dive: Gridtype 2 — Adaptive Envelope via `EnvelopeOpt()`
+### Deep Dive: Gridtype 2 â€” Adaptive Envelope via `EnvelopeOpt()`
 
 Gridtype 2 uses a dynamic strategy to select the number of grid points per dimension based on a cost-benefit analysis. The goal is to minimize total runtime by balancing envelope construction cost against sampling efficiency.
 
@@ -275,7 +275,7 @@ The tradeoff is formalized as:
 
 - \(T_{\text{sample}}(n, \text{acc}_i(g_i)) \propto n / \text{acc}_i(g_i)\): cost of drawing \(n\) samples given acceptance rate \(\text{acc}_i(g_i)\)
 
-The function `EnvelopeOpt(a_i, n)` solves this tradeoff using approximations from subgradient theory. Dimensions are ranked by decreasing posterior standard deviation — equivalently, by increasing values of \( 1 / (1 + a_i) \). Dimensions with larger `a_i` (i.e., sharper curvature) are more likely to benefit from additional tangents.
+The function `EnvelopeOpt(a_i, n)` solves this tradeoff using approximations from subgradient theory. Dimensions are ranked by decreasing posterior standard deviation â€” equivalently, by increasing values of \( 1 / (1 + a_i) \). Dimensions with larger `a_i` (i.e., sharper curvature) are more likely to benefit from additional tangents.
 
 The algorithm proceeds as follows:
 
@@ -296,11 +296,11 @@ In the implementation of `EnvelopeOpt()`, the line
 intest[i] <- 3^(i-1)
 ```
 
-represents the **grid construction cost** at iteration *i*. This term estimates the number of log‑likelihood and gradient evaluations required to build the envelope as more dimensions are promoted from single‑point to three‑point tangents:
+represents the **grid construction cost** at iteration *i*. This term estimates the number of logâ€‘likelihood and gradient evaluations required to build the envelope as more dimensions are promoted from singleâ€‘point to threeâ€‘point tangents:
 
-- At the start ($i = 1$), all dimensions use single‑point tangents, so the build cost is minimal.  
-- Each time a new dimension is switched to a three‑point tangent, the number of required evaluations grows multiplicatively.  
-- The factor $3^{\,i-1}$ captures this exponential growth: with each additional three‑point dimension, the grid size triples, and so does the number of evaluations needed to construct the envelope.
+- At the start ($i = 1$), all dimensions use singleâ€‘point tangents, so the build cost is minimal.  
+- Each time a new dimension is switched to a threeâ€‘point tangent, the number of required evaluations grows multiplicatively.  
+- The factor $3^{\,i-1}$ captures this exponential growth: with each additional threeâ€‘point dimension, the grid size triples, and so does the number of evaluations needed to construct the envelope.
 
 In addition to the build cost term `intest[i]`, the function also tracks the **expected sampling cost** through the quantity
 
@@ -314,15 +314,15 @@ This term represents the **expected number of likelihood/gradient (slope) evalua
   \[
   \text{slopeest}[1] \;=\; \prod_j \sqrt{1 + a_j},
   \]  
-  which corresponds to the baseline rejection burden when all dimensions use single‑point tangents.  
+  which corresponds to the baseline rejection burden when all dimensions use singleâ€‘point tangents.  
 
-- Each time a dimension is promoted to a three‑point tangent, its entry in `scaleest` is replaced by the constant  
+- Each time a dimension is promoted to a threeâ€‘point tangent, its entry in `scaleest` is replaced by the constant  
   \[
   \tfrac{2}{\sqrt{\pi}},
   \]  
   reflecting the improved acceptance bound for that dimension.  
 
-- Consequently, as more dimensions are switched to three‑point tangents, the product  
+- Consequently, as more dimensions are switched to threeâ€‘point tangents, the product  
   \[
   \prod_j \text{scaleest}[i,j]
   \]  
@@ -330,8 +330,8 @@ This term represents the **expected number of likelihood/gradient (slope) evalua
 
 Thus, `slopeest[i]` captures the **sampling efficiency** of the envelope:
 
-- **Large** `slopeest` values → more rejections, higher per‑draw cost.  
-- **Smaller** `slopeest` values → fewer rejections, more efficient sampling.  
+- **Large** `slopeest` values â†’ more rejections, higher perâ€‘draw cost.  
+- **Smaller** `slopeest` values â†’ fewer rejections, more efficient sampling.  
 
 Together with the build cost term `intest[i]`, the total evaluation cost is
 
@@ -346,7 +346,7 @@ This balance ensures that the algorithm adaptively chooses the grid size that mi
 
 The optimizer selects the configuration that minimizes this total. Intuitively:
 
-- For **small sample sizes** ($n$ small), the build cost dominates, so the algorithm favors fewer three‑point tangents.  
+- For **small sample sizes** ($n$ small), the build cost dominates, so the algorithm favors fewer threeâ€‘point tangents.  
 - For **large sample sizes** ($n$ large), the sampling cost dominates, so the algorithm invests more in upfront grid construction to reduce rejections later.
 
 
@@ -383,7 +383,7 @@ When GPU acceleration is available through OpenCL, the Grid construction can be 
 
 ## 6. Building the Envelope
 
-The implementation of `EnvelopeBuild` follows the envelope construction in Nygren & Nygren (2006) for models in standard form (see Section 3–3.3). The outline below captures the process when each dimension involves three-point tangents. If some dimensions involve only one-point tangents, only the mid-point is used and the intervals become the full real-number line. 
+The implementation of `EnvelopeBuild` follows the envelope construction in Nygren & Nygren (2006) for models in standard form (see Section 3â€“3.3). The outline below captures the process when each dimension involves three-point tangents. If some dimensions involve only one-point tangents, only the mid-point is used and the intervals become the full real-number line. 
 
 
 ### 1. Compute width parameters \( \omega_i \) from the diagonal precision matrix
@@ -450,7 +450,7 @@ The Cartesian product of per-dimension partitions yields the \( 3^p \) restricte
 
 ### 5. Evaluate negative log-likelihood and gradients at each grid point
 
-This step constructs the likelihood subgradient densities and facilitates accept–reject sampling. The subgradients \( c(\bar{\theta}) \) are part of the definitions of likelihood subgradient densities (see Definition 2). Both subgradients and negative log-likelihoods (via \( h_{\bar{\theta}}(.) \)) are used during the accept–reject procedure.
+This step constructs the likelihood subgradient densities and facilitates acceptâ€“reject sampling. The subgradients \( c(\bar{\theta}) \) are part of the definitions of likelihood subgradient densities (see Definition 2). Both subgradients and negative log-likelihoods (via \( h_{\bar{\theta}}(.) \)) are used during the acceptâ€“reject procedure.
 
 - On CPU: via `f2_*` and `f3_*` routines  
 - On GPU: via `f2_f3_opencl`, which computes both together
@@ -475,7 +475,7 @@ Normalization ensures the mixture of restricted densities forms a valid dominati
 
 The standardized sampler called through `.rNormalGLM_std_cpp()` uses the envelope to generate posterior samples via rejection sampling. This routine is called internally by `.rNormalGLM_cpp()`, which in turn is invoked by the user-facing function `rNormal_reg()`. Together, these routines implement envelope-based sampling for generalized linear models with log-concave likelihood functions and multivariate normal priors.
 
-The envelope provides a mixture of restricted likelihood–subgradient densities, each defined over a region \( A_i \), with associated mixture weights \( \tilde{p}_i \) stored in `PLSD`. The sampling proceeds as follows:
+The envelope provides a mixture of restricted likelihoodâ€“subgradient densities, each defined over a region \( A_i \), with associated mixture weights \( \tilde{p}_i \) stored in `PLSD`. The sampling proceeds as follows:
 
 1. **Draw a region index.**  
    A region index \( J(i) \) is drawn from the discrete distribution defined by `PLSD`.
@@ -531,7 +531,7 @@ This section documents the exact reverse transformations applied to sampled draw
 - **Optional diagnostics**: recompute the user-supplied log-posterior at the transformed draws when requested.
 
 ### 8.2 Returned object (fields you can rely on)
-- **coefficients**: n × k matrix of posterior draws on the original parameter scale (returned as `trans(out2)` in the C++ routing function).  
+- **coefficients**: n Ã— k matrix of posterior draws on the original parameter scale (returned as `trans(out2)` in the C++ routing function).  
 - **coef.mode**: k-vector containing the posterior mode on the original scale (optimizer output + `mu`).  
 - **dispersion**: final dispersion used (1 for Poisson/Binomial; user value otherwise).  
 - **Prior**: list with components **mean** and **Precision** (original `mu` and `P`).  

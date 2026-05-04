@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(glmbayes)
+library(nmathopencl)
 ```
 
 # Chapter A12: Technical Derivations for Priors Returned by `Prior_Setup()`

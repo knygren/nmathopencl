@@ -1,4 +1,4 @@
----
+﻿---
 title: "Chapter A04: Directional Tail Diagnostics for Prior-Posterior Disagreement"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup,echo = FALSE}
-library(glmbayes)
+library(nmathopencl)
 ```
 
 ## Directional tail diagnostic (current implementation)
@@ -293,7 +293,7 @@ The package example already demonstrates the intended workflow and interpretatio
 A compact usage sketch from that example is:
 
 ```{r directional-tail-example-sketched, eval=FALSE}
-example("directional_tail", package = "glmbayes")
+example("directional_tail", package = "nmathopencl")
 
 # Core objects used in interpretation:
 dt <- directional_tail(fit)
@@ -476,7 +476,7 @@ There are three distinct, concrete reasons the Bayesian posterior tail probabili
 In the conjugate parameterization above, posterior $\boldsymbol{v = 2\alpha_{0} + n}$.
 If the prior has positive $\boldsymbol{\alpha_{0}}$ (an informative prior on the variance),
 the posterior $\boldsymbol{v}$ will be larger than the classical $n - p$.
-Increasing $v$ makes the Student‑t closer to normal (lighter tails), so the tail probability
+Increasing $v$ makes the Studentâ€‘t closer to normal (lighter tails), so the tail probability
 at the same $t$ value is smaller.
 
 -- Even for vaguely inforative priors, the prior contributes "pseudo-observations" to the posterior **df**. This is often the main cause of smaller Bayesian tails
@@ -490,7 +490,7 @@ Two effects happen here:
 (a) $\boldsymbol{V_{n}}$ generally shrinks relative to $(X^{T}X)^{-1}$ because of the prior precision $\boldsymbol{V_{0}^{-1}}$, and  
 (b) the posterior scale factor $\boldsymbol{\frac{\beta_{n}}{\alpha_{n}}}$ can be smaller than the classical estimate $\hat{s}^{2}$ depending on prior hyperparameters and the data (e.g., prior favors smaller variance).
 
-Either effect reduces the denominator and can increase the raw $t$ value — but combined with larger $\boldsymbol{v}$ the net tail probability can still be smaller.
+Either effect reduces the denominator and can increase the raw $t$ value â€” but combined with larger $\boldsymbol{v}$ the net tail probability can still be smaller.
 
 
 So you must compare both the numerator (posterior mean $\boldsymbol{m_{n,j}}$) 
@@ -505,8 +505,8 @@ both of which reduce evidence against $H_{0}$.
   the numerator of the Bayesian $t$ is smaller in magnitude than $\hat{\beta}_{j}$, 
   further reducing tail probability. In combination with (1) and (2), the posterior 
   tail probability will often be noticeably smaller than the classical one. 
-  Griffin & Brown and other shrinkage‑prior literature discuss this tradeoff 
-  explicitly for normal–gamma shrinkage priors.
+  Griffin & Brown and other shrinkageâ€‘prior literature discuss this tradeoff 
+  explicitly for normalâ€“gamma shrinkage priors.
 
 
 For Bayesian linear models with normal-gamma priors, it seems like standard errors used in t-statistic calculations need to be adjusted relative to the classical estimates. In particular, the adjustment seems to be

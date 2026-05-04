@@ -189,8 +189,8 @@ The function \code{glmb} is a Bayesian version of the classical
 \code{glm} was written by Simon Davies (under Ross Ihaka at the
 University of Auckland) and has since been extensively rewritten by
 members of the R Core Team; its design was inspired by the S
-function described in \insertCite{Hastie1992}{glmbayes}, which in turn relies on the
-formula framework described in \insertCite{WilkinsonRogers1973}{glmbayes}.
+function described in \insertCite{Hastie1992}{nmathopencl}, which in turn relies on the
+formula framework described in \insertCite{WilkinsonRogers1973}{nmathopencl}.
 
 Setup (including the use of formulas and families) mirrors that of \code{\link{glm}} but adds a
 required \code{pfamily} argument to specify the prior distribution. The design of the \code{pfamily} family of
@@ -207,7 +207,7 @@ generics (\code{\link{predict}}, \code{\link{residuals}}, etc.).
 A helper, \code{\link{Prior_Setup}}, assists users in choosing prior
 parameters. It ships with sensible defaults but also allows full
 customization. In particular, the default for \code{dNormal} is a
-reparameterization of Zellner's g-prior \insertCite{zellner1986gprior}{glmbayes}.
+reparameterization of Zellner's g-prior \insertCite{zellner1986gprior}{nmathopencl}.
 
 Currently supported response families are
 \code{gaussian} (identity link), \code{poisson} and \code{quasipoisson}
@@ -218,9 +218,9 @@ Currently supported response families are
 
 For the Gaussian family, draws under \code{dNormal} and
 \code{dNormalGamma} come from posterior distributions resulting from conjugate
-prior distributions \insertCite{Raiffa1961}{glmbayes}. For all other priors or response families,
+prior distributions \insertCite{Raiffa1961}{nmathopencl}. For all other priors or response families,
 we use an accept-reject sampler built on the likelihood-subgradient envelope
-method \insertCite{Nygren2006}{glmbayes}. The
+method \insertCite{Nygren2006}{nmathopencl}. The
 \code{Gridtype} argument controls how many tangent points are used
 in the envelope-trading off envelope tightness against construction
 cost-and \code{iters} reports candidate counts before acceptance.
@@ -353,7 +353,7 @@ summary(out_glmb_dGamma)
 }
 \references{
 \insertAllCited{}
-\insertRef{Dobson1990}{glmbayes}
+\insertRef{Dobson1990}{nmathopencl}
 }
 \seealso{
 \code{\link[stats]{lm}}, \code{\link[stats]{glm}}, \code{\link[stats]{family}}, \code{\link[stats]{formula}}
@@ -365,9 +365,9 @@ for classical modeling functions, family objects, and formula syntax
 
 \code{\link{EnvelopeBuild}} for envelope construction  methods.
 
-Further reading: \insertCite{Nygren2006}{glmbayes};
-\insertCite{glmbayesChapter00,glmbayesChapterA02,glmbayesSimmethods,glmbayesChapterA08}{glmbayes};
-OpenCL/GPU: \insertCite{glmbayesChapter12,glmbayesChapterA10}{glmbayes}.
+Further reading: \insertCite{Nygren2006}{nmathopencl};
+\insertCite{glmbayesChapter00,glmbayesChapterA02,glmbayesSimmethods,glmbayesChapterA08}{nmathopencl};
+OpenCL/GPU: \insertCite{glmbayesChapter12,glmbayesChapterA10}{nmathopencl}.
 
 \code{\link{summary.glmb}}, \code{\link{predict.glmb}}, \code{\link{residuals.glmb}}, \code{\link{simulate.glmb}},
 \code{\link{extractAIC.glmb}}, \code{\link{dummy.coef.glmb}} and methods(class="glmb") for \code{glmb}

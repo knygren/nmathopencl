@@ -1116,7 +1116,7 @@ Rcpp::List rIndepNormalGammaReg(
   // Base R functions (needed for mode optimization below)
   Rcpp::Function optim("optim");
   Rcpp::Function gaussian("gaussian");
-  Rcpp::Environment glmbayes_ns = Rcpp::Environment::namespace_env("glmbayes");
+  Rcpp::Environment glmbayes_ns = Rcpp::Environment::namespace_env("nmathopencl");
   Rcpp::Function glmbfamfunc = glmbayes_ns["glmbfamfunc"];
   Rcpp::List famfunc = glmbfamfunc( gaussian() );
   Rcpp::Function f2 = famfunc["f2"];

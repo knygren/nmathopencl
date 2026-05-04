@@ -1,4 +1,4 @@
-#' The Central Gamma Distribution
+﻿#' The Central Gamma Distribution
 #'
 #' Distribution function and random generation for the center (between a lower
 #' and an upper bound) of the Gamma distribution with shape and rate parameters.
@@ -49,15 +49,15 @@
 #'   \item numerical degeneracy when the Gamma CDF collapses in floating point
 #' }
 #'
-#' All computations are performed on the log scale using stable log–CDF and
-#' log–sum–exp transformations. This avoids the catastrophic cancellation that
+#' All computations are performed on the log scale using stable logâ€“CDF and
+#' logâ€“sumâ€“exp transformations. This avoids the catastrophic cancellation that
 #' occurs when the Gamma CDF values at the truncation points are extremely close.
 #'
 #' These functions are primarily intended for use in hierarchical Bayesian
 #' models where precision parameters are updated under tight truncation
 #' constraints, and where numerical stability is essential for reliable sampling
 #' performance. They are used in envelope-based dispersion sampling
-#' \insertCite{Nygren2006}{glmbayes}.
+#' \insertCite{Nygren2006}{nmathopencl}.
 #'
 #' @seealso \code{\link{Normal_ct}}, \code{\link{InvGamma_ct}}, \code{\link{EnvelopeDispersionBuild}}
 #' @references

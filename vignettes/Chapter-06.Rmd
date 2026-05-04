@@ -1,4 +1,4 @@
----
+﻿---
 title: "Chapter 06: Estimating Bayesian Generalized Linear Models"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup,echo = FALSE}
-library(glmbayes)
+library(nmathopencl)
 ```
 
 # General Discussion 

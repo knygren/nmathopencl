@@ -19,7 +19,7 @@ row and column names corresponding to the parameter names given by the
 }
 \description{
 Returns the posterior variance-covariance matrix of the regression coefficients
-from a fitted Bayesian GLM object \insertCite{Gelman2013}{glmbayes}.
+from a fitted Bayesian GLM object \insertCite{Gelman2013}{nmathopencl}.
 }
 \examples{
 ## ----dobson-------------------------------------------------------------------
@@ -45,6 +45,6 @@ vcov(glmb.D93)
 }
 \seealso{
 \code{\link{confint.glmb}}, \code{\link{summary.glmb}}, \code{\link{glmb}},
-\code{\link{glmbayes-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
+\code{\link{nmathopencl-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
 \code{\link[stats]{vcov}}
 }

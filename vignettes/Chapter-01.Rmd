@@ -1,4 +1,4 @@
----
+﻿---
 title: "Chapter 01: Getting started with glmbayes"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
@@ -28,7 +28,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup,echo = FALSE}
-library(glmbayes)
+library(nmathopencl)
 ```
 
 # 1. Introductory Discussion
@@ -113,15 +113,15 @@ print(glm.D93)
 ```
 #### 4.1.1 Coefficients
 
-The Coefficients table reports the maximum‐likelihood estimates for the intercept and each predictor on the log‐scale, summarizing how each covariate shifts the expected log‐count from its baseline. Later vignettes will show how these MLEs compare to the Bayesian posterior means produced by `glmb()`.
+The Coefficients table reports the maximumâ€likelihood estimates for the intercept and each predictor on the logâ€scale, summarizing how each covariate shifts the expected logâ€count from its baseline. Later vignettes will show how these MLEs compare to the Bayesian posterior means produced by `glmb()`.
 
 #### 4.1.2 Null and Residual Degrees of Freedom
 
-The Degrees of Freedom line gives the total df for the null (intercept‐only) model and the residual df for the full model (observations minus estimated parameters). These dfs underpin chi‐square tests on deviance reductions and the correct calibration of standard errors.
+The Degrees of Freedom line gives the total df for the null (interceptâ€only) model and the residual df for the full model (observations minus estimated parameters). These dfs underpin chiâ€square tests on deviance reductions and the correct calibration of standard errors.
 
 #### 4.1.3 Residual Deviance
 
-Residual deviance quantifies the lack of fit of the fitted model relative to a perfect (saturated) model, with smaller values indicating better fit. In later sections we’ll use both null and residual deviance to assess model adequacy and perform formal likelihood‐ratio tests.
+Residual deviance quantifies the lack of fit of the fitted model relative to a perfect (saturated) model, with smaller values indicating better fit. In later sections weâ€™ll use both null and residual deviance to assess model adequacy and perform formal likelihoodâ€ratio tests.
 
 #### 4.1.4 AIC
 
@@ -138,15 +138,15 @@ print(glmb.D93)
 ```
 #### 4.2.1 Posterior Mean Coefficients
 
-The Posterior Mean Coefficients table reports the Bayesian point estimates for each parameter under the specified prior, summarizing how each covariate shifts the expected log‐count after combining data and prior information. Later vignettes will explore how these posterior means compare to classical MLEs and how prior choice induces shrinkage.
+The Posterior Mean Coefficients table reports the Bayesian point estimates for each parameter under the specified prior, summarizing how each covariate shifts the expected logâ€count after combining data and prior information. Later vignettes will explore how these posterior means compare to classical MLEs and how prior choice induces shrinkage.
 
 #### 4.2.2 Effective Number of Parameters
 
-The Effective Number of Parameters quantifies model complexity by measuring how much the posterior distribution adapts to the data, often shrinking the apparent degrees of freedom under informative priors. We’ll contrast this with the nominal parameter count and show its role in penalizing overfitting.
+The Effective Number of Parameters quantifies model complexity by measuring how much the posterior distribution adapts to the data, often shrinking the apparent degrees of freedom under informative priors. Weâ€™ll contrast this with the nominal parameter count and show its role in penalizing overfitting.
 
 #### 4.2.3 Expected Residual Deviance
 
-Expected Residual Deviance is the posterior mean of the deviance, reflecting the model’s average lack of fit under its own predictive distribution. In subsequent vignettes we’ll use this quantity for Bayesian goodness‐of‐fit checks and compare it to classical residual deviance.
+Expected Residual Deviance is the posterior mean of the deviance, reflecting the modelâ€™s average lack of fit under its own predictive distribution. In subsequent vignettes weâ€™ll use this quantity for Bayesian goodnessâ€ofâ€fit checks and compare it to classical residual deviance.
 
 #### 4.2.4 DIC
 
@@ -164,7 +164,7 @@ The section references in the table below follow @Agresti2015.
 | 3.1.1 Calling the glm function             | 7.1 Poisson GLMs for Counts and Rates                                | Illustrates the canonical log-link for count data, Example 7.1 on log-rate modeling and interpretation via rate ratios.                                      |
 | 3.2.1 Setting the prior                    | 10.2 Bayesian Linear Models                                          | Discusses conjugate normal priors and the g-prior; shows how \(V \propto (X^\top X)^{-1}\) standardizes shrinkage across coefficients (Example 10.2).       |
 | 3.2.2 Calling the glmb function            | 10.3 Bayesian Generalized Linear Models                              | Introduces Bayesian GLM framework, Laplace approximation for marginal likelihood, and basic MCMC/penalized-likelihood connections (Example 11.3).            |
-| 4.1.1 Coefficients                         | 7.1 Poisson GLMs for Counts and Rates                                | Details how to interpret coefficients on the log scale as multiplicative effects on the mean; see Example 8.4’s discussion of log-rate differences.          |
+| 4.1.1 Coefficients                         | 7.1 Poisson GLMs for Counts and Rates                                | Details how to interpret coefficients on the log scale as multiplicative effects on the mean; see Example 8.4â€™s discussion of log-rate differences.          |
 | 4.1.2 Null and Residual Degrees of Freedom | 4.4 Deviance of a GLM, Model Comparison, and Model Checking          | Defines null vs. residual deviance, links to chi-square tests for nested models, and outlines df calculations for goodness-of-fit testing.                  |
 | 4.1.3 Residual Deviance                    | 4.4 Deviance of a GLM, Model Comparison, and Model Checking          | Covers deviance residuals, Pearson residuals, and formal goodness-of-fit metrics based on the deviance.                                            |
 | 4.1.4 AIC                                  | 4.6 Selecting Explanatory Variables for a GLM                        | Presents AIC derivation \(\!D + 2p\), compares to BIC, and discusses selection of parsimonious models via information criteria.                              |

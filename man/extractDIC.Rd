@@ -28,8 +28,8 @@ A named numeric vector with components:
 Computes the Deviance Information Criterion (DIC) and the effective
 number of parameters for Bayesian generalized linear models fitted
 via \code{glmb()} or \code{rglmb()}. The DIC, introduced by
-\insertCite{Spiegelhalter2002}{glmbayes}, provides a Bayesian analog to the
-AIC \insertCite{Akaike1974}{glmbayes}.
+\insertCite{Spiegelhalter2002}{nmathopencl}, provides a Bayesian analog to the
+AIC \insertCite{Akaike1974}{nmathopencl}.
 }
 \examples{
 ## ----dobson-------------------------------------------------------------------
@@ -53,7 +53,7 @@ extractAIC(glmb.D93)
 \insertAllCited{}
 }
 \seealso{
-\code{\link{summary.glmb}}, \code{\link{glmb}}, \code{\link{glmbayes-package}},
+\code{\link{summary.glmb}}, \code{\link{glmb}}, \code{\link{nmathopencl-package}},
 \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
 \code{\link[stats]{extractAIC}} for the classical AIC computation on \code{lm}/\code{glm} fits
 }

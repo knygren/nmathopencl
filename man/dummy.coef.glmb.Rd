@@ -25,7 +25,7 @@ A list giving for each term the draws for the coefficients.
 \description{
 Extracts coefficients in terms of the original factor levels rather than the
 coded variables. The logic mirrors \code{\link[stats]{dummy.coef}} for \code{lm}
-objects \insertCite{Chambers1992,VenablesRipley2002}{glmbayes}.
+objects \insertCite{Chambers1992,VenablesRipley2002}{nmathopencl}.
 }
 \details{
 A fitted linear model has coefficients for the contrasts of the factor terms,
@@ -59,7 +59,7 @@ print(myd)
 \insertAllCited{}
 }
 \seealso{
-\code{\link{summary.glmb}}, \code{\link{glmb}}, \code{\link{glmbayes-package}};
+\code{\link{summary.glmb}}, \code{\link{glmb}}, \code{\link{nmathopencl-package}};
 \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
 \code{\link[stats]{dummy.coef}}
 }

@@ -1,4 +1,4 @@
----
+﻿---
 title: "Chapter 12: Large Models: GPU Acceleration using OpenCL"
 output: rmarkdown::html_vignette
 vignette: >
@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 # **Introduction**
 
-This chapter describes how to enable GPU acceleration in `glmbayes` using OpenCL. GPU acceleration can dramatically reduce computation time for large envelope models, especially when working with high‑dimensional predictors or repeated model fits. OpenCL is used because it is vendor‑neutral and works across NVIDIA, AMD, and Intel hardware. CPU‑only execution remains fully supported, but may be significantly slower for large models.
+This chapter describes how to enable GPU acceleration in `glmbayes` using OpenCL. GPU acceleration can dramatically reduce computation time for large envelope models, especially when working with highâ€‘dimensional predictors or repeated model fits. OpenCL is used because it is vendorâ€‘neutral and works across NVIDIA, AMD, and Intel hardware. CPUâ€‘only execution remains fully supported, but may be significantly slower for large models.
 
 # **Installing and Using glmbayes with OpenCL Support**
 
@@ -36,7 +36,7 @@ https://cran.r-project.org/bin/windows/Rtools/
 - Ubuntu/Debian:
   sudo apt-get install build-essential r-base-dev
 
-  (If you need the latest R, add the CRAN repo first — see “Installing the latest R on Ubuntu/Debian” below.)
+  (If you need the latest R, add the CRAN repo first â€” see â€œInstalling the latest R on Ubuntu/Debianâ€ below.)
 
 - Fedora:
   sudo dnf groupinstall "Development Tools"
@@ -46,7 +46,7 @@ https://cran.r-project.org/bin/windows/Rtools/
   sudo pacman -S base-devel r
 
 Installing the latest R on Ubuntu/Debian (optional but recommended)
-Ubuntu’s default repositories often contain older R versions. To install the current CRAN release:
+Ubuntuâ€™s default repositories often contain older R versions. To install the current CRAN release:
 
 sudo apt-get install --no-install-recommends dirmngr gnupg ca-certificates software-properties-common
 sudo gpg --keyserver keyserver.ubuntu.com --recv-key E298A3A825C0D65DFD57CBB651716619E084DAB9
@@ -59,7 +59,7 @@ sudo apt-get install build-essential r-base-dev
 
 
 macOS requires both the Xcode Command Line Tools and GCC when installing *glmbayes* from source. 
-This is because the package’s configure script uses GCC to detect system include and library paths 
+This is because the packageâ€™s configure script uses GCC to detect system include and library paths 
 for OpenCL.
 
 Install Xcode Command Line Tools:
@@ -74,12 +74,12 @@ Install GCC via Homebrew:
 brew install gcc
 ```
 
-Binary installs (e.g., CRAN or R‑Universe macOS binaries) do not require GCC.
+Binary installs (e.g., CRAN or Râ€‘Universe macOS binaries) do not require GCC.
 
 
 ## **2. Install OpenCL Components**
 
-`glmbayes` must currently be installed **from source** because neither CRAN nor R‑universe build packages with OpenCL GPU support. Their build systems do not provide OpenCL headers or development libraries, so any precompiled binary from those repositories will have OpenCL disabled. To enable GPU acceleration, you must install `glmbayes` from source on a system where a complete OpenCL development environment is available.
+`glmbayes` must currently be installed **from source** because neither CRAN nor Râ€‘universe build packages with OpenCL GPU support. Their build systems do not provide OpenCL headers or development libraries, so any precompiled binary from those repositories will have OpenCL disabled. To enable GPU acceleration, you must install `glmbayes` from source on a system where a complete OpenCL development environment is available.
 
 A full OpenCL development environment includes:
 
@@ -87,7 +87,7 @@ A full OpenCL development environment includes:
 2. **The OpenCL runtime / ICD loader** (needed at run time)  
 3. **The OpenCL development library** providing the unversioned linker symlink `libOpenCL.so` (needed for linking)
 
-Most GPU drivers provide only the vendor‑specific OpenCL runtime, not the headers or the development symlink. The following subsections describe how to install the required OpenCL components on Windows, Linux, and macOS.
+Most GPU drivers provide only the vendorâ€‘specific OpenCL runtime, not the headers or the development symlink. The following subsections describe how to install the required OpenCL components on Windows, Linux, and macOS.
 
 ### **2.1 Windows**
 
@@ -100,7 +100,7 @@ Choose one of:
 - **Intel OpenCL runtimes / Intel oneAPI CPU runtime**  
   https://www.intel.com/content/www/us/en/developer/articles/tool/opencl-drivers.html
 
-- **Khronos OpenCL Headers (header‑only download)**  
+- **Khronos OpenCL Headers (headerâ€‘only download)**  
   https://github.com/KhronosGroup/OpenCL-Headers
 
 **Note:** When installing the CUDA Toolkit, Intel OpenCL SDK, or Khronos OpenCL headers,  
@@ -109,20 +109,20 @@ OpenCL header files (such as `CL/cl.h`) required to compile `glmbayes` from sour
 
 On Windows, installing the CUDA Toolkit or Intel OpenCL SDK is sufficient; no additional OpenCL runtime or development packages are required.
 
-AMD’s Windows driver package includes the OpenCL runtime and ICD components automatically. No additional installation or PATH configuration is required. If OpenCL is not detected, updating to the latest AMD Software (Adrenalin Edition) typically resolves the issue. The `diagnose_glmbayes()` function will report whether the AMD OpenCL components are correctly installed.
+AMDâ€™s Windows driver package includes the OpenCL runtime and ICD components automatically. No additional installation or PATH configuration is required. If OpenCL is not detected, updating to the latest AMD Software (Adrenalin Edition) typically resolves the issue. The `diagnose_glmbayes()` function will report whether the AMD OpenCL components are correctly installed.
 
 ### **2.2 Linux**
 
 To compile and run `glmbayes` with OpenCL support on Linux, you must install:
 
 1. An OpenCL implementation (vendor runtime)  
-2. OpenCL header files (compile‑time)  
+2. OpenCL header files (compileâ€‘time)  
 3. The OpenCL ICD loader (runtime)  
 4. The OpenCL development library providing `libOpenCL.so` (linking)
 
 The correct OpenCL implementation depends on your GPU vendor.  
 For NVIDIA and Intel, the OpenCL runtime is installed automatically with the GPU driver.  
-For AMD, you must choose the correct OpenCL stack — see Appendix A.
+For AMD, you must choose the correct OpenCL stack â€” see Appendix A.
 
 ---
 
@@ -224,7 +224,7 @@ If only `libOpenCL.so.1` is present, install the development package.
 
 #### **2.2.5 Verify OpenCL platforms with `clinfo` (Linux, recommended)**
 
-Having headers and `libOpenCL` installed does **not** guarantee that a **vendor** OpenCL implementation registers a **platform**. The `glmbayes` configure script and `diagnose_glmbayes()` both probe for a usable platform (e.g. `clGetPlatformIDs()`). On Linux—especially **remote GPU VMs**—it helps to check this **outside R** first.
+Having headers and `libOpenCL` installed does **not** guarantee that a **vendor** OpenCL implementation registers a **platform**. The `glmbayes` configure script and `diagnose_glmbayes()` both probe for a usable platform (e.g. `clGetPlatformIDs()`). On Linuxâ€”especially **remote GPU VMs**â€”it helps to check this **outside R** first.
 
 Install the **`clinfo`** utility:
 
@@ -246,7 +246,7 @@ Then run:
 clinfo
 ```
 
-You should see **`Number of platforms` >= 1** and at least one **GPU** device (for NVIDIA, typically under the NVIDIA platform). If **`Number of platforms` is 0**, the ICD loader is present but **no vendor runtime** is visible—install your vendor’s OpenCL ICD (on Ubuntu/Debian with NVIDIA GPUs, `sudo apt-get install nvidia-opencl-icd` is often required in minimal images) and run **`clinfo`** again.
+You should see **`Number of platforms` >= 1** and at least one **GPU** device (for NVIDIA, typically under the NVIDIA platform). If **`Number of platforms` is 0**, the ICD loader is present but **no vendor runtime** is visibleâ€”install your vendorâ€™s OpenCL ICD (on Ubuntu/Debian with NVIDIA GPUs, `sudo apt-get install nvidia-opencl-icd` is often required in minimal images) and run **`clinfo`** again.
 
 **Note:** `clinfo` is a system diagnostic, not part of R. It complements `diagnose_glmbayes()` when debugging **cloud or container** setups where the NVIDIA driver looks fine (`nvidia-smi` works) but OpenCL still reports no platform.
 
@@ -254,9 +254,9 @@ You should see **`Number of platforms` >= 1** and at least one **GPU** device (f
 
 macOS includes the OpenCL headers and the system OpenCL runtime as part of the Xcode Command Line Tools, so no additional installation is required for compilation. However, Apple has deprecated OpenCL, and modern Apple Silicon systems do not provide hardware OpenCL support. As a result, `glmbayes` will compile successfully on macOS, but GPU acceleration is not guaranteed and may fall back to CPU execution.
 
-## **3. Install glmbayes from source via R‑universe**
+## **3. Install glmbayes from source via Râ€‘universe**
 
-Because CRAN and R‑universe do not build packages with OpenCL support, installing from source is required to enable GPU acceleration.
+Because CRAN and Râ€‘universe do not build packages with OpenCL support, installing from source is required to enable GPU acceleration.
 
 ```r
 install.packages(
@@ -269,12 +269,12 @@ install.packages(
 ## **4. Load the package**
 
 ```r
-library(glmbayes)
+library(nmathopencl)
 ```
 
 ## **5. Check for OpenCL availability**
 
-On **Linux**, if you have shell access (including **Jupyter Terminal** on a cloud instance), running **`clinfo`** before opening R is recommended: confirm **`Number of platforms` >= 1** (see §2.2.5). That catches missing vendor ICDs early, independent of the R session.
+On **Linux**, if you have shell access (including **Jupyter Terminal** on a cloud instance), running **`clinfo`** before opening R is recommended: confirm **`Number of platforms` >= 1** (see Â§2.2.5). That catches missing vendor ICDs early, independent of the R session.
 
 ```r
 has_opencl()
@@ -317,7 +317,7 @@ GPU: NVIDIA
 
 - **GPU: NVIDIA**  
   Identifies the GPU vendor detected by the OpenCL runtime.  
-  (May show Intel, AMD, or “CPU” depending on the system.)
+  (May show Intel, AMD, or â€œCPUâ€ depending on the system.)
 
 - **[OK] Driver installed**  
   The system GPU driver is present and exposes an OpenCL platform.
@@ -329,7 +329,7 @@ GPU: NVIDIA
   The OpenCL ICD loader (`libOpenCL.so.1` on Linux) is available at runtime.
 
 - **[OK] OpenCL fully available (headers + runtime)**  
-  Confirms that both compile‑time and run‑time OpenCL components are present.
+  Confirms that both compileâ€‘time and runâ€‘time OpenCL components are present.
 
 - **[OK] Required PATH and library dirs present**  
   The library search paths include the directories where OpenCL is installed.
@@ -350,13 +350,13 @@ example(Cleveland)
 
 # Cleveland heart data: CPU vs OpenCL (illustrative)
 
-The chunks below are **not executed** during vignette builds (runtime). They mirror a large `glmb` CPU vs OpenCL comparison; for an interactive GPU check use **`example(Cleveland)`** (§6 above).
+The chunks below are **not executed** during vignette builds (runtime). They mirror a large `glmb` CPU vs OpenCL comparison; for an interactive GPU check use **`example(Cleveland)`** (Â§6 above).
 
 ```{r, eval=FALSE}
 # Cleveland GPU-accelerated example (same pattern as example(Cleveland))
 # (Not executed in the vignette build.)
 
-library(glmbayes)
+library(nmathopencl)
 
 # Load the dataset
 data("Cleveland")
@@ -396,7 +396,7 @@ t_non_opencl
 
 ```{r, echo=FALSE, out.width="100%"}
 knitr::include_graphics(
-  system.file("extdata", "cleveland_non_opencl_output_01.png", package = "glmbayes")
+  system.file("extdata", "cleveland_non_opencl_output_01.png", package = "nmathopencl")
 )
 ```
 
@@ -422,7 +422,7 @@ t_opencl
 
 ```{r, echo=FALSE, out.width="100%"}
 knitr::include_graphics(
-  system.file("extdata", "cleveland_opencl_output_01.png", package = "glmbayes")
+  system.file("extdata", "cleveland_opencl_output_01.png", package = "nmathopencl")
 )
 ```
 
@@ -434,10 +434,10 @@ summary(fit_opencl)
 
 ```{r, echo=FALSE, out.width="100%"}
 knitr::include_graphics(
-  system.file("extdata", "cleveland_summary_output_01.png", package = "glmbayes")
+  system.file("extdata", "cleveland_summary_output_01.png", package = "nmathopencl")
 )
 knitr::include_graphics(
-  system.file("extdata", "cleveland_summary_output_02.png", package = "glmbayes")
+  system.file("extdata", "cleveland_summary_output_02.png", package = "nmathopencl")
 )
 ```
 
@@ -457,7 +457,7 @@ This installs:
 
 - the AMD OpenCL runtime  
 - the ICD file (`amdocl64.icd`)  
-- ROCm’s optimized OpenCL implementation  
+- ROCmâ€™s optimized OpenCL implementation  
 
 ### **Supported AMD GPUs**
 
@@ -473,7 +473,7 @@ Older GPUs (Polaris, Vega, Navi 1x/2x) are **not supported** by ROCm.
 ### **Other AMD OpenCL stacks**
 
 - **Mesa Rusticl**: community OpenCL implementation; may work but is not officially supported.  
-- **AMDGPU‑PRO OpenCL**: legacy and not recommended.
+- **AMDGPUâ€‘PRO OpenCL**: legacy and not recommended.
 
    
 

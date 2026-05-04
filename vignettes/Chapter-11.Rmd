@@ -1,4 +1,4 @@
----
+﻿---
 title: "Chapter 11: Estimating Models with unknown dispersion parameters"
 output: rmarkdown::html_vignette
 bibliography: REFERENCES.bib
@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(glmbayes)
+library(nmathopencl)
 ```
 ## 1. Introduction
 
@@ -27,20 +27,20 @@ Earlier chapters developed Bayesian linear and generalized linear models under t
 that the dispersion parameter, denoted by \( \phi \) (or equivalently the residual variance
 \( \sigma^{2} \)), was known.
 For Gaussian models this corresponds to fixing the variance of the error term,
-and for quasi‑families it corresponds to fixing the scale parameter.
+and for quasiâ€‘families it corresponds to fixing the scale parameter.
 
 This chapter extends the framework to unknown dispersion parameters---a standard topic in Bayesian linear and generalized linear models [@OHaganForster2004; @Gelman2013]---showing how glmbayes
 supports:
 
 (1) Priors on the dispersion only  
-(2) Joint conjugate Normal–Gamma priors  
-(3) Independent Normal–Gamma priors  
-      • iid sampling via truncated Gamma priors  
-      • two‑block Gibbs sampling  
+(2) Joint conjugate Normalâ€“Gamma priors  
+(3) Independent Normalâ€“Gamma priors  
+      â€¢ iid sampling via truncated Gamma priors  
+      â€¢ twoâ€‘block Gibbs sampling  
 
-Full derivations for Gaussian dispersion, shape, and rate calibration from `Prior_Setup()` / `compute_gaussian_prior()`—and how those objects connect to conjugate and independent Normal--Gamma priors—are given in **Chapter A12** (<https://knygren.r-universe.dev/articles/glmbayes/Chapter-A12.html>).
+Full derivations for Gaussian dispersion, shape, and rate calibration from `Prior_Setup()` / `compute_gaussian_prior()`â€”and how those objects connect to conjugate and independent Normal--Gamma priorsâ€”are given in **Chapter A12** (<https://knygren.r-universe.dev/articles/glmbayes/Chapter-A12.html>).
 
-All Gaussian examples use the **Dobson** plant‑weight data [@Dobson1990], first introduced in Chapter 02.
+All Gaussian examples use the **Dobson** plantâ€‘weight data [@Dobson1990], first introduced in Chapter 02.
 
 
 ```{r dobson}
@@ -269,7 +269,7 @@ w_i\left[
 
 ---
 
-#### **Log‑concavity**
+#### **Logâ€‘concavity**
 
 For fixed \(\tau\):
 
@@ -287,22 +287,22 @@ These properties ensure:
 
 - unique posterior modes  
 - stable envelope construction to support accept-reject sampling for \(\beta\)  
-- valid accept–reject sampling for \(\tau\)  
+- valid acceptâ€“reject sampling for \(\tau\)  
 
 
 ### Implications for Bayesian GLMs
 
-The Gamma log–link model thus shares the same structural advantages as the
+The Gamma logâ€“link model thus shares the same structural advantages as the
 Gaussian and Poisson cases:
 
 * concavity in both \( \beta \) and \( v \),
 * unique posterior modes,
 * stable envelope construction,
 * efficient iid sampling for the dispersion parameter,
-* compatibility with two–block Gibbs sampling when desired.
+* compatibility with twoâ€“block Gibbs sampling when desired.
 
-These properties make the Gamma log–link model an especially clean example of
-how exponential–family structure supports fast, reliable posterior simulation in
+These properties make the Gamma logâ€“link model an especially clean example of
+how exponentialâ€“family structure supports fast, reliable posterior simulation in
 glmbayes.
 
 ## 3. Gaussian Model With Unknown Dispersion
@@ -423,7 +423,7 @@ The posterior mean of the dispersion is then:
   mean(out_rlmb$dispersion)
 ```
 
-## 3.2 Joint Conjugate Normal–Gamma Prior
+## 3.2 Joint Conjugate Normalâ€“Gamma Prior
 
 The conjugate Normal--Gamma prior couples \(\beta\) and \(\tau\) [@LindleySmith1972; @OHaganForster2004]:
 
@@ -488,7 +488,7 @@ summary(lmb.D9_v2)$dispersion
 
 ```
 
-## 3.3 Independent Normal–Gamma Prior
+## 3.3 Independent Normalâ€“Gamma Prior
 
 Here the prior factorizes:
 
@@ -524,17 +524,17 @@ so \(\beta\) and \(\tau\) are *a priori independent*.
 +\text{const}.
 \]
 
-A variation on this prior specification—using a **truncated Gamma prior** for the
-dispersion—is the model developed in **Chapter A07**, where:
+A variation on this prior specificationâ€”using a **truncated Gamma prior** for the
+dispersionâ€”is the model developed in **Chapter A07**, where:
 
 - the conditional posterior in \( \beta \) is *not conjugate*,  
 - the conditional posterior in \( \tau = 1/\phi \) is *not conjugate*, and  
-- the joint posterior remains **log‑concave**, enabling  
-  the **accept–reject envelope sampler**.
+- the joint posterior remains **logâ€‘concave**, enabling  
+  the **acceptâ€“reject envelope sampler**.
 
-This truncated‑Gamma, non‑conjugate Normal–Gamma model is therefore a direct
-extension of the independent Normal–Gamma prior described above, but requires
-the more advanced envelope‑based sampling strategy documented in Chapter A07.
+This truncatedâ€‘Gamma, nonâ€‘conjugate Normalâ€“Gamma model is therefore a direct
+extension of the independent Normalâ€“Gamma prior described above, but requires
+the more advanced envelopeâ€‘based sampling strategy documented in Chapterâ€¯A07.
 
 ### 3.3.1 Independent Normal Gamma Prior in glmbayes
 
@@ -553,7 +553,7 @@ from the package source root.
 ```{r chapter11-load-two-sampler}
 ch11_path <- system.file(
   "extdata", "Chapter11_Dobson_two_sampler.rds",
-  package = "glmbayes"
+  package = "nmathopencl"
 )
 stopifnot(nzchar(ch11_path), file.exists(ch11_path))
 ch11_saved <- readRDS(ch11_path)
@@ -661,16 +661,16 @@ sd(disp_out)
 
 ### 3.3.3 Comparison of the Two Samplers
 
-Under default settings, both the truncated‑Gamma iid sampler and the two‑block
+Under default settings, both the truncatedâ€‘Gamma iid sampler and the twoâ€‘block
 Gibbs sampler produce nearly identical posterior summaries for the regression
 coefficients and the dispersion parameter.
 
 To make this explicit, the table below reports posterior means and standard
 deviations from:
 
-* the iid sampler using the independent Normal–Gamma prior (same specification
+* the iid sampler using the independent Normalâ€“Gamma prior (same specification
   as `lmb(..., dIndependent_Normal_Gamma(...), n = 10000)` above), and  
-* the two‑block Gibbs sampler constructed from alternating Normal and Gamma updates.
+* the twoâ€‘block Gibbs sampler constructed from alternating Normal and Gamma updates.
 
 These values illustrate that both samplers target essentially the same posterior
 distribution (although the former has a truncated prior), with only minor Monte
@@ -707,7 +707,7 @@ difference between a truncated and an unrestricted gamma prior.
 However, the iid sampler has two clear advantages:
 
 * **Independent draws**: no autocorrelation and no loss of effective sample size  
-* **No tuning or burn‑in**: each draw is a direct sample from the posterior
+* **No tuning or burnâ€‘in**: each draw is a direct sample from the posterior
 
 The Gibbs sampler mixes well for this model class, but it inevitably shows mild
 autocorrelation and convergence diagnostics are beyond the scope of this
@@ -718,21 +718,21 @@ convergence diagnostics are needed.
 
 For readers who want the full mathematical details of the iid sampler, see
 **Chapter A07**, which documents the complete envelope construction and
-accept‑reject algorithm for the independent Normal–Gamma prior.
+acceptâ€‘reject algorithm for the independent Normalâ€“Gamma prior.
 
 
 
 ## 4. Gamma Regression Models With Unknown Dispersion
 
 We now specify priors for \((\beta,\tau)\) and derive the corresponding
-log‑priors and log‑posteriors, using the **carinsca** data [@BaileySimon1960; @statsciCarinsca; @McCullagh1989].
+logâ€‘priors and logâ€‘posteriors, using the **carinsca** data [@BaileySimon1960; @statsciCarinsca; @McCullagh1989].
 
 Throughout:
 
 - dispersion: \(\phi\)  
 - precision: \(\tau = 1/\phi\)  
 - mean: \(\mu_i = \exp(x_i^\top\beta)\)  
-- weighted log-likelihood: \(\ell(\beta,\tau)\) from Section 2.3  
+- weighted log-likelihood: \(\ell(\beta,\tau)\) from Sectionâ€¯2.3  
 
 
 
@@ -793,7 +793,7 @@ We place a Gamma prior on the precision:
 \tau \sim \text{Gamma}(a_0,b_0),
 \]
 
-with log‑prior
+with logâ€‘prior
 
 \[
 \log p(\tau)
@@ -812,8 +812,8 @@ Given fixed \(\beta\), the conditional posterior is
 + \text{const}.
 \]
 
-This posterior is **log‑concave in \(\tau\)**, enabling envelope‑based
-accept–reject sampling in the Gamma regression case.
+This posterior is **logâ€‘concave in \(\tau\)**, enabling envelopeâ€‘based
+acceptâ€“reject sampling in the Gamma regression case.
 
 
 ```{r glm_call_gamma_prior2}
@@ -835,7 +835,7 @@ mean(out2$dispersion)
 
 
 
-### 4.2 Independent Normal–Gamma Prior
+### 4.2 Independent Normalâ€“Gamma Prior
 
 Here the priors factorize:
 
@@ -849,7 +849,7 @@ so \(\beta\) and \(\tau\) are **a priori independent**.
 
 ---
 
-#### **Log‑prior**
+#### **Logâ€‘prior**
 
 \[
 \log p(\beta,\tau)
@@ -862,7 +862,7 @@ so \(\beta\) and \(\tau\) are **a priori independent**.
 
 ---
 
-#### **Log‑posterior**
+#### **Logâ€‘posterior**
 
 \[
 \log p(\beta,\tau \mid y)
@@ -878,33 +878,33 @@ In Gamma regression:
 
 - the conditional posterior in \(\beta\) is **not conjugate**  
 - the conditional posterior in \(\tau\) is **not conjugate**  
-- the joint posterior remains **log‑concave**
+- the joint posterior remains **logâ€‘concave**
 
 This in theory enables two sampling strategies for the Gamma regression model:
 
-1. **Two‑block Gibbs sampler**  
+1. **Twoâ€‘block Gibbs sampler**  
    - \( \beta \mid \tau, y \): sampled using a Normal approximation (via `rglmb`)  
-   - \( \tau \mid \beta, y \): sampled using a Gamma‑based quasi‑likelihood update  
+   - \( \tau \mid \beta, y \): sampled using a Gammaâ€‘based quasiâ€‘likelihood update  
    This is the **only fully implemented method** for Gamma regression in the
    current version of *glmbayes*.
 
-2. **Accept–reject envelope sampler (Chapter A07)**
-   Chapter A07 develops an accept–reject sampler using a **truncated Gamma prior**
+2. **Acceptâ€“reject envelope sampler (Chapterâ€¯A07)**
+   Chapterâ€¯A07 develops an acceptâ€“reject sampler using a **truncated Gamma prior**
    for \( \tau \) and a joint envelope over \((\beta,\tau)\).
    **However, this method is implemented only for the Gaussian family.**  
-   Extending the envelope‑based sampler to the Gamma regression model would require
+   Extending the envelopeâ€‘based sampler to the Gamma regression model would require
    additional mathematical development and corresponding modifications to the code.
 
-The truncated‑Gamma independent Normal–Gamma model in **Chapter A07** therefore
+The truncatedâ€‘Gamma independent Normalâ€“Gamma model in **Chapterâ€¯A07** therefore
 applies exclusively to the Gaussian case, while Gamma regression currently relies
-on the two‑block Gibbs sampler described above.
+on the twoâ€‘block Gibbs sampler described above.
 
 Implementation details: alternate `rglmb` draws for \(\beta \mid \tau, y\) using
 `dNormal(..., dispersion = dispersion2)` with draws for \(\tau \mid \beta, y\)
 using `dGamma(...)` on the Gamma regression likelihood, updating `dispersion2`
 after each \(\tau\) step.
-A **1000‑iteration burn‑in** is followed by **1000 stored iterations**
-(coefficient matrix `beta_out`, dispersion vector `disp_out`, and accept–reject
+A **1000â€‘iteration burnâ€‘in** is followed by **1000 stored iterations**
+(coefficient matrix `beta_out`, dispersion vector `disp_out`, and acceptâ€“reject
 counts `iters_out`).
 The same logic is written to **`inst/extdata/Chapter11_Carinsca_gamma_gibbs.rds`**
 by **`data-raw/make_Chapter11_Carinsca_gamma_gibbs_output.R`**
@@ -919,7 +919,7 @@ in **`chapter11-load-carinsca-gamma`**, and summaries are produced in
 ```{r chapter11-load-carinsca-gamma}
 ch11_cg_path <- system.file(
   "extdata", "Chapter11_Carinsca_gamma_gibbs.rds",
-  package = "glmbayes"
+  package = "nmathopencl"
 )
 stopifnot(nzchar(ch11_cg_path), file.exists(ch11_cg_path))
 ch11_cg <- readRDS(ch11_cg_path)
@@ -1055,7 +1055,7 @@ The posterior can be written in the form
 
 where \( \text{testfunc}(v) \) is a concave remainder term capturing the curvature
 contributed by the Gamma likelihood.
-This decomposition enables a **tangent–envelope accept–reject sampler**, in which:
+This decomposition enables a **tangentâ€“envelope acceptâ€“reject sampler**, in which:
 
 1. A Gamma proposal distribution is constructed using the linear part  
    \[
@@ -1085,14 +1085,14 @@ This chapter introduced Bayesian estimation of Gaussian models with unknown disp
 [@Gelman2013; @OHaganForster2004],
 including:
 
-• Gamma priors on the precision \( \tau \)  
-• Joint Normal–Gamma priors  
-• Independent Normal–Gamma priors  
-• iid sampling via envelope methods  
-• two‑block Gibbs sampling  
+â€¢ Gamma priors on the precision \( \tau \)  
+â€¢ Joint Normalâ€“Gamma priors  
+â€¢ Independent Normalâ€“Gamma priors  
+â€¢ iid sampling via envelope methods  
+â€¢ twoâ€‘block Gibbs sampling  
 
-The log‑concavity of the Gaussian likelihood in both \( \beta \) and \( \tau \)
-ensures that all samplers are stable, efficient, and theoretically well‑behaved.
+The logâ€‘concavity of the Gaussian likelihood in both \( \beta \) and \( \tau \)
+ensures that all samplers are stable, efficient, and theoretically wellâ€‘behaved.
 
 ## A1: Posterior Distribution Details for Conjugate Normal-Gamma prior
 
@@ -1174,7 +1174,7 @@ The **first** display becomes
 for any factor \(W^{1/2}\) with \(W^{1/2}(W^{1/2})^{\mathsf T}=W\)
 (e.g.\ diagonal \(\sqrt{w_i}\)).
 
-This closed‑form marginal is what makes the Normal–Gamma prior so computationally
+This closedâ€‘form marginal is what makes the Normalâ€“Gamma prior so computationally
 attractive:
 sampling \( \tau \) requires **only a single Gamma draw**.
 
@@ -1216,7 +1216,7 @@ Posterior draws are obtained by **independent Monte Carlo sampling**, not by a G
 
 #### Step 1: Draw the marginal posterior for \( \tau \)
 
-The dispersion (precision) parameter has a closed‑form marginal posterior:
+The dispersion (precision) parameter has a closedâ€‘form marginal posterior:
 
 \[
 \tau \mid y \sim 
@@ -1233,7 +1233,7 @@ S(\hat\beta_{\text{GLS}})
 = (y - X\hat\beta_{\text{GLS}})^{T}(y - X\hat\beta_{\text{GLS}})
 \]
 
-and \( \hat\beta_{\text{GLS}} \) is the generalized least‑squares estimator under
+and \( \hat\beta_{\text{GLS}} \) is the generalized leastâ€‘squares estimator under
 the prior precision.
 
 Each draw of \( \tau \) is **i.i.d.** from this Gamma distribution.
@@ -1278,7 +1278,7 @@ The conjugate posterior allows:
 - **direct sampling** of \( \beta \) from its conditional Normal distribution  
 
 No Markov chain is constructed, and **no Gibbs or Metropolis steps** are involved.  
-All posterior samples are **independent**, making the conjugate Normal–Gamma
+All posterior samples are **independent**, making the conjugate Normalâ€“Gamma
 model one of the simplest Bayesian regression frameworks for simulation.
 
 ## A2. Detailed sampling procedured for the Independent Normal-Gamma prior
@@ -1293,7 +1293,7 @@ basic Normal-Gamma structure.
 The iid sampler for this prior family is based on the envelope accept-reject
 method described in:
 
-**Chapter A07 — Accept-Reject Sampling for Gaussian Regression Models with
+**Chapter A07 â€” Accept-Reject Sampling for Gaussian Regression Models with
 Independent Normal-Gamma Priors**
 
 That vignette explains the full simulation procedure, including:

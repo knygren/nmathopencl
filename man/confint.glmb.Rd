@@ -24,7 +24,7 @@ upper credible limits for each parameter. These will be labeled
 \description{
 Computes Bayesian credible intervals for model parameters from posterior draws.
 Intervals are constructed as quantiles of the posterior distribution, following
-the standard approach for posterior summaries \insertCite{Gelman2013}{glmbayes}.
+the standard approach for posterior summaries \insertCite{Gelman2013}{nmathopencl}.
 }
 \examples{
 
@@ -50,6 +50,6 @@ confint(glmb.D93)
 }
 \seealso{
 \code{\link{summary.glmb}}, \code{\link{vcov.glmb}}, \code{\link{glmb}},
-\code{\link{glmbayes-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
+\code{\link{nmathopencl-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
 \code{\link[stats]{confint}} for classical confidence intervals
 }

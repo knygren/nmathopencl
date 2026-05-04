@@ -1,4 +1,4 @@
----
+﻿---
 title: "Chapter A08: Overview of Envelope Related Functions"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(glmbayes)
+library(nmathopencl)
 ```
 
 # Chapter A08: Overview of Envelope Related Functions

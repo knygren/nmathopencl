@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(glmbayes)
+library(nmathopencl)
 
-test_check("glmbayes")
+test_check("nmathopencl")
