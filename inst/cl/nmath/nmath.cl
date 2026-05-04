@@ -34,6 +34,11 @@
 // OpenCL-safe R_forceint equivalent
 #define R_forceint(x) round(x)
 
+#ifdef HAVE_VISIBILITY_ATTRIBUTE
+# define attribute_hidden __attribute__ ((visibility ("hidden")))
+#else
+# define attribute_hidden
+#endif
 
 // OpenCL compliant ML_ERROR DEFINITON
 
@@ -78,7 +83,7 @@
 
 
 // nmath.cl - OpenCL math constants, macros & remaps for GPU kernels
-//@provides: ML_POSINF,ML_NEGINF,ML_NAN,ME_NONE,ME_DOMAIN,ME_RANGE,ME_NOCONV,ME_PRECISION,ME_UNDERFLOW,ISNAN,R_FINITE,ML_VALID,ML_ERR_return_NAN,ML_ERROR,WILCOX_MAX,_
+//@provides: ML_POSINF,ML_NEGINF,ML_NAN,ME_NONE,ME_DOMAIN,ME_RANGE,ME_NOCONV,ME_PRECISION,ME_UNDERFLOW,ISNAN,R_FINITE,ML_VALID,ML_ERR_return_NAN,ML_ERROR,WILCOX_MAX,attribute_hidden,_
 
 // ──────────────────────────────
 // 📦 Numerical Constants (Quiet Override)
