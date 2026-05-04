@@ -7,9 +7,9 @@
 ## `dIndependent_Normal_Gamma()`; for the latter, pass `shape = ps$shape_ING`
 ## (see ?Prior_Setup).
 ##
-## Run: demo(Ex_10_Prior_Setup_gaussian_calibration, package = "glmbayes")
+## Run: demo(Ex_10_Prior_Setup_gaussian_calibration, package = "nmathopencl")
 
-library(glmbayes)
+library(nmathopencl)
 
 vcov_congruence <- function(V_post, V_base) {
   U <- chol(V_base)

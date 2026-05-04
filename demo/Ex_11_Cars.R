@@ -13,9 +13,9 @@
 ## `dGamma()` uses fixed `ps$coefficients` with `rate = ps$rate_gamma` when present
 ## (RSS at the Zellner blend; else `ps$rate`).
 ##
-## Run: demo(Ex_11_Cars, package = "glmbayes")
+## Run: demo(Ex_11_Cars, package = "nmathopencl")
 
-library(glmbayes)
+library(nmathopencl)
 
 vcov_congruence <- function(V_post, V_base) {
   U <- chol(V_base)
