@@ -4,7 +4,7 @@
 //@includes: nmath
 
 
-attribute_hidden inline int chebyshev_init(double *dos, int nos, double eta)
+attribute_hidden int chebyshev_init(double *dos, int nos, double eta)
 {
     int i, ii;
     double err;
