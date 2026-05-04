@@ -4,7 +4,7 @@
 //@includes: nmath
 
 
-inline double lgammafn_sign(double x, int *sgn)
+double lgammafn_sign(double x, int *sgn)
 {
     double ans, y, sinpiy;
 
@@ -83,7 +83,7 @@ inline double lgammafn_sign(double x, int *sgn)
     return ans;
 }
 
-inline double lgammafn(double x)
+double lgammafn(double x)
 {
     return lgammafn_sign(x, NULL);
 }

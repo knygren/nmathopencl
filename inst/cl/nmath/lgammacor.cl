@@ -5,7 +5,7 @@
 
 // lgammacor.cl – OpenCL port of R's lgammacor.c
 
-inline double lgammacor(double x)
+attribute_hidden double lgammacor(double x)
 {
     const double algmcs[15] = {
         +.1666389480451863247205729650822e+0,

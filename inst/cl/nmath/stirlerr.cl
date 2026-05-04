@@ -4,7 +4,7 @@
 //@includes: nmath
 
 
-inline double stirlerr(double n) {
+attribute_hidden double stirlerr(double n) {
 
      
         if (n <= 5.25)         return stirlerr_small(n);

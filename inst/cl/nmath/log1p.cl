@@ -9,7 +9,7 @@
  
 
 #ifndef HAVE_WORKING_LOG1P
-inline double Rlog1p(double x)
+double Rlog1p(double x)
 {
     /* series for log1p on the interval -.375 to .375
      *				     with weighted error   6.35e-32

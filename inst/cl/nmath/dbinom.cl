@@ -5,7 +5,7 @@
 
 
 /* Compute  (1+x)^y  accurately also for |x| << 1  */
-inline double pow1p(double x, double y)
+double pow1p(double x, double y)
 {
     if(isnan(y))
 	return (x == 0) ? 1. : y; // (0+1)^NaN := 1  by standards
@@ -30,7 +30,7 @@ inline double pow1p(double x, double y)
     }
 }
 
-inline double dbinom_raw(double x, double n, double p, double q, int give_log)
+double dbinom_raw(double x, double n, double p, double q, int give_log)
 {
     if (p == 0) return((x == 0) ? R_D__1 : R_D__0);
     if (q == 0) return((x == n) ? R_D__1 : R_D__0);
@@ -80,7 +80,7 @@ inline double dbinom_raw(double x, double n, double p, double q, int give_log)
 
 
 
-inline double dbinom(double x, double n, double p, int give_log)
+double dbinom(double x, double n, double p, int give_log)
 {
 #ifdef IEEE_754
     /* NaNs propagated correctly */

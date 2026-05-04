@@ -6,7 +6,7 @@
 
 // fmax2.cl – OpenCL port of R's fmax2.c
 
-inline double fmax2(double x, double y)
+double fmax2(double x, double y)
 {
     if (ISNAN(x)) return y;
     if (ISNAN(y)) return x;

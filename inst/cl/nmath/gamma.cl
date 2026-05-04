@@ -3,7 +3,7 @@
 //@depends: chebyshev, gammalims, stirlerr_large, lgammacor, nmath
 //@includes: nmath
 
-inline double gammafn(double x)
+double gammafn(double x)
 {
     const static double gamcs[42] = {
 	+.8571195590989331421920062399942e-2,

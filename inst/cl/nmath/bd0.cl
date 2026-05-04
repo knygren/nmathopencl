@@ -4,7 +4,7 @@
 //@includes: nmath
 
 
-inline double bd0(double x, double np)
+attribute_hidden double bd0(double x, double np)
 {
     if(!R_FINITE(x) || !R_FINITE(np) || np == 0.0) ML_WARN_return_NAN;
 
@@ -197,7 +197,7 @@ inline double bd0(double x, double np)
  *
  * Deliver the result back in two parts, *yh and *yl.
  */
-inline void ebd0(double x, double M, double *yh, double *yl)
+attribute_hidden void ebd0(double x, double M, double *yh, double *yl)
 {
 	const int Sb = 10;
 	const double S = 1u << Sb; // = 2^10 = 1024

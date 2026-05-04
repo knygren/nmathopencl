@@ -8,7 +8,7 @@
 #define x_LRG           2.86111748575702815380240589208115399625e+307 /* = 2^1023 / pi */
 
 // called also from dgamma.c, pgamma.c, dnbeta.c, dnbinom.c, dnchisq.c :
-inline double dpois_raw(double x, double lambda, int give_log)
+double dpois_raw(double x, double lambda, int give_log)
 {
     /*       x >= 0 ; integer for dpois(), but not e.g. for pgamma()!
         lambda >= 0
@@ -38,7 +38,7 @@ inline double dpois_raw(double x, double lambda, int give_log)
 
 
 
-inline double dpois(double x, double lambda, int give_log)
+double dpois(double x, double lambda, int give_log)
 {
 #ifdef IEEE_754
     if(ISNAN(x) || ISNAN(lambda))

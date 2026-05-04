@@ -25,7 +25,7 @@ attribute_hidden int chebyshev_init(double *dos, int nos, double eta)
 }
 
 
-inline double chebyshev_eval(double x, const double *a, const int n)
+attribute_hidden double chebyshev_eval(double x, const double *a, const int n)
 {
 static const char fname[] = "chebyshev_eval";
     double b0, b1, b2, twox;

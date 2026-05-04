@@ -6,7 +6,7 @@
 
 // gammalims.cl – OpenCL port of R's gammalims.c
 
-inline void gammalims(double *xmin, double *xmax)
+attribute_hidden void gammalims(double *xmin, double *xmax)
 {
 #ifdef IEEE_754
     *xmin = -170.5674972726612;
