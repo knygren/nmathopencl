@@ -1,5 +1,5 @@
 // fmax2.cl - OpenCL Adaptation of fmax2.c
-// @provides: expm1
+// @provides: fmax2
 // @depends: nmath
 //@includes: nmath
 
@@ -8,7 +8,9 @@
 
 double fmax2(double x, double y)
 {
-    if (ISNAN(x)) return y;
-    if (ISNAN(y)) return x;
-    return (x > y) ? x : y;
+#ifdef IEEE_754
+    if (ISNAN(x) || ISNAN(y))
+        return x + y;
+#endif
+    return (x < y) ? y : x;
 }
