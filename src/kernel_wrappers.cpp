@@ -66,6 +66,7 @@ Rcpp::List f2_f3_opencl(
 #ifdef USE_OPENCL
   
   std::string OPENCL_source     = load_kernel_source("OPENCL.cl");
+  std::string rconfig_source   = load_kernel_library("R","nmathopencl", false);
   std::string rext_source     = load_kernel_library("R_ext","nmathopencl", false);
   std::string system_source     = load_kernel_library("System","nmathopencl", false);
   std::string rmath_source     = load_kernel_library("rmath","nmathopencl", false);
@@ -125,6 +126,7 @@ Rcpp::List f2_f3_opencl(
   /// Updated to use same "Program" logic for all models
   
   all_src = OPENCL_source +
+    "\n" + rconfig_source +
     "\n" + rext_source +
     "\n" + system_source +
     "\n" +   rmath_source + 
