@@ -7,7 +7,7 @@
 // @depends: nmath
 // @include: nmath, Rmath
 
-attribute_hidden double Rf_d1mach(int i)
+inline double Rf_d1mach(int i)
 {
     switch(i) {
         case 1: return DBL_MIN;
@@ -27,7 +27,7 @@ attribute_hidden double Rf_d1mach(int i)
     }
 }
 
-double d1mach(int *i)
+inline double d1mach(int *i)
 {
     return Rf_d1mach(*i);
 }

@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Chapter 02: Estimating Bayesian Linear Models"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"

@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Chapter 01: Getting started with glmbayes"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
