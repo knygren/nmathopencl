@@ -66,7 +66,8 @@ summary(lmb.boston_v2)
 ## Independent Normal-Gamma (OpenCL path when available)
 if (has_opencl()) {
   lmb.boston_v3 <- lmb(
-    n = 1L,
+    n = 10L,
+    # n = 1L,
     # n = 1000L,
     form,
     data = Boston_centered,

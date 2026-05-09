@@ -192,6 +192,79 @@ Rcpp::List f2_f3_opencl(
   );
 }
 
+Rcpp::NumericVector dnorm_opencl(
+    const Rcpp::NumericVector& x,
+    double                     mu,
+    double                     sigma,
+    bool                       give_log,
+    bool                       verbose
+) {
+  Rcpp::NumericVector out(x.size());
+
+  auto cpu_fallback = [&]() {
+    for (R_xlen_t i = 0; i < x.size(); ++i) {
+      out[i] = R::dnorm4(x[i], mu, sigma, give_log ? 1 : 0);
+    }
+  };
+
+#ifdef USE_OPENCL
+  if (!has_opencl()) {
+    if (verbose) {
+      Rcpp::Rcout << "[INFO] OpenCL unavailable; using CPU dnorm fallback.\n";
+    }
+    cpu_fallback();
+    return out;
+  }
+
+  try {
+    std::vector<double> x_flat = copyVector(x);
+    std::vector<double> out_flat;
+
+    std::string OPENCL_source  = load_kernel_source("OPENCL.cl");
+    std::string r_shims_source = load_kernel_library("R_shims", "nmathopencl", false);
+    std::string rext_source    = load_kernel_library("R_ext", "nmathopencl", false);
+    std::string system_source  = load_kernel_library("System", "nmathopencl", false);
+    std::string nmath_source   = load_kernel_library("nmath", "nmathopencl", false);
+    std::string kernel_source  = load_kernel_source("src/dnorm_kernel.cl");
+
+    std::string all_src = OPENCL_source +
+      "\n" + r_shims_source +
+      "\n" + rext_source +
+      "\n" + system_source +
+      "\n" + nmath_source +
+      "\n" + kernel_source;
+
+    dnorm_kernel_runner(
+      all_src,
+      "dnorm_kernel",
+      x_flat,
+      mu,
+      sigma,
+      give_log ? 1 : 0,
+      out_flat
+    );
+
+    for (R_xlen_t i = 0; i < out.size(); ++i) {
+      out[i] = out_flat[static_cast<size_t>(i)];
+    }
+    return out;
+  } catch (const std::exception& e) {
+    if (verbose) {
+      Rcpp::Rcout << "[WARN] OpenCL dnorm failed; using CPU fallback.\n"
+                  << e.what() << "\n";
+    }
+    cpu_fallback();
+    return out;
+  }
+#else
+  if (verbose) {
+    Rcpp::Rcout << "[INFO] Package built without OpenCL; using CPU dnorm fallback.\n";
+  }
+  cpu_fallback();
+  return out;
+#endif
+}
+
 }
 }
 

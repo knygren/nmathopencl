@@ -77,6 +77,10 @@ glmb_Standardize_Model_cpp_export <- function(y, x, P, bstar, A1) {
     .Call(`_nmathopencl_glmb_Standardize_Model_cpp_export`, y, x, P, bstar, A1)
 }
 
+dnorm_opencl_cpp_export <- function(x, mu = 0.0, sigma = 1.0, give_log = FALSE, verbose = FALSE) {
+    .Call(`_nmathopencl_dnorm_opencl_cpp_export`, x, mu, sigma, give_log, verbose)
+}
+
 load_kernel_source_wrapper_cpp_export <- function(relative_path, package = "nmathopencl") {
     .Call(`_nmathopencl_load_kernel_source_wrapper_cpp_export`, relative_path, package)
 }

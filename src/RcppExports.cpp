@@ -440,6 +440,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// dnorm_opencl_cpp_export
+Rcpp::NumericVector dnorm_opencl_cpp_export(const Rcpp::NumericVector& x, double mu, double sigma, bool give_log, bool verbose);
+RcppExport SEXP _nmathopencl_dnorm_opencl_cpp_export(SEXP xSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP give_logSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< bool >::type give_log(give_logSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(dnorm_opencl_cpp_export(x, mu, sigma, give_log, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // load_kernel_source_wrapper_cpp_export
 std::string load_kernel_source_wrapper_cpp_export(const std::string& relative_path, const std::string& package);
 RcppExport SEXP _nmathopencl_load_kernel_source_wrapper_cpp_export(SEXP relative_pathSEXP, SEXP packageSEXP) {
@@ -516,6 +531,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_nmathopencl_rIndepNormalGammaReg_std_cpp_export", (DL_FUNC) &_nmathopencl_rIndepNormalGammaReg_std_cpp_export, 15},
     {"_nmathopencl_rIndepNormalGammaReg_std_parallel_cpp_export", (DL_FUNC) &_nmathopencl_rIndepNormalGammaReg_std_parallel_cpp_export, 15},
     {"_nmathopencl_glmb_Standardize_Model_cpp_export", (DL_FUNC) &_nmathopencl_glmb_Standardize_Model_cpp_export, 5},
+    {"_nmathopencl_dnorm_opencl_cpp_export", (DL_FUNC) &_nmathopencl_dnorm_opencl_cpp_export, 5},
     {"_nmathopencl_load_kernel_source_wrapper_cpp_export", (DL_FUNC) &_nmathopencl_load_kernel_source_wrapper_cpp_export, 2},
     {"_nmathopencl_load_kernel_library_wrapper_cpp_export", (DL_FUNC) &_nmathopencl_load_kernel_library_wrapper_cpp_export, 3},
     {"_nmathopencl_has_opencl_cpp_export", (DL_FUNC) &_nmathopencl_has_opencl_cpp_export, 0},

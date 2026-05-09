@@ -130,6 +130,27 @@ Rcpp::List f2_f3_opencl(
     int                  progbar = 0
 );
 
+// -----------------------------------------------------------------------------
+// Simple nmath function runner/wrapper (dnorm)
+// -----------------------------------------------------------------------------
+void dnorm_kernel_runner(
+    const std::string&         kernel_source,
+    const char*                kernel_name,
+    const std::vector<double>& x_flat,
+    double                     mu,
+    double                     sigma,
+    int                        give_log,
+    std::vector<double>&       out_flat
+);
+
+Rcpp::NumericVector dnorm_opencl(
+    const Rcpp::NumericVector& x,
+    double                     mu,
+    double                     sigma,
+    bool                       give_log = false,
+    bool                       verbose  = false
+);
+
 } // namespace opencl
 } // namespace glmbayes
 

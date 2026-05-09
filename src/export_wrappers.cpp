@@ -1,6 +1,7 @@
 #include "RcppArmadillo.h"
 #include "Envelopefuncs.h"
 #include "openclPort.h"
+#include "opencl.h"
 #include "simfuncs.h"
 
 using namespace openclPort;
@@ -542,6 +543,17 @@ Rcpp::List glmb_Standardize_Model_cpp_export(
 //          get_opencl_core_count, gpu_names
 // User:    Advanced users - GPU diagnostics, kernel loading for use_opencl
 // =============================================================================
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dnorm_opencl_cpp_export(
+    const Rcpp::NumericVector& x,
+    double mu = 0.0,
+    double sigma = 1.0,
+    bool give_log = false,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dnorm_opencl(x, mu, sigma, give_log, verbose);
+}
 
 // [[Rcpp::export]]
 std::string load_kernel_source_wrapper_cpp_export(

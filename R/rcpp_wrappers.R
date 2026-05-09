@@ -274,6 +274,12 @@
   .Call("_nmathopencl_gpu_names_cpp_export")
 }
 
+#' @noRd
+#' @keywords internal
+.dnorm_opencl <- function(x, mean = 0, sd = 1, log = FALSE, verbose = FALSE) {
+  .Call(`_nmathopencl_dnorm_opencl_cpp_export`, x, mean, sd, log, verbose)
+}
+
 
 # =============================================================================
 #  Phased Out (no R wrappers; C++ exports may still exist for compatibility)
