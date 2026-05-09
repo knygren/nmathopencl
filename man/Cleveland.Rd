@@ -60,11 +60,14 @@ if (has_opencl()) {
     family       = binomial(link = "logit"),
     pfamily      = dNormal(mu = ps$mu, Sigma = ps$Sigma),
     data         = Cleveland,
-    n            = 1000,
+    n            = 1,
+    # n            = 1000,
     Gridtype     = 2,
-    use_parallel = TRUE,
+    use_parallel = FALSE,
+    # use_parallel = TRUE,
     use_opencl   = TRUE,
-    verbose      = FALSE
+    verbose      = TRUE
+    # verbose      = FALSE
   )
   summary(fit)
 }

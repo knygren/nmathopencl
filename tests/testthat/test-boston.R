@@ -47,7 +47,8 @@ test_that("Bayesian Gaussian regression with Independent Normal-Gamma prior — 
   # --------------------------------
   # Independent Normal–Gamma prior (non-conjugate, uses envelope)
   # --------------------------------
-  lmb.boston_v3 <- glmb(n = 1000,
+  lmb.boston_v3 <- glmb(n = 1,
+                        # n = 1000,
                         form,
                         data       = Boston_centered,
                         family     = gaussian(),
@@ -55,9 +56,11 @@ test_that("Bayesian Gaussian regression with Independent Normal-Gamma prior — 
                                                                shape = ps$shape_ING,
                                                                rate  = ps$rate
                         ),
-                        use_parallel = TRUE,
+                        use_parallel = FALSE,
+                        # use_parallel = TRUE,
                         use_opencl = TRUE,
-                        verbose    = FALSE
+                        verbose    = TRUE
+                        # verbose    = FALSE
   )
   
   

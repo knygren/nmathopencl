@@ -65,6 +65,14 @@ void f2_f3_kernel_runner(
   grad_flat.assign((size_t)l2*m1, 0.0);
   
   cl_int status = 0;
+  std::string build_log;
+  auto require_success = [&](cl_int s, const char* step) {
+    if (s != CL_SUCCESS) {
+      std::ostringstream msg;
+      msg << "OpenCL error at " << step << " (status=" << s << ").";
+      throw std::runtime_error(msg.str());
+    }
+  };
   
   // 2) Platform & Device
   // Rcpp::Rcout << "[runner] P0: before clGetPlatformIDs\n";
@@ -107,11 +115,13 @@ void f2_f3_kernel_runner(
   // 3) Context & Queue
   // Rcpp::Rcout << "[runner] P3: before clCreateContext\n";
   cl_context context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &status);
+  require_success(status, "clCreateContext");
   // Rcpp::Rcout << "[runner] P4: after clCreateContext, status=" << status << "\n";
   
   cl_queue_properties props[] = {0};
   // Rcpp::Rcout << "[runner] P5: before clCreateCommandQueueWithProperties\n";
   cl_command_queue queue = clCreateCommandQueueWithProperties(context, device, props, &status);
+  require_success(status, "clCreateCommandQueueWithProperties");
   // Rcpp::Rcout << "[runner] P6: after clCreateCommandQueueWithProperties, status=" << status << "\n";
   
   // 4) Program & Kernel
@@ -119,14 +129,37 @@ void f2_f3_kernel_runner(
   size_t      src_len = kernel_source.size();
   // Rcpp::Rcout << "[runner] P7: before clCreateProgramWithSource, src_len=" << src_len << "\n";
   cl_program  program = clCreateProgramWithSource(context, 1, &src_ptr, &src_len, &status);
+  require_success(status, "clCreateProgramWithSource");
   // Rcpp::Rcout << "[runner] P8: after clCreateProgramWithSource, status=" << status << "\n";
+  auto read_build_log = [&](cl_program prog) {
+    size_t log_size = 0;
+    cl_int s0 = clGetProgramBuildInfo(prog, device, CL_PROGRAM_BUILD_LOG, 0, nullptr, &log_size);
+    if (s0 != CL_SUCCESS || log_size == 0) return std::string();
+    std::string log(log_size, '\0');
+    cl_int s1 = clGetProgramBuildInfo(prog, device, CL_PROGRAM_BUILD_LOG, log_size, &log[0], nullptr);
+    if (s1 != CL_SUCCESS) return std::string();
+    return log;
+  };
   
   // Rcpp::Rcout << "[runner] P9: before clBuildProgram\n";
-  status |= clBuildProgram(program, 0, nullptr, nullptr, nullptr, nullptr);
+  status = clBuildProgram(program, 0, nullptr, nullptr, nullptr, nullptr);
+  build_log = read_build_log(program);
+  if (status != CL_SUCCESS) {
+    std::ostringstream msg;
+    msg << "OpenCL error at clBuildProgram (status=" << status << ").";
+    if (!build_log.empty()) {
+      msg << "\nBuild log:\n" << build_log;
+    }
+    throw std::runtime_error(msg.str());
+  }
+  if (progbar > 0 && !build_log.empty()) {
+    Rcpp::Rcout << "[OpenCL build log]\n" << build_log << "\n";
+  }
   // Rcpp::Rcout << "[runner] P10: after clBuildProgram, status=" << status << "\n";
   
   // Rcpp::Rcout << "[runner] P11: before clCreateKernel\n";
   cl_kernel kernel = clCreateKernel(program, kernel_name, &status);
+  require_success(status, "clCreateKernel");
   // Rcpp::Rcout << "[runner] P12: after clCreateKernel, status=" << status << "\n";
   
   // 5) Device Buffers
@@ -134,45 +167,67 @@ void f2_f3_kernel_runner(
   
   cl_mem bufX    = clCreateBuffer(context, CL_MEM_READ_ONLY  | CL_MEM_COPY_HOST_PTR,
                                   sizeof(double)*X_flat.size(),   (void*)X_flat.data(),   &status);
+  require_success(status, "clCreateBuffer(bufX)");
   cl_mem bufB    = clCreateBuffer(context, CL_MEM_READ_ONLY  | CL_MEM_COPY_HOST_PTR,
                                   sizeof(double)*B_flat.size(),   (void*)B_flat.data(),   &status);
+  require_success(status, "clCreateBuffer(bufB)");
   cl_mem bufMu   = clCreateBuffer(context, CL_MEM_READ_ONLY  | CL_MEM_COPY_HOST_PTR,
                                   sizeof(double)*mu_flat.size(),  (void*)mu_flat.data(),  &status);
+  require_success(status, "clCreateBuffer(bufMu)");
   cl_mem bufP    = clCreateBuffer(context, CL_MEM_READ_ONLY  | CL_MEM_COPY_HOST_PTR,
                                   sizeof(double)*P_flat.size(),   (void*)P_flat.data(),   &status);
+  require_success(status, "clCreateBuffer(bufP)");
   cl_mem bufA    = clCreateBuffer(context, CL_MEM_READ_ONLY  | CL_MEM_COPY_HOST_PTR,
                                   sizeof(double)*alpha_flat.size(), (void*)alpha_flat.data(), &status);
+  require_success(status, "clCreateBuffer(bufA)");
   cl_mem bufY    = clCreateBuffer(context, CL_MEM_READ_ONLY  | CL_MEM_COPY_HOST_PTR,
                                   sizeof(double)*y_flat.size(),   (void*)y_flat.data(),   &status);
+  require_success(status, "clCreateBuffer(bufY)");
   cl_mem bufW    = clCreateBuffer(context, CL_MEM_READ_ONLY  | CL_MEM_COPY_HOST_PTR,
                                   sizeof(double)*wt_flat.size(),  (void*)wt_flat.data(),  &status);
+  require_success(status, "clCreateBuffer(bufW)");
   
   cl_mem bufQF   = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
                                   sizeof(double)*qf_flat.size(),   nullptr, &status);
+  require_success(status, "clCreateBuffer(bufQF)");
   cl_mem bufGrad = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
                                   sizeof(double)*grad_flat.size(), nullptr, &status);
+  require_success(status, "clCreateBuffer(bufGrad)");
   
   // Rcpp::Rcout << "[runner] B: after buffer creation\n";
   
   // 6) Set Kernel Args
   int arg = 0;
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufX);
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufB);
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufMu);
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufP);
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufA);
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufY);
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufW);
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufQF);
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufGrad);
-  clSetKernelArg(kernel, arg++, sizeof(int),    &l1);
-  clSetKernelArg(kernel, arg++, sizeof(int),    &l2);
-  clSetKernelArg(kernel, arg++, sizeof(int),    &m1);
+  status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufX);
+  require_success(status, "clSetKernelArg(bufX)");
+  status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufB);
+  require_success(status, "clSetKernelArg(bufB)");
+  status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufMu);
+  require_success(status, "clSetKernelArg(bufMu)");
+  status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufP);
+  require_success(status, "clSetKernelArg(bufP)");
+  status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufA);
+  require_success(status, "clSetKernelArg(bufA)");
+  status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufY);
+  require_success(status, "clSetKernelArg(bufY)");
+  status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufW);
+  require_success(status, "clSetKernelArg(bufW)");
+  status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufQF);
+  require_success(status, "clSetKernelArg(bufQF)");
+  status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufGrad);
+  require_success(status, "clSetKernelArg(bufGrad)");
+  status = clSetKernelArg(kernel, arg++, sizeof(int),    &l1);
+  require_success(status, "clSetKernelArg(l1)");
+  status = clSetKernelArg(kernel, arg++, sizeof(int),    &l2);
+  require_success(status, "clSetKernelArg(l2)");
+  status = clSetKernelArg(kernel, arg++, sizeof(int),    &m1);
+  require_success(status, "clSetKernelArg(m1)");
   
   // 7) Launch
   size_t global = (size_t)m1;
   // Rcpp::Rcout << "[runner] C: before enqueue\n";
   status = clEnqueueNDRangeKernel(queue, kernel, 1, nullptr, &global, nullptr, 0, nullptr, nullptr);
+  require_success(status, "clEnqueueNDRangeKernel");
   // Rcpp::Rcout << "[runner] D: after enqueue\n";
   
   // 8) Read back outputs
@@ -180,12 +235,14 @@ void f2_f3_kernel_runner(
   status = clEnqueueReadBuffer(queue, bufQF,   CL_TRUE, 0,
                                sizeof(double)*qf_flat.size(),   qf_flat.data(),
                                0, nullptr, nullptr);
+  require_success(status, "clEnqueueReadBuffer(qf)");
   // Rcpp::Rcout << "[runner] F: after read qf\n";
   
   // Rcpp::Rcout << "[runner] G: before read grad\n";
   status = clEnqueueReadBuffer(queue, bufGrad, CL_TRUE, 0,
                                sizeof(double)*grad_flat.size(), grad_flat.data(),
                                0, nullptr, nullptr);
+  require_success(status, "clEnqueueReadBuffer(grad)");
   // Rcpp::Rcout << "[runner] H: after read grad\n";
   
   // 8a) Sanity-check: error out if both outputs are all zeros
@@ -195,14 +252,19 @@ void f2_f3_kernel_runner(
                          [](double x){ return x == 0.0; });
     };
     
-    bool qf_is_zero   = all_zero(qf_flat);
-    bool grad_is_zero = all_zero(grad_flat);
+    bool qf_is_zero   = (!qf_flat.empty()) && all_zero(qf_flat);
+    bool grad_is_zero = (!grad_flat.empty()) && all_zero(grad_flat);
     
     if (qf_is_zero || grad_is_zero) {
       std::ostringstream msg;
       msg << "OpenCL kernel returned "
           << (qf_is_zero   ? "qf_flat all zeros "   : "")
-          << (grad_is_zero ? "grad_flat all zeros." : "");
+          << (grad_is_zero ? "grad_flat all zeros." : "")
+          << " [kernel=" << kernel_name
+          << ", l1=" << l1 << ", l2=" << l2 << ", m1=" << m1 << ", global=" << global << "]";
+      if (!build_log.empty()) {
+        msg << "\nBuild log:\n" << build_log;
+      }
       throw std::runtime_error(msg.str());
     }
   }

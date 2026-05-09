@@ -69,9 +69,10 @@ Rcpp::List f2_f3_opencl(
   std::string r_shims_source   = load_kernel_library("R_shims","nmathopencl", false);
   std::string rext_source     = load_kernel_library("R_ext","nmathopencl", false);
   std::string system_source     = load_kernel_library("System","nmathopencl", false);
-  std::string rmath_source     = load_kernel_library("rmath","nmathopencl", false);
   std::string nmath_source     = load_kernel_library("nmath","nmathopencl", false);
-  std::string dpq_source     = load_kernel_library("dpq","nmathopencl", false);
+  // Old sequence retained for reference during migration:
+  // std::string rmath_source = load_kernel_library("rmath","nmathopencl", false);
+  // std::string dpq_source   = load_kernel_library("dpq","nmathopencl", false);
   
   
   if (family == "binomial"||family == "quasibinomial") {
@@ -125,14 +126,22 @@ Rcpp::List f2_f3_opencl(
   
   /// Updated to use same "Program" logic for all models
   
+  // Old program assembly sequence (kept as comment):
+  // all_src = OPENCL_source +
+  //   "\n" + r_shims_source +
+  //   "\n" + rext_source +
+  //   "\n" + system_source +
+  //   "\n" + rmath_source +
+  //   "\n" + dpq_source +
+  //   "\n" + nmath_source +
+  //   "\n" + ksrc;
+
   all_src = OPENCL_source +
     "\n" + r_shims_source +
     "\n" + rext_source +
     "\n" + system_source +
-    "\n" +   rmath_source + 
-    "\n" + dpq_source +
-    "\n" +nmath_source   
-  + "\n" +   ksrc;
+    "\n" + nmath_source +
+    "\n" + ksrc;
   
   // Rcpp::Rcout << "Entering f2_f3_kernel runner \n";
   

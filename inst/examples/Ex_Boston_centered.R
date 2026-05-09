@@ -43,7 +43,8 @@ summary(lmb.boston_v2)
 ## Independent Normal-Gamma (OpenCL path when available)
 if (has_opencl()) {
   lmb.boston_v3 <- lmb(
-    n = 1000L,
+    n = 1L,
+    # n = 1000L,
     form,
     data = Boston_centered,
     pfamily = dIndependent_Normal_Gamma(
@@ -52,9 +53,11 @@ if (has_opencl()) {
       shape = ps$shape_ING,
       rate = ps$rate
     ),
-    use_parallel = TRUE,
+    use_parallel = FALSE,
+    # use_parallel = TRUE,
     use_opencl = TRUE,
-    verbose = FALSE
+    verbose = TRUE
+    # verbose = FALSE
   )
   summary(lmb.boston_v3)
 }

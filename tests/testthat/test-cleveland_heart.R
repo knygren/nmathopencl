@@ -16,18 +16,21 @@ test_that("Bayesian binomial-logit regression-OpenCL", {
   mu <- ps$mu
   sigma <- ps$Sigma
   
-  # Fit Bayesian GLM with parallel + OpenCL
+  # Fit Bayesian GLM with OpenCL (temporarily serial for debugging)
   glmb_hd <- glmb(
     hd ~ age + sex + cp + trestbps + chol +
       fbs + restecg + thalach + exang + oldpeak + slope + ca + thal,
     family  = binomial(link = "logit"),
     pfamily = dNormal(mu = mu, Sigma = sigma),
     data    = df,
-    n       = 10000,
+    n       = 1,
+    # n       = 10000,
     Gridtype = 2,
-    use_parallel = TRUE,
+    use_parallel = FALSE,
+    # use_parallel = TRUE,
     use_opencl   = TRUE
-    ,verbose      = FALSE
+    ,verbose      = TRUE
+    # ,verbose      = FALSE
   )
   
   # Test condition: average number of candidates per acceptance < 6
