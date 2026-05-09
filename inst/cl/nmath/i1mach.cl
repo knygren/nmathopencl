@@ -1,11 +1,11 @@
 // @source_type: c
 // @source_origin: i1mach.c
-// @all_depends_count: 2
-// @all_depends: Rmath, nmath
-// @load_order: 45
 // @includes: nmath.h, limits.h
 // @depends: nmath
 // @provides: Rf_i1mach
+// @all_depends_count: 2
+// @all_depends: Rmath, nmath
+// @load_order: 48
 
 /*
  *  Mathlib - A Mathematical Function Library
@@ -27,8 +27,10 @@
  *  https://www.R-project.org/Licenses/
  */
 
-// #include "nmath.h"
-// #include <limits.h>
+// openclport: include directives disabled for OpenCL C compilation.
+// openclport: preload equivalent ported headers/shims in program assembly.
+// openclport-disabled-include: #include "nmath.h"
+// openclport-disabled-include: #include <limits.h>
 
 attribute_hidden int Rf_i1mach(int i)
 {

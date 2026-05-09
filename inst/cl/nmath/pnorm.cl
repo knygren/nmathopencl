@@ -1,9 +1,114 @@
-// pnorm.cl - OpenCL Adaptation of pnorm.c
-//@provides: pnorm5, pnorm_both
-//@depends: nmath, dnorm, chebyshev
-//@includes: nmath, dpq
+// @source_type: c
+// @source_origin: pnorm.c
+// @includes: nmath.h, dpq.h
+// @depends: nmath, dpq
+// @provides: pnorm5, pnorm_both
+// @all_depends_count: 3
+// @all_depends: dpq, Rmath, nmath
+// @load_order: 12
+// @local_macros: d_2, do_del, swap_tail
 
+// openclport: macro hygiene pre-clean for concatenated translation units.
+#ifdef d_2
+# undef d_2
+#endif
+#ifdef do_del
+# undef do_del
+#endif
+#ifdef swap_tail
+# undef swap_tail
+#endif
 
+/*
+ *  Mathlib : A C Library of Special Functions
+ *  Copyright (C) 2000-2024 The R Core Team
+ *  Copyright (C) 2003	    The R Foundation
+ *  Copyright (C) 1998	    Ross Ihaka
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, a copy is available at
+ *  https://www.R-project.org/Licenses/
+ *
+ *  SYNOPSIS
+ *
+ *   #include <Rmath.h>
+ *
+ *   double pnorm5(double x, double mu, double sigma, int lower_tail,int log_p);
+ *	   {pnorm (..) is synonymous and preferred inside R}
+ *
+ *   void   pnorm_both(double x, double *cum, double *ccum,
+ *		       int i_tail, int log_p);
+ *
+ *  DESCRIPTION
+ *
+ *	The main computation evaluates near-minimax approximations derived
+ *	from those in "Rational Chebyshev approximations for the error
+ *	function" by W. J. Cody, Math. Comp., 1969, 631-637.  This
+ *	transportable program uses rational functions that theoretically
+ *	approximate the normal distribution function to at least 18
+ *	significant decimal digits.  The accuracy achieved depends on the
+ *	arithmetic system, the compiler, the intrinsic functions, and
+ *	proper selection of the machine-dependent constants.
+ *
+ *  REFERENCE
+ *
+ *	Cody, W. D. (1993).
+ *	ALGORITHM 715: SPECFUN - A Portable FORTRAN Package of
+ *	Special Function Routines and Test Drivers".
+ *	ACM Transactions on Mathematical Software. 19, 22-32.
+ *
+ *  EXTENSIONS
+ *
+ *  The "_both" , lower, upper, and log_p  variants were added by
+ *  Martin Maechler, Jan.2000;
+ *  as well as log1p() and similar improvements later on.
+ *
+ *  James M. Rath contributed bug report PR#699 and patches correcting SIXTEN
+ *  and if() clauses {with a bug: "|| instead of &&" -> PR #2883) more in line
+ *  with the original Cody code.
+ */
+
+// openclport: include directives disabled for OpenCL C compilation.
+// openclport: preload equivalent ported headers/shims in program assembly.
+// openclport-disabled-include: #include "nmath.h"
+// openclport-disabled-include: #include "dpq.h"
+
+double pnorm5(double x, double mu, double sigma, int lower_tail, int log_p)
+{
+    double p, cp;
+
+    /* Note: The structure of these checks has been carefully thought through.
+     * For example, if x == mu and sigma == 0, we get the correct answer 1.
+     */
+#ifdef IEEE_754
+    if(ISNAN(x) || ISNAN(mu) || ISNAN(sigma))
+	return x + mu + sigma;
+#endif
+    if(!R_FINITE(x) && mu == x) return ML_NAN;/* x-mu is NaN */
+    if (sigma <= 0) {
+	if(sigma < 0) ML_WARN_return_NAN;
+	/* sigma = 0 : */
+	return (x < mu) ? R_DT_0 : R_DT_1;
+    }
+    p = (x - mu) / sigma;
+    if(!R_FINITE(p))
+	return (x < mu) ? R_DT_0 : R_DT_1;
+    x = p;
+
+    pnorm_both(x, &p, &cp, (lower_tail ? 0 : 1), log_p);
+
+    return(lower_tail ? p : cp);
+}
 
 
 void pnorm_both(double x, double *cum, double *ccum, int i_tail, int log_p)
@@ -204,31 +309,7 @@ void pnorm_both(double x, double *cum, double *ccum, int i_tail, int log_p)
     return;
 }
 
-
-double pnorm5(double x, double mu, double sigma, int lower_tail, int log_p)
-{
-    double p, cp;
-
-    /* Note: The structure of these checks has been carefully thought through.
-     * For example, if x == mu and sigma == 0, we get the correct answer 1.
-     */
-#ifdef IEEE_754
-    if(ISNAN(x) || ISNAN(mu) || ISNAN(sigma))
-	return x + mu + sigma;
-#endif
-    if(!R_FINITE(x) && mu == x) return ML_NAN;/* x-mu is NaN */
-    if (sigma <= 0) {
-	if(sigma < 0) ML_WARN_return_NAN;
-	/* sigma = 0 : */
-	return (x < mu) ? R_DT_0 : R_DT_1;
-    }
-    p = (x - mu) / sigma;
-    if(!R_FINITE(p))
-	return (x < mu) ? R_DT_0 : R_DT_1;
-    x = p;
-
-    pnorm_both(x, &p, &cp, (lower_tail ? 0 : 1), log_p);
-
-    return(lower_tail ? p : cp);
-}
-
+// openclport: macro hygiene post-clean for concatenated translation units.
+#undef d_2
+#undef do_del
+#undef swap_tail

@@ -1,63 +1,104 @@
-// gammalims.cl - OpenCL Adaptation of gammalims.c
-//@provides: gammalims
-//@depends: nmath, d1mach
-//@includes: nmath
+// @source_type: c
+// @source_origin: gammalims.c
+// @includes: nmath.h
+// @depends: fmax2, nmath
+// @provides: gammalims
+// @all_depends_count: 3
+// @all_depends: Rmath, nmath, fmax2
+// @load_order: 47
 
+/*
+ *  Mathlib : A C Library of Special Functions
+ *  Copyright (C) 1998 Ross Ihaka
+ *  Copyright (C) 1999-2025  The R Core Team
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, a copy is available at
+ *  https://www.R-project.org/Licenses/
+ *
+ *  SYNOPSIS
+ *
+ *    #include <Rmath.h>
+ *    void gammalims(double *xmin, double *xmax);
+ *
+ *  DESCRIPTION
+ *
+ *    This function calculates the minimum and maximum legal bounds
+ *    for x in gammafn(x).  These are not the only bounds, but they
+ *    are the only non-trivial ones to calculate.
+ *
+ *  NOTES
+ *
+ *    This routine is a translation into C of a Fortran subroutine
+ *    by W. Fullerton of Los Alamos Scientific Laboratory.
+ */
 
-// gammalims.cl – OpenCL port of R's gammalims.c
+// openclport: include directives disabled for OpenCL C compilation.
+// openclport: preload equivalent ported headers/shims in program assembly.
+// openclport-disabled-include: #include "nmath.h"
 
 attribute_hidden void gammalims(double *xmin, double *xmax)
 {
+/* FIXME: Even better: If IEEE, #define these in nmath.h
+	  and don't call gammalims() at all
+*/
 #ifdef IEEE_754
     *xmin = -170.5674972726612;
-    *xmax = 171.61447887182298;
+    *xmax =  171.61447887182298;/*(3 Intel/Sparc architectures)*/
 #else
     double alnbig, alnsml, xln, xold;
     int i;
 
-    //In OpenCL, these must be pointers
-    int idx = 1;
-    int idx2 = 2;
-
-    alnsml = log(d1mach(&idx));
-
-    //alnsml = log(d1mach(1));
+    alnsml = log(d1mach(1));
     *xmin = -alnsml;
-
-    for (i = 1; i <= 10; ++i) {
-        xold = *xmin;
-        xln = log(*xmin);
-        *xmin -= *xmin * ((*xmin + 0.5) * xln - *xmin - 0.2258 + alnsml) / (*xmin * xln + 0.5);
-        if (fabs(*xmin - xold) < 0.005) {
-            *xmin = -(*xmin) + 0.01;
-            goto find_xmax;
-        }
+    for (i=1; i<=10; ++i) {
+	xold = *xmin;
+	xln = log(*xmin);
+	*xmin -= *xmin * ((*xmin + .5) * xln - *xmin - .2258 + alnsml) /
+		(*xmin * xln + .5);
+	if (fabs(*xmin - xold) < .005) {
+	    *xmin = -(*xmin) + .01;
+	    goto find_xmax;
+	}
     }
 
-    ML_ERROR(ME_NOCONV, "gammalims");
+    /* unable to find xmin */
+
+    ML_WARNING(ME_NOCONV, "gammalims");
     *xmin = *xmax = ML_NAN;
 
 find_xmax:
-    //In OpenCL, this must be a pointer
-//    int idx2 = 2;
-    alnbig = log(d1mach(&idx2));
-//    alnbig = log(d1mach(2));
-    *xmax = alnbig;
 
-    for (i = 1; i <= 10; ++i) {
-        xold = *xmax;
-        xln = log(*xmax);
-        *xmax -= *xmax * ((*xmax - 0.5) * xln - *xmax + 0.9189 - alnbig) / (*xmax * xln - 0.5);
-        if (fabs(*xmax - xold) < 0.005) {
-            *xmax += -0.01;
-            goto done;
-        }
+    alnbig = log(d1mach(2));
+    *xmax = alnbig;
+    for (i=1; i<=10; ++i) {
+	xold = *xmax;
+	xln = log(*xmax);
+	*xmax -= *xmax * ((*xmax - .5) * xln - *xmax + .9189 - alnbig) /
+		(*xmax * xln - .5);
+	if (fabs(*xmax - xold) < .005) {
+	    *xmax += -.01;
+	    goto done;
+	}
     }
 
-    ML_ERROR(ME_NOCONV, "gammalims");
+    /* unable to find xmax */
+
+    ML_WARNING(ME_NOCONV, "gammalims");
     *xmin = *xmax = ML_NAN;
 
 done:
     *xmin = fmax2(*xmin, -(*xmax) + 1);
 #endif
 }
+

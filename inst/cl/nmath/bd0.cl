@@ -1,8 +1,69 @@
-// bd0.cl - OpenCL Adaptation of bd0.c
-//@provides: bd0, bd0C, bd0_p1l1d1, bd0_p1l1d, bd0_l1pm, ebd0, ebd0C
-//@depends: nmath, log1p, stirlerr
-//@includes: nmath
+// @source_type: c
+// @source_origin: bd0.c
+// @includes: nmath.h
+// @depends: pgamma_utils, nmath
+// @provides: bd0, ebd0
+// @all_depends_count: 12
+// @all_depends: refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils
+// @load_order: 80
+// @local_macros: lg_x_n, ADD1
 
+// openclport: macro hygiene pre-clean for concatenated translation units.
+#ifdef lg_x_n
+# undef lg_x_n
+#endif
+#ifdef ADD1
+# undef ADD1
+#endif
+
+/*
+ *  AUTHORS
+ *	Catherine Loader, catherine@research.bell-labs.com, October 23, 2000. [ bd0() ]
+ *	Morten Welinder, see Bugzilla PR#15628, 2014                          [ebd0() ]
+ *
+ *  Merge in to R (and much more):
+ *
+ *	Copyright (C) 2000-2025 The R Core Team
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, a copy is available at
+ *  https://www.R-project.org/Licenses/
+ *
+ *
+ *  DESCRIPTION
+ *	Evaluates the "deviance part"
+ *	bd0(x,M) :=  M * D0(x/M) = M*[ x/M * log(x/M) + 1 - (x/M) ] =
+ *		  =  x * log(x/M) + M - x
+ *	where M = E[X] = n*p (or = lambda), for	  x, M > 0
+ *
+ *	in a manner that should be stable (with small relative error)
+ *	for all x and M=np. In particular for x/np close to 1, direct
+ *	evaluation fails, and evaluation is based on the Taylor series
+ *	of log((1+v)/(1-v)) with v = (x-M)/(x+M) = (x-np)/(x+np).
+ *
+ * Martyn Plummer had the nice idea to use log1p() and Martin Maechler
+ * emphasized the extra need to control cancellation.
+ *
+ * MP:   t := (x-M)/M  ( <==> 1+t = x/M  ==>
+ *
+ * bd0 = M*[ x/M * log(x/M) + 1 - (x/M) ] = M*[ (1+t)*log1p(t) + 1 - (1+t) ]
+ *     = M*[ (1+t)*log1p(t) - t ] =: M * p1log1pm(t) =: M * p1l1(t)
+ * MM: The above is very nice, as the "simple" p1l1() function would be useful
+ *    to have available in a fast numerical stable way more generally.
+ */
+// openclport: include directives disabled for OpenCL C compilation.
+// openclport: preload equivalent ported headers/shims in program assembly.
+// openclport-disabled-include: #include "nmath.h"
 
 attribute_hidden double bd0(double x, double np)
 {
@@ -58,7 +119,7 @@ attribute_hidden double bd0(double x, double np)
  * argument to log is p/q where q=1024 and p=floor(q / r + 0.5).
  * Thus r*p/q is close to 1.
  */
- static const float bd0_scale[128 + 1][4] = {
+static const float bd0_scale[128 + 1][4] = {
 	{ +0x1.62e430p-1, -0x1.05c610p-29, -0x1.950d88p-54, +0x1.d9cc02p-79 }, /* 128: log(2048/1024.) */
 	{ +0x1.5ee02cp-1, -0x1.6dbe98p-25, -0x1.51e540p-50, +0x1.2bfa48p-74 }, /* 129: log(2032/1024.) */
 	{ +0x1.5ad404p-1, +0x1.86b3e4p-26, +0x1.9f6534p-50, +0x1.54be04p-74 }, /* 130: log(2016/1024.) */
@@ -313,4 +374,8 @@ attribute_hidden void ebd0(double x, double M, double *yh, double *yl)
 #endif
 }
 
+#undef ADD1
+
+// openclport: macro hygiene post-clean for concatenated translation units.
+#undef lg_x_n
 #undef ADD1

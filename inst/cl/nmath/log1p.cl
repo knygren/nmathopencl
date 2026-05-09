@@ -1,12 +1,62 @@
-// log1p.cl - OpenCL Adaptation of log1p.c
-//@provides: Rlog1p
-//@depends: nmath, chebyshev
-//@includes: nmath
+// @source_type: c
+// @source_origin: log1p.c
+// @includes: config.h, nmath.h
+// @depends: chebyshev, nmath
+// @provides: Rlog1p
+// @all_depends_count: 3
+// @all_depends: Rmath, nmath, chebyshev
+// @load_order: 52
+// @local_macros: nlnrel
 
+// openclport: macro hygiene pre-clean for concatenated translation units.
+#ifdef nlnrel
+# undef nlnrel
+#endif
 
-// log1p.cl – OpenCL port of R's log1p.c
+/*
+ *  Mathlib : A C Library of Special Functions
+ *  Copyright (C) 1998 Ross Ihaka
+ *  Copyright (C) 2000-2018 The R Core Team
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, a copy is available at
+ *  https://www.R-project.org/Licenses/
+ *
+ *  SYNOPSIS
+ *
+ *	#include <Rmath.h>
+ *	double log1p(double x);
+ *
+ *  DESCRIPTION
+ *
+ *	Compute the relative error logarithm.
+ *
+ *			log(1 + x)
+ *
+ *  NOTES
+ *
+ *	This code is a translation of the Fortran subroutine `dlnrel'
+ *	written by W. Fullerton of Los Alamos Scientific Laboratory.
+ */
 
- 
+/* Every currently known platform has log1p (which is C99), 
+   but NetBSD/OpenBSD were at least at one time inaccurate */
+#ifdef HAVE_CONFIG_H
+// openclport: include directives disabled for OpenCL C compilation.
+// openclport: preload equivalent ported headers/shims in program assembly.
+// openclport-disabled-include: # include <config.h>
+#endif
+// openclport-disabled-include: #include "nmath.h"
 
 #ifndef HAVE_WORKING_LOG1P
 double Rlog1p(double x)
@@ -99,3 +149,6 @@ double Rlog1p(double x)
     return log(1 + x);
 }
 #endif
+
+// openclport: macro hygiene post-clean for concatenated translation units.
+#undef nlnrel

@@ -1,8 +1,58 @@
-// dbinom.cl - OpenCL Adaptation of dbinom.c
-//@provides: dbinom, dbinom_raw, pow1p
-//@depends: nmath, bd0, stirlerr, log1p
-//@includes: nmath, dpq
+// @source_type: c
+// @source_origin: dbinom.c
+// @includes: nmath.h, dpq.h
+// @depends: bd0, stirlerr, nmath, dpq
+// @provides: pow1p, dbinom_raw, dbinom
+// @all_depends_count: 16
+// @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr
+// @load_order: 91
 
+/*
+ * AUTHOR
+ *   Catherine Loader, catherine@research.bell-labs.com.
+ *   October 23, 2000.
+ *
+ *  Merge in to R and further tweaks :
+ *  notably using log1p() and pow1p(), thanks to Morten Welinder, PR#18642
+ *
+ *	Copyright (C) 2000-2025 The R Core Team
+ *	Copyright (C) 2008 The R Foundation
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, a copy is available at
+ *  https://www.R-project.org/Licenses/
+ *
+ *
+ * DESCRIPTION
+ *
+ *   To compute the binomial probability, call dbinom(x,n,p).
+ *   This checks for argument validity, and calls dbinom_raw().
+ *
+ *   dbinom_raw() does the actual computation; note this is called by
+ *   other functions in addition to dbinom().
+ *     (1) dbinom_raw() has both p and q arguments, when one may be represented
+ *         more accurately than the other (in particular, in df()).
+ *     (2) dbinom_raw() does NOT check that inputs x and n are integers. This
+ *         should be done in the calling function, where necessary.
+ *         -- but is not the case at all when called e.g., from df() or dbeta() !
+ *     (3) Also does not check for 0 <= p <= 1 and 0 <= q <= 1 or NaN's.
+ *         Do this in the calling function.
+ */
+
+// openclport: include directives disabled for OpenCL C compilation.
+// openclport: preload equivalent ported headers/shims in program assembly.
+// openclport-disabled-include: #include "nmath.h"
+// openclport-disabled-include: #include "dpq.h"
 
 /* Compute  (1+x)^y  accurately also for |x| << 1  */
 double pow1p(double x, double y)
@@ -77,8 +127,6 @@ double dbinom_raw(double x, double n, double p, double q, int give_log)
 
     return R_D_exp(lc - 0.5*lf);
 }
-
-
 
 double dbinom(double x, double n, double p, int give_log)
 {

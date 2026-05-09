@@ -1,7 +1,76 @@
-// gamma.cl - OpenCL Adaptation of gamma.c
-//@provides: gammafn
-//@depends: chebyshev, gammalims, stirlerr_large, lgammacor, nmath
-//@includes: nmath
+// @source_type: c
+// @source_origin: gamma.c
+// @includes: nmath.h, refactored.h
+// @depends: chebyshev, cospi, fmax2, gammalims, lgammacor, stirlerr_cycle_free, nmath, refactored
+// @provides: gammafn
+// @all_depends_count: 9
+// @all_depends: refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor
+// @load_order: 72
+// @local_macros: ngam, xmin, xmax, xsml, dxrel
+
+// openclport: macro hygiene pre-clean for concatenated translation units.
+#ifdef ngam
+# undef ngam
+#endif
+#ifdef xmin
+# undef xmin
+#endif
+#ifdef xmax
+# undef xmax
+#endif
+#ifdef xsml
+# undef xsml
+#endif
+#ifdef dxrel
+# undef dxrel
+#endif
+
+/*
+ *  Mathlib : A C Library of Special Functions
+ *  Copyright (C) 2000-2024 The R Core Team
+ *  Copyright (C) 2002-2024 The R Foundation
+ *  Copyright (C) 1998 Ross Ihaka
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, a copy is available at
+ *  https://www.R-project.org/Licenses/
+ *
+ *  SYNOPSIS
+ *
+ *    #include <Rmath.h>
+ *    double gammafn(double x);
+ *
+ *  DESCRIPTION
+ *
+ *    This function computes the value of the gamma function.
+ *
+ *  NOTES
+ *
+ *    This function is a translation into C of a Fortran subroutine
+ *    by W. Fullerton of Los Alamos Scientific Laboratory.
+ *    (e.g. http://www.netlib.org/slatec/fnlib/gamma.f)
+ *
+ *    The accuracy of this routine compares (very) favourably
+ *    with those of the Sun Microsystems portable mathematical
+ *    library.
+ *
+ *    MM specialized the case of  n!  for n < 50 - for even better precision
+ */
+
+// openclport: include directives disabled for OpenCL C compilation.
+// openclport: preload equivalent ported headers/shims in program assembly.
+// openclport-disabled-include: #include "nmath.h"
+// openclport-disabled-include: #include "refactored.h"
 
 double gammafn(double x)
 {
@@ -52,28 +121,26 @@ double gammafn(double x)
 
 #ifdef NOMORE_FOR_THREADS
     static int ngam = 0;
-    static double xmin = 0, xmax_gamma = 0., xsml = 0., dxrel = 0.;
+    static double xmin = 0, xmax = 0., xsml = 0., dxrel = 0.;
 
     /* Initialize machine dependent constants, the first time gamma() is called.
 	FIXME for threads ! */
     if (ngam == 0) {
 	ngam = chebyshev_init(gamcs, 42, DBL_EPSILON/20);/*was .1*d1mach(3)*/
-	gammalims(&xmin, &xmax_gamma);/*-> ./gammalims.c */
+	gammalims(&xmin, &xmax);/*-> ./gammalims.c */
 	xsml = exp(fmax2(log(DBL_MIN), -log(DBL_MAX)) + 0.01);
 	/*   = exp(.01)*DBL_MIN = 2.247e-308 for IEEE */
 	dxrel = sqrt(DBL_EPSILON);/*was sqrt(d1mach(4)) */
     }
 #else
 /* For IEEE double precision DBL_EPSILON = 2^-52 = 2.220446049250313e-16 :
- * (xmin, xmax_gamma) are non-trivial, see ./gammalims.c
+ * (xmin, xmax) are non-trivial, see ./gammalims.c
  * xsml = exp(.01)*DBL_MIN
  * dxrel = sqrt(DBL_EPSILON) = 2 ^ -26
 */
 # define ngam 22
 # define xmin -170.5674972726612
-
-// Rename for inline use- xmax also used by other functions
-# define xmax_gamma  171.61447887182298
+# define xmax  171.61447887182298
 # define xsml 2.2474362225598545e-308
 # define dxrel 1.490116119384765696e-8
 #endif
@@ -141,7 +208,7 @@ double gammafn(double x)
     else {
 	/* gamma(x) for	 y = |x| > 10. */
 
-	if (x > xmax_gamma) {			/* Overflow */
+	if (x > xmax) {			/* Overflow */
 	    // No warning: +Inf is the best answer
 	    return ML_POSINF;
 	}
@@ -157,7 +224,7 @@ double gammafn(double x)
 	}
 	else { /* normal case */
 	    value = exp((y - 0.5) * log(y) - y + M_LN_SQRT_2PI +
-			((2*y == (int)2*y) ? stirlerr_large(y) : lgammacor(y)));
+			((2*y == (int)2*y) ? stirlerr_cycle_free(y) : lgammacor(y)));
 	}
 
 	if (x > 0)
@@ -180,3 +247,10 @@ double gammafn(double x)
 	return -M_PI / (y * sinpiy * value);
     }
 }
+
+// openclport: macro hygiene post-clean for concatenated translation units.
+#undef ngam
+#undef xmin
+#undef xmax
+#undef xsml
+#undef dxrel

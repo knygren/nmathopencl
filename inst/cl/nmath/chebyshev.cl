@@ -1,7 +1,59 @@
-// chebyshev.cl - OpenCL Adaptation of chebyshev.c
-//@provides: chebyshev_eval, chebyshev_init
-//@depends: nmath
-//@includes: nmath
+// @source_type: c
+// @source_origin: chebyshev.c
+// @includes: nmath.h
+// @depends: nmath
+// @provides: chebyshev_init, chebyshev_eval
+// @all_depends_count: 2
+// @all_depends: Rmath, nmath
+// @load_order: 29
+
+/*
+ *  Mathlib : A C Library of Special Functions
+ *  Copyright (C) 1998 Ross Ihaka
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, a copy is available at
+ *  https://www.R-project.org/Licenses/
+ *
+ *  SYNOPSIS
+ *
+ *    int chebyshev_init(double *dos, int nos, double eta)
+ *    double chebyshev_eval(double x, double *a, int n)
+ *
+ *  DESCRIPTION
+ *
+ *    "chebyshev_init" determines the number of terms for the
+ *    double precision orthogonal series "dos" needed to insure
+ *    the error is no larger than "eta".  Ordinarily eta will be
+ *    chosen to be one-tenth machine precision.
+ *
+ *    "chebyshev_eval" evaluates the n-term Chebyshev series
+ *    "a" at "x".
+ *
+ *  NOTES
+ *
+ *    These routines are translations into C of Fortran routines
+ *    by W. Fullerton of Los Alamos Scientific Laboratory.
+ *
+ *    Based on the Fortran routine dcsevl by W. Fullerton.
+ *    Adapted from R. Broucke, Algorithm 446, CACM., 16, 254 (1973).
+ */
+
+// openclport: include directives disabled for OpenCL C compilation.
+// openclport: preload equivalent ported headers/shims in program assembly.
+// openclport-disabled-include: #include "nmath.h"
+
+/* NaNs propagated correctly */
 
 
 attribute_hidden int chebyshev_init(double *dos, int nos, double eta)
@@ -27,7 +79,6 @@ attribute_hidden int chebyshev_init(double *dos, int nos, double eta)
 
 attribute_hidden double chebyshev_eval(double x, const double *a, const int n)
 {
-static const char fname[] = "chebyshev_eval";
     double b0, b1, b2, twox;
     int i;
 
