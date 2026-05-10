@@ -7,6 +7,7 @@
 #' @param verbose Logical; print informational fallback messages.
 #'
 #' @return Numeric vector of length \code{n}.
+#' @example inst/examples/Ex_rexp_opencl.R
 #' @export
 rexp_opencl <- function(
     n,

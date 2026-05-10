@@ -24,3 +24,6 @@ Numeric vector of length \code{n}.
 \description{
 OpenCL-backed binomial random generation with graceful fallback
 }
+\examples{
+rbinom_opencl(5, size = 10, prob = 0.3)
+}

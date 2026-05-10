@@ -14,6 +14,7 @@
 #' @param verbose Logical; print informational fallback messages.
 #'
 #' @return Numeric vector result from the corresponding gamma-family operation.
+#' @example inst/examples/Ex_gamma_opencl.R
 #' @rdname gamma_opencl
 #' @export
 dgamma_opencl <- function(n, x, shape, scale = 1, fallback = TRUE, verbose = FALSE) {

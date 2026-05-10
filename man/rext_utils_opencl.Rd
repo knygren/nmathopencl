@@ -22,3 +22,18 @@ Numeric vector of length \code{n}.
 \description{
 Wrappers for utility hooks used by translated R_ext-dependent kernels.
 }
+\section{Known OpenCL limitations}{
+
+On some builds, \code{r_check_stack_opencl()} can fail in device compilation or
+runtime due to missing host/runtime stack symbols. Use as linkage smoke only,
+and keep CPU fallback enabled unless explicitly debugging OpenCL failures.
+}
+
+\examples{
+n <- 5L
+
+r_check_user_interrupt_opencl(n)
+
+# Known linkage/runtime gap on some setups (stack hook symbol availability):
+# r_check_stack_opencl(n)
+}

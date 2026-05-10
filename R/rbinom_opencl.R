@@ -8,6 +8,7 @@
 #' @param verbose Logical; print informational fallback messages.
 #'
 #' @return Numeric vector of length \code{n}.
+#' @example inst/examples/Ex_rbinom_opencl.R
 #' @export
 rbinom_opencl <- function(
     n,

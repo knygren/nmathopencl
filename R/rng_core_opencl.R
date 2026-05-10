@@ -8,6 +8,7 @@
 #' @param verbose Logical; print fallback/error diagnostics.
 #'
 #' @return Numeric vector of length \code{n}.
+#' @example inst/examples/Ex_rng_core_opencl.R
 #' @rdname rng_core_opencl
 #' @export
 norm_rand_opencl <- function(n, fallback = TRUE, verbose = FALSE) {

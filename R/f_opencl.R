@@ -11,7 +11,14 @@
 #' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
 #' @param verbose Logical; print fallback/error diagnostics.
 #'
+#' @section Known OpenCL limitations:
+#' \code{qf_opencl()} can fail on some GPU/driver combinations with
+#' \code{CL_OUT_OF_RESOURCES} in heavy non-central inversion paths
+#' (\code{qnf -> qnbeta -> pnbeta} iterations). If reproducibility is critical,
+#' prefer CPU fallback or small linkage-only smoke inputs.
+#'
 #' @return Numeric vector of length \code{n}.
+#' @example inst/examples/Ex_f_opencl.R
 #' @rdname f_opencl
 #' @export
 pf_opencl <- function(n, x, df1, df2, ncp, fallback = TRUE, verbose = FALSE) {
@@ -44,6 +51,3 @@ qf_opencl <- function(n, p, df1, df2, ncp, fallback = TRUE, verbose = FALSE) {
   )
 }
 
-# Backward-compatible aliases (old Mathlib-style names)
-pnf_opencl <- function(...) pf_opencl(...)
-qnf_opencl <- function(...) qf_opencl(...)

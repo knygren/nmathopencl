@@ -12,6 +12,7 @@
 #' @param verbose Logical; print fallback/error diagnostics.
 #'
 #' @return Numeric vector of length \code{n}.
+#' @example inst/examples/Ex_discrete_opencl.R
 #' @rdname discrete_opencl
 #' @export
 qbinom_opencl <- function(n, p, size, prob, fallback = TRUE, verbose = FALSE) {

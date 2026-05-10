@@ -24,3 +24,16 @@ Numeric vector of length \code{n}.
 \description{
 OpenCL-backed Wilcoxon random generation with graceful fallback
 }
+\section{Known OpenCL limitations}{
+
+The OpenCL path for \code{rwilcox_opencl()} is a known high-risk linkage
+target because translated Wilcoxon code paths can require allocator/runtime
+symbols not fully available on device builds. CPU fallback is recommended for
+production use until full device-safe allocation shims are in place.
+}
+
+\examples{
+# OpenCL Wilcoxon paths may require allocator/runtime symbols not always available.
+# Keeping this commented avoids flaky example failures across devices.
+# rwilcox_opencl(5, m = 5, nn = 7)
+}

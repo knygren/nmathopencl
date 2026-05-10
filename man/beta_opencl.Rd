@@ -32,3 +32,16 @@ Numeric vector of length \code{n}.
 \description{
 OpenCL-backed distribution and quantile wrappers for beta-family linkage checks.
 }
+\section{Known OpenCL limitations}{
+
+\code{qbeta_opencl()} (non-central path via \code{qnbeta}) may be slow or hit
+device/runtime resource limits for difficult parameter regions on some GPUs.
+Use small linkage-smoke inputs when validating kernel wiring.
+}
+
+\examples{
+n <- 5L
+
+pbeta_opencl(n, x = 0.6, a = 2.5, b = 4, ncp = 1.1)
+qbeta_opencl(n, p = 0.8, a = 2.5, b = 4, ncp = 1.1)
+}

@@ -39,3 +39,11 @@ OpenCL-backed density, distribution, quantile, and random generation wrappers
 for the gamma distribution. These mirror the base \code{stats} gamma family
 while adding OpenCL dispatch and optional CPU fallback behavior.
 }
+\examples{
+n <- 5L
+
+dgamma_opencl(n, x = 1.2, shape = 2, scale = 1)
+pgamma_opencl(n, x = 1.2, shape = 2, scale = 1)
+qgamma_opencl(n, p = 0.8, shape = 2, scale = 1)
+rgamma_opencl(n, shape = 2, scale = 1)
+}

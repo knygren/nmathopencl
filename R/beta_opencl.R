@@ -11,7 +11,13 @@
 #' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
 #' @param verbose Logical; print fallback/error diagnostics.
 #'
+#' @section Known OpenCL limitations:
+#' \code{qbeta_opencl()} (non-central path via \code{qnbeta}) may be slow or hit
+#' device/runtime resource limits for difficult parameter regions on some GPUs.
+#' Use small linkage-smoke inputs when validating kernel wiring.
+#'
 #' @return Numeric vector of length \code{n}.
+#' @example inst/examples/Ex_beta_opencl.R
 #' @rdname beta_opencl
 #' @export
 pbeta_opencl <- function(n, x, a, b, ncp, fallback = TRUE, verbose = FALSE) {
@@ -44,6 +50,3 @@ qbeta_opencl <- function(n, p, a, b, ncp, fallback = TRUE, verbose = FALSE) {
   )
 }
 
-# Backward-compatible aliases (old Mathlib-style names)
-pnbeta_opencl <- function(...) pbeta_opencl(...)
-qnbeta_opencl <- function(...) qbeta_opencl(...)

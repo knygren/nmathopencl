@@ -22,3 +22,6 @@ Numeric vector of length \code{n}.
 \description{
 OpenCL-backed exponential random generation with graceful fallback
 }
+\examples{
+rexp_opencl(5, rate = 1)
+}

@@ -10,6 +10,7 @@
 #' @param verbose Logical; print fallback/error diagnostics.
 #'
 #' @return Numeric vector of length \code{n}.
+#' @example inst/examples/Ex_rmath_runtime_opencl.R
 #' @rdname rmath_runtime_opencl
 #' @export
 r_pow_opencl <- function(n, x, y, fallback = TRUE, verbose = FALSE) {

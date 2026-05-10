@@ -7,7 +7,14 @@
 #'   when OpenCL is unavailable or fails.
 #' @param verbose Logical; print informational fallback messages.
 #'
+#' @section Known OpenCL limitations:
+#' The OpenCL path for \code{rwilcox_opencl()} is a known high-risk linkage
+#' target because translated Wilcoxon code paths can require allocator/runtime
+#' symbols not fully available on device builds. CPU fallback is recommended for
+#' production use until full device-safe allocation shims are in place.
+#'
 #' @return Numeric vector of length \code{n}.
+#' @example inst/examples/Ex_rwilcox_opencl.R
 #' @export
 rwilcox_opencl <- function(
     n,

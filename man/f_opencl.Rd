@@ -32,3 +32,19 @@ Numeric vector of length \code{n}.
 \description{
 OpenCL-backed non-central F distribution and quantile wrappers.
 }
+\section{Known OpenCL limitations}{
+
+\code{qf_opencl()} can fail on some GPU/driver combinations with
+\code{CL_OUT_OF_RESOURCES} in heavy non-central inversion paths
+(\code{qnf -> qnbeta -> pnbeta} iterations). If reproducibility is critical,
+prefer CPU fallback or small linkage-only smoke inputs.
+}
+
+\examples{
+n <- 5L
+
+pf_opencl(n, x = 2, df1 = 5, df2 = 9, ncp = 1.1)
+
+# Known unstable OpenCL path on some GPU/driver stacks (may hit CL_OUT_OF_RESOURCES):
+# qf_opencl(n, p = 0.8, df1 = 5, df2 = 9, ncp = 1.1)
+}

@@ -11,6 +11,7 @@
 #' @param verbose Logical; print fallback/error diagnostics.
 #'
 #' @return Numeric vector of length \code{n}.
+#' @example inst/examples/Ex_chisq_opencl.R
 #' @rdname chisq_opencl
 #' @export
 pchisq_opencl <- function(n, x, df, ncp, fallback = TRUE, verbose = FALSE) {
@@ -41,6 +42,3 @@ qchisq_opencl <- function(n, p, df, ncp, fallback = TRUE, verbose = FALSE) {
   )
 }
 
-# Backward-compatible aliases (old Mathlib-style names)
-pnchisq_opencl <- function(...) pchisq_opencl(...)
-qnchisq_opencl <- function(...) qchisq_opencl(...)
