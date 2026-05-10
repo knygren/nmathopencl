@@ -97,6 +97,10 @@ rwilcox_opencl_cpp_export <- function(n, m, n2, verbose = FALSE) {
     .Call(`_nmathopencl_rwilcox_opencl_cpp_export`, n, m, n2, verbose)
 }
 
+rbinom_opencl_cpp_export <- function(n, size, prob, verbose = FALSE) {
+    .Call(`_nmathopencl_rbinom_opencl_cpp_export`, n, size, prob, verbose)
+}
+
 load_kernel_source_wrapper_cpp_export <- function(relative_path, package = "nmathopencl") {
     .Call(`_nmathopencl_load_kernel_source_wrapper_cpp_export`, relative_path, package)
 }

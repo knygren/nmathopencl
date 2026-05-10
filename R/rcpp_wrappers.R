@@ -304,6 +304,12 @@
   .Call(`_nmathopencl_rwilcox_opencl_cpp_export`, n, m, nn, verbose)
 }
 
+#' @noRd
+#' @keywords internal
+.rbinom_opencl <- function(n, size, prob, verbose = FALSE) {
+  .Call(`_nmathopencl_rbinom_opencl_cpp_export`, n, size, prob, verbose)
+}
+
 
 # =============================================================================
 #  Phased Out (no R wrappers; C++ exports may still exist for compatibility)

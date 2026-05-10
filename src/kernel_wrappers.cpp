@@ -65,11 +65,14 @@ Rcpp::List f2_f3_opencl(
   
 #ifdef USE_OPENCL
   
-  std::string OPENCL_source     = load_kernel_source("OPENCL.cl");
-  std::string r_shims_source   = load_kernel_library("R_shims","nmathopencl", false);
-  std::string rext_source     = load_kernel_library("R_ext","nmathopencl", false);
-  std::string system_source     = load_kernel_library("System","nmathopencl", false);
-  std::string nmath_source     = load_kernel_library("nmath","nmathopencl", false);
+  std::string OPENCL_source           = load_kernel_source("OPENCL.cl");
+  std::string libr_shims_source       = load_kernel_library("libR_shims", "nmathopencl", false);
+  std::string r_ext_types_source      = load_kernel_library("R_ext_types", "nmathopencl", false);
+  std::string r_shims_source          = load_kernel_library("R_shims", "nmathopencl", false);
+  std::string r_ext_runtime_source    = load_kernel_library("R_ext_runtime", "nmathopencl", false);
+  std::string r_ext_internals_source  = load_kernel_library("R_ext_internals", "nmathopencl", false);
+  std::string system_source           = load_kernel_library("System", "nmathopencl", false);
+  std::string nmath_source            = load_kernel_library("nmath", "nmathopencl", false);
   // Old sequence retained for reference during migration:
   // std::string rmath_source = load_kernel_library("rmath","nmathopencl", false);
   // std::string dpq_source   = load_kernel_library("dpq","nmathopencl", false);
@@ -137,8 +140,11 @@ Rcpp::List f2_f3_opencl(
   //   "\n" + ksrc;
 
   all_src = OPENCL_source +
+    "\n" + libr_shims_source +
+    "\n" + r_ext_types_source +
     "\n" + r_shims_source +
-    "\n" + rext_source +
+    "\n" + r_ext_runtime_source +
+    "\n" + r_ext_internals_source +
     "\n" + system_source +
     "\n" + nmath_source +
     "\n" + ksrc;
@@ -220,16 +226,22 @@ Rcpp::NumericVector dnorm_opencl(
     std::vector<double> x_flat = copyVector(x);
     std::vector<double> out_flat;
 
-    std::string OPENCL_source  = load_kernel_source("OPENCL.cl");
-    std::string r_shims_source = load_kernel_library("R_shims", "nmathopencl", false);
-    std::string rext_source    = load_kernel_library("R_ext", "nmathopencl", false);
-    std::string system_source  = load_kernel_library("System", "nmathopencl", false);
-    std::string nmath_source   = load_kernel_library("nmath", "nmathopencl", false);
+    std::string OPENCL_source           = load_kernel_source("OPENCL.cl");
+    std::string libr_shims_source       = load_kernel_library("libR_shims", "nmathopencl", false);
+    std::string r_ext_types_source      = load_kernel_library("R_ext_types", "nmathopencl", false);
+    std::string r_shims_source          = load_kernel_library("R_shims", "nmathopencl", false);
+    std::string r_ext_runtime_source    = load_kernel_library("R_ext_runtime", "nmathopencl", false);
+    std::string r_ext_internals_source  = load_kernel_library("R_ext_internals", "nmathopencl", false);
+    std::string system_source           = load_kernel_library("System", "nmathopencl", false);
+    std::string nmath_source            = load_kernel_library("nmath", "nmathopencl", false);
     std::string kernel_source  = load_kernel_source("src/dnorm_kernel.cl");
 
     std::string all_src = OPENCL_source +
+      "\n" + libr_shims_source +
+      "\n" + r_ext_types_source +
       "\n" + r_shims_source +
-      "\n" + rext_source +
+      "\n" + r_ext_runtime_source +
+      "\n" + r_ext_internals_source +
       "\n" + system_source +
       "\n" + nmath_source +
       "\n" + kernel_source;
@@ -288,8 +300,11 @@ Rcpp::NumericVector runif_opencl(
     std::vector<double> out_flat;
     std::string all_src =
       load_kernel_source("OPENCL.cl") +
+      "\n" + load_kernel_library("libR_shims", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext_types", "nmathopencl", false) +
       "\n" + load_kernel_library("R_shims", "nmathopencl", false) +
-      "\n" + load_kernel_library("R_ext", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext_runtime", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext_internals", "nmathopencl", false) +
       "\n" + load_kernel_library("System", "nmathopencl", false) +
       "\n" + load_kernel_library("nmath", "nmathopencl", false) +
       "\n" + load_kernel_source("src/runif_kernel.cl");
@@ -333,8 +348,11 @@ Rcpp::NumericVector rnorm_opencl(
     std::vector<double> out_flat;
     std::string all_src =
       load_kernel_source("OPENCL.cl") +
+      "\n" + load_kernel_library("libR_shims", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext_types", "nmathopencl", false) +
       "\n" + load_kernel_library("R_shims", "nmathopencl", false) +
-      "\n" + load_kernel_library("R_ext", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext_runtime", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext_internals", "nmathopencl", false) +
       "\n" + load_kernel_library("System", "nmathopencl", false) +
       "\n" + load_kernel_library("nmath", "nmathopencl", false) +
       "\n" + load_kernel_source("src/rnorm_kernel.cl");
@@ -377,8 +395,11 @@ Rcpp::NumericVector rexp_opencl(
     std::vector<double> out_flat;
     std::string all_src =
       load_kernel_source("OPENCL.cl") +
+      "\n" + load_kernel_library("libR_shims", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext_types", "nmathopencl", false) +
       "\n" + load_kernel_library("R_shims", "nmathopencl", false) +
-      "\n" + load_kernel_library("R_ext", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext_runtime", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext_internals", "nmathopencl", false) +
       "\n" + load_kernel_library("System", "nmathopencl", false) +
       "\n" + load_kernel_library("nmath", "nmathopencl", false) +
       "\n" + load_kernel_source("src/rexp_kernel.cl");
@@ -422,8 +443,11 @@ Rcpp::NumericVector rwilcox_opencl(
     std::vector<double> out_flat;
     std::string all_src =
       load_kernel_source("OPENCL.cl") +
+      "\n" + load_kernel_library("libR_shims", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext_types", "nmathopencl", false) +
       "\n" + load_kernel_library("R_shims", "nmathopencl", false) +
-      "\n" + load_kernel_library("R_ext", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext_runtime", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext_internals", "nmathopencl", false) +
       "\n" + load_kernel_library("System", "nmathopencl", false) +
       "\n" + load_kernel_library("nmath", "nmathopencl", false) +
       "\n" + load_kernel_source("src/rwilcox_kernel.cl");
@@ -467,8 +491,11 @@ Rcpp::NumericVector rbinom_opencl(
     std::vector<double> out_flat;
     std::string all_src =
       load_kernel_source("OPENCL.cl") +
+      "\n" + load_kernel_library("libR_shims", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext_types", "nmathopencl", false) +
       "\n" + load_kernel_library("R_shims", "nmathopencl", false) +
-      "\n" + load_kernel_library("R_ext", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext_runtime", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext_internals", "nmathopencl", false) +
       "\n" + load_kernel_library("System", "nmathopencl", false) +
       "\n" + load_kernel_library("nmath", "nmathopencl", false) +
       "\n" + load_kernel_source("src/rbinom_kernel.cl");

@@ -510,6 +510,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rbinom_opencl_cpp_export
+Rcpp::NumericVector rbinom_opencl_cpp_export(int n, double size, double prob, bool verbose);
+RcppExport SEXP _nmathopencl_rbinom_opencl_cpp_export(SEXP nSEXP, SEXP sizeSEXP, SEXP probSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type size(sizeSEXP);
+    Rcpp::traits::input_parameter< double >::type prob(probSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(rbinom_opencl_cpp_export(n, size, prob, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // load_kernel_source_wrapper_cpp_export
 std::string load_kernel_source_wrapper_cpp_export(const std::string& relative_path, const std::string& package);
 RcppExport SEXP _nmathopencl_load_kernel_source_wrapper_cpp_export(SEXP relative_pathSEXP, SEXP packageSEXP) {
@@ -591,6 +605,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_nmathopencl_rnorm_opencl_cpp_export", (DL_FUNC) &_nmathopencl_rnorm_opencl_cpp_export, 4},
     {"_nmathopencl_rexp_opencl_cpp_export", (DL_FUNC) &_nmathopencl_rexp_opencl_cpp_export, 3},
     {"_nmathopencl_rwilcox_opencl_cpp_export", (DL_FUNC) &_nmathopencl_rwilcox_opencl_cpp_export, 4},
+    {"_nmathopencl_rbinom_opencl_cpp_export", (DL_FUNC) &_nmathopencl_rbinom_opencl_cpp_export, 4},
     {"_nmathopencl_load_kernel_source_wrapper_cpp_export", (DL_FUNC) &_nmathopencl_load_kernel_source_wrapper_cpp_export, 2},
     {"_nmathopencl_load_kernel_library_wrapper_cpp_export", (DL_FUNC) &_nmathopencl_load_kernel_library_wrapper_cpp_export, 3},
     {"_nmathopencl_has_opencl_cpp_export", (DL_FUNC) &_nmathopencl_has_opencl_cpp_export, 0},
