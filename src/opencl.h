@@ -151,6 +151,84 @@ Rcpp::NumericVector dnorm_opencl(
     bool                       verbose  = false
 );
 
+void runif_kernel_runner(
+    const std::string&   kernel_source,
+    const char*          kernel_name,
+    int                  n,
+    double               a,
+    double               b,
+    std::vector<double>& out_flat
+);
+
+void rnorm_kernel_runner(
+    const std::string&   kernel_source,
+    const char*          kernel_name,
+    int                  n,
+    double               mu,
+    double               sigma,
+    std::vector<double>& out_flat
+);
+
+void rexp_kernel_runner(
+    const std::string&   kernel_source,
+    const char*          kernel_name,
+    int                  n,
+    double               scale,
+    std::vector<double>& out_flat
+);
+
+void rwilcox_kernel_runner(
+    const std::string&   kernel_source,
+    const char*          kernel_name,
+    int                  n_out,
+    double               m,
+    double               n2,
+    std::vector<double>& out_flat
+);
+
+void rbinom_kernel_runner(
+    const std::string&   kernel_source,
+    const char*          kernel_name,
+    int                  n_out,
+    double               size,
+    double               prob,
+    std::vector<double>& out_flat
+);
+
+Rcpp::NumericVector runif_opencl(
+    int    n,
+    double a,
+    double b,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rnorm_opencl(
+    int    n,
+    double mu,
+    double sigma,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rexp_opencl(
+    int    n,
+    double scale,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rwilcox_opencl(
+    int    n_out,
+    double m,
+    double n2,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rbinom_opencl(
+    int    n_out,
+    double size,
+    double prob,
+    bool   verbose = false
+);
+
 } // namespace opencl
 } // namespace glmbayes
 

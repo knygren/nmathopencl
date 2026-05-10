@@ -455,6 +455,61 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// runif_opencl_cpp_export
+Rcpp::NumericVector runif_opencl_cpp_export(int n, double a, double b, bool verbose);
+RcppExport SEXP _nmathopencl_runif_opencl_cpp_export(SEXP nSEXP, SEXP aSEXP, SEXP bSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type b(bSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(runif_opencl_cpp_export(n, a, b, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rnorm_opencl_cpp_export
+Rcpp::NumericVector rnorm_opencl_cpp_export(int n, double mu, double sigma, bool verbose);
+RcppExport SEXP _nmathopencl_rnorm_opencl_cpp_export(SEXP nSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(rnorm_opencl_cpp_export(n, mu, sigma, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rexp_opencl_cpp_export
+Rcpp::NumericVector rexp_opencl_cpp_export(int n, double scale, bool verbose);
+RcppExport SEXP _nmathopencl_rexp_opencl_cpp_export(SEXP nSEXP, SEXP scaleSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type scale(scaleSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(rexp_opencl_cpp_export(n, scale, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rwilcox_opencl_cpp_export
+Rcpp::NumericVector rwilcox_opencl_cpp_export(int n, double m, double n2, bool verbose);
+RcppExport SEXP _nmathopencl_rwilcox_opencl_cpp_export(SEXP nSEXP, SEXP mSEXP, SEXP n2SEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type m(mSEXP);
+    Rcpp::traits::input_parameter< double >::type n2(n2SEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(rwilcox_opencl_cpp_export(n, m, n2, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // load_kernel_source_wrapper_cpp_export
 std::string load_kernel_source_wrapper_cpp_export(const std::string& relative_path, const std::string& package);
 RcppExport SEXP _nmathopencl_load_kernel_source_wrapper_cpp_export(SEXP relative_pathSEXP, SEXP packageSEXP) {
@@ -532,6 +587,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_nmathopencl_rIndepNormalGammaReg_std_parallel_cpp_export", (DL_FUNC) &_nmathopencl_rIndepNormalGammaReg_std_parallel_cpp_export, 15},
     {"_nmathopencl_glmb_Standardize_Model_cpp_export", (DL_FUNC) &_nmathopencl_glmb_Standardize_Model_cpp_export, 5},
     {"_nmathopencl_dnorm_opencl_cpp_export", (DL_FUNC) &_nmathopencl_dnorm_opencl_cpp_export, 5},
+    {"_nmathopencl_runif_opencl_cpp_export", (DL_FUNC) &_nmathopencl_runif_opencl_cpp_export, 4},
+    {"_nmathopencl_rnorm_opencl_cpp_export", (DL_FUNC) &_nmathopencl_rnorm_opencl_cpp_export, 4},
+    {"_nmathopencl_rexp_opencl_cpp_export", (DL_FUNC) &_nmathopencl_rexp_opencl_cpp_export, 3},
+    {"_nmathopencl_rwilcox_opencl_cpp_export", (DL_FUNC) &_nmathopencl_rwilcox_opencl_cpp_export, 4},
     {"_nmathopencl_load_kernel_source_wrapper_cpp_export", (DL_FUNC) &_nmathopencl_load_kernel_source_wrapper_cpp_export, 2},
     {"_nmathopencl_load_kernel_library_wrapper_cpp_export", (DL_FUNC) &_nmathopencl_load_kernel_library_wrapper_cpp_export, 3},
     {"_nmathopencl_has_opencl_cpp_export", (DL_FUNC) &_nmathopencl_has_opencl_cpp_export, 0},

@@ -86,9 +86,15 @@ double	Rf_gamma_cody(double);
 # define MATHLIB_WARNING6(fmt,x,x2,x3,x4,x5,x6) warning(fmt,x,x2,x3,x4,x5,x6)
 
 // openclport-disabled-include: #include <R_ext/Arith.h>
+#ifndef ML_POSINF
 #define ML_POSINF	R_PosInf
+#endif
+#ifndef ML_NEGINF
 #define ML_NEGINF	R_NegInf
+#endif
+#ifndef ML_NAN
 #define ML_NAN		R_NaN
+#endif
 
 
 void R_CheckUserInterrupt(void);

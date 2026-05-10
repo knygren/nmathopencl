@@ -81,6 +81,22 @@ dnorm_opencl_cpp_export <- function(x, mu = 0.0, sigma = 1.0, give_log = FALSE, 
     .Call(`_nmathopencl_dnorm_opencl_cpp_export`, x, mu, sigma, give_log, verbose)
 }
 
+runif_opencl_cpp_export <- function(n, a = 0.0, b = 1.0, verbose = FALSE) {
+    .Call(`_nmathopencl_runif_opencl_cpp_export`, n, a, b, verbose)
+}
+
+rnorm_opencl_cpp_export <- function(n, mu = 0.0, sigma = 1.0, verbose = FALSE) {
+    .Call(`_nmathopencl_rnorm_opencl_cpp_export`, n, mu, sigma, verbose)
+}
+
+rexp_opencl_cpp_export <- function(n, scale = 1.0, verbose = FALSE) {
+    .Call(`_nmathopencl_rexp_opencl_cpp_export`, n, scale, verbose)
+}
+
+rwilcox_opencl_cpp_export <- function(n, m, n2, verbose = FALSE) {
+    .Call(`_nmathopencl_rwilcox_opencl_cpp_export`, n, m, n2, verbose)
+}
+
 load_kernel_source_wrapper_cpp_export <- function(relative_path, package = "nmathopencl") {
     .Call(`_nmathopencl_load_kernel_source_wrapper_cpp_export`, relative_path, package)
 }

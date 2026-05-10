@@ -265,6 +265,230 @@ Rcpp::NumericVector dnorm_opencl(
 #endif
 }
 
+Rcpp::NumericVector runif_opencl(
+    int    n,
+    double a,
+    double b,
+    bool   verbose
+) {
+  if (n < 0) Rcpp::stop("`n` must be >= 0.");
+  Rcpp::NumericVector out(n);
+
+  auto cpu_fallback = [&]() {
+    for (int i = 0; i < n; ++i) out[i] = R::runif(a, b);
+  };
+
+#ifdef USE_OPENCL
+  if (!has_opencl()) {
+    if (verbose) Rcpp::Rcout << "[INFO] OpenCL unavailable; using CPU runif fallback.\n";
+    cpu_fallback();
+    return out;
+  }
+  try {
+    std::vector<double> out_flat;
+    std::string all_src =
+      load_kernel_source("OPENCL.cl") +
+      "\n" + load_kernel_library("R_shims", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext", "nmathopencl", false) +
+      "\n" + load_kernel_library("System", "nmathopencl", false) +
+      "\n" + load_kernel_library("nmath", "nmathopencl", false) +
+      "\n" + load_kernel_source("src/runif_kernel.cl");
+    runif_kernel_runner(all_src, "runif_kernel", n, a, b, out_flat);
+    for (int i = 0; i < n; ++i) out[i] = out_flat[static_cast<size_t>(i)];
+    return out;
+  } catch (const std::exception& e) {
+    if (verbose) {
+      Rcpp::Rcout << "[WARN] OpenCL runif failed; using CPU fallback.\n" << e.what() << "\n";
+    }
+    cpu_fallback();
+    return out;
+  }
+#else
+  if (verbose) Rcpp::Rcout << "[INFO] Package built without OpenCL; using CPU runif fallback.\n";
+  cpu_fallback();
+  return out;
+#endif
+}
+
+Rcpp::NumericVector rnorm_opencl(
+    int    n,
+    double mu,
+    double sigma,
+    bool   verbose
+) {
+  if (n < 0) Rcpp::stop("`n` must be >= 0.");
+  Rcpp::NumericVector out(n);
+
+  auto cpu_fallback = [&]() {
+    for (int i = 0; i < n; ++i) out[i] = R::rnorm(mu, sigma);
+  };
+
+#ifdef USE_OPENCL
+  if (!has_opencl()) {
+    if (verbose) Rcpp::Rcout << "[INFO] OpenCL unavailable; using CPU rnorm fallback.\n";
+    cpu_fallback();
+    return out;
+  }
+  try {
+    std::vector<double> out_flat;
+    std::string all_src =
+      load_kernel_source("OPENCL.cl") +
+      "\n" + load_kernel_library("R_shims", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext", "nmathopencl", false) +
+      "\n" + load_kernel_library("System", "nmathopencl", false) +
+      "\n" + load_kernel_library("nmath", "nmathopencl", false) +
+      "\n" + load_kernel_source("src/rnorm_kernel.cl");
+    rnorm_kernel_runner(all_src, "rnorm_kernel", n, mu, sigma, out_flat);
+    for (int i = 0; i < n; ++i) out[i] = out_flat[static_cast<size_t>(i)];
+    return out;
+  } catch (const std::exception& e) {
+    if (verbose) {
+      Rcpp::Rcout << "[WARN] OpenCL rnorm failed; using CPU fallback.\n" << e.what() << "\n";
+    }
+    cpu_fallback();
+    return out;
+  }
+#else
+  if (verbose) Rcpp::Rcout << "[INFO] Package built without OpenCL; using CPU rnorm fallback.\n";
+  cpu_fallback();
+  return out;
+#endif
+}
+
+Rcpp::NumericVector rexp_opencl(
+    int    n,
+    double scale,
+    bool   verbose
+) {
+  if (n < 0) Rcpp::stop("`n` must be >= 0.");
+  Rcpp::NumericVector out(n);
+
+  auto cpu_fallback = [&]() {
+    for (int i = 0; i < n; ++i) out[i] = R::rexp(scale);
+  };
+
+#ifdef USE_OPENCL
+  if (!has_opencl()) {
+    if (verbose) Rcpp::Rcout << "[INFO] OpenCL unavailable; using CPU rexp fallback.\n";
+    cpu_fallback();
+    return out;
+  }
+  try {
+    std::vector<double> out_flat;
+    std::string all_src =
+      load_kernel_source("OPENCL.cl") +
+      "\n" + load_kernel_library("R_shims", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext", "nmathopencl", false) +
+      "\n" + load_kernel_library("System", "nmathopencl", false) +
+      "\n" + load_kernel_library("nmath", "nmathopencl", false) +
+      "\n" + load_kernel_source("src/rexp_kernel.cl");
+    rexp_kernel_runner(all_src, "rexp_kernel", n, scale, out_flat);
+    for (int i = 0; i < n; ++i) out[i] = out_flat[static_cast<size_t>(i)];
+    return out;
+  } catch (const std::exception& e) {
+    if (verbose) {
+      Rcpp::Rcout << "[WARN] OpenCL rexp failed; using CPU fallback.\n" << e.what() << "\n";
+    }
+    cpu_fallback();
+    return out;
+  }
+#else
+  if (verbose) Rcpp::Rcout << "[INFO] Package built without OpenCL; using CPU rexp fallback.\n";
+  cpu_fallback();
+  return out;
+#endif
+}
+
+Rcpp::NumericVector rwilcox_opencl(
+    int    n_out,
+    double m,
+    double n2,
+    bool   verbose
+) {
+  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
+  Rcpp::NumericVector out(n_out);
+
+  auto cpu_fallback = [&]() {
+    for (int i = 0; i < n_out; ++i) out[i] = ::Rf_rwilcox(m, n2);
+  };
+
+#ifdef USE_OPENCL
+  if (!has_opencl()) {
+    if (verbose) Rcpp::Rcout << "[INFO] OpenCL unavailable; using CPU rwilcox fallback.\n";
+    cpu_fallback();
+    return out;
+  }
+  try {
+    std::vector<double> out_flat;
+    std::string all_src =
+      load_kernel_source("OPENCL.cl") +
+      "\n" + load_kernel_library("R_shims", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext", "nmathopencl", false) +
+      "\n" + load_kernel_library("System", "nmathopencl", false) +
+      "\n" + load_kernel_library("nmath", "nmathopencl", false) +
+      "\n" + load_kernel_source("src/rwilcox_kernel.cl");
+    rwilcox_kernel_runner(all_src, "rwilcox_kernel", n_out, m, n2, out_flat);
+    for (int i = 0; i < n_out; ++i) out[i] = out_flat[static_cast<size_t>(i)];
+    return out;
+  } catch (const std::exception& e) {
+    if (verbose) {
+      Rcpp::Rcout << "[WARN] OpenCL rwilcox failed; using CPU fallback.\n" << e.what() << "\n";
+    }
+    cpu_fallback();
+    return out;
+  }
+#else
+  if (verbose) Rcpp::Rcout << "[INFO] Package built without OpenCL; using CPU rwilcox fallback.\n";
+  cpu_fallback();
+  return out;
+#endif
+}
+
+Rcpp::NumericVector rbinom_opencl(
+    int    n_out,
+    double size,
+    double prob,
+    bool   verbose
+) {
+  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
+  Rcpp::NumericVector out(n_out);
+
+  auto cpu_fallback = [&]() {
+    for (int i = 0; i < n_out; ++i) out[i] = ::Rf_rbinom(size, prob);
+  };
+
+#ifdef USE_OPENCL
+  if (!has_opencl()) {
+    if (verbose) Rcpp::Rcout << "[INFO] OpenCL unavailable; using CPU rbinom fallback.\n";
+    cpu_fallback();
+    return out;
+  }
+  try {
+    std::vector<double> out_flat;
+    std::string all_src =
+      load_kernel_source("OPENCL.cl") +
+      "\n" + load_kernel_library("R_shims", "nmathopencl", false) +
+      "\n" + load_kernel_library("R_ext", "nmathopencl", false) +
+      "\n" + load_kernel_library("System", "nmathopencl", false) +
+      "\n" + load_kernel_library("nmath", "nmathopencl", false) +
+      "\n" + load_kernel_source("src/rbinom_kernel.cl");
+    rbinom_kernel_runner(all_src, "rbinom_kernel", n_out, size, prob, out_flat);
+    for (int i = 0; i < n_out; ++i) out[i] = out_flat[static_cast<size_t>(i)];
+    return out;
+  } catch (const std::exception& e) {
+    if (verbose) {
+      Rcpp::Rcout << "[WARN] OpenCL rbinom failed; using CPU fallback.\n" << e.what() << "\n";
+    }
+    cpu_fallback();
+    return out;
+  }
+#else
+  if (verbose) Rcpp::Rcout << "[INFO] Package built without OpenCL; using CPU rbinom fallback.\n";
+  cpu_fallback();
+  return out;
+#endif
+}
+
 }
 }
 

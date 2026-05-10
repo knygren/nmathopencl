@@ -556,6 +556,55 @@ Rcpp::NumericVector dnorm_opencl_cpp_export(
 }
 
 // [[Rcpp::export]]
+Rcpp::NumericVector runif_opencl_cpp_export(
+    int n,
+    double a = 0.0,
+    double b = 1.0,
+    bool verbose = false
+) {
+  return glmbayes::opencl::runif_opencl(n, a, b, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rnorm_opencl_cpp_export(
+    int n,
+    double mu = 0.0,
+    double sigma = 1.0,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rnorm_opencl(n, mu, sigma, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rexp_opencl_cpp_export(
+    int n,
+    double scale = 1.0,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rexp_opencl(n, scale, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rwilcox_opencl_cpp_export(
+    int n,
+    double m,
+    double n2,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rwilcox_opencl(n, m, n2, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rbinom_opencl_cpp_export(
+    int n,
+    double size,
+    double prob,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rbinom_opencl(n, size, prob, verbose);
+}
+
+// [[Rcpp::export]]
 std::string load_kernel_source_wrapper_cpp_export(
     const std::string& relative_path,
     const std::string& package = "nmathopencl"

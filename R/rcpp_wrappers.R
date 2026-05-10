@@ -280,6 +280,30 @@
   .Call(`_nmathopencl_dnorm_opencl_cpp_export`, x, mean, sd, log, verbose)
 }
 
+#' @noRd
+#' @keywords internal
+.runif_opencl <- function(n, min = 0, max = 1, verbose = FALSE) {
+  .Call(`_nmathopencl_runif_opencl_cpp_export`, n, min, max, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rnorm_opencl <- function(n, mean = 0, sd = 1, verbose = FALSE) {
+  .Call(`_nmathopencl_rnorm_opencl_cpp_export`, n, mean, sd, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rexp_opencl <- function(n, rate = 1, verbose = FALSE) {
+  .Call(`_nmathopencl_rexp_opencl_cpp_export`, n, 1 / rate, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rwilcox_opencl <- function(n, m, nn, verbose = FALSE) {
+  .Call(`_nmathopencl_rwilcox_opencl_cpp_export`, n, m, nn, verbose)
+}
+
 
 # =============================================================================
 #  Phased Out (no R wrappers; C++ exports may still exist for compatibility)

@@ -20,6 +20,15 @@
   #define HAVE_WORKING_ISFINITE 0
 #endif
 
+/*
+ * OpenCL C has no portable long double math surface. Keep HAVE_LONG_DOUBLE
+ * undefined so nmath sources stay on double-precision branches (log/log1p/exp/fabs)
+ * instead of long-double branches (logl/log1pl/expl/fabsl).
+ */
+#ifdef HAVE_LONG_DOUBLE
+  #undef HAVE_LONG_DOUBLE
+#endif
+
 #ifndef ML_NAN
   #define ML_NAN (0.0/0.0)
   #define ML_POSINF INFINITY
