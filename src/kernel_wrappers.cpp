@@ -516,6 +516,196 @@ Rcpp::NumericVector rbinom_opencl(
 #endif
 }
 
+static std::string build_rmath_program_with_kernel(const std::string& kernel_rel_path) {
+  return load_kernel_source("OPENCL.cl") +
+    "\n" + load_kernel_library("libR_shims", "nmathopencl", false) +
+    "\n" + load_kernel_library("R_ext_types", "nmathopencl", false) +
+    "\n" + load_kernel_library("R_shims", "nmathopencl", false) +
+    "\n" + load_kernel_library("R_ext_runtime", "nmathopencl", false) +
+    "\n" + load_kernel_library("R_ext_internals", "nmathopencl", false) +
+    "\n" + load_kernel_library("System", "nmathopencl", false) +
+    "\n" + load_kernel_library("nmath", "nmathopencl", false) +
+    "\n" + load_kernel_source(kernel_rel_path);
+}
+
+Rcpp::NumericVector r_pow_opencl(int n_out, double x, double y, bool verbose) {
+  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try {
+    std::vector<double> out_flat;
+    rmath_runtime_kernel_runner(build_rmath_program_with_kernel("src/r_pow_kernel.cl"), "r_pow_kernel", n_out, x, y, 0.0, out_flat);
+    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
+  } catch (const std::exception& e) {
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
+  }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector r_pow_di_opencl(int n_out, double x, int n_exp, bool verbose) {
+  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try {
+    std::vector<double> out_flat;
+    rmath_runtime_kernel_runner(build_rmath_program_with_kernel("src/r_pow_di_kernel.cl"), "r_pow_di_kernel", n_out, x, (double)n_exp, 0.0, out_flat);
+    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
+  } catch (const std::exception& e) {
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
+  }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector norm_rand_opencl(int n_out, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_rng_kernel_runner(build_rmath_program_with_kernel("src/norm_rand_kernel.cl"), "norm_rand_kernel", n_out, 0.0, 1.0, 1.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector unif_rand_opencl(int n_out, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_rng_kernel_runner(build_rmath_program_with_kernel("src/unif_rand_kernel.cl"), "unif_rand_kernel", n_out, 0.0, 1.0, 1.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector r_unif_index_opencl(int n_out, double dn, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_rng_kernel_runner(build_rmath_program_with_kernel("src/r_unif_index_kernel.cl"), "r_unif_index_kernel", n_out, 0.0, 1.0, dn, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector exp_rand_opencl(int n_out, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_rng_kernel_runner(build_rmath_program_with_kernel("src/exp_rand_kernel.cl"), "exp_rand_kernel", n_out, 0.0, 1.0, 1.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector qbinom_opencl(int n_out, double p, double size, double prob, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_discrete_kernel_runner(build_rmath_program_with_kernel("src/qbinom_kernel.cl"), "qbinom_kernel", n_out, size, prob, p, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector qpois_opencl(int n_out, double p, double lambda, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_discrete_kernel_runner(build_rmath_program_with_kernel("src/qpois_kernel.cl"), "qpois_kernel", n_out, 0.0, 0.0, p, lambda, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector qnbinom_mu_opencl(int n_out, double p, double size, double mu, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_discrete_kernel_runner(build_rmath_program_with_kernel("src/qnbinom_mu_kernel.cl"), "qnbinom_mu_kernel", n_out, size, 0.0, p, mu, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector rpois_opencl(int n_out, double lambda, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_discrete_kernel_runner(build_rmath_program_with_kernel("src/rpois_kernel.cl"), "rpois_kernel", n_out, 0.0, 0.0, 0.0, lambda, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector pnchisq_opencl(int n_out, double x, double df, double ncp, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_noncentral_kernel_runner(build_rmath_program_with_kernel("src/pnchisq_kernel.cl"), "pnchisq_kernel", n_out, x, df, ncp, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector qnchisq_opencl(int n_out, double p, double df, double ncp, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_noncentral_kernel_runner(build_rmath_program_with_kernel("src/qnchisq_kernel.cl"), "qnchisq_kernel", n_out, 0.0, df, ncp, 0.0, p, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector pnf_opencl(int n_out, double x, double df1, double df2, double ncp, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_noncentral_kernel_runner(build_rmath_program_with_kernel("src/pnf_kernel.cl"), "pnf_kernel", n_out, x, df1, ncp, df2, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector qnf_opencl(int n_out, double p, double df1, double df2, double ncp, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_noncentral_kernel_runner(build_rmath_program_with_kernel("src/qnf_kernel.cl"), "qnf_kernel", n_out, 0.0, df1, ncp, df2, p, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector pnt_opencl(int n_out, double x, double df, double ncp, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_noncentral_kernel_runner(build_rmath_program_with_kernel("src/pnt_kernel.cl"), "pnt_kernel", n_out, x, df, ncp, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector qnt_opencl(int n_out, double p, double df, double ncp, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_noncentral_kernel_runner(build_rmath_program_with_kernel("src/qnt_kernel.cl"), "qnt_kernel", n_out, 0.0, df, ncp, 0.0, p, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector r_check_user_interrupt_opencl(int n_out, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rext_utils_kernel_runner(build_rmath_program_with_kernel("src/r_check_user_interrupt_kernel.cl"), "r_check_user_interrupt_kernel", n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector r_check_stack_opencl(int n_out, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rext_utils_kernel_runner(build_rmath_program_with_kernel("src/r_check_stack_kernel.cl"), "r_check_stack_kernel", n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
 }
 }
 

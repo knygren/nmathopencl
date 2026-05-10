@@ -195,6 +195,56 @@ void rbinom_kernel_runner(
     std::vector<double>& out_flat
 );
 
+void rmath_runtime_kernel_runner(
+    const std::string&   kernel_source,
+    const char*          kernel_name,
+    int                  n_out,
+    double               x,
+    double               y,
+    double               z,
+    std::vector<double>& out_flat
+);
+
+void rmath_rng_kernel_runner(
+    const std::string&   kernel_source,
+    const char*          kernel_name,
+    int                  n_out,
+    double               a,
+    double               b,
+    double               index_upper,
+    std::vector<double>& out_flat
+);
+
+void rmath_discrete_kernel_runner(
+    const std::string&   kernel_source,
+    const char*          kernel_name,
+    int                  n_out,
+    double               size,
+    double               prob,
+    double               lambda,
+    double               mu,
+    std::vector<double>& out_flat
+);
+
+void rmath_noncentral_kernel_runner(
+    const std::string&   kernel_source,
+    const char*          kernel_name,
+    int                  n_out,
+    double               x,
+    double               df,
+    double               ncp,
+    double               df2,
+    double               p,
+    std::vector<double>& out_flat
+);
+
+void rext_utils_kernel_runner(
+    const std::string&   kernel_source,
+    const char*          kernel_name,
+    int                  n_out,
+    std::vector<double>& out_flat
+);
+
 Rcpp::NumericVector runif_opencl(
     int    n,
     double a,
@@ -227,6 +277,130 @@ Rcpp::NumericVector rbinom_opencl(
     double size,
     double prob,
     bool   verbose = false
+);
+
+Rcpp::NumericVector r_pow_opencl(
+    int    n_out,
+    double x,
+    double y,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector r_pow_di_opencl(
+    int    n_out,
+    double x,
+    int    n_exp,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector norm_rand_opencl(
+    int  n_out,
+    bool verbose = false
+);
+
+Rcpp::NumericVector unif_rand_opencl(
+    int  n_out,
+    bool verbose = false
+);
+
+Rcpp::NumericVector r_unif_index_opencl(
+    int    n_out,
+    double dn,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector exp_rand_opencl(
+    int  n_out,
+    bool verbose = false
+);
+
+Rcpp::NumericVector qbinom_opencl(
+    int    n_out,
+    double p,
+    double size,
+    double prob,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qpois_opencl(
+    int    n_out,
+    double p,
+    double lambda,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qnbinom_mu_opencl(
+    int    n_out,
+    double p,
+    double size,
+    double mu,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rpois_opencl(
+    int    n_out,
+    double lambda,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pnchisq_opencl(
+    int    n_out,
+    double x,
+    double df,
+    double ncp,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qnchisq_opencl(
+    int    n_out,
+    double p,
+    double df,
+    double ncp,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pnf_opencl(
+    int    n_out,
+    double x,
+    double df1,
+    double df2,
+    double ncp,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qnf_opencl(
+    int    n_out,
+    double p,
+    double df1,
+    double df2,
+    double ncp,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pnt_opencl(
+    int    n_out,
+    double x,
+    double df,
+    double ncp,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qnt_opencl(
+    int    n_out,
+    double p,
+    double df,
+    double ncp,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector r_check_user_interrupt_opencl(
+    int  n_out,
+    bool verbose = false
+);
+
+Rcpp::NumericVector r_check_stack_opencl(
+    int  n_out,
+    bool verbose = false
 );
 
 } // namespace opencl

@@ -310,6 +310,114 @@
   .Call(`_nmathopencl_rbinom_opencl_cpp_export`, n, size, prob, verbose)
 }
 
+#' @noRd
+#' @keywords internal
+.r_pow_opencl <- function(n, x, y, verbose = FALSE) {
+  .Call(`_nmathopencl_r_pow_opencl_cpp_export`, n, x, y, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.r_pow_di_opencl <- function(n, x, n_exp, verbose = FALSE) {
+  .Call(`_nmathopencl_r_pow_di_opencl_cpp_export`, n, x, n_exp, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.norm_rand_opencl <- function(n, verbose = FALSE) {
+  .Call(`_nmathopencl_norm_rand_opencl_cpp_export`, n, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.unif_rand_opencl <- function(n, verbose = FALSE) {
+  .Call(`_nmathopencl_unif_rand_opencl_cpp_export`, n, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.r_unif_index_opencl <- function(n, dn, verbose = FALSE) {
+  .Call(`_nmathopencl_r_unif_index_opencl_cpp_export`, n, dn, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.exp_rand_opencl <- function(n, verbose = FALSE) {
+  .Call(`_nmathopencl_exp_rand_opencl_cpp_export`, n, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qbinom_opencl <- function(n, p, size, prob, verbose = FALSE) {
+  .Call(`_nmathopencl_qbinom_opencl_cpp_export`, n, p, size, prob, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qpois_opencl <- function(n, p, lambda, verbose = FALSE) {
+  .Call(`_nmathopencl_qpois_opencl_cpp_export`, n, p, lambda, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qnbinom_mu_opencl <- function(n, p, size, mu, verbose = FALSE) {
+  .Call(`_nmathopencl_qnbinom_mu_opencl_cpp_export`, n, p, size, mu, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rpois_opencl <- function(n, lambda, verbose = FALSE) {
+  .Call(`_nmathopencl_rpois_opencl_cpp_export`, n, lambda, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.pnchisq_opencl <- function(n, x, df, ncp, verbose = FALSE) {
+  .Call(`_nmathopencl_pnchisq_opencl_cpp_export`, n, x, df, ncp, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qnchisq_opencl <- function(n, p, df, ncp, verbose = FALSE) {
+  .Call(`_nmathopencl_qnchisq_opencl_cpp_export`, n, p, df, ncp, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.pnf_opencl <- function(n, x, df1, df2, ncp, verbose = FALSE) {
+  .Call(`_nmathopencl_pnf_opencl_cpp_export`, n, x, df1, df2, ncp, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qnf_opencl <- function(n, p, df1, df2, ncp, verbose = FALSE) {
+  .Call(`_nmathopencl_qnf_opencl_cpp_export`, n, p, df1, df2, ncp, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.pnt_opencl <- function(n, x, df, ncp, verbose = FALSE) {
+  .Call(`_nmathopencl_pnt_opencl_cpp_export`, n, x, df, ncp, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qnt_opencl <- function(n, p, df, ncp, verbose = FALSE) {
+  .Call(`_nmathopencl_qnt_opencl_cpp_export`, n, p, df, ncp, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.r_check_user_interrupt_opencl <- function(n, verbose = FALSE) {
+  .Call(`_nmathopencl_r_check_user_interrupt_opencl_cpp_export`, n, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.r_check_stack_opencl <- function(n, verbose = FALSE) {
+  .Call(`_nmathopencl_r_check_stack_opencl_cpp_export`, n, verbose)
+}
+
 
 # =============================================================================
 #  Phased Out (no R wrappers; C++ exports may still exist for compatibility)
