@@ -125,6 +125,42 @@ exp_rand_opencl_cpp_export <- function(n, verbose = FALSE) {
     .Call(`_nmathopencl_exp_rand_opencl_cpp_export`, n, verbose)
 }
 
+pnorm_opencl_cpp_export <- function(n, x, mu, sigma, verbose = FALSE) {
+    .Call(`_nmathopencl_pnorm_opencl_cpp_export`, n, x, mu, sigma, verbose)
+}
+
+qnorm_opencl_cpp_export <- function(n, p, mu, sigma, verbose = FALSE) {
+    .Call(`_nmathopencl_qnorm_opencl_cpp_export`, n, p, mu, sigma, verbose)
+}
+
+dunif_opencl_cpp_export <- function(n, x, min, max, verbose = FALSE) {
+    .Call(`_nmathopencl_dunif_opencl_cpp_export`, n, x, min, max, verbose)
+}
+
+punif_opencl_cpp_export <- function(n, x, min, max, verbose = FALSE) {
+    .Call(`_nmathopencl_punif_opencl_cpp_export`, n, x, min, max, verbose)
+}
+
+qunif_opencl_cpp_export <- function(n, p, min, max, verbose = FALSE) {
+    .Call(`_nmathopencl_qunif_opencl_cpp_export`, n, p, min, max, verbose)
+}
+
+dgamma_opencl_cpp_export <- function(n, x, shape, scale, verbose = FALSE) {
+    .Call(`_nmathopencl_dgamma_opencl_cpp_export`, n, x, shape, scale, verbose)
+}
+
+pgamma_opencl_cpp_export <- function(n, x, shape, scale, verbose = FALSE) {
+    .Call(`_nmathopencl_pgamma_opencl_cpp_export`, n, x, shape, scale, verbose)
+}
+
+qgamma_opencl_cpp_export <- function(n, p, shape, scale, verbose = FALSE) {
+    .Call(`_nmathopencl_qgamma_opencl_cpp_export`, n, p, shape, scale, verbose)
+}
+
+rgamma_opencl_cpp_export <- function(n, shape, scale, verbose = FALSE) {
+    .Call(`_nmathopencl_rgamma_opencl_cpp_export`, n, shape, scale, verbose)
+}
+
 qbinom_opencl_cpp_export <- function(n, p, size, prob, verbose = FALSE) {
     .Call(`_nmathopencl_qbinom_opencl_cpp_export`, n, p, size, prob, verbose)
 }

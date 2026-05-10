@@ -238,6 +238,18 @@ void rmath_noncentral_kernel_runner(
     std::vector<double>& out_flat
 );
 
+void rmath_distribution_kernel_runner(
+    const std::string&   kernel_source,
+    const char*          kernel_name,
+    int                  n_out,
+    double               a,
+    double               b,
+    double               c,
+    double               d,
+    double               e,
+    std::vector<double>& out_flat
+);
+
 void rext_utils_kernel_runner(
     const std::string&   kernel_source,
     const char*          kernel_name,
@@ -312,6 +324,77 @@ Rcpp::NumericVector r_unif_index_opencl(
 Rcpp::NumericVector exp_rand_opencl(
     int  n_out,
     bool verbose = false
+);
+
+Rcpp::NumericVector pnorm_opencl(
+    int    n_out,
+    double x,
+    double mu,
+    double sigma,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qnorm_opencl(
+    int    n_out,
+    double p,
+    double mu,
+    double sigma,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dunif_opencl(
+    int    n_out,
+    double x,
+    double min,
+    double max,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector punif_opencl(
+    int    n_out,
+    double x,
+    double min,
+    double max,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qunif_opencl(
+    int    n_out,
+    double p,
+    double min,
+    double max,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dgamma_opencl(
+    int    n_out,
+    double x,
+    double shape,
+    double scale,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pgamma_opencl(
+    int    n_out,
+    double x,
+    double shape,
+    double scale,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qgamma_opencl(
+    int    n_out,
+    double p,
+    double shape,
+    double scale,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rgamma_opencl(
+    int    n_out,
+    double shape,
+    double scale,
+    bool   verbose = false
 );
 
 Rcpp::NumericVector qbinom_opencl(

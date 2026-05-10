@@ -348,6 +348,60 @@
 
 #' @noRd
 #' @keywords internal
+.pnorm_opencl <- function(n, x, mu, sigma, verbose = FALSE) {
+  .Call(`_nmathopencl_pnorm_opencl_cpp_export`, n, x, mu, sigma, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qnorm_opencl <- function(n, p, mu, sigma, verbose = FALSE) {
+  .Call(`_nmathopencl_qnorm_opencl_cpp_export`, n, p, mu, sigma, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.dunif_opencl <- function(n, x, min, max, verbose = FALSE) {
+  .Call(`_nmathopencl_dunif_opencl_cpp_export`, n, x, min, max, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.punif_opencl <- function(n, x, min, max, verbose = FALSE) {
+  .Call(`_nmathopencl_punif_opencl_cpp_export`, n, x, min, max, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qunif_opencl <- function(n, p, min, max, verbose = FALSE) {
+  .Call(`_nmathopencl_qunif_opencl_cpp_export`, n, p, min, max, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.dgamma_opencl <- function(n, x, shape, scale, verbose = FALSE) {
+  .Call(`_nmathopencl_dgamma_opencl_cpp_export`, n, x, shape, scale, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.pgamma_opencl <- function(n, x, shape, scale, verbose = FALSE) {
+  .Call(`_nmathopencl_pgamma_opencl_cpp_export`, n, x, shape, scale, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qgamma_opencl <- function(n, p, shape, scale, verbose = FALSE) {
+  .Call(`_nmathopencl_qgamma_opencl_cpp_export`, n, p, shape, scale, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rgamma_opencl <- function(n, shape, scale, verbose = FALSE) {
+  .Call(`_nmathopencl_rgamma_opencl_cpp_export`, n, shape, scale, verbose)
+}
+
+#' @noRd
+#' @keywords internal
 .qbinom_opencl <- function(n, p, size, prob, verbose = FALSE) {
   .Call(`_nmathopencl_qbinom_opencl_cpp_export`, n, p, size, prob, verbose)
 }

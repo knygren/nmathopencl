@@ -777,6 +777,20 @@ void rmath_noncentral_kernel_runner(
   rng_scalar_kernel_runner(kernel_source, kernel_name, {x, df, ncp, df2, p}, n_out, out_flat);
 }
 
+void rmath_distribution_kernel_runner(
+    const std::string&   kernel_source,
+    const char*          kernel_name,
+    int                  n_out,
+    double               a,
+    double               b,
+    double               c,
+    double               d,
+    double               e,
+    std::vector<double>& out_flat
+) {
+  rng_scalar_kernel_runner(kernel_source, kernel_name, {a, b, c, d, e}, n_out, out_flat);
+}
+
 void rext_utils_kernel_runner(
     const std::string&   kernel_source,
     const char*          kernel_name,

@@ -658,6 +658,104 @@ Rcpp::NumericVector exp_rand_opencl_cpp_export(
 }
 
 // [[Rcpp::export]]
+Rcpp::NumericVector pnorm_opencl_cpp_export(
+    int n,
+    double x,
+    double mu,
+    double sigma,
+    bool verbose = false
+) {
+  return glmbayes::opencl::pnorm_opencl(n, x, mu, sigma, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qnorm_opencl_cpp_export(
+    int n,
+    double p,
+    double mu,
+    double sigma,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qnorm_opencl(n, p, mu, sigma, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dunif_opencl_cpp_export(
+    int n,
+    double x,
+    double min,
+    double max,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dunif_opencl(n, x, min, max, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector punif_opencl_cpp_export(
+    int n,
+    double x,
+    double min,
+    double max,
+    bool verbose = false
+) {
+  return glmbayes::opencl::punif_opencl(n, x, min, max, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qunif_opencl_cpp_export(
+    int n,
+    double p,
+    double min,
+    double max,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qunif_opencl(n, p, min, max, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dgamma_opencl_cpp_export(
+    int n,
+    double x,
+    double shape,
+    double scale,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dgamma_opencl(n, x, shape, scale, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector pgamma_opencl_cpp_export(
+    int n,
+    double x,
+    double shape,
+    double scale,
+    bool verbose = false
+) {
+  return glmbayes::opencl::pgamma_opencl(n, x, shape, scale, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qgamma_opencl_cpp_export(
+    int n,
+    double p,
+    double shape,
+    double scale,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qgamma_opencl(n, p, shape, scale, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rgamma_opencl_cpp_export(
+    int n,
+    double shape,
+    double scale,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rgamma_opencl(n, shape, scale, verbose);
+}
+
+// [[Rcpp::export]]
 Rcpp::NumericVector qbinom_opencl_cpp_export(
     int n,
     double p,
