@@ -396,6 +396,18 @@
 
 #' @noRd
 #' @keywords internal
+.pnbeta_opencl <- function(n, x, a, b, ncp, verbose = FALSE) {
+  .Call(`_nmathopencl_pnbeta_opencl_cpp_export`, n, x, a, b, ncp, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qnbeta_opencl <- function(n, p, a, b, ncp, verbose = FALSE) {
+  .Call(`_nmathopencl_qnbeta_opencl_cpp_export`, n, p, a, b, ncp, verbose)
+}
+
+#' @noRd
+#' @keywords internal
 .pnt_opencl <- function(n, x, df, ncp, verbose = FALSE) {
   .Call(`_nmathopencl_pnt_opencl_cpp_export`, n, x, df, ncp, verbose)
 }

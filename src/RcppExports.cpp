@@ -720,6 +720,38 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// pnbeta_opencl_cpp_export
+Rcpp::NumericVector pnbeta_opencl_cpp_export(int n, double x, double a, double b, double ncp, bool verbose);
+RcppExport SEXP _nmathopencl_pnbeta_opencl_cpp_export(SEXP nSEXP, SEXP xSEXP, SEXP aSEXP, SEXP bSEXP, SEXP ncpSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type b(bSEXP);
+    Rcpp::traits::input_parameter< double >::type ncp(ncpSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(pnbeta_opencl_cpp_export(n, x, a, b, ncp, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// qnbeta_opencl_cpp_export
+Rcpp::NumericVector qnbeta_opencl_cpp_export(int n, double p, double a, double b, double ncp, bool verbose);
+RcppExport SEXP _nmathopencl_qnbeta_opencl_cpp_export(SEXP nSEXP, SEXP pSEXP, SEXP aSEXP, SEXP bSEXP, SEXP ncpSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type b(bSEXP);
+    Rcpp::traits::input_parameter< double >::type ncp(ncpSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(qnbeta_opencl_cpp_export(n, p, a, b, ncp, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pnt_opencl_cpp_export
 Rcpp::NumericVector pnt_opencl_cpp_export(int n, double x, double df, double ncp, bool verbose);
 RcppExport SEXP _nmathopencl_pnt_opencl_cpp_export(SEXP nSEXP, SEXP xSEXP, SEXP dfSEXP, SEXP ncpSEXP, SEXP verboseSEXP) {
@@ -870,6 +902,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_nmathopencl_qnchisq_opencl_cpp_export", (DL_FUNC) &_nmathopencl_qnchisq_opencl_cpp_export, 5},
     {"_nmathopencl_pnf_opencl_cpp_export", (DL_FUNC) &_nmathopencl_pnf_opencl_cpp_export, 6},
     {"_nmathopencl_qnf_opencl_cpp_export", (DL_FUNC) &_nmathopencl_qnf_opencl_cpp_export, 6},
+    {"_nmathopencl_pnbeta_opencl_cpp_export", (DL_FUNC) &_nmathopencl_pnbeta_opencl_cpp_export, 6},
+    {"_nmathopencl_qnbeta_opencl_cpp_export", (DL_FUNC) &_nmathopencl_qnbeta_opencl_cpp_export, 6},
     {"_nmathopencl_pnt_opencl_cpp_export", (DL_FUNC) &_nmathopencl_pnt_opencl_cpp_export, 5},
     {"_nmathopencl_qnt_opencl_cpp_export", (DL_FUNC) &_nmathopencl_qnt_opencl_cpp_export, 5},
     {"_nmathopencl_r_check_user_interrupt_opencl_cpp_export", (DL_FUNC) &_nmathopencl_r_check_user_interrupt_opencl_cpp_export, 2},

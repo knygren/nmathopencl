@@ -377,6 +377,24 @@ Rcpp::NumericVector qnf_opencl(
     bool   verbose = false
 );
 
+Rcpp::NumericVector pnbeta_opencl(
+    int    n_out,
+    double x,
+    double a,
+    double b,
+    double ncp,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qnbeta_opencl(
+    int    n_out,
+    double p,
+    double a,
+    double b,
+    double ncp,
+    bool   verbose = false
+);
+
 Rcpp::NumericVector pnt_opencl(
     int    n_out,
     double x,

@@ -670,6 +670,24 @@ Rcpp::NumericVector qnf_opencl(int n_out, double p, double df1, double df2, doub
   return out;
 }
 
+Rcpp::NumericVector pnbeta_opencl(int n_out, double x, double a, double b, double ncp, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_noncentral_kernel_runner(build_rmath_program_with_kernel("src/pnbeta_kernel.cl"), "pnbeta_kernel", n_out, x, a, ncp, b, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector qnbeta_opencl(int n_out, double p, double a, double b, double ncp, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_noncentral_kernel_runner(build_rmath_program_with_kernel("src/qnbeta_kernel.cl"), "qnbeta_kernel", n_out, 0.0, a, ncp, b, p, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
 Rcpp::NumericVector pnt_opencl(int n_out, double x, double df, double ncp, bool verbose) {
   Rcpp::NumericVector out(n_out);
 #ifdef USE_OPENCL

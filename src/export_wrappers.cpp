@@ -745,6 +745,30 @@ Rcpp::NumericVector qnf_opencl_cpp_export(
 }
 
 // [[Rcpp::export]]
+Rcpp::NumericVector pnbeta_opencl_cpp_export(
+    int n,
+    double x,
+    double a,
+    double b,
+    double ncp,
+    bool verbose = false
+) {
+  return glmbayes::opencl::pnbeta_opencl(n, x, a, b, ncp, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qnbeta_opencl_cpp_export(
+    int n,
+    double p,
+    double a,
+    double b,
+    double ncp,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qnbeta_opencl(n, p, a, b, ncp, verbose);
+}
+
+// [[Rcpp::export]]
 Rcpp::NumericVector pnt_opencl_cpp_export(
     int n,
     double x,

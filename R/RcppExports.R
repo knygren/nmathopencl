@@ -157,6 +157,14 @@ qnf_opencl_cpp_export <- function(n, p, df1, df2, ncp, verbose = FALSE) {
     .Call(`_nmathopencl_qnf_opencl_cpp_export`, n, p, df1, df2, ncp, verbose)
 }
 
+pnbeta_opencl_cpp_export <- function(n, x, a, b, ncp, verbose = FALSE) {
+    .Call(`_nmathopencl_pnbeta_opencl_cpp_export`, n, x, a, b, ncp, verbose)
+}
+
+qnbeta_opencl_cpp_export <- function(n, p, a, b, ncp, verbose = FALSE) {
+    .Call(`_nmathopencl_qnbeta_opencl_cpp_export`, n, p, a, b, ncp, verbose)
+}
+
 pnt_opencl_cpp_export <- function(n, x, df, ncp, verbose = FALSE) {
     .Call(`_nmathopencl_pnt_opencl_cpp_export`, n, x, df, ncp, verbose)
 }

@@ -56,6 +56,27 @@ const char* opencl_status_name(cl_int status) {
   }
 }
 
+const char* opencl_status_hint(cl_int status) {
+  switch (status) {
+    case CL_OUT_OF_RESOURCES:
+      return "Device/runtime resource limit exceeded (often kernel execution failure, watchdog timeout, or register/local-memory pressure).";
+    case CL_OUT_OF_HOST_MEMORY:
+      return "Host memory allocation failed while interacting with OpenCL runtime.";
+    case CL_MEM_OBJECT_ALLOCATION_FAILURE:
+      return "Device memory allocation failed for one or more buffers.";
+    case CL_BUILD_PROGRAM_FAILURE:
+      return "Kernel compilation/build failed; inspect CL_PROGRAM_BUILD_LOG.";
+    case CL_INVALID_CONTEXT:
+      return "OpenCL context is invalid; may indicate stale runtime state.";
+    case CL_INVALID_DEVICE:
+      return "Selected OpenCL device is invalid for this operation.";
+    case CL_DEVICE_NOT_AVAILABLE:
+      return "OpenCL device is present but temporarily unavailable.";
+    default:
+      return "No additional hint available.";
+  }
+}
+
 std::string read_platform_info_str(cl_platform_id platform, cl_platform_info param) {
   if (platform == nullptr) return "unknown";
   size_t n = 0;
@@ -135,7 +156,10 @@ void f2_f3_kernel_runner(
   auto require_success = [&](cl_int s, const char* step) {
     if (s != CL_SUCCESS) {
       std::ostringstream msg;
-      msg << "OpenCL error at " << step << " (status=" << s << ").";
+      msg << "OpenCL error at " << step
+          << " (status=" << s
+          << ", name=" << opencl_status_name(s) << "). "
+          << opencl_status_hint(s);
       throw std::runtime_error(msg.str());
     }
   };
@@ -158,7 +182,9 @@ void f2_f3_kernel_runner(
   }
   if (status != CL_SUCCESS) {
     std::ostringstream msg;
-    msg << "OpenCL error: clGetPlatformIDs failed with status " << status << ".";
+    msg << "OpenCL error: clGetPlatformIDs failed with status " << status
+        << " (" << opencl_status_name(status) << "). "
+        << opencl_status_hint(status);
     throw std::runtime_error(msg.str());
   }
   
@@ -174,7 +200,9 @@ void f2_f3_kernel_runner(
   }
   if (status != CL_SUCCESS) {
     std::ostringstream msg;
-    msg << "OpenCL error: clGetDeviceIDs failed with status " << status << ".";
+    msg << "OpenCL error: clGetDeviceIDs failed with status " << status
+        << " (" << opencl_status_name(status) << "). "
+        << opencl_status_hint(status);
     throw std::runtime_error(msg.str());
   }
   
@@ -214,7 +242,9 @@ void f2_f3_kernel_runner(
   build_log = read_build_log(program);
   if (status != CL_SUCCESS) {
     std::ostringstream msg;
-    msg << "OpenCL error at clBuildProgram (status=" << status << ").";
+    msg << "OpenCL error at clBuildProgram (status=" << status
+        << ", name=" << opencl_status_name(status) << "). "
+        << opencl_status_hint(status);
     if (!build_log.empty()) {
       msg << "\nBuild log:\n" << build_log;
     }
@@ -374,7 +404,10 @@ void dnorm_kernel_runner(
   auto require_success = [&](cl_int s, const char* step) {
     if (s != CL_SUCCESS) {
       std::ostringstream msg;
-      msg << "OpenCL error at " << step << " (status=" << s << ").";
+      msg << "OpenCL error at " << step
+          << " (status=" << s
+          << ", name=" << opencl_status_name(s) << "). "
+          << opencl_status_hint(s);
       throw std::runtime_error(msg.str());
     }
   };
@@ -390,7 +423,9 @@ void dnorm_kernel_runner(
   }
   if (status != CL_SUCCESS) {
     std::ostringstream msg;
-    msg << "OpenCL error: clGetPlatformIDs failed with status " << status << ".";
+    msg << "OpenCL error: clGetPlatformIDs failed with status " << status
+        << " (" << opencl_status_name(status) << "). "
+        << opencl_status_hint(status);
     throw std::runtime_error(msg.str());
   }
 
@@ -402,7 +437,9 @@ void dnorm_kernel_runner(
   }
   if (status != CL_SUCCESS) {
     std::ostringstream msg;
-    msg << "OpenCL error: clGetDeviceIDs failed with status " << status << ".";
+    msg << "OpenCL error: clGetDeviceIDs failed with status " << status
+        << " (" << opencl_status_name(status) << "). "
+        << opencl_status_hint(status);
     throw std::runtime_error(msg.str());
   }
 
@@ -434,7 +471,9 @@ void dnorm_kernel_runner(
   build_log = read_build_log(program);
   if (status != CL_SUCCESS) {
     std::ostringstream msg;
-    msg << "OpenCL error at clBuildProgram (status=" << status << ").";
+    msg << "OpenCL error at clBuildProgram (status=" << status
+        << ", name=" << opencl_status_name(status) << "). "
+        << opencl_status_hint(status);
     if (!build_log.empty()) msg << "\nBuild log:\n" << build_log;
     throw std::runtime_error(msg.str());
   }
@@ -501,113 +540,136 @@ static void rng_scalar_kernel_runner(
 
   cl_int status = 0;
   std::string build_log;
+  cl_context context = nullptr;
+  cl_command_queue queue = nullptr;
+  cl_program program = nullptr;
+  cl_kernel kernel = nullptr;
+  cl_mem bufOut = nullptr;
 
   auto require_success = [&](cl_int s, const char* step) {
     if (s != CL_SUCCESS) {
       std::ostringstream msg;
-      msg << "OpenCL error at " << step << " (status=" << s << ").";
+      msg << "OpenCL error at " << step
+          << " (status=" << s
+          << ", name=" << opencl_status_name(s) << "). "
+          << opencl_status_hint(s);
       throw std::runtime_error(msg.str());
     }
+  };
+
+  auto cleanup = [&]() {
+    if (bufOut) { clReleaseMemObject(bufOut); bufOut = nullptr; }
+    if (kernel) { clReleaseKernel(kernel); kernel = nullptr; }
+    if (program) { clReleaseProgram(program); program = nullptr; }
+    if (queue) { clReleaseCommandQueue(queue); queue = nullptr; }
+    if (context) { clReleaseContext(context); context = nullptr; }
   };
 
   cl_platform_id platform = nullptr;
   cl_device_id   device   = nullptr;
 
-  status = clGetPlatformIDs(1, &platform, nullptr);
-  if (status == -1001) {
-    throw std::runtime_error(
-      "OpenCL error: no OpenCL platforms found (clGetPlatformIDs returned -1001)."
+  try {
+    status = clGetPlatformIDs(1, &platform, nullptr);
+    if (status == -1001) {
+      throw std::runtime_error(
+        "OpenCL error: no OpenCL platforms found (clGetPlatformIDs returned -1001)."
+      );
+    }
+    if (status != CL_SUCCESS) {
+      std::ostringstream msg;
+      msg << "OpenCL error: clGetPlatformIDs failed with status " << status
+          << " (" << opencl_status_name(status) << "). "
+          << opencl_status_hint(status);
+      throw std::runtime_error(msg.str());
+    }
+
+    status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_DEFAULT, 1, &device, nullptr);
+    if (status == -9) {
+      throw std::runtime_error(
+        "OpenCL error: no suitable OpenCL devices found (clGetDeviceIDs returned -9)."
+      );
+    }
+    if (status != CL_SUCCESS) {
+      std::ostringstream msg;
+      msg << "OpenCL error: clGetDeviceIDs failed with status " << status
+          << " (" << opencl_status_name(status) << "). "
+          << opencl_status_hint(status);
+      throw std::runtime_error(msg.str());
+    }
+
+    context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &status);
+    if (status != CL_SUCCESS) {
+      throw make_context_error(status, platform, device);
+    }
+
+    cl_queue_properties props[] = {0};
+    queue = clCreateCommandQueueWithProperties(context, device, props, &status);
+    require_success(status, "clCreateCommandQueueWithProperties");
+
+    const char* src_ptr = kernel_source.c_str();
+    size_t src_len = kernel_source.size();
+    program = clCreateProgramWithSource(context, 1, &src_ptr, &src_len, &status);
+    require_success(status, "clCreateProgramWithSource");
+
+    auto read_build_log = [&](cl_program prog) {
+      size_t log_size = 0;
+      cl_int s0 = clGetProgramBuildInfo(prog, device, CL_PROGRAM_BUILD_LOG, 0, nullptr, &log_size);
+      if (s0 != CL_SUCCESS || log_size == 0) return std::string();
+      std::string log(log_size, '\0');
+      cl_int s1 = clGetProgramBuildInfo(prog, device, CL_PROGRAM_BUILD_LOG, log_size, &log[0], nullptr);
+      if (s1 != CL_SUCCESS) return std::string();
+      return log;
+    };
+
+    status = clBuildProgram(program, 0, nullptr, nullptr, nullptr, nullptr);
+    build_log = read_build_log(program);
+    if (status != CL_SUCCESS) {
+      std::ostringstream msg;
+      msg << "OpenCL error at clBuildProgram (status=" << status
+          << ", name=" << opencl_status_name(status) << "). "
+          << opencl_status_hint(status);
+      if (!build_log.empty()) msg << "\nBuild log:\n" << build_log;
+      throw std::runtime_error(msg.str());
+    }
+
+    kernel = clCreateKernel(program, kernel_name, &status);
+    require_success(status, "clCreateKernel");
+
+    bufOut = clCreateBuffer(
+        context, CL_MEM_WRITE_ONLY,
+        sizeof(double) * out_flat.size(), nullptr, &status
     );
-  }
-  if (status != CL_SUCCESS) {
-    std::ostringstream msg;
-    msg << "OpenCL error: clGetPlatformIDs failed with status " << status << ".";
-    throw std::runtime_error(msg.str());
-  }
+    require_success(status, "clCreateBuffer(bufOut)");
 
-  status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_DEFAULT, 1, &device, nullptr);
-  if (status == -9) {
-    throw std::runtime_error(
-      "OpenCL error: no suitable OpenCL devices found (clGetDeviceIDs returned -9)."
+    int arg = 0;
+    for (double val : dargs) {
+      status = clSetKernelArg(kernel, arg++, sizeof(double), &val);
+      require_success(status, "clSetKernelArg(double)");
+    }
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufOut);
+    require_success(status, "clSetKernelArg(bufOut)");
+    status = clSetKernelArg(kernel, arg++, sizeof(int), &n_out);
+    require_success(status, "clSetKernelArg(n_out)");
+
+    const size_t global = 1;
+    status = clEnqueueNDRangeKernel(queue, kernel, 1, nullptr, &global, nullptr, 0, nullptr, nullptr);
+    require_success(status, "clEnqueueNDRangeKernel");
+
+    status = clEnqueueReadBuffer(
+        queue, bufOut, CL_TRUE, 0,
+        sizeof(double) * out_flat.size(), out_flat.data(),
+        0, nullptr, nullptr
     );
+    require_success(status, "clEnqueueReadBuffer(out)");
+
+    clFlush(queue);
+    clFinish(queue);
+
+    cleanup();
+  } catch (...) {
+    cleanup();
+    throw;
   }
-  if (status != CL_SUCCESS) {
-    std::ostringstream msg;
-    msg << "OpenCL error: clGetDeviceIDs failed with status " << status << ".";
-    throw std::runtime_error(msg.str());
-  }
-
-  cl_context context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &status);
-  if (status != CL_SUCCESS) {
-    throw make_context_error(status, platform, device);
-  }
-
-  cl_queue_properties props[] = {0};
-  cl_command_queue queue = clCreateCommandQueueWithProperties(context, device, props, &status);
-  require_success(status, "clCreateCommandQueueWithProperties");
-
-  const char* src_ptr = kernel_source.c_str();
-  size_t src_len = kernel_source.size();
-  cl_program program = clCreateProgramWithSource(context, 1, &src_ptr, &src_len, &status);
-  require_success(status, "clCreateProgramWithSource");
-
-  auto read_build_log = [&](cl_program prog) {
-    size_t log_size = 0;
-    cl_int s0 = clGetProgramBuildInfo(prog, device, CL_PROGRAM_BUILD_LOG, 0, nullptr, &log_size);
-    if (s0 != CL_SUCCESS || log_size == 0) return std::string();
-    std::string log(log_size, '\0');
-    cl_int s1 = clGetProgramBuildInfo(prog, device, CL_PROGRAM_BUILD_LOG, log_size, &log[0], nullptr);
-    if (s1 != CL_SUCCESS) return std::string();
-    return log;
-  };
-
-  status = clBuildProgram(program, 0, nullptr, nullptr, nullptr, nullptr);
-  build_log = read_build_log(program);
-  if (status != CL_SUCCESS) {
-    std::ostringstream msg;
-    msg << "OpenCL error at clBuildProgram (status=" << status << ").";
-    if (!build_log.empty()) msg << "\nBuild log:\n" << build_log;
-    throw std::runtime_error(msg.str());
-  }
-
-  cl_kernel kernel = clCreateKernel(program, kernel_name, &status);
-  require_success(status, "clCreateKernel");
-
-  cl_mem bufOut = clCreateBuffer(
-      context, CL_MEM_WRITE_ONLY,
-      sizeof(double) * out_flat.size(), nullptr, &status
-  );
-  require_success(status, "clCreateBuffer(bufOut)");
-
-  int arg = 0;
-  for (double val : dargs) {
-    status = clSetKernelArg(kernel, arg++, sizeof(double), &val);
-    require_success(status, "clSetKernelArg(double)");
-  }
-  status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufOut);
-  require_success(status, "clSetKernelArg(bufOut)");
-  status = clSetKernelArg(kernel, arg++, sizeof(int), &n_out);
-  require_success(status, "clSetKernelArg(n_out)");
-
-  const size_t global = 1;
-  status = clEnqueueNDRangeKernel(queue, kernel, 1, nullptr, &global, nullptr, 0, nullptr, nullptr);
-  require_success(status, "clEnqueueNDRangeKernel");
-
-  status = clEnqueueReadBuffer(
-      queue, bufOut, CL_TRUE, 0,
-      sizeof(double) * out_flat.size(), out_flat.data(),
-      0, nullptr, nullptr
-  );
-  require_success(status, "clEnqueueReadBuffer(out)");
-
-  clFlush(queue);
-  clFinish(queue);
-
-  clReleaseMemObject(bufOut);
-  clReleaseKernel(kernel);
-  clReleaseProgram(program);
-  clReleaseCommandQueue(queue);
-  clReleaseContext(context);
 }
 
 void runif_kernel_runner(
