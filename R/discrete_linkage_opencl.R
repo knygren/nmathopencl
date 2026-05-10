@@ -1,4 +1,18 @@
-#' OpenCL-backed qbinom linkage check
+#' OpenCL-backed Discrete linkage checks
+#'
+#' Linkage wrappers for selected discrete distribution helpers.
+#'
+#' @param n Number of observations. Non-negative integer scalar.
+#' @param p Probability in \code{[0, 1]}.
+#' @param size Size/shape parameter (distribution specific; must be non-negative).
+#' @param prob Probability parameter in \code{[0, 1]} for binomial calls.
+#' @param lambda Rate/intensity parameter for Poisson calls.
+#' @param mu Mean parameter for \code{qnbinom_mu_opencl}.
+#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param verbose Logical; print fallback/error diagnostics.
+#'
+#' @return Numeric vector of length \code{n}.
+#' @rdname discrete_opencl
 #' @export
 qbinom_opencl <- function(n, p, size, prob, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
@@ -13,7 +27,7 @@ qbinom_opencl <- function(n, p, size, prob, fallback = TRUE, verbose = FALSE) {
   )
 }
 
-#' OpenCL-backed qpois linkage check
+#' @rdname discrete_opencl
 #' @export
 qpois_opencl <- function(n, p, lambda, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
@@ -27,7 +41,7 @@ qpois_opencl <- function(n, p, lambda, fallback = TRUE, verbose = FALSE) {
   )
 }
 
-#' OpenCL-backed qnbinom_mu linkage check
+#' @rdname discrete_opencl
 #' @export
 qnbinom_mu_opencl <- function(n, p, size, mu, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
@@ -42,7 +56,7 @@ qnbinom_mu_opencl <- function(n, p, size, mu, fallback = TRUE, verbose = FALSE) 
   )
 }
 
-#' OpenCL-backed rpois linkage check
+#' @rdname discrete_opencl
 #' @export
 rpois_opencl <- function(n, lambda, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n)

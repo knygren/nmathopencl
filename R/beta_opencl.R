@@ -1,4 +1,18 @@
-#' OpenCL-backed pbeta linkage check
+#' The Beta Distribution (OpenCL linkage subset)
+#'
+#' OpenCL-backed distribution and quantile wrappers for beta-family linkage checks.
+#'
+#' @param n Number of observations. Non-negative integer scalar.
+#' @param x Numeric scalar quantile in \code{[0, 1]}.
+#' @param p Numeric scalar probability in \code{[0, 1]}.
+#' @param a Shape1 parameter (must be > 0).
+#' @param b Shape2 parameter (must be > 0).
+#' @param ncp Non-centrality parameter (must be >= 0).
+#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param verbose Logical; print fallback/error diagnostics.
+#'
+#' @return Numeric vector of length \code{n}.
+#' @rdname beta_opencl
 #' @export
 pbeta_opencl <- function(n, x, a, b, ncp, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
@@ -9,12 +23,12 @@ pbeta_opencl <- function(n, x, a, b, ncp, fallback = TRUE, verbose = FALSE) {
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
   .opencl_try_or_fallback(
     opencl_expr = function() .pnbeta_opencl(n, x, a, b, ncp, verbose = verbose),
-    fallback_expr = function() rep(stats::pnbeta(x, shape1 = a, shape2 = b, ncp = ncp), n),
+    fallback_expr = function() rep(stats::pbeta(x, shape1 = a, shape2 = b, ncp = ncp), n),
     fallback = fallback, verbose = verbose, fn_name = "pbeta_opencl"
   )
 }
 
-#' OpenCL-backed qbeta linkage check
+#' @rdname beta_opencl
 #' @export
 qbeta_opencl <- function(n, p, a, b, ncp, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n)

@@ -1,4 +1,18 @@
-#' OpenCL-backed pf linkage check
+#' The F Distribution (OpenCL linkage subset)
+#'
+#' OpenCL-backed non-central F distribution and quantile wrappers.
+#'
+#' @param n Number of observations. Non-negative integer scalar.
+#' @param x Numeric scalar quantile.
+#' @param p Numeric scalar probability in \code{[0, 1]}.
+#' @param df1 Numerator degrees of freedom (must be > 0).
+#' @param df2 Denominator degrees of freedom (must be > 0).
+#' @param ncp Non-centrality parameter (must be >= 0).
+#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param verbose Logical; print fallback/error diagnostics.
+#'
+#' @return Numeric vector of length \code{n}.
+#' @rdname f_opencl
 #' @export
 pf_opencl <- function(n, x, df1, df2, ncp, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
@@ -14,7 +28,7 @@ pf_opencl <- function(n, x, df1, df2, ncp, fallback = TRUE, verbose = FALSE) {
   )
 }
 
-#' OpenCL-backed qf linkage check
+#' @rdname f_opencl
 #' @export
 qf_opencl <- function(n, p, df1, df2, ncp, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n)

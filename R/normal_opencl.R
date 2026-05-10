@@ -17,6 +17,7 @@
 #' @param verbose Logical; print informational fallback messages.
 #'
 #' @return Numeric vector result from the corresponding normal-family operation.
+#' @example inst/examples/Ex_normal_opencl.R
 #' @rdname normal_opencl
 #' @export
 dnorm_opencl <- function(

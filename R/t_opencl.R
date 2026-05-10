@@ -1,4 +1,17 @@
-#' OpenCL-backed pt linkage check
+#' The Student t Distribution (OpenCL linkage subset)
+#'
+#' OpenCL-backed non-central Student t distribution and quantile wrappers.
+#'
+#' @param n Number of observations. Non-negative integer scalar.
+#' @param x Numeric scalar quantile.
+#' @param p Numeric scalar probability in \code{[0, 1]}.
+#' @param df Degrees of freedom (must be > 0).
+#' @param ncp Non-centrality parameter.
+#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param verbose Logical; print fallback/error diagnostics.
+#'
+#' @return Numeric vector of length \code{n}.
+#' @rdname t_opencl
 #' @export
 pt_opencl <- function(n, x, df, ncp, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
@@ -13,7 +26,7 @@ pt_opencl <- function(n, x, df, ncp, fallback = TRUE, verbose = FALSE) {
   )
 }
 
-#' OpenCL-backed qt linkage check
+#' @rdname t_opencl
 #' @export
 qt_opencl <- function(n, p, df, ncp, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n)

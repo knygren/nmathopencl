@@ -14,6 +14,7 @@
 #' @param verbose Logical; print informational fallback messages.
 #'
 #' @return Numeric vector result from the corresponding uniform-family operation.
+#' @example inst/examples/Ex_uniform_opencl.R
 #' @rdname uniform_opencl
 #' @export
 dunif_opencl <- function(n, x, min = 0, max = 1, fallback = TRUE, verbose = FALSE) {

@@ -1,4 +1,13 @@
-#' OpenCL-backed R_CheckUserInterrupt linkage check
+#' OpenCL-backed R_ext runtime utility linkage checks
+#'
+#' Wrappers for utility hooks used by translated R_ext-dependent kernels.
+#'
+#' @param n Number of observations. Non-negative integer scalar.
+#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param verbose Logical; print fallback/error diagnostics.
+#'
+#' @return Numeric vector of length \code{n}.
+#' @rdname rext_utils_opencl
 #' @export
 r_check_user_interrupt_opencl <- function(n, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
@@ -10,7 +19,7 @@ r_check_user_interrupt_opencl <- function(n, fallback = TRUE, verbose = FALSE) {
   )
 }
 
-#' OpenCL-backed R_CheckStack linkage check
+#' @rdname rext_utils_opencl
 #' @export
 r_check_stack_opencl <- function(n, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n)

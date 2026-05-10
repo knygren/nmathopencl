@@ -1,4 +1,14 @@
-#' OpenCL-backed norm_rand linkage check
+#' OpenCL-backed RNG Core linkage checks
+#'
+#' Linkage wrappers for core RNG primitives used by translated Mathlib paths.
+#'
+#' @param n Number of observations. Non-negative integer scalar.
+#' @param dn Positive upper bound used by \code{r_unif_index_opencl}.
+#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param verbose Logical; print fallback/error diagnostics.
+#'
+#' @return Numeric vector of length \code{n}.
+#' @rdname rng_core_opencl
 #' @export
 norm_rand_opencl <- function(n, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n); .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
@@ -9,7 +19,7 @@ norm_rand_opencl <- function(n, fallback = TRUE, verbose = FALSE) {
   )
 }
 
-#' OpenCL-backed unif_rand linkage check
+#' @rdname rng_core_opencl
 #' @export
 unif_rand_opencl <- function(n, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n); .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
@@ -20,7 +30,7 @@ unif_rand_opencl <- function(n, fallback = TRUE, verbose = FALSE) {
   )
 }
 
-#' OpenCL-backed R_unif_index linkage check
+#' @rdname rng_core_opencl
 #' @export
 r_unif_index_opencl <- function(n, dn, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
@@ -33,7 +43,7 @@ r_unif_index_opencl <- function(n, dn, fallback = TRUE, verbose = FALSE) {
   )
 }
 
-#' OpenCL-backed exp_rand linkage check
+#' @rdname rng_core_opencl
 #' @export
 exp_rand_opencl <- function(n, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n); .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")

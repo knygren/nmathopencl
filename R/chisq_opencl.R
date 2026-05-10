@@ -1,4 +1,17 @@
-#' OpenCL-backed pchisq linkage check
+#' The Chi-squared Distribution (OpenCL linkage subset)
+#'
+#' OpenCL-backed non-central chi-squared distribution and quantile wrappers.
+#'
+#' @param n Number of observations. Non-negative integer scalar.
+#' @param x Numeric scalar quantile.
+#' @param p Numeric scalar probability in \code{[0, 1]}.
+#' @param df Degrees of freedom (must be > 0).
+#' @param ncp Non-centrality parameter (must be >= 0).
+#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param verbose Logical; print fallback/error diagnostics.
+#'
+#' @return Numeric vector of length \code{n}.
+#' @rdname chisq_opencl
 #' @export
 pchisq_opencl <- function(n, x, df, ncp, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
@@ -13,7 +26,7 @@ pchisq_opencl <- function(n, x, df, ncp, fallback = TRUE, verbose = FALSE) {
   )
 }
 
-#' OpenCL-backed qchisq linkage check
+#' @rdname chisq_opencl
 #' @export
 qchisq_opencl <- function(n, p, df, ncp, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
