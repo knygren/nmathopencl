@@ -305,6 +305,58 @@ Rcpp::NumericVector r_pow_di_opencl(
     bool   verbose = false
 );
 
+Rcpp::NumericVector log1pmx_opencl(
+    int    n_out,
+    double x,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector log1pexp_opencl(
+    int    n_out,
+    double x,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector log1mexp_opencl(
+    int    n_out,
+    double x,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector lgamma1p_opencl(
+    int    n_out,
+    double x,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pow1p_opencl(
+    int    n_out,
+    double x,
+    double y,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector logspace_add_opencl(
+    int    n_out,
+    double logx,
+    double logy,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector logspace_sub_opencl(
+    int    n_out,
+    double logx,
+    double logy,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector logspace_sum_opencl(
+    int    n_out,
+    double logx,
+    double logy,
+    bool   verbose = false
+);
+
 Rcpp::NumericVector norm_rand_opencl(
     int  n_out,
     bool verbose = false

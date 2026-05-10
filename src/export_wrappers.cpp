@@ -625,6 +625,82 @@ Rcpp::NumericVector r_pow_di_opencl_cpp_export(
 }
 
 // [[Rcpp::export]]
+Rcpp::NumericVector log1pmx_opencl_cpp_export(
+    int n,
+    double x,
+    bool verbose = false
+) {
+  return glmbayes::opencl::log1pmx_opencl(n, x, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector log1pexp_opencl_cpp_export(
+    int n,
+    double x,
+    bool verbose = false
+) {
+  return glmbayes::opencl::log1pexp_opencl(n, x, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector log1mexp_opencl_cpp_export(
+    int n,
+    double x,
+    bool verbose = false
+) {
+  return glmbayes::opencl::log1mexp_opencl(n, x, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector lgamma1p_opencl_cpp_export(
+    int n,
+    double x,
+    bool verbose = false
+) {
+  return glmbayes::opencl::lgamma1p_opencl(n, x, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector pow1p_opencl_cpp_export(
+    int n,
+    double x,
+    double y,
+    bool verbose = false
+) {
+  return glmbayes::opencl::pow1p_opencl(n, x, y, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector logspace_add_opencl_cpp_export(
+    int n,
+    double logx,
+    double logy,
+    bool verbose = false
+) {
+  return glmbayes::opencl::logspace_add_opencl(n, logx, logy, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector logspace_sub_opencl_cpp_export(
+    int n,
+    double logx,
+    double logy,
+    bool verbose = false
+) {
+  return glmbayes::opencl::logspace_sub_opencl(n, logx, logy, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector logspace_sum_opencl_cpp_export(
+    int n,
+    double logx,
+    double logy,
+    bool verbose = false
+) {
+  return glmbayes::opencl::logspace_sum_opencl(n, logx, logy, verbose);
+}
+
+// [[Rcpp::export]]
 Rcpp::NumericVector norm_rand_opencl_cpp_export(
     int n,
     bool verbose = false

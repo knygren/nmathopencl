@@ -109,6 +109,38 @@ r_pow_di_opencl_cpp_export <- function(n, x, n_exp, verbose = FALSE) {
     .Call(`_nmathopencl_r_pow_di_opencl_cpp_export`, n, x, n_exp, verbose)
 }
 
+log1pmx_opencl_cpp_export <- function(n, x, verbose = FALSE) {
+    .Call(`_nmathopencl_log1pmx_opencl_cpp_export`, n, x, verbose)
+}
+
+log1pexp_opencl_cpp_export <- function(n, x, verbose = FALSE) {
+    .Call(`_nmathopencl_log1pexp_opencl_cpp_export`, n, x, verbose)
+}
+
+log1mexp_opencl_cpp_export <- function(n, x, verbose = FALSE) {
+    .Call(`_nmathopencl_log1mexp_opencl_cpp_export`, n, x, verbose)
+}
+
+lgamma1p_opencl_cpp_export <- function(n, x, verbose = FALSE) {
+    .Call(`_nmathopencl_lgamma1p_opencl_cpp_export`, n, x, verbose)
+}
+
+pow1p_opencl_cpp_export <- function(n, x, y, verbose = FALSE) {
+    .Call(`_nmathopencl_pow1p_opencl_cpp_export`, n, x, y, verbose)
+}
+
+logspace_add_opencl_cpp_export <- function(n, logx, logy, verbose = FALSE) {
+    .Call(`_nmathopencl_logspace_add_opencl_cpp_export`, n, logx, logy, verbose)
+}
+
+logspace_sub_opencl_cpp_export <- function(n, logx, logy, verbose = FALSE) {
+    .Call(`_nmathopencl_logspace_sub_opencl_cpp_export`, n, logx, logy, verbose)
+}
+
+logspace_sum_opencl_cpp_export <- function(n, logx, logy, verbose = FALSE) {
+    .Call(`_nmathopencl_logspace_sum_opencl_cpp_export`, n, logx, logy, verbose)
+}
+
 norm_rand_opencl_cpp_export <- function(n, verbose = FALSE) {
     .Call(`_nmathopencl_norm_rand_opencl_cpp_export`, n, verbose)
 }

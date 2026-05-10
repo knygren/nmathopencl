@@ -562,6 +562,142 @@ Rcpp::NumericVector r_pow_di_opencl(int n_out, double x, int n_exp, bool verbose
   return out;
 }
 
+Rcpp::NumericVector log1pmx_opencl(int n_out, double x, bool verbose) {
+  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try {
+    std::vector<double> out_flat;
+    rmath_runtime_kernel_runner(build_rmath_program_with_kernel("src/log1pmx_kernel.cl"), "log1pmx_kernel", n_out, x, 0.0, 0.0, out_flat);
+    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
+  } catch (const std::exception& e) {
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
+  }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector log1pexp_opencl(int n_out, double x, bool verbose) {
+  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try {
+    std::vector<double> out_flat;
+    rmath_runtime_kernel_runner(build_rmath_program_with_kernel("src/log1pexp_kernel.cl"), "log1pexp_kernel", n_out, x, 0.0, 0.0, out_flat);
+    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
+  } catch (const std::exception& e) {
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
+  }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector log1mexp_opencl(int n_out, double x, bool verbose) {
+  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try {
+    std::vector<double> out_flat;
+    rmath_runtime_kernel_runner(build_rmath_program_with_kernel("src/log1mexp_kernel.cl"), "log1mexp_kernel", n_out, x, 0.0, 0.0, out_flat);
+    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
+  } catch (const std::exception& e) {
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
+  }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector lgamma1p_opencl(int n_out, double x, bool verbose) {
+  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try {
+    std::vector<double> out_flat;
+    rmath_runtime_kernel_runner(build_rmath_program_with_kernel("src/lgamma1p_kernel.cl"), "lgamma1p_kernel", n_out, x, 0.0, 0.0, out_flat);
+    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
+  } catch (const std::exception& e) {
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
+  }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector pow1p_opencl(int n_out, double x, double y, bool verbose) {
+  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try {
+    std::vector<double> out_flat;
+    rmath_runtime_kernel_runner(build_rmath_program_with_kernel("src/pow1p_kernel.cl"), "pow1p_kernel", n_out, x, y, 0.0, out_flat);
+    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
+  } catch (const std::exception& e) {
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
+  }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector logspace_add_opencl(int n_out, double logx, double logy, bool verbose) {
+  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try {
+    std::vector<double> out_flat;
+    rmath_runtime_kernel_runner(build_rmath_program_with_kernel("src/logspace_add_kernel.cl"), "logspace_add_kernel", n_out, logx, logy, 0.0, out_flat);
+    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
+  } catch (const std::exception& e) {
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
+  }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector logspace_sub_opencl(int n_out, double logx, double logy, bool verbose) {
+  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try {
+    std::vector<double> out_flat;
+    rmath_runtime_kernel_runner(build_rmath_program_with_kernel("src/logspace_sub_kernel.cl"), "logspace_sub_kernel", n_out, logx, logy, 0.0, out_flat);
+    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
+  } catch (const std::exception& e) {
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
+  }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector logspace_sum_opencl(int n_out, double logx, double logy, bool verbose) {
+  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try {
+    std::vector<double> out_flat;
+    rmath_runtime_kernel_runner(build_rmath_program_with_kernel("src/logspace_sum_kernel.cl"), "logspace_sum_kernel", n_out, logx, logy, 0.0, out_flat);
+    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
+  } catch (const std::exception& e) {
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
+  }
+#endif
+  return out;
+}
+
 Rcpp::NumericVector norm_rand_opencl(int n_out, bool verbose) {
   Rcpp::NumericVector out(n_out);
 #ifdef USE_OPENCL
