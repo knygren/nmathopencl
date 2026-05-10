@@ -1,6 +1,10 @@
-n <- 5L
+if (has_opencl()) {
+  n <- 5L
 
-dgamma_opencl(n, x = 1.2, shape = 2, scale = 1)
-pgamma_opencl(n, x = 1.2, shape = 2, scale = 1)
-qgamma_opencl(n, p = 0.8, shape = 2, scale = 1)
-rgamma_opencl(n, shape = 2, scale = 1)
+  dgamma_opencl(n, x = 1.2, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
+  pgamma_opencl(n, x = 1.2, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
+  qgamma_opencl(n, p = 0.8, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
+  rgamma_opencl(n, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
+} else {
+  message("OpenCL unavailable; skipping GPU-only example.")
+}
