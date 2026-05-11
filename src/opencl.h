@@ -644,9 +644,77 @@ Rcpp::NumericVector pbinom_opencl(
     bool   verbose = false
 );
 
+Rcpp::NumericVector dnbinom_opencl(
+    int    n_out,
+    double x,
+    double size,
+    double prob,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pnbinom_opencl(
+    int    n_out,
+    double q,
+    double size,
+    double prob,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qnbinom_opencl(
+    int    n_out,
+    double p,
+    double size,
+    double prob,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rnbinom_opencl(
+    int    n_out,
+    double size,
+    double prob,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dnbinom_mu_opencl(
+    int    n_out,
+    double x,
+    double size,
+    double mu,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pnbinom_mu_opencl(
+    int    n_out,
+    double q,
+    double size,
+    double mu,
+    bool   verbose = false
+);
+
 Rcpp::NumericVector qpois_opencl(
     int    n_out,
     double p,
+    double lambda,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dpois_raw_opencl(
+    int    n_out,
+    double x,
+    double lambda,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dpois_opencl(
+    int    n_out,
+    double x,
+    double lambda,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector ppois_opencl(
+    int    n_out,
+    double q,
     double lambda,
     bool   verbose = false
 );
@@ -662,6 +730,13 @@ Rcpp::NumericVector qnbinom_mu_opencl(
 Rcpp::NumericVector rpois_opencl(
     int    n_out,
     double lambda,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rnbinom_mu_opencl(
+    int    n_out,
+    double size,
+    double mu,
     bool   verbose = false
 );
 
@@ -783,6 +858,77 @@ Rcpp::NumericVector rhyper_opencl(
     double r,
     double b,
     double n,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dweibull_opencl(
+    int    n_out,
+    double x,
+    double shape,
+    double scale,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pweibull_opencl(
+    int    n_out,
+    double q,
+    double shape,
+    double scale,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qweibull_opencl(
+    int    n_out,
+    double p,
+    double shape,
+    double scale,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rweibull_opencl(
+    int    n_out,
+    double shape,
+    double scale,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dlogis_opencl(
+    int    n_out,
+    double x,
+    double location,
+    double scale,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector plogis_opencl(
+    int    n_out,
+    double q,
+    double location,
+    double scale,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qlogis_opencl(
+    int    n_out,
+    double p,
+    double location,
+    double scale,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rlogis_opencl(
+    int    n_out,
+    double location,
+    double scale,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dnbeta_opencl(
+    int    n_out,
+    double x,
+    double a,
+    double b,
+    double ncp,
     bool   verbose = false
 );
 

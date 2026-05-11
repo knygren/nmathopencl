@@ -602,6 +602,42 @@
 
 #' @noRd
 #' @keywords internal
+.dnbinom_opencl <- function(n, x, size, prob, verbose = FALSE) {
+  .Call(`_nmathopencl_dnbinom_opencl_cpp_export`, n, x, size, prob, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.pnbinom_opencl <- function(n, q, size, prob, verbose = FALSE) {
+  .Call(`_nmathopencl_pnbinom_opencl_cpp_export`, n, q, size, prob, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qnbinom_opencl <- function(n, p, size, prob, verbose = FALSE) {
+  .Call(`_nmathopencl_qnbinom_opencl_cpp_export`, n, p, size, prob, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rnbinom_opencl <- function(n, size, prob, verbose = FALSE) {
+  .Call(`_nmathopencl_rnbinom_opencl_cpp_export`, n, size, prob, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.dnbinom_mu_opencl <- function(n, x, size, mu, verbose = FALSE) {
+  .Call(`_nmathopencl_dnbinom_mu_opencl_cpp_export`, n, x, size, mu, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.pnbinom_mu_opencl <- function(n, q, size, mu, verbose = FALSE) {
+  .Call(`_nmathopencl_pnbinom_mu_opencl_cpp_export`, n, q, size, mu, verbose)
+}
+
+#' @noRd
+#' @keywords internal
 .rmultinom_opencl <- function(n, size, prob, verbose = FALSE) {
   .Call(`_nmathopencl_rmultinom_opencl_cpp_export`, n, size, prob, verbose)
 }
@@ -710,6 +746,24 @@
 
 #' @noRd
 #' @keywords internal
+.dpois_raw_opencl <- function(n, x, lambda, verbose = FALSE) {
+  .Call(`_nmathopencl_dpois_raw_opencl_cpp_export`, n, x, lambda, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.dpois_opencl <- function(n, x, lambda, verbose = FALSE) {
+  .Call(`_nmathopencl_dpois_opencl_cpp_export`, n, x, lambda, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.ppois_opencl <- function(n, q, lambda, verbose = FALSE) {
+  .Call(`_nmathopencl_ppois_opencl_cpp_export`, n, q, lambda, verbose)
+}
+
+#' @noRd
+#' @keywords internal
 .qnbinom_mu_opencl <- function(n, p, size, mu, verbose = FALSE) {
   .Call(`_nmathopencl_qnbinom_mu_opencl_cpp_export`, n, p, size, mu, verbose)
 }
@@ -718,6 +772,60 @@
 #' @keywords internal
 .rpois_opencl <- function(n, lambda, verbose = FALSE) {
   .Call(`_nmathopencl_rpois_opencl_cpp_export`, n, lambda, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rnbinom_mu_opencl <- function(n, size, mu, verbose = FALSE) {
+  .Call(`_nmathopencl_rnbinom_mu_opencl_cpp_export`, n, size, mu, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.dweibull_opencl <- function(n, x, shape, scale, verbose = FALSE) {
+  .Call(`_nmathopencl_dweibull_opencl_cpp_export`, n, x, shape, scale, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.pweibull_opencl <- function(n, q, shape, scale, verbose = FALSE) {
+  .Call(`_nmathopencl_pweibull_opencl_cpp_export`, n, q, shape, scale, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qweibull_opencl <- function(n, p, shape, scale, verbose = FALSE) {
+  .Call(`_nmathopencl_qweibull_opencl_cpp_export`, n, p, shape, scale, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rweibull_opencl <- function(n, shape, scale, verbose = FALSE) {
+  .Call(`_nmathopencl_rweibull_opencl_cpp_export`, n, shape, scale, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.dlogis_opencl <- function(n, x, location, scale, verbose = FALSE) {
+  .Call(`_nmathopencl_dlogis_opencl_cpp_export`, n, x, location, scale, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.plogis_opencl <- function(n, q, location, scale, verbose = FALSE) {
+  .Call(`_nmathopencl_plogis_opencl_cpp_export`, n, q, location, scale, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qlogis_opencl <- function(n, p, location, scale, verbose = FALSE) {
+  .Call(`_nmathopencl_qlogis_opencl_cpp_export`, n, p, location, scale, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rlogis_opencl <- function(n, location, scale, verbose = FALSE) {
+  .Call(`_nmathopencl_rlogis_opencl_cpp_export`, n, location, scale, verbose)
 }
 
 #' @noRd
@@ -754,6 +862,12 @@
 #' @keywords internal
 .qnbeta_opencl <- function(n, p, a, b, ncp, verbose = FALSE) {
   .Call(`_nmathopencl_qnbeta_opencl_cpp_export`, n, p, a, b, ncp, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.dnbeta_opencl <- function(n, x, a, b, ncp, verbose = FALSE) {
+  .Call(`_nmathopencl_dnbeta_opencl_cpp_export`, n, x, a, b, ncp, verbose)
 }
 
 #' @noRd

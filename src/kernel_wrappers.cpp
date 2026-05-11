@@ -1040,6 +1040,60 @@ Rcpp::NumericVector pbinom_opencl(int n_out, double q, double size, double prob,
   return out;
 }
 
+Rcpp::NumericVector dnbinom_opencl(int n_out, double x, double size, double prob, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/dnbinom_kernel.cl"), "dnbinom_kernel", n_out, x, size, prob, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector pnbinom_opencl(int n_out, double q, double size, double prob, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/pnbinom_kernel.cl"), "pnbinom_kernel", n_out, q, size, prob, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector qnbinom_opencl(int n_out, double p, double size, double prob, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/qnbinom_kernel.cl"), "qnbinom_kernel", n_out, p, size, prob, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector rnbinom_opencl(int n_out, double size, double prob, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/rnbinom_kernel.cl"), "rnbinom_kernel", n_out, size, prob, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector dnbinom_mu_opencl(int n_out, double x, double size, double mu, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/dnbinom_mu_kernel.cl"), "dnbinom_mu_kernel", n_out, x, size, mu, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector pnbinom_mu_opencl(int n_out, double q, double size, double mu, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/pnbinom_mu_kernel.cl"), "pnbinom_mu_kernel", n_out, q, size, mu, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
 Rcpp::NumericVector rmultinom_opencl(int n_out, double size, double prob, bool verbose) {
   Rcpp::NumericVector out(n_out);
 #ifdef USE_OPENCL
@@ -1202,6 +1256,33 @@ Rcpp::NumericVector qpois_opencl(int n_out, double p, double lambda, bool verbos
   return out;
 }
 
+Rcpp::NumericVector dpois_raw_opencl(int n_out, double x, double lambda, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/dpois_raw_kernel.cl"), "dpois_raw_kernel", n_out, x, lambda, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector dpois_opencl(int n_out, double x, double lambda, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/dpois_kernel.cl"), "dpois_kernel", n_out, x, lambda, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector ppois_opencl(int n_out, double q, double lambda, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/ppois_kernel.cl"), "ppois_kernel", n_out, q, lambda, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
 Rcpp::NumericVector qnbinom_mu_opencl(int n_out, double p, double size, double mu, bool verbose) {
   Rcpp::NumericVector out(n_out);
 #ifdef USE_OPENCL
@@ -1216,6 +1297,87 @@ Rcpp::NumericVector rpois_opencl(int n_out, double lambda, bool verbose) {
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
   try { std::vector<double> out_flat; rmath_discrete_kernel_runner(build_rmath_program_with_kernel("src/rpois_kernel.cl"), "rpois_kernel", n_out, 0.0, 0.0, 0.0, lambda, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector rnbinom_mu_opencl(int n_out, double size, double mu, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/rnbinom_mu_kernel.cl"), "rnbinom_mu_kernel", n_out, size, mu, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector dweibull_opencl(int n_out, double x, double shape, double scale, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/dweibull_kernel.cl"), "dweibull_kernel", n_out, x, shape, scale, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector pweibull_opencl(int n_out, double q, double shape, double scale, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/pweibull_kernel.cl"), "pweibull_kernel", n_out, q, shape, scale, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector qweibull_opencl(int n_out, double p, double shape, double scale, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/qweibull_kernel.cl"), "qweibull_kernel", n_out, p, shape, scale, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector rweibull_opencl(int n_out, double shape, double scale, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/rweibull_kernel.cl"), "rweibull_kernel", n_out, shape, scale, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector dlogis_opencl(int n_out, double x, double location, double scale, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/dlogis_kernel.cl"), "dlogis_kernel", n_out, x, location, scale, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector plogis_opencl(int n_out, double q, double location, double scale, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/plogis_kernel.cl"), "plogis_kernel", n_out, q, location, scale, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector qlogis_opencl(int n_out, double p, double location, double scale, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/qlogis_kernel.cl"), "qlogis_kernel", n_out, p, location, scale, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector rlogis_opencl(int n_out, double location, double scale, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/rlogis_kernel.cl"), "rlogis_kernel", n_out, location, scale, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
 #endif
   return out;
 }
@@ -1270,6 +1432,15 @@ Rcpp::NumericVector qnbeta_opencl(int n_out, double p, double a, double b, doubl
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
   try { std::vector<double> out_flat; rmath_noncentral_kernel_runner(build_rmath_program_with_kernel("src/qnbeta_kernel.cl"), "qnbeta_kernel", n_out, 0.0, a, ncp, b, p, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector dnbeta_opencl(int n_out, double x, double a, double b, double ncp, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_noncentral_kernel_runner(build_rmath_program_with_kernel("src/dnbeta_kernel.cl"), "dnbeta_kernel", n_out, x, a, ncp, b, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
 #endif
   return out;
 }

@@ -2,12 +2,15 @@
 % Please edit documentation in R/beta_opencl.R
 \name{dbeta_opencl}
 \alias{dbeta_opencl}
+\alias{dnbeta_opencl}
 \alias{pbeta_opencl}
 \alias{qbeta_opencl}
 \alias{rbeta_opencl}
 \title{The Beta Distribution (OpenCL)}
 \usage{
 dbeta_opencl(n, x, shape1, shape2, fallback = TRUE, verbose = FALSE)
+
+dnbeta_opencl(n, x, shape1, shape2, ncp, fallback = TRUE, verbose = FALSE)
 
 pbeta_opencl(n, x, shape1, shape2, ncp = 0, fallback = TRUE, verbose = FALSE)
 
@@ -29,7 +32,7 @@ rbeta_opencl(n, shape1, shape2, fallback = TRUE, verbose = FALSE)
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
 \item{ncp}{Non-centrality parameter (must be >= 0). Used by
-\code{pbeta_opencl()} and \code{qbeta_opencl()}.}
+\code{dnbeta_opencl()}, \code{pbeta_opencl()}, and \code{qbeta_opencl()}.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -53,6 +56,7 @@ if (has_opencl()) {
   n <- 5L
 
   dbeta_opencl(n, x = 0.6, shape1 = 2.5, shape2 = 4, fallback = FALSE, verbose = TRUE)
+  dnbeta_opencl(n, x = 0.6, shape1 = 2.5, shape2 = 4, ncp = 0.8, fallback = FALSE, verbose = TRUE)
   pbeta_opencl(n, x = 0.6, shape1 = 2.5, shape2 = 4, ncp = 0, fallback = FALSE, verbose = TRUE)
   qbeta_opencl(n, p = 0.8, shape1 = 2.5, shape2 = 4, ncp = 0, fallback = FALSE, verbose = TRUE)
   rbeta_opencl(n, shape1 = 2.5, shape2 = 4, fallback = FALSE, verbose = TRUE)

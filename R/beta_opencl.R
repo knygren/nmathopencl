@@ -10,7 +10,7 @@
 #' @param shape1 First shape parameter (must be > 0).
 #' @param shape2 Second shape parameter (must be > 0).
 #' @param ncp Non-centrality parameter (must be >= 0). Used by
-#'   \code{pbeta_opencl()} and \code{qbeta_opencl()}.
+#'   \code{dnbeta_opencl()}, \code{pbeta_opencl()}, and \code{qbeta_opencl()}.
 #' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
 #' @param verbose Logical; print fallback/error diagnostics.
 #'
@@ -33,6 +33,22 @@ dbeta_opencl <- function(n, x, shape1, shape2, fallback = TRUE, verbose = FALSE)
     opencl_expr = function() .dbeta_opencl(n, x, shape1, shape2, verbose = verbose),
     fallback_expr = function() rep(stats::dbeta(x, shape1 = shape1, shape2 = shape2), n),
     fallback = fallback, verbose = verbose, fn_name = "dbeta_opencl"
+  )
+}
+
+#' @rdname beta_opencl
+#' @export
+dnbeta_opencl <- function(n, x, shape1, shape2, ncp, fallback = TRUE, verbose = FALSE) {
+  n <- .validate_n_scalar(n)
+  .validate_scalar_num(x, "x", 0, 1)
+  .validate_scalar_num(shape1, "shape1", 0, Inf, open_lower = TRUE)
+  .validate_scalar_num(shape2, "shape2", 0, Inf, open_lower = TRUE)
+  .validate_scalar_num(ncp, "ncp", 0, Inf)
+  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+  .opencl_try_or_fallback(
+    opencl_expr = function() .dnbeta_opencl(n, x, shape1, shape2, ncp, verbose = verbose),
+    fallback_expr = function() rep(stats::dbeta(x, shape1 = shape1, shape2 = shape2, ncp = ncp), n),
+    fallback = fallback, verbose = verbose, fn_name = "dnbeta_opencl"
   )
 }
 

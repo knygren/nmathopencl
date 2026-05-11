@@ -1094,6 +1094,71 @@ Rcpp::NumericVector pbinom_opencl_cpp_export(
 }
 
 // [[Rcpp::export]]
+Rcpp::NumericVector dnbinom_opencl_cpp_export(
+    int n,
+    double x,
+    double size,
+    double prob,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dnbinom_opencl(n, x, size, prob, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector pnbinom_opencl_cpp_export(
+    int n,
+    double q,
+    double size,
+    double prob,
+    bool verbose = false
+) {
+  return glmbayes::opencl::pnbinom_opencl(n, q, size, prob, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qnbinom_opencl_cpp_export(
+    int n,
+    double p,
+    double size,
+    double prob,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qnbinom_opencl(n, p, size, prob, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rnbinom_opencl_cpp_export(
+    int n,
+    double size,
+    double prob,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rnbinom_opencl(n, size, prob, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dnbinom_mu_opencl_cpp_export(
+    int n,
+    double x,
+    double size,
+    double mu,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dnbinom_mu_opencl(n, x, size, mu, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector pnbinom_mu_opencl_cpp_export(
+    int n,
+    double q,
+    double size,
+    double mu,
+    bool verbose = false
+) {
+  return glmbayes::opencl::pnbinom_mu_opencl(n, q, size, mu, verbose);
+}
+
+// [[Rcpp::export]]
 Rcpp::NumericVector rmultinom_opencl_cpp_export(
     int n,
     double size,
@@ -1284,6 +1349,36 @@ Rcpp::NumericVector qpois_opencl_cpp_export(
 }
 
 // [[Rcpp::export]]
+Rcpp::NumericVector dpois_raw_opencl_cpp_export(
+    int n,
+    double x,
+    double lambda,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dpois_raw_opencl(n, x, lambda, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dpois_opencl_cpp_export(
+    int n,
+    double x,
+    double lambda,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dpois_opencl(n, x, lambda, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector ppois_opencl_cpp_export(
+    int n,
+    double q,
+    double lambda,
+    bool verbose = false
+) {
+  return glmbayes::opencl::ppois_opencl(n, q, lambda, verbose);
+}
+
+// [[Rcpp::export]]
 Rcpp::NumericVector qnbinom_mu_opencl_cpp_export(
     int n,
     double p,
@@ -1301,6 +1396,102 @@ Rcpp::NumericVector rpois_opencl_cpp_export(
     bool verbose = false
 ) {
   return glmbayes::opencl::rpois_opencl(n, lambda, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rnbinom_mu_opencl_cpp_export(
+    int n,
+    double size,
+    double mu,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rnbinom_mu_opencl(n, size, mu, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dweibull_opencl_cpp_export(
+    int n,
+    double x,
+    double shape,
+    double scale,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dweibull_opencl(n, x, shape, scale, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector pweibull_opencl_cpp_export(
+    int n,
+    double q,
+    double shape,
+    double scale,
+    bool verbose = false
+) {
+  return glmbayes::opencl::pweibull_opencl(n, q, shape, scale, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qweibull_opencl_cpp_export(
+    int n,
+    double p,
+    double shape,
+    double scale,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qweibull_opencl(n, p, shape, scale, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rweibull_opencl_cpp_export(
+    int n,
+    double shape,
+    double scale,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rweibull_opencl(n, shape, scale, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dlogis_opencl_cpp_export(
+    int n,
+    double x,
+    double location,
+    double scale,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dlogis_opencl(n, x, location, scale, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector plogis_opencl_cpp_export(
+    int n,
+    double q,
+    double location,
+    double scale,
+    bool verbose = false
+) {
+  return glmbayes::opencl::plogis_opencl(n, q, location, scale, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qlogis_opencl_cpp_export(
+    int n,
+    double p,
+    double location,
+    double scale,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qlogis_opencl(n, p, location, scale, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rlogis_opencl_cpp_export(
+    int n,
+    double location,
+    double scale,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rlogis_opencl(n, location, scale, verbose);
 }
 
 // [[Rcpp::export]]
@@ -1371,6 +1562,18 @@ Rcpp::NumericVector qnbeta_opencl_cpp_export(
     bool verbose = false
 ) {
   return glmbayes::opencl::qnbeta_opencl(n, p, a, b, ncp, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dnbeta_opencl_cpp_export(
+    int n,
+    double x,
+    double a,
+    double b,
+    double ncp,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dnbeta_opencl(n, x, a, b, ncp, verbose);
 }
 
 // [[Rcpp::export]]
