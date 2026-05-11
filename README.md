@@ -68,13 +68,15 @@ vector using nmath routines.
 
 When `use_opencl = TRUE`, `EnvelopeEval` dispatches to its GPU backend
 (`f2_f3_opencl`). That function assembles a complete OpenCL program at
-runtime by concatenating three layers of source code:
+runtime by concatenating source layers in a fixed dependency order:
 
 1. A global configuration header (`OPENCL.cl`) that enables double-precision
    arithmetic and defines IEEE constants.
-2. The ported nmath library sources from `nmathopencl` — the `rmath`, `nmath`,
-   and `dpq` subdirectory files — which make functions like `lgamma`, `lbeta`,
-   `dbinom`, and `dpois` available as device-side functions.
+2. The full `nmathopencl` layer — `libR_shims`, `R_ext_types`, `R_shims`,
+   `R_ext_runtime`, `R_ext_internals`, `System`, and `nmath` — loaded in that
+   order via `load_kernel_library(..., package = "nmathopencl")`. This makes
+   functions like `lgamma`, `lbeta`, `dbinom`, and `dpois` available as
+   device-side functions.
 3. The model- and link-specific kernel (e.g. `f2_f3_binomial_logit.cl`), which
    contains the actual `__kernel` entry point and calls freely into the nmath
    layer above it.
@@ -109,32 +111,55 @@ applies to any package that needs statistical math inside an OpenCL kernel.
 
 ## What "using nmathopencl as a backend" looks like
 
-At the R level, the pattern is straightforward. In your package, at the point
-where you assemble an OpenCL program:
+The assembly of an OpenCL program is done in C++ using `load_kernel_source()`
+and `load_kernel_library()` from `glmbayes`. These functions handle file
+discovery, `@provides`/`@depends` annotation parsing, and dependency-ordered
+concatenation automatically — you specify a library directory name, not
+individual files.
 
-```r
-# Locate the nmath OpenCL source tree from the installed package
-nmath_cl_dir  <- system.file("cl", package = "nmathopencl")
+The full load order that `glmbayes` uses (reflected in `f2_f3_opencl`) is:
 
-# Assemble your program source by combining the nmath layer with your kernel
-program_source <- c(
-  readLines(file.path(nmath_cl_dir, "R_ext_types",  "...")),
-  readLines(file.path(nmath_cl_dir, "R_ext_runtime", "...")),
-  readLines(file.path(nmath_cl_dir, "nmath", "lgamma.cl")),
-  readLines(file.path(nmath_cl_dir, "nmath", "lbeta.cl")),
-  readLines(file.path(nmath_cl_dir, "nmath", "pbeta.cl")),
-  # ... any other nmath files your kernel needs ...
-  your_custom_kernel_source   # calls lgamma(), lbeta(), pbeta() freely
-)
+```cpp
+// 1. Global OpenCL configuration header (extensions, IEEE constants, macros)
+std::string OPENCL_source          = load_kernel_source("OPENCL.cl");
 
-# Build and run the program with your OpenCL framework of choice
+// 2-7. The nmathopencl layer, loaded in dependency order from nmathopencl's inst/cl/
+std::string libr_shims_source      = load_kernel_library("libR_shims",     "nmathopencl", false);
+std::string r_ext_types_source     = load_kernel_library("R_ext_types",    "nmathopencl", false);
+std::string r_shims_source         = load_kernel_library("R_shims",        "nmathopencl", false);
+std::string r_ext_runtime_source   = load_kernel_library("R_ext_runtime",  "nmathopencl", false);
+std::string r_ext_internals_source = load_kernel_library("R_ext_internals","nmathopencl", false);
+std::string system_source          = load_kernel_library("System",         "nmathopencl", false);
+std::string nmath_source           = load_kernel_library("nmath",          "nmathopencl", false);
+
+// 8. Your model-specific kernel source
+std::string ksrc = load_kernel_source("src/my_kernel.cl");
+
+// Concatenate into a single program string and compile
+std::string all_src = OPENCL_source
+  + "\n" + libr_shims_source
+  + "\n" + r_ext_types_source
+  + "\n" + r_shims_source
+  + "\n" + r_ext_runtime_source
+  + "\n" + r_ext_internals_source
+  + "\n" + system_source
+  + "\n" + nmath_source
+  + "\n" + ksrc;
 ```
 
-Inside `your_custom_kernel_source`, functions like `lgamma`, `lbeta`,
-`pbeta`, `dnorm`, `rgamma`, and the rest are available as device functions,
-because the nmath sources define them as inline OpenCL C functions. You call
-them exactly as you would in regular C code. The GPU handles parallelism
-through the normal OpenCL work-item model.
+The key point is steps 2–7: these are the layers from `nmathopencl`, loaded
+via the `package = "nmathopencl"` argument so that `load_kernel_library`
+finds them at `system.file("cl/<subdir>", package = "nmathopencl")`. Together
+they satisfy all of nmath's type, macro, and runtime dependencies.
+Step 8 is entirely your own code. Inside `my_kernel.cl` you can call any
+nmath function — `lgamma`, `lbeta`, `pbeta`, `dnorm`, `rgamma`, and so on —
+exactly as you would in regular C, because the nmath layer above has already
+defined them as inline OpenCL device functions.
+
+`load_kernel_library` performs a topological sort based on `@provides` and
+`@depends` annotations in each `.cl` file, so the files within each
+subdirectory are concatenated in the correct dependency order. You do not need
+to enumerate individual files.
 
 The result is that you can write kernel logic that looks essentially identical
 to what you would write in R — using the same functions, the same parameter
