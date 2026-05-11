@@ -85,5 +85,17 @@ void *  R_realloc_gc(void *, size_t);
 // ---- END AUTO DETERMINISTIC SHIM ----
 
 // ---- BEGIN MANUAL REASONED SHIM ----
-// (none)
+void* vmaxget(void) {
+    return (void*)0;
+}
+
+void vmaxset(const void* v) {
+    (void)v;
+}
+
+char* R_alloc(R_SIZE_T n, int size) {
+    (void)n;
+    (void)size;
+    return (char*)0;
+}
 // ---- END MANUAL REASONED SHIM ----

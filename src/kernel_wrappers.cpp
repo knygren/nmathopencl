@@ -1562,6 +1562,276 @@ Rcpp::NumericVector rsignrank_opencl(int n_out, double nsize, bool verbose) {
   return out;
 }
 
+Rcpp::NumericVector gammafn_opencl(int n_out, double x, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/gammafn_kernel.cl"), "gammafn_kernel", n_out, x, 0.0, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector lgammafn_opencl(int n_out, double x, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/lgammafn_kernel.cl"), "lgammafn_kernel", n_out, x, 0.0, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector lgammafn_sign_opencl(int n_out, double x, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/lgammafn_sign_kernel.cl"), "lgammafn_sign_kernel", n_out, x, 0.0, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector dpsifn_opencl(int n_out, double x, double n_deriv, double kode, double m, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/dpsifn_kernel.cl"), "dpsifn_kernel", n_out, x, n_deriv, kode, m, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector psigamma_opencl(int n_out, double x, double deriv, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/psigamma_kernel.cl"), "psigamma_kernel", n_out, x, deriv, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector digamma_opencl(int n_out, double x, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/digamma_kernel.cl"), "digamma_kernel", n_out, x, 0.0, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector trigamma_opencl(int n_out, double x, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/trigamma_kernel.cl"), "trigamma_kernel", n_out, x, 0.0, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector tetragamma_opencl(int n_out, double x, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/tetragamma_kernel.cl"), "tetragamma_kernel", n_out, x, 0.0, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector pentagamma_opencl(int n_out, double x, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/pentagamma_kernel.cl"), "pentagamma_kernel", n_out, x, 0.0, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector beta_opencl(int n_out, double a, double b, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/beta_special_kernel.cl"), "beta_special_kernel", n_out, a, b, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector lbeta_opencl(int n_out, double a, double b, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/lbeta_special_kernel.cl"), "lbeta_special_kernel", n_out, a, b, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector choose_opencl(int n_out, double n_val, double k, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/choose_special_kernel.cl"), "choose_special_kernel", n_out, n_val, k, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector lchoose_opencl(int n_out, double n_val, double k, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/lchoose_special_kernel.cl"), "lchoose_special_kernel", n_out, n_val, k, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector bessel_i_opencl(int n_out, double x, double nu, double expo_scaled, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/bessel_i_kernel.cl"), "bessel_i_kernel", n_out, x, nu, expo_scaled, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector bessel_j_opencl(int n_out, double x, double nu, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/bessel_j_kernel.cl"), "bessel_j_kernel", n_out, x, nu, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector bessel_k_opencl(int n_out, double x, double nu, double expo_scaled, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/bessel_k_kernel.cl"), "bessel_k_kernel", n_out, x, nu, expo_scaled, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector bessel_y_opencl(int n_out, double x, double nu, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/bessel_y_kernel.cl"), "bessel_y_kernel", n_out, x, nu, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector bessel_i_ex_opencl(int n_out, double x, double nu, double expo, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/bessel_i_ex_kernel.cl"), "bessel_i_ex_kernel", n_out, x, nu, expo, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector bessel_j_ex_opencl(int n_out, double x, double nu, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/bessel_j_ex_kernel.cl"), "bessel_j_ex_kernel", n_out, x, nu, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector bessel_k_ex_opencl(int n_out, double x, double nu, double expo, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/bessel_k_ex_kernel.cl"), "bessel_k_ex_kernel", n_out, x, nu, expo, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector bessel_y_ex_opencl(int n_out, double x, double nu, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/bessel_y_ex_kernel.cl"), "bessel_y_ex_kernel", n_out, x, nu, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector imax2_opencl(int n_out, double x, double y, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/imax2_kernel.cl"), "imax2_kernel", n_out, x, y, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector imin2_opencl(int n_out, double x, double y, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/imin2_kernel.cl"), "imin2_kernel", n_out, x, y, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector fmax2_opencl(int n_out, double x, double y, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/fmax2_kernel.cl"), "fmax2_kernel", n_out, x, y, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector fmin2_opencl(int n_out, double x, double y, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/fmin2_kernel.cl"), "fmin2_kernel", n_out, x, y, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector sign_opencl(int n_out, double x, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/sign_kernel.cl"), "sign_kernel", n_out, x, 0.0, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector fprec_opencl(int n_out, double x, double digits, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/fprec_kernel.cl"), "fprec_kernel", n_out, x, digits, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector fround_opencl(int n_out, double x, double digits, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/fround_kernel.cl"), "fround_kernel", n_out, x, digits, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector fsign_opencl(int n_out, double x, double y, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/fsign_kernel.cl"), "fsign_kernel", n_out, x, y, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
+Rcpp::NumericVector ftrunc_opencl(int n_out, double x, bool verbose) {
+  Rcpp::NumericVector out(n_out);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  try { std::vector<double> out_flat; rmath_distribution_kernel_runner(build_rmath_program_with_kernel("src/ftrunc_kernel.cl"), "ftrunc_kernel", n_out, x, 0.0, 0.0, 0.0, 0.0, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+#endif
+  return out;
+}
+
 Rcpp::NumericVector r_check_user_interrupt_opencl(int n_out, bool verbose) {
   Rcpp::NumericVector out(n_out);
 #ifdef USE_OPENCL

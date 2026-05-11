@@ -1718,6 +1718,303 @@ Rcpp::NumericVector rsignrank_opencl_cpp_export(
 }
 
 // [[Rcpp::export]]
+Rcpp::NumericVector gammafn_opencl_cpp_export(
+    int n,
+    double x,
+    bool verbose = false
+) {
+  return glmbayes::opencl::gammafn_opencl(n, x, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector lgammafn_opencl_cpp_export(
+    int n,
+    double x,
+    bool verbose = false
+) {
+  return glmbayes::opencl::lgammafn_opencl(n, x, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector lgammafn_sign_opencl_cpp_export(
+    int n,
+    double x,
+    bool verbose = false
+) {
+  return glmbayes::opencl::lgammafn_sign_opencl(n, x, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dpsifn_opencl_cpp_export(
+    int n,
+    double x,
+    double n_deriv,
+    double kode,
+    double m,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dpsifn_opencl(n, x, n_deriv, kode, m, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector psigamma_opencl_cpp_export(
+    int n,
+    double x,
+    double deriv,
+    bool verbose = false
+) {
+  return glmbayes::opencl::psigamma_opencl(n, x, deriv, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector digamma_opencl_cpp_export(
+    int n,
+    double x,
+    bool verbose = false
+) {
+  return glmbayes::opencl::digamma_opencl(n, x, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector trigamma_opencl_cpp_export(
+    int n,
+    double x,
+    bool verbose = false
+) {
+  return glmbayes::opencl::trigamma_opencl(n, x, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector tetragamma_opencl_cpp_export(
+    int n,
+    double x,
+    bool verbose = false
+) {
+  return glmbayes::opencl::tetragamma_opencl(n, x, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector pentagamma_opencl_cpp_export(
+    int n,
+    double x,
+    bool verbose = false
+) {
+  return glmbayes::opencl::pentagamma_opencl(n, x, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector beta_opencl_cpp_export(
+    int n,
+    double a,
+    double b,
+    bool verbose = false
+) {
+  return glmbayes::opencl::beta_opencl(n, a, b, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector lbeta_opencl_cpp_export(
+    int n,
+    double a,
+    double b,
+    bool verbose = false
+) {
+  return glmbayes::opencl::lbeta_opencl(n, a, b, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector choose_opencl_cpp_export(
+    int n,
+    double n_val,
+    double k,
+    bool verbose = false
+) {
+  return glmbayes::opencl::choose_opencl(n, n_val, k, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector lchoose_opencl_cpp_export(
+    int n,
+    double n_val,
+    double k,
+    bool verbose = false
+) {
+  return glmbayes::opencl::lchoose_opencl(n, n_val, k, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector bessel_i_opencl_cpp_export(
+    int n,
+    double x,
+    double nu,
+    double expo_scaled,
+    bool verbose = false
+) {
+  return glmbayes::opencl::bessel_i_opencl(n, x, nu, expo_scaled, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector bessel_j_opencl_cpp_export(
+    int n,
+    double x,
+    double nu,
+    bool verbose = false
+) {
+  return glmbayes::opencl::bessel_j_opencl(n, x, nu, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector bessel_k_opencl_cpp_export(
+    int n,
+    double x,
+    double nu,
+    double expo_scaled,
+    bool verbose = false
+) {
+  return glmbayes::opencl::bessel_k_opencl(n, x, nu, expo_scaled, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector bessel_y_opencl_cpp_export(
+    int n,
+    double x,
+    double nu,
+    bool verbose = false
+) {
+  return glmbayes::opencl::bessel_y_opencl(n, x, nu, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector bessel_i_ex_opencl_cpp_export(
+    int n,
+    double x,
+    double nu,
+    double expo,
+    bool verbose = false
+) {
+  return glmbayes::opencl::bessel_i_ex_opencl(n, x, nu, expo, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector bessel_j_ex_opencl_cpp_export(
+    int n,
+    double x,
+    double nu,
+    bool verbose = false
+) {
+  return glmbayes::opencl::bessel_j_ex_opencl(n, x, nu, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector bessel_k_ex_opencl_cpp_export(
+    int n,
+    double x,
+    double nu,
+    double expo,
+    bool verbose = false
+) {
+  return glmbayes::opencl::bessel_k_ex_opencl(n, x, nu, expo, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector bessel_y_ex_opencl_cpp_export(
+    int n,
+    double x,
+    double nu,
+    bool verbose = false
+) {
+  return glmbayes::opencl::bessel_y_ex_opencl(n, x, nu, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector imax2_opencl_cpp_export(
+    int n,
+    double x,
+    double y,
+    bool verbose = false
+) {
+  return glmbayes::opencl::imax2_opencl(n, x, y, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector imin2_opencl_cpp_export(
+    int n,
+    double x,
+    double y,
+    bool verbose = false
+) {
+  return glmbayes::opencl::imin2_opencl(n, x, y, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector fmax2_opencl_cpp_export(
+    int n,
+    double x,
+    double y,
+    bool verbose = false
+) {
+  return glmbayes::opencl::fmax2_opencl(n, x, y, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector fmin2_opencl_cpp_export(
+    int n,
+    double x,
+    double y,
+    bool verbose = false
+) {
+  return glmbayes::opencl::fmin2_opencl(n, x, y, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector sign_opencl_cpp_export(
+    int n,
+    double x,
+    bool verbose = false
+) {
+  return glmbayes::opencl::sign_opencl(n, x, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector fprec_opencl_cpp_export(
+    int n,
+    double x,
+    double digits,
+    bool verbose = false
+) {
+  return glmbayes::opencl::fprec_opencl(n, x, digits, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector fround_opencl_cpp_export(
+    int n,
+    double x,
+    double digits,
+    bool verbose = false
+) {
+  return glmbayes::opencl::fround_opencl(n, x, digits, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector fsign_opencl_cpp_export(
+    int n,
+    double x,
+    double y,
+    bool verbose = false
+) {
+  return glmbayes::opencl::fsign_opencl(n, x, y, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector ftrunc_opencl_cpp_export(
+    int n,
+    double x,
+    bool verbose = false
+) {
+  return glmbayes::opencl::ftrunc_opencl(n, x, verbose);
+}
+
+// [[Rcpp::export]]
 Rcpp::NumericVector r_check_user_interrupt_opencl_cpp_export(
     int n,
     bool verbose = false

@@ -1086,6 +1086,213 @@ Rcpp::NumericVector qnt_opencl(
     bool   verbose = false
 );
 
+Rcpp::NumericVector gammafn_opencl(
+    int    n_out,
+    double x,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector lgammafn_opencl(
+    int    n_out,
+    double x,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector lgammafn_sign_opencl(
+    int    n_out,
+    double x,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dpsifn_opencl(
+    int    n_out,
+    double x,
+    double n_deriv,
+    double kode,
+    double m,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector psigamma_opencl(
+    int    n_out,
+    double x,
+    double deriv,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector digamma_opencl(
+    int    n_out,
+    double x,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector trigamma_opencl(
+    int    n_out,
+    double x,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector tetragamma_opencl(
+    int    n_out,
+    double x,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pentagamma_opencl(
+    int    n_out,
+    double x,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector beta_opencl(
+    int    n_out,
+    double a,
+    double b,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector lbeta_opencl(
+    int    n_out,
+    double a,
+    double b,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector choose_opencl(
+    int    n_out,
+    double n_val,
+    double k,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector lchoose_opencl(
+    int    n_out,
+    double n_val,
+    double k,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector bessel_i_opencl(
+    int    n_out,
+    double x,
+    double nu,
+    double expo_scaled,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector bessel_j_opencl(
+    int    n_out,
+    double x,
+    double nu,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector bessel_k_opencl(
+    int    n_out,
+    double x,
+    double nu,
+    double expo_scaled,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector bessel_y_opencl(
+    int    n_out,
+    double x,
+    double nu,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector bessel_i_ex_opencl(
+    int    n_out,
+    double x,
+    double nu,
+    double expo,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector bessel_j_ex_opencl(
+    int    n_out,
+    double x,
+    double nu,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector bessel_k_ex_opencl(
+    int    n_out,
+    double x,
+    double nu,
+    double expo,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector bessel_y_ex_opencl(
+    int    n_out,
+    double x,
+    double nu,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector imax2_opencl(
+    int    n_out,
+    double x,
+    double y,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector imin2_opencl(
+    int    n_out,
+    double x,
+    double y,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector fmax2_opencl(
+    int    n_out,
+    double x,
+    double y,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector fmin2_opencl(
+    int    n_out,
+    double x,
+    double y,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector sign_opencl(
+    int    n_out,
+    double x,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector fprec_opencl(
+    int    n_out,
+    double x,
+    double digits,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector fround_opencl(
+    int    n_out,
+    double x,
+    double digits,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector fsign_opencl(
+    int    n_out,
+    double x,
+    double y,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector ftrunc_opencl(
+    int    n_out,
+    double x,
+    bool   verbose = false
+);
+
 Rcpp::NumericVector r_check_user_interrupt_opencl(
     int  n_out,
     bool verbose = false
