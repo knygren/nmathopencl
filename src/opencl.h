@@ -449,6 +449,168 @@ Rcpp::NumericVector rgamma_opencl(
     bool   verbose = false
 );
 
+Rcpp::NumericVector dbeta_opencl(
+    int    n_out,
+    double x,
+    double a,
+    double b,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pbeta_opencl(
+    int    n_out,
+    double x,
+    double a,
+    double b,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qbeta_opencl(
+    int    n_out,
+    double p,
+    double a,
+    double b,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rbeta_opencl(
+    int    n_out,
+    double a,
+    double b,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dlnorm_opencl(
+    int    n_out,
+    double x,
+    double meanlog,
+    double sdlog,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector plnorm_opencl(
+    int    n_out,
+    double q,
+    double meanlog,
+    double sdlog,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qlnorm_opencl(
+    int    n_out,
+    double p,
+    double meanlog,
+    double sdlog,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rlnorm_opencl(
+    int    n_out,
+    double meanlog,
+    double sdlog,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dchisq_opencl(
+    int    n_out,
+    double x,
+    double df,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pchisq_opencl(
+    int    n_out,
+    double x,
+    double df,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qchisq_opencl(
+    int    n_out,
+    double p,
+    double df,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rchisq_opencl(
+    int    n_out,
+    double df,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dnchisq_opencl(
+    int    n_out,
+    double x,
+    double df,
+    double ncp,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rnchisq_opencl(
+    int    n_out,
+    double df,
+    double ncp,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector df_opencl(
+    int    n_out,
+    double x,
+    double df1,
+    double df2,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pf_opencl(
+    int    n_out,
+    double x,
+    double df1,
+    double df2,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qf_opencl(
+    int    n_out,
+    double p,
+    double df1,
+    double df2,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rf_opencl(
+    int    n_out,
+    double df1,
+    double df2,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dt_opencl(
+    int    n_out,
+    double x,
+    double df,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pt_opencl(
+    int    n_out,
+    double x,
+    double df,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qt_opencl(
+    int    n_out,
+    double p,
+    double df,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rt_opencl(
+    int    n_out,
+    double df,
+    bool   verbose = false
+);
+
 Rcpp::NumericVector qbinom_opencl(
     int    n_out,
     double p,

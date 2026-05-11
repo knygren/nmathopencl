@@ -450,6 +450,138 @@
 
 #' @noRd
 #' @keywords internal
+.dbeta_opencl <- function(n, x, a, b, verbose = FALSE) {
+  .Call(`_nmathopencl_dbeta_opencl_cpp_export`, n, x, a, b, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.pbeta_opencl <- function(n, x, a, b, verbose = FALSE) {
+  .Call(`_nmathopencl_pbeta_opencl_cpp_export`, n, x, a, b, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qbeta_opencl <- function(n, p, a, b, verbose = FALSE) {
+  .Call(`_nmathopencl_qbeta_opencl_cpp_export`, n, p, a, b, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rbeta_opencl <- function(n, a, b, verbose = FALSE) {
+  .Call(`_nmathopencl_rbeta_opencl_cpp_export`, n, a, b, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.dlnorm_opencl <- function(n, x, meanlog, sdlog, verbose = FALSE) {
+  .Call(`_nmathopencl_dlnorm_opencl_cpp_export`, n, x, meanlog, sdlog, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.plnorm_opencl <- function(n, q, meanlog, sdlog, verbose = FALSE) {
+  .Call(`_nmathopencl_plnorm_opencl_cpp_export`, n, q, meanlog, sdlog, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qlnorm_opencl <- function(n, p, meanlog, sdlog, verbose = FALSE) {
+  .Call(`_nmathopencl_qlnorm_opencl_cpp_export`, n, p, meanlog, sdlog, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rlnorm_opencl <- function(n, meanlog, sdlog, verbose = FALSE) {
+  .Call(`_nmathopencl_rlnorm_opencl_cpp_export`, n, meanlog, sdlog, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.dchisq_opencl <- function(n, x, df, verbose = FALSE) {
+  .Call(`_nmathopencl_dchisq_opencl_cpp_export`, n, x, df, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.pchisq_opencl <- function(n, x, df, verbose = FALSE) {
+  .Call(`_nmathopencl_pchisq_opencl_cpp_export`, n, x, df, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qchisq_opencl <- function(n, p, df, verbose = FALSE) {
+  .Call(`_nmathopencl_qchisq_opencl_cpp_export`, n, p, df, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rchisq_opencl <- function(n, df, verbose = FALSE) {
+  .Call(`_nmathopencl_rchisq_opencl_cpp_export`, n, df, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.dnchisq_opencl <- function(n, x, df, ncp, verbose = FALSE) {
+  .Call(`_nmathopencl_dnchisq_opencl_cpp_export`, n, x, df, ncp, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rnchisq_opencl <- function(n, df, ncp, verbose = FALSE) {
+  .Call(`_nmathopencl_rnchisq_opencl_cpp_export`, n, df, ncp, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.df_opencl <- function(n, x, df1, df2, verbose = FALSE) {
+  .Call(`_nmathopencl_df_opencl_cpp_export`, n, x, df1, df2, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.pf_opencl <- function(n, x, df1, df2, verbose = FALSE) {
+  .Call(`_nmathopencl_pf_opencl_cpp_export`, n, x, df1, df2, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qf_opencl <- function(n, p, df1, df2, verbose = FALSE) {
+  .Call(`_nmathopencl_qf_opencl_cpp_export`, n, p, df1, df2, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rf_opencl <- function(n, df1, df2, verbose = FALSE) {
+  .Call(`_nmathopencl_rf_opencl_cpp_export`, n, df1, df2, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.dt_opencl <- function(n, x, df, verbose = FALSE) {
+  .Call(`_nmathopencl_dt_opencl_cpp_export`, n, x, df, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.pt_opencl <- function(n, x, df, verbose = FALSE) {
+  .Call(`_nmathopencl_pt_opencl_cpp_export`, n, x, df, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qt_opencl <- function(n, p, df, verbose = FALSE) {
+  .Call(`_nmathopencl_qt_opencl_cpp_export`, n, p, df, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rt_opencl <- function(n, df, verbose = FALSE) {
+  .Call(`_nmathopencl_rt_opencl_cpp_export`, n, df, verbose)
+}
+
+#' @noRd
+#' @keywords internal
 .qbinom_opencl <- function(n, p, size, prob, verbose = FALSE) {
   .Call(`_nmathopencl_qbinom_opencl_cpp_export`, n, p, size, prob, verbose)
 }

@@ -832,6 +832,234 @@ Rcpp::NumericVector rgamma_opencl_cpp_export(
 }
 
 // [[Rcpp::export]]
+Rcpp::NumericVector dbeta_opencl_cpp_export(
+    int n,
+    double x,
+    double a,
+    double b,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dbeta_opencl(n, x, a, b, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector pbeta_opencl_cpp_export(
+    int n,
+    double x,
+    double a,
+    double b,
+    bool verbose = false
+) {
+  return glmbayes::opencl::pbeta_opencl(n, x, a, b, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qbeta_opencl_cpp_export(
+    int n,
+    double p,
+    double a,
+    double b,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qbeta_opencl(n, p, a, b, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rbeta_opencl_cpp_export(
+    int n,
+    double a,
+    double b,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rbeta_opencl(n, a, b, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dlnorm_opencl_cpp_export(
+    int n,
+    double x,
+    double meanlog,
+    double sdlog,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dlnorm_opencl(n, x, meanlog, sdlog, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector plnorm_opencl_cpp_export(
+    int n,
+    double q,
+    double meanlog,
+    double sdlog,
+    bool verbose = false
+) {
+  return glmbayes::opencl::plnorm_opencl(n, q, meanlog, sdlog, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qlnorm_opencl_cpp_export(
+    int n,
+    double p,
+    double meanlog,
+    double sdlog,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qlnorm_opencl(n, p, meanlog, sdlog, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rlnorm_opencl_cpp_export(
+    int n,
+    double meanlog,
+    double sdlog,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rlnorm_opencl(n, meanlog, sdlog, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dchisq_opencl_cpp_export(
+    int n,
+    double x,
+    double df,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dchisq_opencl(n, x, df, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector pchisq_opencl_cpp_export(
+    int n,
+    double x,
+    double df,
+    bool verbose = false
+) {
+  return glmbayes::opencl::pchisq_opencl(n, x, df, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qchisq_opencl_cpp_export(
+    int n,
+    double p,
+    double df,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qchisq_opencl(n, p, df, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rchisq_opencl_cpp_export(
+    int n,
+    double df,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rchisq_opencl(n, df, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dnchisq_opencl_cpp_export(
+    int n,
+    double x,
+    double df,
+    double ncp,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dnchisq_opencl(n, x, df, ncp, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rnchisq_opencl_cpp_export(
+    int n,
+    double df,
+    double ncp,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rnchisq_opencl(n, df, ncp, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector df_opencl_cpp_export(
+    int n,
+    double x,
+    double df1,
+    double df2,
+    bool verbose = false
+) {
+  return glmbayes::opencl::df_opencl(n, x, df1, df2, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector pf_opencl_cpp_export(
+    int n,
+    double x,
+    double df1,
+    double df2,
+    bool verbose = false
+) {
+  return glmbayes::opencl::pf_opencl(n, x, df1, df2, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qf_opencl_cpp_export(
+    int n,
+    double p,
+    double df1,
+    double df2,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qf_opencl(n, p, df1, df2, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rf_opencl_cpp_export(
+    int n,
+    double df1,
+    double df2,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rf_opencl(n, df1, df2, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dt_opencl_cpp_export(
+    int n,
+    double x,
+    double df,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dt_opencl(n, x, df, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector pt_opencl_cpp_export(
+    int n,
+    double x,
+    double df,
+    bool verbose = false
+) {
+  return glmbayes::opencl::pt_opencl(n, x, df, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qt_opencl_cpp_export(
+    int n,
+    double p,
+    double df,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qt_opencl(n, p, df, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rt_opencl_cpp_export(
+    int n,
+    double df,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rt_opencl(n, df, verbose);
+}
+
+// [[Rcpp::export]]
 Rcpp::NumericVector qbinom_opencl_cpp_export(
     int n,
     double p,
