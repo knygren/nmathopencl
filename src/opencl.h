@@ -619,6 +619,31 @@ Rcpp::NumericVector qbinom_opencl(
     bool   verbose = false
 );
 
+Rcpp::NumericVector dbinom_raw_opencl(
+    int    n_out,
+    double x,
+    double n_size,
+    double prob,
+    double qprob,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dbinom_opencl(
+    int    n_out,
+    double x,
+    double size,
+    double prob,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pbinom_opencl(
+    int    n_out,
+    double q,
+    double size,
+    double prob,
+    bool   verbose = false
+);
+
 Rcpp::NumericVector qpois_opencl(
     int    n_out,
     double p,
@@ -637,6 +662,127 @@ Rcpp::NumericVector qnbinom_mu_opencl(
 Rcpp::NumericVector rpois_opencl(
     int    n_out,
     double lambda,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rmultinom_opencl(
+    int    n_out,
+    double size,
+    double prob,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dcauchy_opencl(
+    int    n_out,
+    double x,
+    double location,
+    double scale,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pcauchy_opencl(
+    int    n_out,
+    double q,
+    double location,
+    double scale,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qcauchy_opencl(
+    int    n_out,
+    double p,
+    double location,
+    double scale,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rcauchy_opencl(
+    int    n_out,
+    double location,
+    double scale,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dexp_opencl(
+    int    n_out,
+    double x,
+    double rate,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pexp_opencl(
+    int    n_out,
+    double q,
+    double rate,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qexp_opencl(
+    int    n_out,
+    double p,
+    double rate,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dgeom_opencl(
+    int    n_out,
+    double x,
+    double prob,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pgeom_opencl(
+    int    n_out,
+    double q,
+    double prob,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qgeom_opencl(
+    int    n_out,
+    double p,
+    double prob,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rgeom_opencl(
+    int    n_out,
+    double prob,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dhyper_opencl(
+    int    n_out,
+    double x,
+    double r,
+    double b,
+    double n,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector phyper_opencl(
+    int    n_out,
+    double q,
+    double r,
+    double b,
+    double n,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qhyper_opencl(
+    int    n_out,
+    double p,
+    double r,
+    double b,
+    double n,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rhyper_opencl(
+    int    n_out,
+    double r,
+    double b,
+    double n,
     bool   verbose = false
 );
 

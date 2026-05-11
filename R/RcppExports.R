@@ -281,6 +281,82 @@ rt_opencl_cpp_export <- function(n, df, verbose = FALSE) {
     .Call(`_nmathopencl_rt_opencl_cpp_export`, n, df, verbose)
 }
 
+dbinom_raw_opencl_cpp_export <- function(n, x, n_size, prob, qprob, verbose = FALSE) {
+    .Call(`_nmathopencl_dbinom_raw_opencl_cpp_export`, n, x, n_size, prob, qprob, verbose)
+}
+
+dbinom_opencl_cpp_export <- function(n, x, size, prob, verbose = FALSE) {
+    .Call(`_nmathopencl_dbinom_opencl_cpp_export`, n, x, size, prob, verbose)
+}
+
+pbinom_opencl_cpp_export <- function(n, q, size, prob, verbose = FALSE) {
+    .Call(`_nmathopencl_pbinom_opencl_cpp_export`, n, q, size, prob, verbose)
+}
+
+rmultinom_opencl_cpp_export <- function(n, size, prob, verbose = FALSE) {
+    .Call(`_nmathopencl_rmultinom_opencl_cpp_export`, n, size, prob, verbose)
+}
+
+dcauchy_opencl_cpp_export <- function(n, x, location, scale, verbose = FALSE) {
+    .Call(`_nmathopencl_dcauchy_opencl_cpp_export`, n, x, location, scale, verbose)
+}
+
+pcauchy_opencl_cpp_export <- function(n, q, location, scale, verbose = FALSE) {
+    .Call(`_nmathopencl_pcauchy_opencl_cpp_export`, n, q, location, scale, verbose)
+}
+
+qcauchy_opencl_cpp_export <- function(n, p, location, scale, verbose = FALSE) {
+    .Call(`_nmathopencl_qcauchy_opencl_cpp_export`, n, p, location, scale, verbose)
+}
+
+rcauchy_opencl_cpp_export <- function(n, location, scale, verbose = FALSE) {
+    .Call(`_nmathopencl_rcauchy_opencl_cpp_export`, n, location, scale, verbose)
+}
+
+dexp_opencl_cpp_export <- function(n, x, rate, verbose = FALSE) {
+    .Call(`_nmathopencl_dexp_opencl_cpp_export`, n, x, rate, verbose)
+}
+
+pexp_opencl_cpp_export <- function(n, q, rate, verbose = FALSE) {
+    .Call(`_nmathopencl_pexp_opencl_cpp_export`, n, q, rate, verbose)
+}
+
+qexp_opencl_cpp_export <- function(n, p, rate, verbose = FALSE) {
+    .Call(`_nmathopencl_qexp_opencl_cpp_export`, n, p, rate, verbose)
+}
+
+dgeom_opencl_cpp_export <- function(n, x, prob, verbose = FALSE) {
+    .Call(`_nmathopencl_dgeom_opencl_cpp_export`, n, x, prob, verbose)
+}
+
+pgeom_opencl_cpp_export <- function(n, q, prob, verbose = FALSE) {
+    .Call(`_nmathopencl_pgeom_opencl_cpp_export`, n, q, prob, verbose)
+}
+
+qgeom_opencl_cpp_export <- function(n, p, prob, verbose = FALSE) {
+    .Call(`_nmathopencl_qgeom_opencl_cpp_export`, n, p, prob, verbose)
+}
+
+rgeom_opencl_cpp_export <- function(n, prob, verbose = FALSE) {
+    .Call(`_nmathopencl_rgeom_opencl_cpp_export`, n, prob, verbose)
+}
+
+dhyper_opencl_cpp_export <- function(n, x, r, b, n1, verbose = FALSE) {
+    .Call(`_nmathopencl_dhyper_opencl_cpp_export`, n, x, r, b, n1, verbose)
+}
+
+phyper_opencl_cpp_export <- function(n, q, r, b, n1, verbose = FALSE) {
+    .Call(`_nmathopencl_phyper_opencl_cpp_export`, n, q, r, b, n1, verbose)
+}
+
+qhyper_opencl_cpp_export <- function(n, p, r, b, n1, verbose = FALSE) {
+    .Call(`_nmathopencl_qhyper_opencl_cpp_export`, n, p, r, b, n1, verbose)
+}
+
+rhyper_opencl_cpp_export <- function(n, r, b, n1, verbose = FALSE) {
+    .Call(`_nmathopencl_rhyper_opencl_cpp_export`, n, r, b, n1, verbose)
+}
+
 qbinom_opencl_cpp_export <- function(n, p, size, prob, verbose = FALSE) {
     .Call(`_nmathopencl_qbinom_opencl_cpp_export`, n, p, size, prob, verbose)
 }

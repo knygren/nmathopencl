@@ -1060,6 +1060,209 @@ Rcpp::NumericVector rt_opencl_cpp_export(
 }
 
 // [[Rcpp::export]]
+Rcpp::NumericVector dbinom_raw_opencl_cpp_export(
+    int n,
+    double x,
+    double n_size,
+    double prob,
+    double qprob,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dbinom_raw_opencl(n, x, n_size, prob, qprob, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dbinom_opencl_cpp_export(
+    int n,
+    double x,
+    double size,
+    double prob,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dbinom_opencl(n, x, size, prob, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector pbinom_opencl_cpp_export(
+    int n,
+    double q,
+    double size,
+    double prob,
+    bool verbose = false
+) {
+  return glmbayes::opencl::pbinom_opencl(n, q, size, prob, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rmultinom_opencl_cpp_export(
+    int n,
+    double size,
+    double prob,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rmultinom_opencl(n, size, prob, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dcauchy_opencl_cpp_export(
+    int n,
+    double x,
+    double location,
+    double scale,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dcauchy_opencl(n, x, location, scale, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector pcauchy_opencl_cpp_export(
+    int n,
+    double q,
+    double location,
+    double scale,
+    bool verbose = false
+) {
+  return glmbayes::opencl::pcauchy_opencl(n, q, location, scale, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qcauchy_opencl_cpp_export(
+    int n,
+    double p,
+    double location,
+    double scale,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qcauchy_opencl(n, p, location, scale, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rcauchy_opencl_cpp_export(
+    int n,
+    double location,
+    double scale,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rcauchy_opencl(n, location, scale, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dexp_opencl_cpp_export(
+    int n,
+    double x,
+    double rate,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dexp_opencl(n, x, rate, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector pexp_opencl_cpp_export(
+    int n,
+    double q,
+    double rate,
+    bool verbose = false
+) {
+  return glmbayes::opencl::pexp_opencl(n, q, rate, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qexp_opencl_cpp_export(
+    int n,
+    double p,
+    double rate,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qexp_opencl(n, p, rate, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dgeom_opencl_cpp_export(
+    int n,
+    double x,
+    double prob,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dgeom_opencl(n, x, prob, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector pgeom_opencl_cpp_export(
+    int n,
+    double q,
+    double prob,
+    bool verbose = false
+) {
+  return glmbayes::opencl::pgeom_opencl(n, q, prob, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qgeom_opencl_cpp_export(
+    int n,
+    double p,
+    double prob,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qgeom_opencl(n, p, prob, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rgeom_opencl_cpp_export(
+    int n,
+    double prob,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rgeom_opencl(n, prob, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dhyper_opencl_cpp_export(
+    int n,
+    double x,
+    double r,
+    double b,
+    double n1,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dhyper_opencl(n, x, r, b, n1, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector phyper_opencl_cpp_export(
+    int n,
+    double q,
+    double r,
+    double b,
+    double n1,
+    bool verbose = false
+) {
+  return glmbayes::opencl::phyper_opencl(n, q, r, b, n1, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qhyper_opencl_cpp_export(
+    int n,
+    double p,
+    double r,
+    double b,
+    double n1,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qhyper_opencl(n, p, r, b, n1, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rhyper_opencl_cpp_export(
+    int n,
+    double r,
+    double b,
+    double n1,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rhyper_opencl(n, r, b, n1, verbose);
+}
+
+// [[Rcpp::export]]
 Rcpp::NumericVector qbinom_opencl_cpp_export(
     int n,
     double p,

@@ -5,7 +5,6 @@
 #' @param n Number of observations. Non-negative integer scalar.
 #' @param p Probability in \code{[0, 1]}.
 #' @param size Size/shape parameter (distribution specific; must be non-negative).
-#' @param prob Probability parameter in \code{[0, 1]} for binomial calls.
 #' @param lambda Rate/intensity parameter for Poisson calls.
 #' @param mu Mean parameter for \code{qnbinom_mu_opencl}.
 #' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
@@ -13,21 +12,6 @@
 #'
 #' @return Numeric vector of length \code{n}.
 #' @example inst/examples/Ex_discrete_opencl.R
-#' @rdname discrete_opencl
-#' @export
-qbinom_opencl <- function(n, p, size, prob, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(p, "p", 0, 1)
-  .validate_scalar_num(size, "size", 0, Inf)
-  .validate_scalar_num(prob, "prob", 0, 1)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
-  .opencl_try_or_fallback(
-    opencl_expr = function() .qbinom_opencl(n, p, size, prob, verbose = verbose),
-    fallback_expr = function() rep(stats::qbinom(p, size = size, prob = prob), n),
-    fallback = fallback, verbose = verbose, fn_name = "qbinom_opencl"
-  )
-}
-
 #' @rdname discrete_opencl
 #' @export
 qpois_opencl <- function(n, p, lambda, fallback = TRUE, verbose = FALSE) {
