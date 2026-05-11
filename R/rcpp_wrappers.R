@@ -848,6 +848,12 @@
 
 #' @noRd
 #' @keywords internal
+.dnf_opencl <- function(n, x, df1, df2, ncp, verbose = FALSE) {
+  .Call(`_nmathopencl_dnf_opencl_cpp_export`, n, x, df1, df2, ncp, verbose)
+}
+
+#' @noRd
+#' @keywords internal
 .qnf_opencl <- function(n, p, df1, df2, ncp, verbose = FALSE) {
   .Call(`_nmathopencl_qnf_opencl_cpp_export`, n, p, df1, df2, ncp, verbose)
 }
@@ -872,6 +878,12 @@
 
 #' @noRd
 #' @keywords internal
+.dnt_opencl <- function(n, x, df, ncp, verbose = FALSE) {
+  .Call(`_nmathopencl_dnt_opencl_cpp_export`, n, x, df, ncp, verbose)
+}
+
+#' @noRd
+#' @keywords internal
 .pnt_opencl <- function(n, x, df, ncp, verbose = FALSE) {
   .Call(`_nmathopencl_pnt_opencl_cpp_export`, n, x, df, ncp, verbose)
 }
@@ -880,6 +892,60 @@
 #' @keywords internal
 .qnt_opencl <- function(n, p, df, ncp, verbose = FALSE) {
   .Call(`_nmathopencl_qnt_opencl_cpp_export`, n, p, df, ncp, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.ptukey_opencl <- function(n, q, nmeans, df, nranges, verbose = FALSE) {
+  .Call(`_nmathopencl_ptukey_opencl_cpp_export`, n, q, nmeans, df, nranges, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qtukey_opencl <- function(n, p, nmeans, df, nranges, verbose = FALSE) {
+  .Call(`_nmathopencl_qtukey_opencl_cpp_export`, n, p, nmeans, df, nranges, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.dwilcox_opencl <- function(n, x, m, n2, verbose = FALSE) {
+  .Call(`_nmathopencl_dwilcox_opencl_cpp_export`, n, x, m, n2, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.pwilcox_opencl <- function(n, q, m, n2, verbose = FALSE) {
+  .Call(`_nmathopencl_pwilcox_opencl_cpp_export`, n, q, m, n2, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qwilcox_opencl <- function(n, p, m, n2, verbose = FALSE) {
+  .Call(`_nmathopencl_qwilcox_opencl_cpp_export`, n, p, m, n2, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.dsignrank_opencl <- function(n, x, nsize, verbose = FALSE) {
+  .Call(`_nmathopencl_dsignrank_opencl_cpp_export`, n, x, nsize, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.psignrank_opencl <- function(n, q, nsize, verbose = FALSE) {
+  .Call(`_nmathopencl_psignrank_opencl_cpp_export`, n, q, nsize, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.qsignrank_opencl <- function(n, p, nsize, verbose = FALSE) {
+  .Call(`_nmathopencl_qsignrank_opencl_cpp_export`, n, p, nsize, verbose)
+}
+
+#' @noRd
+#' @keywords internal
+.rsignrank_opencl <- function(n, nsize, verbose = FALSE) {
+  .Call(`_nmathopencl_rsignrank_opencl_cpp_export`, n, nsize, verbose)
 }
 
 #' @noRd

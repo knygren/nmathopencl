@@ -957,6 +957,15 @@ Rcpp::NumericVector pnf_opencl(
     bool   verbose = false
 );
 
+Rcpp::NumericVector dnf_opencl(
+    int    n_out,
+    double x,
+    double df1,
+    double df2,
+    double ncp,
+    bool   verbose = false
+);
+
 Rcpp::NumericVector qnf_opencl(
     int    n_out,
     double p,
@@ -984,11 +993,88 @@ Rcpp::NumericVector qnbeta_opencl(
     bool   verbose = false
 );
 
+Rcpp::NumericVector dnt_opencl(
+    int    n_out,
+    double x,
+    double df,
+    double ncp,
+    bool   verbose = false
+);
+
 Rcpp::NumericVector pnt_opencl(
     int    n_out,
     double x,
     double df,
     double ncp,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector ptukey_opencl(
+    int    n_out,
+    double q,
+    double nmeans,
+    double df,
+    double nranges,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qtukey_opencl(
+    int    n_out,
+    double p,
+    double nmeans,
+    double df,
+    double nranges,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dwilcox_opencl(
+    int    n_out,
+    double x,
+    double m,
+    double n2,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector pwilcox_opencl(
+    int    n_out,
+    double q,
+    double m,
+    double n2,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qwilcox_opencl(
+    int    n_out,
+    double p,
+    double m,
+    double n2,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector dsignrank_opencl(
+    int    n_out,
+    double x,
+    double nsize,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector psignrank_opencl(
+    int    n_out,
+    double q,
+    double nsize,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector qsignrank_opencl(
+    int    n_out,
+    double p,
+    double nsize,
+    bool   verbose = false
+);
+
+Rcpp::NumericVector rsignrank_opencl(
+    int    n_out,
+    double nsize,
     bool   verbose = false
 );
 

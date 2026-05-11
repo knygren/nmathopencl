@@ -7,7 +7,7 @@
 \alias{rf_opencl}
 \title{The F Distribution (OpenCL)}
 \usage{
-df_opencl(n, x, df1, df2, fallback = TRUE, verbose = FALSE)
+df_opencl(n, x, df1, df2, ncp = 0, fallback = TRUE, verbose = FALSE)
 
 pf_opencl(n, x, df1, df2, ncp = 0, fallback = TRUE, verbose = FALSE)
 
@@ -24,12 +24,12 @@ rf_opencl(n, df1, df2, fallback = TRUE, verbose = FALSE)
 
 \item{df2}{Denominator degrees of freedom (must be > 0).}
 
+\item{ncp}{Non-centrality parameter (must be >= 0). Used by
+\code{df_opencl()}, \code{pf_opencl()}, and \code{qf_opencl()}.}
+
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
-
-\item{ncp}{Non-centrality parameter (must be >= 0). Used by
-\code{pf_opencl()} and \code{qf_opencl()}.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -51,8 +51,10 @@ non-central settings, with non-central paths typically more fragile.
 if (has_opencl()) {
   n <- 5L
 
-  df_opencl(n, x = 2, df1 = 5, df2 = 9, fallback = FALSE, verbose = TRUE)
+  df_opencl(n, x = 2, df1 = 5, df2 = 9, ncp = 0, fallback = FALSE, verbose = TRUE)
+  df_opencl(n, x = 2, df1 = 5, df2 = 9, ncp = 1.1, fallback = FALSE, verbose = TRUE)
   pf_opencl(n, x = 2, df1 = 5, df2 = 9, ncp = 0, fallback = FALSE, verbose = TRUE)
+  pf_opencl(n, x = 2, df1 = 5, df2 = 9, ncp = 1.1, fallback = FALSE, verbose = TRUE)
   rf_opencl(n, df1 = 5, df2 = 9, fallback = FALSE, verbose = TRUE)
 
   # Known unstable on some GPU/driver stacks (can hit CL_OUT_OF_RESOURCES):

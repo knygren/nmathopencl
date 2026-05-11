@@ -457,6 +457,10 @@ pnf_opencl_cpp_export <- function(n, x, df1, df2, ncp, verbose = FALSE) {
     .Call(`_nmathopencl_pnf_opencl_cpp_export`, n, x, df1, df2, ncp, verbose)
 }
 
+dnf_opencl_cpp_export <- function(n, x, df1, df2, ncp, verbose = FALSE) {
+    .Call(`_nmathopencl_dnf_opencl_cpp_export`, n, x, df1, df2, ncp, verbose)
+}
+
 qnf_opencl_cpp_export <- function(n, p, df1, df2, ncp, verbose = FALSE) {
     .Call(`_nmathopencl_qnf_opencl_cpp_export`, n, p, df1, df2, ncp, verbose)
 }
@@ -473,12 +477,52 @@ dnbeta_opencl_cpp_export <- function(n, x, a, b, ncp, verbose = FALSE) {
     .Call(`_nmathopencl_dnbeta_opencl_cpp_export`, n, x, a, b, ncp, verbose)
 }
 
+dnt_opencl_cpp_export <- function(n, x, df, ncp, verbose = FALSE) {
+    .Call(`_nmathopencl_dnt_opencl_cpp_export`, n, x, df, ncp, verbose)
+}
+
 pnt_opencl_cpp_export <- function(n, x, df, ncp, verbose = FALSE) {
     .Call(`_nmathopencl_pnt_opencl_cpp_export`, n, x, df, ncp, verbose)
 }
 
 qnt_opencl_cpp_export <- function(n, p, df, ncp, verbose = FALSE) {
     .Call(`_nmathopencl_qnt_opencl_cpp_export`, n, p, df, ncp, verbose)
+}
+
+ptukey_opencl_cpp_export <- function(n, q, nmeans, df, nranges, verbose = FALSE) {
+    .Call(`_nmathopencl_ptukey_opencl_cpp_export`, n, q, nmeans, df, nranges, verbose)
+}
+
+qtukey_opencl_cpp_export <- function(n, p, nmeans, df, nranges, verbose = FALSE) {
+    .Call(`_nmathopencl_qtukey_opencl_cpp_export`, n, p, nmeans, df, nranges, verbose)
+}
+
+dwilcox_opencl_cpp_export <- function(n, x, m, n2, verbose = FALSE) {
+    .Call(`_nmathopencl_dwilcox_opencl_cpp_export`, n, x, m, n2, verbose)
+}
+
+pwilcox_opencl_cpp_export <- function(n, q, m, n2, verbose = FALSE) {
+    .Call(`_nmathopencl_pwilcox_opencl_cpp_export`, n, q, m, n2, verbose)
+}
+
+qwilcox_opencl_cpp_export <- function(n, p, m, n2, verbose = FALSE) {
+    .Call(`_nmathopencl_qwilcox_opencl_cpp_export`, n, p, m, n2, verbose)
+}
+
+dsignrank_opencl_cpp_export <- function(n, x, nsize, verbose = FALSE) {
+    .Call(`_nmathopencl_dsignrank_opencl_cpp_export`, n, x, nsize, verbose)
+}
+
+psignrank_opencl_cpp_export <- function(n, q, nsize, verbose = FALSE) {
+    .Call(`_nmathopencl_psignrank_opencl_cpp_export`, n, q, nsize, verbose)
+}
+
+qsignrank_opencl_cpp_export <- function(n, p, nsize, verbose = FALSE) {
+    .Call(`_nmathopencl_qsignrank_opencl_cpp_export`, n, p, nsize, verbose)
+}
+
+rsignrank_opencl_cpp_export <- function(n, nsize, verbose = FALSE) {
+    .Call(`_nmathopencl_rsignrank_opencl_cpp_export`, n, nsize, verbose)
 }
 
 r_check_user_interrupt_opencl_cpp_export <- function(n, verbose = FALSE) {

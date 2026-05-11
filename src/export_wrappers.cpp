@@ -1529,6 +1529,18 @@ Rcpp::NumericVector pnf_opencl_cpp_export(
 }
 
 // [[Rcpp::export]]
+Rcpp::NumericVector dnf_opencl_cpp_export(
+    int n,
+    double x,
+    double df1,
+    double df2,
+    double ncp,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dnf_opencl(n, x, df1, df2, ncp, verbose);
+}
+
+// [[Rcpp::export]]
 Rcpp::NumericVector qnf_opencl_cpp_export(
     int n,
     double p,
@@ -1577,6 +1589,17 @@ Rcpp::NumericVector dnbeta_opencl_cpp_export(
 }
 
 // [[Rcpp::export]]
+Rcpp::NumericVector dnt_opencl_cpp_export(
+    int n,
+    double x,
+    double df,
+    double ncp,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dnt_opencl(n, x, df, ncp, verbose);
+}
+
+// [[Rcpp::export]]
 Rcpp::NumericVector pnt_opencl_cpp_export(
     int n,
     double x,
@@ -1596,6 +1619,102 @@ Rcpp::NumericVector qnt_opencl_cpp_export(
     bool verbose = false
 ) {
   return glmbayes::opencl::qnt_opencl(n, p, df, ncp, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector ptukey_opencl_cpp_export(
+    int n,
+    double q,
+    double nmeans,
+    double df,
+    double nranges,
+    bool verbose = false
+) {
+  return glmbayes::opencl::ptukey_opencl(n, q, nmeans, df, nranges, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qtukey_opencl_cpp_export(
+    int n,
+    double p,
+    double nmeans,
+    double df,
+    double nranges,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qtukey_opencl(n, p, nmeans, df, nranges, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dwilcox_opencl_cpp_export(
+    int n,
+    double x,
+    double m,
+    double n2,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dwilcox_opencl(n, x, m, n2, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector pwilcox_opencl_cpp_export(
+    int n,
+    double q,
+    double m,
+    double n2,
+    bool verbose = false
+) {
+  return glmbayes::opencl::pwilcox_opencl(n, q, m, n2, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qwilcox_opencl_cpp_export(
+    int n,
+    double p,
+    double m,
+    double n2,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qwilcox_opencl(n, p, m, n2, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dsignrank_opencl_cpp_export(
+    int n,
+    double x,
+    double nsize,
+    bool verbose = false
+) {
+  return glmbayes::opencl::dsignrank_opencl(n, x, nsize, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector psignrank_opencl_cpp_export(
+    int n,
+    double q,
+    double nsize,
+    bool verbose = false
+) {
+  return glmbayes::opencl::psignrank_opencl(n, q, nsize, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector qsignrank_opencl_cpp_export(
+    int n,
+    double p,
+    double nsize,
+    bool verbose = false
+) {
+  return glmbayes::opencl::qsignrank_opencl(n, p, nsize, verbose);
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector rsignrank_opencl_cpp_export(
+    int n,
+    double nsize,
+    bool verbose = false
+) {
+  return glmbayes::opencl::rsignrank_opencl(n, nsize, verbose);
 }
 
 // [[Rcpp::export]]

@@ -1,6 +1,6 @@
 // @source_type: shim
 // @source_origin: libR
-// @provides: R_pow, R_pow_di
+// @provides: R_pow, R_pow_di, R_CheckStack
 
 /*
  * Minimal device-side libR runtime shim for OpenCL.
@@ -29,6 +29,13 @@ INLINE double R_pow_di(double x, int n) {
         }
     }
     return p;
+}
+
+INLINE void R_CheckStack(void) {
+    /*
+     * No-op on device: host stack checks are not meaningful for OpenCL kernels.
+     * This satisfies translated R math paths that call R_CheckStack().
+     */
 }
 
 #endif

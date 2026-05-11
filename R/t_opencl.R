@@ -15,14 +15,21 @@
 #' @example inst/examples/Ex_t_opencl.R
 #' @rdname t_opencl
 #' @export
-dt_opencl <- function(n, x, df, fallback = TRUE, verbose = FALSE) {
+dt_opencl <- function(n, x, df, ncp = 0, fallback = TRUE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_scalar_num(x, "x")
   .validate_scalar_num(df, "df", 0, Inf, open_lower = TRUE)
+  .validate_scalar_num(ncp, "ncp")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
   .opencl_try_or_fallback(
-    opencl_expr = function() .dt_opencl(n, x, df, verbose = verbose),
-    fallback_expr = function() rep(stats::dt(x, df = df), n),
+    opencl_expr = function() {
+      if (ncp == 0) {
+        .dt_opencl(n, x, df, verbose = verbose)
+      } else {
+        .dnt_opencl(n, x, df, ncp, verbose = verbose)
+      }
+    },
+    fallback_expr = function() rep(stats::dt(x, df = df, ncp = ncp), n),
     fallback = fallback, verbose = verbose, fn_name = "dt_opencl"
   )
 }

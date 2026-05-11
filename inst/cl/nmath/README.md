@@ -7,6 +7,7 @@ This note documents known OpenCL port/runtime limitations (not numeric-accuracy 
 
 ### Symptom
 - Build/link failures for unresolved allocation/runtime symbols (for example `R_chk_calloc`).
+- Build/link failures for unresolved stack/runtime symbols (for example `R_CheckStack`).
 - OpenCL execution path fails and wrapper falls back to CPU.
 
 ### Why this happens

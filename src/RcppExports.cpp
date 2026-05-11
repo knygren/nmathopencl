@@ -1804,6 +1804,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// dnf_opencl_cpp_export
+Rcpp::NumericVector dnf_opencl_cpp_export(int n, double x, double df1, double df2, double ncp, bool verbose);
+RcppExport SEXP _nmathopencl_dnf_opencl_cpp_export(SEXP nSEXP, SEXP xSEXP, SEXP df1SEXP, SEXP df2SEXP, SEXP ncpSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type df1(df1SEXP);
+    Rcpp::traits::input_parameter< double >::type df2(df2SEXP);
+    Rcpp::traits::input_parameter< double >::type ncp(ncpSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(dnf_opencl_cpp_export(n, x, df1, df2, ncp, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // qnf_opencl_cpp_export
 Rcpp::NumericVector qnf_opencl_cpp_export(int n, double p, double df1, double df2, double ncp, bool verbose);
 RcppExport SEXP _nmathopencl_qnf_opencl_cpp_export(SEXP nSEXP, SEXP pSEXP, SEXP df1SEXP, SEXP df2SEXP, SEXP ncpSEXP, SEXP verboseSEXP) {
@@ -1868,6 +1884,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// dnt_opencl_cpp_export
+Rcpp::NumericVector dnt_opencl_cpp_export(int n, double x, double df, double ncp, bool verbose);
+RcppExport SEXP _nmathopencl_dnt_opencl_cpp_export(SEXP nSEXP, SEXP xSEXP, SEXP dfSEXP, SEXP ncpSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type df(dfSEXP);
+    Rcpp::traits::input_parameter< double >::type ncp(ncpSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(dnt_opencl_cpp_export(n, x, df, ncp, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pnt_opencl_cpp_export
 Rcpp::NumericVector pnt_opencl_cpp_export(int n, double x, double df, double ncp, bool verbose);
 RcppExport SEXP _nmathopencl_pnt_opencl_cpp_export(SEXP nSEXP, SEXP xSEXP, SEXP dfSEXP, SEXP ncpSEXP, SEXP verboseSEXP) {
@@ -1895,6 +1926,138 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type ncp(ncpSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
     rcpp_result_gen = Rcpp::wrap(qnt_opencl_cpp_export(n, p, df, ncp, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ptukey_opencl_cpp_export
+Rcpp::NumericVector ptukey_opencl_cpp_export(int n, double q, double nmeans, double df, double nranges, bool verbose);
+RcppExport SEXP _nmathopencl_ptukey_opencl_cpp_export(SEXP nSEXP, SEXP qSEXP, SEXP nmeansSEXP, SEXP dfSEXP, SEXP nrangesSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type q(qSEXP);
+    Rcpp::traits::input_parameter< double >::type nmeans(nmeansSEXP);
+    Rcpp::traits::input_parameter< double >::type df(dfSEXP);
+    Rcpp::traits::input_parameter< double >::type nranges(nrangesSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(ptukey_opencl_cpp_export(n, q, nmeans, df, nranges, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// qtukey_opencl_cpp_export
+Rcpp::NumericVector qtukey_opencl_cpp_export(int n, double p, double nmeans, double df, double nranges, bool verbose);
+RcppExport SEXP _nmathopencl_qtukey_opencl_cpp_export(SEXP nSEXP, SEXP pSEXP, SEXP nmeansSEXP, SEXP dfSEXP, SEXP nrangesSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type nmeans(nmeansSEXP);
+    Rcpp::traits::input_parameter< double >::type df(dfSEXP);
+    Rcpp::traits::input_parameter< double >::type nranges(nrangesSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(qtukey_opencl_cpp_export(n, p, nmeans, df, nranges, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// dwilcox_opencl_cpp_export
+Rcpp::NumericVector dwilcox_opencl_cpp_export(int n, double x, double m, double n2, bool verbose);
+RcppExport SEXP _nmathopencl_dwilcox_opencl_cpp_export(SEXP nSEXP, SEXP xSEXP, SEXP mSEXP, SEXP n2SEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type m(mSEXP);
+    Rcpp::traits::input_parameter< double >::type n2(n2SEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(dwilcox_opencl_cpp_export(n, x, m, n2, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// pwilcox_opencl_cpp_export
+Rcpp::NumericVector pwilcox_opencl_cpp_export(int n, double q, double m, double n2, bool verbose);
+RcppExport SEXP _nmathopencl_pwilcox_opencl_cpp_export(SEXP nSEXP, SEXP qSEXP, SEXP mSEXP, SEXP n2SEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type q(qSEXP);
+    Rcpp::traits::input_parameter< double >::type m(mSEXP);
+    Rcpp::traits::input_parameter< double >::type n2(n2SEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(pwilcox_opencl_cpp_export(n, q, m, n2, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// qwilcox_opencl_cpp_export
+Rcpp::NumericVector qwilcox_opencl_cpp_export(int n, double p, double m, double n2, bool verbose);
+RcppExport SEXP _nmathopencl_qwilcox_opencl_cpp_export(SEXP nSEXP, SEXP pSEXP, SEXP mSEXP, SEXP n2SEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type m(mSEXP);
+    Rcpp::traits::input_parameter< double >::type n2(n2SEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(qwilcox_opencl_cpp_export(n, p, m, n2, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// dsignrank_opencl_cpp_export
+Rcpp::NumericVector dsignrank_opencl_cpp_export(int n, double x, double nsize, bool verbose);
+RcppExport SEXP _nmathopencl_dsignrank_opencl_cpp_export(SEXP nSEXP, SEXP xSEXP, SEXP nsizeSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type nsize(nsizeSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(dsignrank_opencl_cpp_export(n, x, nsize, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// psignrank_opencl_cpp_export
+Rcpp::NumericVector psignrank_opencl_cpp_export(int n, double q, double nsize, bool verbose);
+RcppExport SEXP _nmathopencl_psignrank_opencl_cpp_export(SEXP nSEXP, SEXP qSEXP, SEXP nsizeSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type q(qSEXP);
+    Rcpp::traits::input_parameter< double >::type nsize(nsizeSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(psignrank_opencl_cpp_export(n, q, nsize, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// qsignrank_opencl_cpp_export
+Rcpp::NumericVector qsignrank_opencl_cpp_export(int n, double p, double nsize, bool verbose);
+RcppExport SEXP _nmathopencl_qsignrank_opencl_cpp_export(SEXP nSEXP, SEXP pSEXP, SEXP nsizeSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type nsize(nsizeSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(qsignrank_opencl_cpp_export(n, p, nsize, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rsignrank_opencl_cpp_export
+Rcpp::NumericVector rsignrank_opencl_cpp_export(int n, double nsize, bool verbose);
+RcppExport SEXP _nmathopencl_rsignrank_opencl_cpp_export(SEXP nSEXP, SEXP nsizeSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type nsize(nsizeSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(rsignrank_opencl_cpp_export(n, nsize, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -2093,12 +2256,23 @@ static const R_CallMethodDef CallEntries[] = {
     {"_nmathopencl_pnchisq_opencl_cpp_export", (DL_FUNC) &_nmathopencl_pnchisq_opencl_cpp_export, 5},
     {"_nmathopencl_qnchisq_opencl_cpp_export", (DL_FUNC) &_nmathopencl_qnchisq_opencl_cpp_export, 5},
     {"_nmathopencl_pnf_opencl_cpp_export", (DL_FUNC) &_nmathopencl_pnf_opencl_cpp_export, 6},
+    {"_nmathopencl_dnf_opencl_cpp_export", (DL_FUNC) &_nmathopencl_dnf_opencl_cpp_export, 6},
     {"_nmathopencl_qnf_opencl_cpp_export", (DL_FUNC) &_nmathopencl_qnf_opencl_cpp_export, 6},
     {"_nmathopencl_pnbeta_opencl_cpp_export", (DL_FUNC) &_nmathopencl_pnbeta_opencl_cpp_export, 6},
     {"_nmathopencl_qnbeta_opencl_cpp_export", (DL_FUNC) &_nmathopencl_qnbeta_opencl_cpp_export, 6},
     {"_nmathopencl_dnbeta_opencl_cpp_export", (DL_FUNC) &_nmathopencl_dnbeta_opencl_cpp_export, 6},
+    {"_nmathopencl_dnt_opencl_cpp_export", (DL_FUNC) &_nmathopencl_dnt_opencl_cpp_export, 5},
     {"_nmathopencl_pnt_opencl_cpp_export", (DL_FUNC) &_nmathopencl_pnt_opencl_cpp_export, 5},
     {"_nmathopencl_qnt_opencl_cpp_export", (DL_FUNC) &_nmathopencl_qnt_opencl_cpp_export, 5},
+    {"_nmathopencl_ptukey_opencl_cpp_export", (DL_FUNC) &_nmathopencl_ptukey_opencl_cpp_export, 6},
+    {"_nmathopencl_qtukey_opencl_cpp_export", (DL_FUNC) &_nmathopencl_qtukey_opencl_cpp_export, 6},
+    {"_nmathopencl_dwilcox_opencl_cpp_export", (DL_FUNC) &_nmathopencl_dwilcox_opencl_cpp_export, 5},
+    {"_nmathopencl_pwilcox_opencl_cpp_export", (DL_FUNC) &_nmathopencl_pwilcox_opencl_cpp_export, 5},
+    {"_nmathopencl_qwilcox_opencl_cpp_export", (DL_FUNC) &_nmathopencl_qwilcox_opencl_cpp_export, 5},
+    {"_nmathopencl_dsignrank_opencl_cpp_export", (DL_FUNC) &_nmathopencl_dsignrank_opencl_cpp_export, 4},
+    {"_nmathopencl_psignrank_opencl_cpp_export", (DL_FUNC) &_nmathopencl_psignrank_opencl_cpp_export, 4},
+    {"_nmathopencl_qsignrank_opencl_cpp_export", (DL_FUNC) &_nmathopencl_qsignrank_opencl_cpp_export, 4},
+    {"_nmathopencl_rsignrank_opencl_cpp_export", (DL_FUNC) &_nmathopencl_rsignrank_opencl_cpp_export, 3},
     {"_nmathopencl_r_check_user_interrupt_opencl_cpp_export", (DL_FUNC) &_nmathopencl_r_check_user_interrupt_opencl_cpp_export, 2},
     {"_nmathopencl_r_check_stack_opencl_cpp_export", (DL_FUNC) &_nmathopencl_r_check_stack_opencl_cpp_export, 2},
     {"_nmathopencl_load_kernel_source_wrapper_cpp_export", (DL_FUNC) &_nmathopencl_load_kernel_source_wrapper_cpp_export, 2},

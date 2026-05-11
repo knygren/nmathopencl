@@ -7,7 +7,7 @@
 \alias{rt_opencl}
 \title{The Student t Distribution (OpenCL)}
 \usage{
-dt_opencl(n, x, df, fallback = TRUE, verbose = FALSE)
+dt_opencl(n, x, df, ncp = 0, fallback = TRUE, verbose = FALSE)
 
 pt_opencl(n, x, df, ncp = 0, fallback = TRUE, verbose = FALSE)
 
@@ -22,11 +22,11 @@ rt_opencl(n, df, fallback = TRUE, verbose = FALSE)
 
 \item{df}{Degrees of freedom (must be > 0).}
 
+\item{ncp}{Non-centrality parameter.}
+
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
-
-\item{ncp}{Non-centrality parameter.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -41,9 +41,12 @@ for the Student t distribution.
 if (has_opencl()) {
   n <- 5L
 
-  dt_opencl(n, x = 1.5, df = 8, fallback = FALSE, verbose = TRUE)
+  dt_opencl(n, x = 1.5, df = 8, ncp = 0, fallback = FALSE, verbose = TRUE)
+  dt_opencl(n, x = 1.5, df = 8, ncp = 1.2, fallback = FALSE, verbose = TRUE)
   pt_opencl(n, x = 1.5, df = 8, ncp = 0, fallback = FALSE, verbose = TRUE)
+  pt_opencl(n, x = 1.5, df = 8, ncp = 1.2, fallback = FALSE, verbose = TRUE)
   qt_opencl(n, p = 0.8, df = 8, ncp = 0, fallback = FALSE, verbose = TRUE)
+  qt_opencl(n, p = 0.8, df = 8, ncp = 1.2, fallback = FALSE, verbose = TRUE)
   rt_opencl(n, df = 8, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")
