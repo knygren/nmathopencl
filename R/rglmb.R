@@ -95,8 +95,7 @@
 #' \insertCite{glmbayesSimmethods,glmbayesChapterA08}{nmathopencl};
 #' OpenCL/GPU: \insertCite{glmbayesChapter12,glmbayesChapterA10}{nmathopencl}.
 #'
-#' \code{\link{residuals.glmb}} and methods(class="glmb") for \code{glmb} 
-#' and the methods and generic functions for classes \code{glm} and \code{lm} from which class \code{glmb} inherits.
+#' Methods(class="glmb") and the generic functions for classes \code{glm} and \code{lm} from which class \code{glmb} inherits.
 #' 
 #' @references
 #' \insertAllCited{}

@@ -140,8 +140,7 @@
 #' \insertCite{glmbayesSimmethods,glmbayesChapterA08}{nmathopencl};
 #' independent Normal--Gamma sampler: \insertCite{glmbayesIndNormGammaVignette}{nmathopencl}.
 #'
-#' \code{\link{residuals.glmb}} and methods(class="glmb") for methods 
-#' inherited from class \code{glmb} and the methods and generic functions for classes \code{glm} and 
+#' Methods inherited from class \code{glmb} and the methods and generic functions for classes \code{glm} and 
 #' \code{lm} from which class \code{lmb} also inherits.
 #'
 #' 
