@@ -199,5 +199,5 @@ Env_sorted
 }
 \seealso{
 \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeOrchestrator}},
-\code{\link{EnvelopeDispersionBuild}}, \code{\link{rNormal_reg}}, \code{\link{rglmb}}.
+\code{\link{EnvelopeDispersionBuild}}, \code{\link{rNormal_reg}}.
 }

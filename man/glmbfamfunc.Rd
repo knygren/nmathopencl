@@ -39,7 +39,7 @@ C++-aligned likelihood/posterior routines and remain commented out in the implem
 \description{
 This function takes as input a \code{\link{family}} object and returns a
 set of functions that are used during simulation and summarization of models
-using the \code{\link{rglmb}} function.
+using the simulation functions in this package.
 }
 \details{
 For simulation, many code paths now pass closed-form objectives into C++ directly; \code{glmbfamfunc}

@@ -284,6 +284,6 @@ eval_out$cbars
 }
 \seealso{
 \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeSize}}, \code{\link{EnvelopeSort}};
-\code{\link{rNormal_reg}}, \code{\link{rglmb}}. Vignettes:
+\code{\link{rNormal_reg}}. Vignettes:
 \insertCite{glmbayesSimmethods,glmbayesChapterA08,glmbayesChapterA10,glmbayesChapter12}{nmathopencl}.
 }

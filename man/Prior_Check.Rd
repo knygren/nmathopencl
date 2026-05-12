@@ -129,7 +129,7 @@ prior-data conflict checks \insertCite{EvansMoshonov2006}{nmathopencl}.
 \insertAllCited{}
 }
 \seealso{
-\code{\link{Prior_Setup}}, \code{\link{rglmb}}; see \insertCite{glmbayesChapter03}{nmathopencl} for prior tailoring;
+\code{\link{Prior_Setup}}; see \insertCite{glmbayesChapter03}{nmathopencl} for prior tailoring;
 \insertCite{glmbayesChapterA12}{nmathopencl} for full derivations.
 
 Other prior: 

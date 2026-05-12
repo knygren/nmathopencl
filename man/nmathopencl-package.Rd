@@ -43,7 +43,7 @@ GPU/OpenCL topics in
 \insertAllCited{}
 }
 \seealso{
-Main interfaces: \code{\link{rglmb}}, \code{\link{rlmb}}; low-level simulation API
+Main interfaces: \code{\link{simfuncs}}; low-level simulation API
 \code{\link{simfuncs}}; envelope construction \code{\link{EnvelopeBuild}}.
 
 Useful links:

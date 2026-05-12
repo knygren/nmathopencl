@@ -112,12 +112,10 @@ for standard use these produce i.i.d.\ posterior samples for the implemented set
 }
 \description{
 Prior family objects provide a convenient way to specify the details of the priors
-used by functions such as \code{\link{rglmb}} and \code{\link{rlmb}}. See the documentation for
-\code{\link{rglmb}} for details of how model fitting takes place.
+used by the simulation functions in this package. See \code{\link{simfuncs}} for details.
 }
 \details{
-\code{pfamily} is a generic with methods for fitted objects such as \code{\link{rglmb}} and
-\code{\link{rlmb}}. Many models currently only implement the \code{dNormal()}
+\code{pfamily} is a generic for prior family objects consumed by the simulation functions. Many models currently only implement the \code{dNormal()}
 prior family. The \code{Gamma()} response family works with \code{dGamma()}; the
 \code{gaussian()} family works with \code{dGamma()} and \code{dNormal_Gamma()}.
 
@@ -190,7 +188,7 @@ Each \code{pfamily} object includes:
 \insertAllCited{}
 }
 \seealso{
-\code{\link{rglmb}}, \code{\link{rlmb}} for modeling functions that consume \code{pfamily} objects.
+\code{\link{simfuncs}} for simulation functions that consume \code{pfamily} objects.
 
 \code{\link{rNormal_reg}}, \code{\link{rNormalGamma_reg}}, \code{\link{rGamma_reg}} for lower-level sampling functions used by \code{pfamily} constructors.
 
@@ -202,7 +200,7 @@ See also \insertCite{Hastie1992}{nmathopencl} for the original S modeling framew
 }
 \author{
 The design of the \code{pfamily} set of functions was developed by Kjell Nygren and was
-inspired by the family used by \code{\link{rglmb}} to specify the likelihood
+inspired by the \code{\link[stats]{glm}} family convention to specify the likelihood
 function. That design in turn was inspired by S functions of the same names from
 the statistical modeling literature.
 }

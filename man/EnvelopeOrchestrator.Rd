@@ -36,14 +36,14 @@ coefficients (from the standardized model).}
 
 \item{y}{Numeric response vector of length \code{m}.}
 
-\item{x2}{Numeric matrix of standardized predictors (\code{m Ã— p}).}
+\item{x2}{Numeric matrix of standardized predictors (\code{m × p}).}
 
 \item{mu2}{Numeric vector. Standardized prior mean (typically a zero vector).}
 
 \item{P2}{Numeric matrix. Standardized prior precision component moved into
-the logâ€‘likelihood.}
+the log‑likelihood.}
 
-\item{alpha}{Numeric vector. Offsetâ€‘adjusted mean component.}
+\item{alpha}{Numeric vector. Offset‑adjusted mean component.}
 
 \item{wt}{Numeric vector of prior weights.}
 
@@ -66,13 +66,13 @@ dispersion axis (typically \code{centering_out$RSS_post} from
 \code{\link{EnvelopeCentering}} inside \code{\link{rindepNormalGamma_reg}};
 see vignette \code{Chapter-A11}).}
 
-\item{RSS_ML}{Numeric. Maximumâ€‘likelihood residual sum of squares.}
+\item{RSS_ML}{Numeric. Maximum‑likelihood residual sum of squares.}
 
 \item{max_disp_perc}{Numeric in \code{(0,1)}. Tail probability used to
 determine dispersion bounds when not explicitly supplied.}
 
 \item{disp_lower}{Optional numeric. Lower bound for the dispersion
-(\eqn{\sigma^2}). If supplied, overrides quantileâ€‘based bounds.}
+(\eqn{\sigma^2}). If supplied, overrides quantile‑based bounds.}
 
 \item{disp_upper}{Optional numeric. Upper bound for the dispersion
 (\eqn{\sigma^2}). Must be strictly greater than \code{disp_lower}.}
@@ -91,10 +91,10 @@ A list with components:
 
 \describe{
 \item{\code{Env}}{The fully constructed and sorted envelope, including the
-PLSD component inserted by the dispersionâ€‘aware refinement step.}
-\item{\code{gamma_list}}{Updated Gammaâ€‘prior parameters for the dispersion
+PLSD component inserted by the dispersion‑aware refinement step.}
+\item{\code{gamma_list}}{Updated Gamma‑prior parameters for the dispersion
 (shape, rate, and dispersion bounds).}
-\item{\code{UB_list}}{Updated UBâ€‘list including reordered
+\item{\code{UB_list}}{Updated UB‑list including reordered
 \code{lg_prob_factor} and \code{UB2min}.}
 \item{\code{diagnostics}}{Diagnostic quantities returned by
 \link[glmbayes]{EnvelopeDispersionBuild}, useful for debugging or envelope
@@ -105,15 +105,15 @@ visualization.}
 }
 \description{
 \code{EnvelopeOrchestrator()} provides a unified interface for constructing the
-fixedâ€‘dispersion and dispersionâ€‘aware envelopes used in likelihoodâ€‘subgradient
-simulation for Bayesian Gaussian regression with Normalâ€“Gamma priors.
+fixed‑dispersion and dispersion‑aware envelopes used in likelihood‑subgradient
+simulation for Bayesian Gaussian regression with Normal–Gamma priors.
 
 This function coordinates:
 \itemize{
-\item fixedâ€‘dispersion envelope construction via \link[glmbayes]{EnvelopeBuild},
-\item dispersionâ€‘refined envelope construction via \link[glmbayes]{EnvelopeDispersionBuild},
+\item fixed‑dispersion envelope construction via \link[glmbayes]{EnvelopeBuild},
+\item dispersion‑refined envelope construction via \link[glmbayes]{EnvelopeDispersionBuild},
 \item envelope sorting and reindexing via \link[glmbayes]{EnvelopeSort}, and
-\item UBâ€‘list alignment (reordered \code{lg_prob_factor} and \code{UB2min}).
+\item UB‑list alignment (reordered \code{lg_prob_factor} and \code{UB2min}).
 }
 
 It is typically used inside *.cpp routines such as
@@ -507,13 +507,13 @@ env_out
 }
 \seealso{
 \itemize{
-\item \link[glmbayes]{EnvelopeBuild} â€“ fixedâ€‘dispersion envelope construction
-\item \link[glmbayes]{EnvelopeDispersionBuild} â€“ dispersionâ€‘aware envelope refinement
-\item \link[glmbayes]{EnvelopeSort} â€“ envelope sorting and reindexing
-\item \link[glmbayes]{EnvelopeCentering} â€“ \code{RSS_Post2} and dispersion anchor
-\item \link[glmbayes]{glmb_Standardize_Model} â€“ standardized inputs for the orchestrator
-\item \code{\link{rindepNormalGamma_reg}} â€“ full Normalâ€“Gamma workflow (R + C++)
-\item \code{\link{rlmb}}, \code{\link{rglmb}}, \code{\link{simfuncs}} â€“ higher-level sampling entry points
+\item \link[glmbayes]{EnvelopeBuild} – fixed‑dispersion envelope construction
+\item \link[glmbayes]{EnvelopeDispersionBuild} – dispersion‑aware envelope refinement
+\item \link[glmbayes]{EnvelopeSort} – envelope sorting and reindexing
+\item \link[glmbayes]{EnvelopeCentering} – \code{RSS_Post2} and dispersion anchor
+\item \link[glmbayes]{glmb_Standardize_Model} – standardized inputs for the orchestrator
+\item \code{\link{rindepNormalGamma_reg}} – full Normal–Gamma workflow (R + C++)
+\item \code{\link{simfuncs}} - higher-level sampling entry points
 \item Vignettes \code{Chapter-A07}, \code{Chapter-A08}, \code{Chapter-A11}; cited as
 \insertCite{Nygren2006,glmbayesChapterA08,glmbayesIndNormGammaVignette}{nmathopencl}
 }

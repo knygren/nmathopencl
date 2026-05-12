@@ -325,10 +325,7 @@ the same weak-prior limit as the conjugate Normalâ€“Gamma posterior:
 \code{\link{dNormal}}, \code{\link{dNormal_Gamma}}, \code{\link{dGamma}},
 and \code{\link{dIndependent_Normal_Gamma}}.
 
-\code{\link{rglmb}}, \code{\link{rlmb}} for formula-based fits with a
-\code{pfamily} built from \code{Prior_Setup()} output; \code{\link{rglmb}},
-\code{\link{rlmb}} for matrix-based sampling that consumes the same prior
-structure; \code{\link{simfuncs}} for functions that take a \code{prior_list}
+\code{\link{simfuncs}} for functions that take a \code{prior_list}
 assembled from those components (including
 \code{\link{rindepNormalGamma_reg}} for
 \code{\link{dIndependent_Normal_Gamma}()}).
