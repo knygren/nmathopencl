@@ -134,9 +134,8 @@ envelopes.}
 \item{digits}{the number of significant digits to use when printing.}
 }
 \value{
-\code{glmb} returns an object of class \code{"glmb"}. The function \code{summary} (i.e.,
-\code{\link{summary.glmb}}) can be used to obtain or print a summary of the results.  The generic accessor functions
-\code{\link{coefficients}}, \code{\link{fitted.values}}, \code{\link{residuals}}, and \code{\link{extractAIC}} can be used
+\code{glmb} returns an object of class \code{"glmb"}. The generic accessor functions
+\code{\link{coefficients}}, \code{\link{fitted.values}}, \code{\link{residuals}} can be used
 to extract various useful features of the value returned by \code{\link{glmb}}.
 
 An object of class \code{"glmb"} is a list containing at least the following components:
@@ -198,11 +197,9 @@ functions was created by Kjell Nygren and is modeled on how \code{glm}
 uses \code{family} to specify the likelihood.
 
 For any implemented combination of family, link, and \code{pfamily},
-\code{glmb} generates independent draws from the posterior density-
-no MCMC chains are required. Results can be printed or summarized
-with methods that mirror those for \code{\link{glm}} (e.g.\ \code{\link{print.glmb}},
-\code{\link{summary.glmb}}), as well as all the usual \code{glm}/\code{lm}
-generics (\code{\link{predict}}, \code{\link{residuals}}, etc.).
+\code{glmb} generates independent draws from the posterior density -
+no MCMC chains are required. Results support the usual \code{glm}/\code{lm}
+generics (\code{\link{residuals}}, etc.).
 
 A helper, \code{\link{Prior_Setup}}, assists users in choosing prior
 parameters. It ships with sensible defaults but also allows full
@@ -256,7 +253,7 @@ Further reading: \insertCite{Nygren2006}{nmathopencl};
 \insertCite{glmbayesChapter00,glmbayesChapterA02,glmbayesSimmethods,glmbayesChapterA08}{nmathopencl};
 OpenCL/GPU: \insertCite{glmbayesChapter12,glmbayesChapterA10}{nmathopencl}.
 
-\code{\link{summary.glmb}}, \code{\link{residuals.glmb}} and methods(class="glmb") for \code{glmb}
+\code{\link{residuals.glmb}} and methods(class="glmb") for \code{glmb}
 and the methods and generic functions for classes \code{glm} and \code{lm} from which class \code{glmb} inherits.
 
 glmbayes Modeling Functions

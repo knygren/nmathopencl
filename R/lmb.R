@@ -30,8 +30,7 @@
 #' @param digits the number of significant digits to use when printing.
 #' @inheritParams stats::lm
 #' @inheritParams glmb
-#' @return \code{lmb} returns an object of class \code{"lmb"}. The function \code{summary} (i.e., 
-#' \code{\link{summary.glmb}}) can be used to obtain or print a summary of the results.  The generic accessor functions 
+#' @return \code{lmb} returns an object of class \code{"lmb"}. The generic accessor functions 
 #' \code{\link{coefficients}}, \code{\link{fitted.values}}, \code{\link{residuals}}, and \code{\link{extractAIC}} can be used 
 #' to extract various useful features of the value returned by \code{\link{lmb}}.
 #' 
@@ -141,7 +140,7 @@
 #' \insertCite{glmbayesSimmethods,glmbayesChapterA08}{nmathopencl};
 #' independent Normal--Gamma sampler: \insertCite{glmbayesIndNormGammaVignette}{nmathopencl}.
 #'
-#' \code{\link{summary.glmb}}, \code{\link{residuals.glmb}} and methods(class="glmb") for methods 
+#' \code{\link{residuals.glmb}} and methods(class="glmb") for methods 
 #' inherited from class \code{glmb} and the methods and generic functions for classes \code{glm} and 
 #' \code{lm} from which class \code{lmb} also inherits.
 #'

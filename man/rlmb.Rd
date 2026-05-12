@@ -66,9 +66,7 @@ envelopes.}
     regression fitting functions (see below).}
 }
 \value{
-\code{rlmb} returns a object of class \code{"rlmb"}.  The function \code{summary}
-(i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
-The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
+\code{rlmb} returns a object of class \code{"rlmb"}.  The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
 \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract
 various useful features of the value returned by \code{\link{rlmb}}.
 An object of class \code{"rlmb"} is a list containing at least the following components:
@@ -146,7 +144,7 @@ used in non-conjugate Gaussian sampling.
 Further reading: \insertCite{Nygren2006}{nmathopencl};
 \insertCite{glmbayesSimmethods,glmbayesChapterA08,glmbayesIndNormGammaVignette}{nmathopencl}.
 
-\code{\link{summary.glmb}}, \code{\link{residuals.glmb}} and methods(class="glmb") for methods
+\code{\link{residuals.glmb}} and methods(class="glmb") for methods
 inherited from class \code{glmb} and the methods and generic functions for classes \code{glm} and
 \code{lm} from which class \code{lmb} also inherits.
 

@@ -14,9 +14,7 @@
 #' @param use_parallel Logical. Whether to use parallel processing during simulation.
 #' @param use_opencl Logical. Whether to use OpenCL acceleration during Envelope construction.
 #' @param verbose Logical. Whether to print progress messages.
-#' @return \code{rglmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
-#' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
-#' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
+#' @return \code{rglmb} returns a object of class \code{"rglmb"}.  The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
 #' \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract
 #' various useful features of the value returned by \code{\link{rglmb}}.
 #' An object of class \code{"rglmb"} is a list containing at least the following components:
@@ -97,7 +95,7 @@
 #' \insertCite{glmbayesSimmethods,glmbayesChapterA08}{nmathopencl};
 #' OpenCL/GPU: \insertCite{glmbayesChapter12,glmbayesChapterA10}{nmathopencl}.
 #'
-#' \code{\link{summary.glmb}}, \code{\link{residuals.glmb}} and methods(class="glmb") for \code{glmb} 
+#' \code{\link{residuals.glmb}} and methods(class="glmb") for \code{glmb} 
 #' and the methods and generic functions for classes \code{glm} and \code{lm} from which class \code{glmb} inherits.
 #' 
 #' @references

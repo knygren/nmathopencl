@@ -32,13 +32,13 @@ use the family's deviance residuals function as in \code{\link[stats]{residuals.
 \insertCite{McCullagh1989}{nmathopencl}.
 }
 \details{
-These functions are all \link{methods} for class \code{glmb}, \code{lmb}, or \code{summary.glmb} objects.
+These functions are all \link{methods} for class \code{glmb} or \code{lmb} objects.
 }
 \references{
 \insertAllCited{}
 }
 \seealso{
-\code{\link{summary.glmb}}, \code{\link{glmb}},
+\code{\link{glmb}},
 \code{\link{nmathopencl-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
 \code{\link[stats]{residuals.glm}}
 }

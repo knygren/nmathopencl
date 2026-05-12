@@ -53,7 +53,7 @@ NULL
 #' @details
 #'   For simulation, many code paths now pass closed-form objectives into C++ directly; \code{glmbfamfunc}
 #'   remains the canonical R closure bundle for the same likelihood/prior/deviance quantities and for
-#'   post-processing (e.g.\ \code{\link{summary.rglmb}}, \code{\link{directional_tail}}).
+#'   post-processing (e.g.\ \code{\link{directional_tail}}).
 #' @export
 #' @rdname glmbfamfunc
 #' @order 1

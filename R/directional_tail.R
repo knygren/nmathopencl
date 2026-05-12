@@ -23,7 +23,7 @@
 #' Tail probability is the proportion of draws with negative projection onto this direction.
 #' For theory, interpretation, and relation to t/F statistics, see
 #' \insertCite{glmbayesChapterA04}{nmathopencl}.
-#' @seealso \code{\link{summary.glmb}}
+#' @seealso \code{\link{directional_tail}}, \code{\link{glmb}}
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt

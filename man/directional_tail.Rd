@@ -45,7 +45,7 @@ For theory, interpretation, and relation to t/F statistics, see
 \insertAllCited{}
 }
 \seealso{
-\code{\link{summary.glmb}}
+\code{\link{directional_tail}}, \code{\link{glmb}}
 }
 \keyword{Bayesian}
 \keyword{diagnostic}
