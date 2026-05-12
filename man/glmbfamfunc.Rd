@@ -30,7 +30,7 @@ are stable: they mean the same roles across families (only the internal formulas
 saturated model, with a \code{dispersion} argument for quasi-families); used in DIC-style summaries.}
 \item{\code{f7}}{Family-specific matrix: weighted sum of outer products of predictor rows,
 i.e.\ a curvature / expected negative Hessian of the log-likelihood w.r.t.\ \code{b}
-at the supplied \code{b} (used e.g.\ by \code{\link{directional_tail}} for \code{glmb} fits).}
+at the supplied \code{b} (used e.g.\ for post-processing of \code{glmb} fits).}
 }
 Slots \code{f5} and \code{f6} are \strong{not} returned: they were reserved for alternate or
 C++-aligned likelihood/posterior routines and remain commented out in the implementation
@@ -44,5 +44,5 @@ using the \code{\link{glmb}}, and \code{\link{rglmb}} functions.
 \details{
 For simulation, many code paths now pass closed-form objectives into C++ directly; \code{glmbfamfunc}
 remains the canonical R closure bundle for the same likelihood/prior/deviance quantities and for
-post-processing (e.g.\ \code{\link{directional_tail}}).
+post-processing of model results.
 }
