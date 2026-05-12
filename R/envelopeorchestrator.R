@@ -45,7 +45,7 @@
 #' \code{\link{EnvelopeOrchestrator}} for envelope construction;
 #' \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeDispersionBuild}};
 #' \code{\link{rindepNormalGamma_reg}} for the full simulation routine;
-#' \code{\link{rlmb}} for the user-facing linear-model interface.
+#' \code{\link{simfuncs}} for the sampling functions.
 #'
 #' @references
 #' \insertAllCited{}
