@@ -116,7 +116,6 @@ rNormal_reg.wfit<-function(x,y,P,mu, w,offset=NULL,method="qr",tol=1e-7,singular
 #' Should be a family function. (see \code{\link{family}} for details of family functions.)
 #' @inheritParams stats::lm.wfit
 #' @return a \code{\link{list}} wih components:
-#' @example inst/examples/Ex_glmb.wfit.R
 #' @rdname bayes_wfit
 #' @export
 

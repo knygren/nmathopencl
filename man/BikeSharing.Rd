@@ -46,17 +46,6 @@ A processed version of the UCI Bike Sharing Dataset (hourly data). The data
 include derived variables for part of day, quarter, and Fourier terms for
 cyclic effects of hour and month.
 }
-\examples{
-############################### Start of BikeSharing dataset example ####################
-
-data("BikeSharing")
-head(BikeSharing)
-dim(BikeSharing)
-
-###############################################################################
-## End of BikeSharing dataset example
-###############################################################################
-}
 \concept{Bike sharing}
 \concept{Count regression}
 \keyword{datasets}

@@ -20,7 +20,6 @@
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
-#' @example inst/examples/Ex_influence.glmb.R
 #' @method influence glmb
 #' @export 
 
@@ -47,7 +46,6 @@ influence.glmb<-function(model,...){
 #' (the latter only for the glm method of \code{rstudent} and \code{cooks.distance}).
 #' @inheritParams stats::influence.measures
 #' @return a \code{\link{list}} with components as returned by the underlying \pkg{stats} functions.
-#' @example inst/examples/Ex_influence.glmb.R
 #' @export 
 
 

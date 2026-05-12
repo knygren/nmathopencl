@@ -146,7 +146,6 @@
 #' inherited from class \code{glmb} and the methods and generic functions for classes \code{glm} and 
 #' \code{lm} from which class \code{lmb} also inherits.
 #'
-#' @example inst/examples/Ex_lmb.R
 #' 
 #' @export
 

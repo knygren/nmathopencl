@@ -98,7 +98,6 @@
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
-#' @example inst/examples/Ex_rlmb.R
 #' @export
 #' @rdname rlmb
 #' @order 1

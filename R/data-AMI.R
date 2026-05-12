@@ -25,7 +25,6 @@
 #'
 #' @usage data(AMI)
 #'
-#' @example inst/examples/Ex_AMI.R
 #'
 #' @keywords datasets
 #' @concept Bayesian Binomial Regression

@@ -38,7 +38,6 @@
 #'
 #' @usage data(carinsca)
 #'
-#' @example inst/examples/Ex_carinsca.R
 #'
 #' @keywords datasets
 #' @concept Bayesian Poisson Regression

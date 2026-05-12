@@ -18,7 +18,6 @@
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
-#' @example inst/examples/Ex_confint.glmb.R
 #' @export 
 #' @method confint glmb
 

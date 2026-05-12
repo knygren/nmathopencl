@@ -44,17 +44,6 @@ Canada excluding Saskatchewan.
 One could apply Poisson regression to the number of claims and gamma
 regression to the cost per claim.
 }
-\examples{
-############################### Start of carinsca dataset example ####################
-
-data(carinsca)
-str(carinsca)
-head(carinsca)
-
-###############################################################################
-## End of carinsca dataset example
-###############################################################################
-}
 \references{
 Data downloaded from http://www.statsci.org/data/general/carinsca.html.
 That site also contains classical Poisson and Gamma regression examples.

@@ -51,7 +51,6 @@
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
-#' @example inst/examples/Ex_predict.glmb.R
 #' @export
 #' @method predict glmb
 

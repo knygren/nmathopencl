@@ -41,7 +41,6 @@
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
-#' @example inst/examples/Ex_Normal_ct.R
 #' @rdname Normal_ct
 #' @order 1
 #' @export

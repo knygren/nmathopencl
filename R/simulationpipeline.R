@@ -12,7 +12,6 @@
 #' @references
 #' \insertAllCited{}
 #'
-#' @example inst/examples/Ex_rNormalGLM_std.R
 #'
 #' @name SimulationPipeline
 NULL
@@ -55,7 +54,6 @@ NULL
 #'   For simulation, many code paths now pass closed-form objectives into C++ directly; \code{glmbfamfunc}
 #'   remains the canonical R closure bundle for the same likelihood/prior/deviance quantities and for
 #'   post-processing (e.g.\ \code{\link{logLik.glmb}}, \code{\link{summary.rglmb}}, \code{\link{directional_tail}}).
-#' @example inst/examples/Ex_glmbfamfunc.R
 #' @export
 #' @rdname glmbfamfunc
 #' @order 1
@@ -481,7 +479,6 @@ print.glmbfamfunc<-function(x,...)
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
-#' @example inst/examples/Ex_glmb_Standardize_Model.R
 #' @export
 
 
@@ -1712,7 +1709,6 @@ EnvelopeSort <- function(l1, l2,
 #' 
 #' 
 #' 
-#' @example inst/examples/Ex_rNormalGLM_std.R
 #' @export
 
 
@@ -1777,7 +1773,6 @@ rNormalGLM_std<-function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, 
 #' \code{\link{rNormalGLM_std}} for the non-Gaussian standardized sampler,
 #' \code{\link{rindepNormalGamma_reg}} for the full simulation routine.
 #'
-#' @example inst/examples/Ex_rIndepNormalGammaReg_std.R
 #'
 #' @export
 rIndepNormalGammaReg_std <- function(n, y, x, mu, P, alpha, wt, f2, Envelope,

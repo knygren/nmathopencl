@@ -26,7 +26,6 @@
 #'
 #' \code{print.summary.rGamma_reg()} prints the summary object and returns
 #' \code{x} invisibly.
-#' @example inst/examples/Ex_summary.rgamma_reg.R
 #' @export
 #' @rdname summary.rgamma_reg
 #' @order 1

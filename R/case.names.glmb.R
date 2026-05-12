@@ -7,7 +7,6 @@
 #' @return A character vector
 #' @seealso \code{\link{glmb}}, \code{\link{nmathopencl-package}}; \code{\link{rglmb}}, \code{\link{rlmb}},
 #'   \code{\link{lmb}}; \code{\link[stats]{case.names}}.
-#' @example inst/examples/Ex_case.names.glmb.R
 #' @rdname case.names.glmb
 #' @export
 #' @method case.names glmb

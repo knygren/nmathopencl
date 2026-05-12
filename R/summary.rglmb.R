@@ -27,7 +27,6 @@
 #' @seealso \code{\link{rglmb}}; \code{\link{glmb}}, \code{\link{nmathopencl-package}},
 #'   \code{\link{rlmb}}, \code{\link{lmb}}, \code{\link{summary}},
 #'   \code{\link[stats]{summary.lm}}, \code{\link[stats]{summary.glm}}.
-#' @example inst/examples/Ex_summary.rglmb.R
 #' @export
 #' @method summary rglmb
 

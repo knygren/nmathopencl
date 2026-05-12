@@ -22,7 +22,6 @@
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
-#' @example inst/examples/Ex_dummy.coef.glmb.R
 #' @method dummy.coef glmb
 #' @export
 

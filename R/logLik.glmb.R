@@ -7,7 +7,6 @@
 #' @return The function returns a vector, \code{logLikout} with the estimated log-likelihood for each draw.
 #' @seealso \code{\link{glmb}}, \code{\link{nmathopencl-package}}; \code{\link{rglmb}}, \code{\link{rlmb}},
 #'   \code{\link{lmb}}; \code{\link[stats]{logLik}}.
-#' @example inst/examples/Ex_logLik.glmb.R
 #' @export
 #' @method logLik glmb
 

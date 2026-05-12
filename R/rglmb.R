@@ -104,7 +104,6 @@
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
-#' @example inst/examples/Ex_rglmb.R
 #' @export 
 #' @rdname rglmb
 #' @order 1

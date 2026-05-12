@@ -27,7 +27,6 @@
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
-#' @example inst/examples/Ex_directional_tail.R
 #' @export
 #' @keywords diagnostic geometry Bayesian
 

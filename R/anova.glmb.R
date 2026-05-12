@@ -20,7 +20,6 @@
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
-#' @example inst/examples/Ex_anova.glmb.R
 #' @export
 #' @method anova glmb
 

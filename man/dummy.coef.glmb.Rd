@@ -35,26 +35,6 @@ reduced basis, any implied constraints (e.g., zero sum for contr.helmert or cont
 will be respected. There will be little point in using dummy.coef for contr.treatment
 contrasts, as the missing coefficients are by definition zero.
 }
-\examples{
-set.seed(333)
-## Dobson (1990) Page 93: Randomized Controlled Trial :
-counts <- c(18, 17, 15, 20, 10, 20, 25, 13, 12)
-outcome <- gl(3, 1, 9)
-treatment <- gl(3, 3)
-
-ps <- Prior_Setup(counts ~ outcome + treatment, family = poisson())
-glmb.D93 <- glmb(
-  n = 1000,
-  counts ~ outcome + treatment,
-  family = poisson(),
-  pfamily = dNormal(mu = ps$mu, Sigma = ps$Sigma)
-)
-summary(glmb.D93)
-
-
-myd <- dummy.coef(glmb.D93)
-print(myd)
-}
 \references{
 \insertAllCited{}
 }

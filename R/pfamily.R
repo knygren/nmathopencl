@@ -156,7 +156,6 @@
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
 #'
-#' @example inst/examples/Ex_pfamily.R
 #' @export 
 #' @rdname pfamily
 #' @order 1

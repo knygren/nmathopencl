@@ -38,7 +38,6 @@
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
-#' @example inst/examples/Ex_summary.glmb.R
 #' @export
 #' @method summary glmb
 

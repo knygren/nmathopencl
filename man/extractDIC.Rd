@@ -31,24 +31,6 @@ via \code{glmb()} or \code{rglmb()}. The DIC, introduced by
 \insertCite{Spiegelhalter2002}{nmathopencl}, provides a Bayesian analog to the
 AIC \insertCite{Akaike1974}{nmathopencl}.
 }
-\examples{
-## ----dobson-------------------------------------------------------------------
-## Dobson (1990) Page 93: Randomized Controlled Trial :
-counts <- c(18, 17, 15, 20, 10, 20, 25, 13, 12)
-outcome <- gl(3, 1, 9)
-treatment <- gl(3, 3)
-
-ps <- Prior_Setup(counts ~ outcome + treatment, family = poisson())
-## Call to glmb
-glmb.D93 <- glmb(
-  n = 1000,
-  counts ~ outcome + treatment,
-  family = poisson(),
-  pfamily = dNormal(mu = ps$mu, Sigma = ps$Sigma)
-)
-## ----glmb extractAIC-------------------------------------------------------------
-extractAIC(glmb.D93)
-}
 \references{
 \insertAllCited{}
 }

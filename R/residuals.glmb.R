@@ -19,7 +19,6 @@
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
-#' @example inst/examples/Ex_residuals.glmb.R
 #' @export 
 #' @method residuals glmb
 

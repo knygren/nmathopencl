@@ -273,7 +273,6 @@ print.simfunction <- function(x, ...) {
 
 
 #' @family simfuncs
-#' @example inst/examples/Ex_rGamma_reg.R
 #' @usage rGamma_reg(n, y, x, prior_list, offset = NULL, weights = 1, family = gaussian(),
 #'            Gridtype = 2,n_envopt = NULL,
 #'             use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE,progbar=FALSE)
@@ -479,7 +478,6 @@ print.rGamma_reg<-function (x, digits = max(3, getOption("digits") - 3), ...)
 
 
 #' @family simfuncs 
-#' @example inst/examples/Ex_rindepNormalGamma_reg.R
 #' @usage rindepNormalGamma_reg(n, y, x, prior_list, offset = NULL, weights = 1,
 #'                              family = gaussian(), Gridtype = 2,n_envopt = NULL,
 #'                               use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE, 
@@ -692,7 +690,6 @@ rindepNormalGamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=ga
 
 
 #' @family simfuncs 
-#' @example inst/examples/Ex_rNormalGamma_reg.R
 #' @usage rNormalGamma_reg(n, y, x, prior_list, offset = NULL, weights = 1, family = gaussian(),
 #'                   Gridtype = 2,n_envopt = NULL, 
 #'                   use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE,progbar=FALSE)
@@ -849,7 +846,6 @@ rNormalGamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussia
 
 
 #' @family simfuncs 
-#' @example inst/examples/Ex_rNormal_reg.R
 #' @usage rNormal_reg(n, y, x, prior_list, offset = NULL, weights = 1,
 #'             family = gaussian(), Gridtype = 2, n_envopt = NULL,
 #'             use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE,progbar=FALSE)

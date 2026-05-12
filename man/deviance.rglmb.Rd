@@ -17,24 +17,6 @@ A vector with the deviance extracted from the \code{object}.
 \description{
 Returns the deviance of a fitted Bayesian Generalized Linear Model
 }
-\examples{
-## ----dobson-------------------------------------------------------------------
-## Dobson (1990) Page 93: Randomized Controlled Trial :
-counts <- c(18, 17, 15, 20, 10, 20, 25, 13, 12)
-outcome <- gl(3, 1, 9)
-treatment <- gl(3, 3)
-
-ps <- Prior_Setup(counts ~ outcome + treatment, family = poisson())
-## Call to glmb
-glmb.D93 <- glmb(
-  n = 1000,
-  counts ~ outcome + treatment,
-  family = poisson(),
-  pfamily = dNormal(mu = ps$mu, Sigma = ps$Sigma)
-)
-## ----rglmb deviance-------------------------------------------------------------
-deviance(glmb.D93)
-}
 \seealso{
 \code{\link{rglmb}}; \code{\link{glmb}}, \code{\link{nmathopencl-package}};
 \code{\link{rlmb}}, \code{\link{lmb}}; \code{\link[stats]{deviance}}.

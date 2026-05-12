@@ -35,7 +35,6 @@
 #' GPU/OpenCL topics in
 #' \insertCite{glmbayesChapter12,glmbayesChapterA10}{nmathopencl}.
 #'
-#' @example inst/examples/Ex_glmbayes-package.R
 #'
 #' @seealso
 #' Main interfaces: \code{\link{glmb}}, \code{\link{lmb}},

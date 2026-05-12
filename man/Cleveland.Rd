@@ -37,44 +37,5 @@ Learning Repository. This version contains only complete cases and includes a
 derived binary outcome variable \code{hd} indicating the presence (\code{"Yes"})
 or absence (\code{"No"}) of heart disease.
 }
-\examples{
-############################### Start of Cleveland dataset example ####################
-
-data("Cleveland")
-head(Cleveland)
-summary(Cleveland)
-
-# OpenCL-accelerated Bayesian logistic regression example
-# This only runs if OpenCL is available
-if (has_opencl()) {
-  ps <- Prior_Setup(
-    hd ~ age + sex + cp + trestbps + chol +
-      fbs + restecg + thalach + exang + oldpeak + slope + ca + thal,
-    family = binomial(logit),
-    data = Cleveland
-  )
-
-  fit <- glmb(
-    hd ~ age + sex + cp + trestbps + chol +
-      fbs + restecg + thalach + exang + oldpeak + slope + ca + thal,
-    family       = binomial(link = "logit"),
-    pfamily      = dNormal(mu = ps$mu, Sigma = ps$Sigma),
-    data         = Cleveland,
-    n            = 10,
-    # n            = 1,
-    # n            = 1000,
-    Gridtype     = 2,
-    use_parallel = FALSE,
-    # use_parallel = TRUE,
-    use_opencl   = TRUE,
-    verbose      = TRUE
-    # verbose      = FALSE
-  )
-  summary(fit)
-}
-###############################################################################
-## End of Cleveland dataset example
-###############################################################################
-}
 \concept{Bayesian Binomial Regression}
 \keyword{datasets}

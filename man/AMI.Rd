@@ -29,16 +29,6 @@ measures (PR interval, QRS duration, diastolic blood pressure). The dataset is u
 in package examples for binomial and related regression; see \insertCite{Dobson1990}{nmathopencl}
 for analogous generalized linear modelling of clinical outcomes.
 }
-\examples{
-############################### Start of AMI dataset example ####################
-
-data(AMI)
-summary(AMI)
-
-###############################################################################
-## End of AMI dataset example
-###############################################################################
-}
 \references{
 \insertAllCited{}
 }

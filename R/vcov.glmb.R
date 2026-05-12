@@ -15,7 +15,6 @@
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
-#' @example inst/examples/Ex_vcov.glmb.R
 #' @export
 #' @method vcov glmb
 

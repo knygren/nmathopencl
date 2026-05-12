@@ -254,7 +254,6 @@
 #' @references
 #' \insertAllCited{}
 #'
-#' @example inst/examples/Ex_Prior_Setup.R
 #' @export
 
 ## Note arguments outside of first two are currently not used
@@ -1034,7 +1033,6 @@ print.PriorSetup <- function(x, ...) {
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
 #' @family prior
-#' @example inst/examples/Ex_Prior_Check.R
 #' @export
 #' @rdname Prior_Check
 #' @order 1

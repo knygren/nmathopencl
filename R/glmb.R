@@ -158,7 +158,6 @@
 #' \insertAllCited{}
 #' \insertRef{Dobson1990}{nmathopencl}
 #' @importFrom Rdpack reprompt
-#' @example inst/examples/Ex_glmb.R
 #' 
 #' @export
 
@@ -502,7 +501,6 @@ print.glmb<-function (x, digits = max(3, getOption("digits") - 3), ...)
 #' \item{Dthetabar}{Negative 2 times log-likelihood evaluated at mean parameters}
 #' \item{pD}{Effective number of parameters}
 #' \item{DIC}{DIC statistic}
-#' @example inst/examples/Ex_glmbdic.R
 #' @noRd 
 
 DIC_Info<-function(coefficients,y,x,alpha=0,f1,f4,wt=1,dispersion=1){
