@@ -67,7 +67,7 @@
 #' GPU acceleration speeds up **envelope construction and grid evaluation**
 #' (e.g. large \eqn{3^p} grids or many tangency evaluations) when you pass
 #' \code{use_opencl = TRUE} in modeling and envelope functions such as
-#' \code{\link{rglmb}} and \code{\link{rlmb}}. OpenCL is **vendor-neutral**
+#' \code{\link{EnvelopeBuild}} and related envelope functions. OpenCL is **vendor-neutral**
 #' (NVIDIA, AMD, Intel); CPU-only builds remain valid and are often used when
 #' no OpenCL stack is present.
 #'
@@ -111,7 +111,7 @@
 #' \code{\link{verify_opencl_runtime}},
 #' \code{\link{has_opencl}}.
 #'
-#' Modeling with \code{use_opencl}: \code{\link{rglmb}}, \code{\link{rlmb}}.
+#' Envelope construction with \code{use_opencl}: \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeEval}}.
 #' Envelope helpers: \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeEval}}.
 #'
 #' Full install and troubleshooting: \code{vignette("Chapter-12", package = "nmathopencl")}

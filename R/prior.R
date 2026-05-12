@@ -236,10 +236,7 @@
 #' \code{\link{dNormal}}, \code{\link{dNormal_Gamma}}, \code{\link{dGamma}},
 #' and \code{\link{dIndependent_Normal_Gamma}}.
 #'
-#' \code{\link{rglmb}}, \code{\link{rlmb}} for formula-based fits with a
-#' \code{pfamily} built from \code{Prior_Setup()} output; \code{\link{rglmb}},
-#' \code{\link{rlmb}} for matrix-based sampling that consumes the same prior
-#' structure; \code{\link{simfuncs}} for functions that take a \code{prior_list}
+#' \code{\link{simfuncs}} for functions that take a \code{prior_list}
 #' assembled from those components (including
 #' \code{\link{rindepNormalGamma_reg}} for
 #' \code{\link{dIndependent_Normal_Gamma}()}). 
@@ -1028,7 +1025,7 @@ print.PriorSetup <- function(x, ...) {
 #' @return A vector where each item provided the ratio of the absolue value for the difference between the 
 #' prior and maximum likelihood estimate divided by the length of the sum of half of the two intervals 
 #' (where normality is assumed)
-#' @seealso \code{\link{Prior_Setup}}, \code{\link{rglmb}}; see \insertCite{glmbayesChapter03}{nmathopencl} for prior tailoring;
+#' @seealso \code{\link{Prior_Setup}}; see \insertCite{glmbayesChapter03}{nmathopencl} for prior tailoring;
 #' \insertCite{glmbayesChapterA12}{nmathopencl} for full derivations.
 #' @references
 #' \insertAllCited{}

@@ -2,7 +2,7 @@
 #'
 #' @description
 #' Simulation functions provide a unified interface for generating posterior samples from Bayesian GLMs.
-#' These functions are typically used within model fitting routines such as \code{\link{rglmb}} and \code{\link{rlmb}}, and
+#' These functions are the core sampling engines for Bayesian GLMs and linear models, and
 #' are also suitable for use in Block Gibbs sampling and other simulation-based inference techniques.
 #'
 #' @name simfuncs
@@ -156,7 +156,7 @@
 #' The simulation framework was developed by Kjell Nygren as part of the \pkg{glmbayes} package. It builds on the likelihood subgradient approach described in \insertCite{Nygren2006}{nmathopencl}, and extends classical Bayesian GLM sampling techniques.
 #'
 #' @seealso
-#' \code{\link{pfamily}}, \code{\link{rglmb}}, \code{\link{rlmb}}
+#' \code{\link{pfamily}}
 #' for modeling functions that consume simulation functions.
 #'
 #' \code{\link{rNormal_reg}}, \code{\link{rNormalGamma_reg}}, \code{\link{rGamma_reg}} for individual simulation functions.

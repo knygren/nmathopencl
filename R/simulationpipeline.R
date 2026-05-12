@@ -23,7 +23,7 @@ NULL
 #'
 #' This function takes as input a \code{\link{family}} object and returns a 
 #' set of functions that are used during simulation and summarization of models 
-#' using the \code{\link{rglmb}} function.
+#' using the simulation functions in this package.
 #' 
 #' @name glmbfamfunc
 #' @aliases
@@ -586,7 +586,7 @@ glmb_Standardize_Model<-function(y, x, P, bstar, A1){
 #' }
 #'
 #' @seealso \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeEval}}, \code{\link{EnvelopeSort}};
-#' \code{\link{rNormal_reg}}, \code{\link{rglmb}} for user-facing sampling that uses these grids.
+#' \code{\link{rNormal_reg}} for user-facing sampling that uses these grids.
 #' Vignettes: \insertCite{glmbayesSimmethods,glmbayesChapterA08}{nmathopencl}.
 #'
 #' @references
@@ -1024,7 +1024,7 @@ EnvelopeOpt<-function(a1,n,core_cnt=1L){
 #' }
 #'
 #' @seealso \code{\link{EnvelopeSize}}, \code{\link{EnvelopeEval}}, \code{\link{EnvelopeSort}},
-#' \code{\link{glmb_Standardize_Model}}; \code{\link{rNormal_reg}}, \code{\link{rglmb}}.
+#' \code{\link{glmb_Standardize_Model}}; \code{\link{rNormal_reg}}.
 #' Theory and vignettes: \insertCite{Nygren2006}{nmathopencl};
 #' \insertCite{glmbayesChapterA08,glmbayesSimmethods,glmbayesChapterA10,glmbayesChapter12}{nmathopencl}.
 #'
@@ -1234,7 +1234,7 @@ EnvelopeSetLogP <- function(logP, NegLL, cbars, G3) {
 #' from the true posterior \eqn{\pi(\theta \mid y)}.
 #'
 #' @seealso \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeSize}}, \code{\link{EnvelopeSort}};
-#' \code{\link{rNormal_reg}}, \code{\link{rglmb}}. Vignettes:
+#' \code{\link{rNormal_reg}}. Vignettes:
 #' \insertCite{glmbayesSimmethods,glmbayesChapterA08,glmbayesChapterA10,glmbayesChapter12}{nmathopencl}.
 #'
 #' @references
@@ -1466,7 +1466,7 @@ EnvelopeEval <- function(G4, y, x, mu, P, alpha, wt,
 #' procedure is valid and unbiased.
 #' @seealso \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeOrchestrator}},
 #'   \code{\link{EnvelopeCentering}} (for obtaining \code{RSS_post} and anchored dispersion),
-#'   \code{\link{rindepNormalGamma_reg}}, \code{\link{rlmb}};
+#'   \code{\link{rindepNormalGamma_reg}};
 #'   \code{\link{glmbfamfunc}}.
 #' @references
 #' \insertAllCited{}
@@ -1533,7 +1533,7 @@ EnvelopeDispersionBuild <- function(Env, Shape, Rate, P, y, x, alpha, n_obs, RSS
 #' Used after \code{\link{EnvelopeBuild}} and (for Normal--Gamma models)
 #' \code{\link{EnvelopeDispersionBuild}}; see \insertCite{Nygren2006,glmbayesChapterA08}{nmathopencl}.
 #' @seealso \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeOrchestrator}},
-#'   \code{\link{EnvelopeDispersionBuild}}, \code{\link{rNormal_reg}}, \code{\link{rglmb}}.
+#'   \code{\link{EnvelopeDispersionBuild}}, \code{\link{rNormal_reg}}.
 #' @references
 #' \insertAllCited{}
 #' @example inst/examples/Ex_EnvelopeSort.R
