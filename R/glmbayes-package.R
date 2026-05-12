@@ -9,9 +9,8 @@
 #' Poisson, Binomial, and Gamma models with log-concave likelihoods.
 #'
 #' @details
-#' The main user-facing interface is `glmb()`, which mirrors the structure of
-#' `glm()` and supports prior specification through `pfamily` objects. Lower-level
-#' functions such as `rglmb()` and `rGamma_reg()` provide direct access to the
+#' The main user-facing interfaces are `rglmb()` and `rlmb()`, which support prior specification
+#' through `pfamily` objects. Lower-level functions such as `rGamma_reg()` provide direct access to the
 #' underlying samplers and can be used in block Gibbs sampling or hierarchical
 #' model implementations.
 #'
@@ -37,8 +36,7 @@
 #'
 #'
 #' @seealso
-#' Main interfaces: \code{\link{glmb}}, \code{\link{lmb}},
-#' \code{\link{rglmb}}, \code{\link{rlmb}}; low-level simulation API
+#' Main interfaces: \code{\link{rglmb}}, \code{\link{rlmb}}; low-level simulation API
 #' \code{\link{simfuncs}}; envelope construction \code{\link{EnvelopeBuild}}.
 #'
 #' Useful links:

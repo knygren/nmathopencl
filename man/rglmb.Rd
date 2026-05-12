@@ -29,26 +29,15 @@ rglmb(
 
 \item{x}{for \code{rglmb} a design matrix of dimension \code{m * p} and for \code{print.rglmb} the object to be printed.}
 
-\item{family}{a description of the error distribution and link
-    function to be used in the model.  For \code{glm} this can be a
-    character string naming a family function, a family function or the
-    result of a call to a family function.  For \code{glm.fit} only the
-    third option is supported.  (See \code{\link[stats]{family}} for details of
-    family functions.)}
+\item{family}{a description of the error distribution and link function to be used in the model. Should be a family function (see \code{\link[stats]{family}} for details).}
 
-\item{pfamily}{a description of the prior distribution and associated constants to be used in the model. This
-should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions).}
+\item{pfamily}{a description of the prior distribution and associated constants to be used in the model. Should be a pfamily function (see \code{\link{pfamily}} for details).}
 
-\item{offset}{this can be used to specify an \emph{a priori} known component to be included in the linear
-predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of
-cases.  One or more \code{\link[stats]{offset}} terms can be included in the formula instead or as well, and
-if more than one is specified their sum is used.  See documentation for \code{model.offset} at
-\code{\link[stats]{model.extract}}.}
+\item{offset}{an optional vector specifying a known component to be included in the linear predictor.}
 
-\item{weights}{an optional vector of \sQuote{prior weights} to be used
-    in the fitting process.  Should be \code{NULL} or a numeric vector.}
+\item{weights}{an optional vector of prior weights to be used in the fitting process.}
 
-\item{Gridtype}{an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.}
+\item{Gridtype}{integer controlling the envelope grid construction method. Default is 2.}
 
 \item{n_envopt}{Effective sample size passed to EnvelopeOpt for grid
 construction. Defaults to match \code{n}. Larger values encourage tighter
@@ -62,12 +51,7 @@ envelopes.}
 
 \item{digits}{the number of significant digits to use when printing.}
 
-\item{...}{
-    For \code{glm}: arguments to be used to form the default
-    \code{control} argument if it is not supplied directly.
-
-    For \code{weights}: further arguments passed to or from other methods.
-  }
+\item{\dots}{further arguments passed to or from other methods.}
 }
 \value{
 \code{rglmb} returns a object of class \code{"rglmb"}.  The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
@@ -100,8 +84,7 @@ prior distribution).
 \details{
 The function \code{rglmb} is a minimalistic engine for Bayesian generalized linear model simulation.
 It is designed to generate independent draws from the posterior distribution of a GLM, given a design matrix,
-response vector, likelihood family, and prior specification. Unlike \code{\link{glmb}}, which wraps formula parsing,
-model setup, and method dispatch, \code{rglmb} operates directly on numeric inputs and is optimized for speed,
+response vector, likelihood family, and prior specification. It operates directly on numeric inputs and is optimized for speed,
 transparency, and integration into simulation workflows.
 
 The original R implementation of \code{glm} was written by Simon Davies (under Ross Ihaka at the University of Auckland)
@@ -132,15 +115,14 @@ counts before acceptance.
 By default, \code{rglmb} draws \code{n = 1} sample, uses parallel CPU simulation, and-if \code{use_opencl = TRUE}-
 GPU-accelerated envelope building. The function returns a list containing posterior samples, prior specifications,
 dispersion estimates, and the envelope used during sampling. It does not return a full model object, and does not
-support formula-based modeling or method dispatch. Instead, it is called internally by \code{\link{glmb}} and
-and may be useful for Gibbs sampling implementations or other workflows where full model
-reconstruction is unnecessary.
+support formula-based modeling or method dispatch. It may be useful for Gibbs sampling implementations
+or other workflows where full model reconstruction is unnecessary.
 }
 \references{
 \insertAllCited{}
 }
 \seealso{
-\code{\link{glmb}} for the formula interface; \code{\link[stats]{lm}} and
+\code{\link{rlmb}} for the Gaussian linear model counterpart; \code{\link[stats]{lm}} and
 \code{\link[stats]{glm}} for classical modeling functions.
 
 \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeSize}}, \code{\link{EnvelopeEval}}
@@ -155,11 +137,9 @@ Further reading: \insertCite{Nygren2006}{nmathopencl};
 \insertCite{glmbayesSimmethods,glmbayesChapterA08}{nmathopencl};
 OpenCL/GPU: \insertCite{glmbayesChapter12,glmbayesChapterA10}{nmathopencl}.
 
-Methods(class="glmb") and the generic functions for classes \code{glm} and \code{lm} from which class \code{glmb} inherits.
+Methods for classes \code{glm} and \code{lm} from which class \code{rglmb} inherits.
 
 glmbayes Modeling Functions
-\code{\link{glmb}()},
-\code{\link{lmb}()},
 \code{\link{rlmb}()}
 }
 \author{

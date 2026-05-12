@@ -13,9 +13,8 @@ the base \code{glm()} function. Supported likelihood families include Gaussian,
 Poisson, Binomial, and Gamma models with log-concave likelihoods.
 }
 \details{
-The main user-facing interface is \code{glmb()}, which mirrors the structure of
-\code{glm()} and supports prior specification through \code{pfamily} objects. Lower-level
-functions such as \code{rglmb()} and \code{rGamma_reg()} provide direct access to the
+The main user-facing interfaces are \code{rglmb()} and \code{rlmb()}, which support prior specification
+through \code{pfamily} objects. Lower-level functions such as \code{rGamma_reg()} provide direct access to the
 underlying samplers and can be used in block Gibbs sampling or hierarchical
 model implementations.
 
@@ -44,8 +43,7 @@ GPU/OpenCL topics in
 \insertAllCited{}
 }
 \seealso{
-Main interfaces: \code{\link{glmb}}, \code{\link{lmb}},
-\code{\link{rglmb}}, \code{\link{rlmb}}; low-level simulation API
+Main interfaces: \code{\link{rglmb}}, \code{\link{rlmb}}; low-level simulation API
 \code{\link{simfuncs}}; envelope construction \code{\link{EnvelopeBuild}}.
 
 Useful links:

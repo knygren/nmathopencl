@@ -530,7 +530,7 @@ Env2
 }
 \seealso{
 \code{\link{EnvelopeSize}}, \code{\link{EnvelopeEval}}, \code{\link{EnvelopeSort}},
-\code{\link{glmb_Standardize_Model}}; \code{\link{rNormal_reg}}, \code{\link{rglmb}}, \code{\link{glmb}}.
+\code{\link{glmb_Standardize_Model}}; \code{\link{rNormal_reg}}, \code{\link{rglmb}}.
 Theory and vignettes: \insertCite{Nygren2006}{nmathopencl};
 \insertCite{glmbayesChapterA08,glmbayesSimmethods,glmbayesChapterA10,glmbayesChapter12}{nmathopencl}.
 }

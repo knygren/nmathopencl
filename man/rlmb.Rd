@@ -33,37 +33,25 @@ rlmb(
 \item{pfamily}{a description of the prior distribution and associated constants to be used in the model. This
 should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions.)}
 
-\item{offset}{this can be used to specify an a priori known component to be
-included in the linear predictor during fitting. This should be \code{NULL} or a numeric
-vector or matrix of extents
-matching those of the response.  One or more \code{offset} terms can be
-included in the formula instead or as well, and if more than one are specified their
-sum is used.  See \code{model.offset}.}
+\item{offset}{an optional vector specifying a known component to be included in the linear predictor.}
 
-\item{weights}{an optional vector of weights to be used in the fitting
-    process.  Should be \code{NULL} or a numeric vector.
-    If non-NULL, weighted least squares is used with weights
-    \code{weights} (that is, minimizing \code{sum(w*e^2)}); otherwise
-    ordinary least squares is used.  See also \sQuote{Details},}
+\item{weights}{an optional vector of prior weights to be used in the fitting process.}
 
-\item{Gridtype}{an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.}
+\item{Gridtype}{integer controlling the envelope grid construction method. Default is 2.}
 
-\item{n_envopt}{Effective sample size passed to EnvelopeOpt for grid
-construction. Defaults to match \code{n}. Larger values encourage tighter
-envelopes.}
+\item{n_envopt}{Effective sample size passed to EnvelopeOpt for grid construction. Defaults to match \code{n}.}
 
 \item{use_parallel}{Logical. Whether to use parallel processing during simulation.}
 
-\item{use_opencl}{Logical. Whether to use OpenCL acceleration during Envelope construction.}
+\item{use_opencl}{Logical. Whether to use OpenCL acceleration during envelope construction.}
 
 \item{verbose}{Logical. Whether to print progress messages.}
 
-\item{progbar}{Logical. Whether to display a progress base during simulation.}
+\item{progbar}{Logical. Whether to display a progress bar during simulation.}
 
 \item{digits}{the number of significant digits to use when printing.}
 
-\item{...}{For \code{lm()}: additional arguments to be passed to the low level
-    regression fitting functions (see below).}
+\item{\dots}{further arguments passed to or from other methods.}
 }
 \value{
 \code{rlmb} returns a object of class \code{"rlmb"}.  The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
@@ -123,7 +111,7 @@ While \code{rlmb} does not return a full model object or support generic methods
 \code{summary}, it is designed for efficient posterior simulation in Gaussian models where full model
 reconstruction is unnecessary.
 
-The \code{\link{rlmb}} function called from within \code{\link{lmb}}.
+The \code{\link{rlmb}} function is the core sampling engine for Bayesian linear models.
 It is intended for simulation-heavy workflows such as Gibbs sampling or posterior
 predictive checks where minimal overhead is preferred.
 }
@@ -133,7 +121,7 @@ predictive checks where minimal overhead is preferred.
 \seealso{
 The classical modeling functions \code{\link[stats]{lm}} and \code{\link[stats]{glm}}.
 
-\code{\link{lmb}}, \code{\link{glmb}}, \code{\link{rglmb}} for related interfaces;
+\code{\link{rglmb}} for the generalized linear model counterpart;
 \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeOrchestrator}} for envelope stages
 used in non-conjugate Gaussian sampling.
 
@@ -147,8 +135,6 @@ Further reading: \insertCite{Nygren2006}{nmathopencl};
 Methods inherited from class \code{glmb} and the generic functions for classes \code{glm} and \code{lm} from which class \code{lmb} also inherits.
 
 glmbayes Modeling Functions
-\code{\link{glmb}()},
-\code{\link{lmb}()},
 \code{\link{rglmb}()}
 }
 \concept{modelfuns}

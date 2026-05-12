@@ -236,7 +236,7 @@
 #' \code{\link{dNormal}}, \code{\link{dNormal_Gamma}}, \code{\link{dGamma}},
 #' and \code{\link{dIndependent_Normal_Gamma}}.
 #'
-#' \code{\link{glmb}}, \code{\link{lmb}} for formula-based fits with a
+#' \code{\link{rglmb}}, \code{\link{rlmb}} for formula-based fits with a
 #' \code{pfamily} built from \code{Prior_Setup()} output; \code{\link{rglmb}},
 #' \code{\link{rlmb}} for matrix-based sampling that consumes the same prior
 #' structure; \code{\link{simfuncs}} for functions that take a \code{prior_list}
@@ -1023,11 +1023,12 @@ print.PriorSetup <- function(x, ...) {
 #' prior-data conflict checks \insertCite{EvansMoshonov2006}{nmathopencl}.
 #'
 #' @param level the confidence level at which the Prior-data conflict should be checked.
-#' @inheritParams glmb
+#' @param pfamily a description of the prior distribution and associated constants. Should be a pfamily function (see \code{\link{pfamily}} for details).
+#' @inheritParams stats::glm
 #' @return A vector where each item provided the ratio of the absolue value for the difference between the 
 #' prior and maximum likelihood estimate divided by the length of the sum of half of the two intervals 
 #' (where normality is assumed)
-#' @seealso \code{\link{Prior_Setup}}, \code{\link{glmb}}; see \insertCite{glmbayesChapter03}{nmathopencl} for prior tailoring;
+#' @seealso \code{\link{Prior_Setup}}, \code{\link{rglmb}}; see \insertCite{glmbayesChapter03}{nmathopencl} for prior tailoring;
 #' \insertCite{glmbayesChapterA12}{nmathopencl} for full derivations.
 #' @references
 #' \insertAllCited{}
