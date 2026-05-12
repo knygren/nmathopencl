@@ -141,8 +141,7 @@
 #' \insertCite{glmbayesSimmethods,glmbayesChapterA08}{nmathopencl};
 #' independent Normal--Gamma sampler: \insertCite{glmbayesIndNormGammaVignette}{nmathopencl}.
 #'
-#' \code{\link{summary.glmb}}, \code{\link{predict.glmb}}, \code{\link{simulate.glmb}}, 
-#' \code{\link{extractAIC.glmb}}, \code{\link{dummy.coef.glmb}} and methods(class="glmb") for methods 
+#' \code{\link{summary.glmb}}, \code{\link{residuals.glmb}} and methods(class="glmb") for methods 
 #' inherited from class \code{glmb} and the methods and generic functions for classes \code{glm} and 
 #' \code{lm} from which class \code{lmb} also inherits.
 #'

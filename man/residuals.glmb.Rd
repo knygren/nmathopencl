@@ -38,7 +38,7 @@ These functions are all \link{methods} for class \code{glmb}, \code{lmb}, or \co
 \insertAllCited{}
 }
 \seealso{
-\code{\link{predict.glmb}}, \code{\link{summary.glmb}}, \code{\link{glmb}},
+\code{\link{summary.glmb}}, \code{\link{glmb}},
 \code{\link{nmathopencl-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
 \code{\link[stats]{residuals.glm}}
 }

@@ -256,8 +256,7 @@ Further reading: \insertCite{Nygren2006}{nmathopencl};
 \insertCite{glmbayesChapter00,glmbayesChapterA02,glmbayesSimmethods,glmbayesChapterA08}{nmathopencl};
 OpenCL/GPU: \insertCite{glmbayesChapter12,glmbayesChapterA10}{nmathopencl}.
 
-\code{\link{summary.glmb}}, \code{\link{predict.glmb}}, \code{\link{residuals.glmb}}, \code{\link{simulate.glmb}},
-\code{\link{extractAIC.glmb}}, \code{\link{dummy.coef.glmb}} and methods(class="glmb") for \code{glmb}
+\code{\link{summary.glmb}}, \code{\link{residuals.glmb}} and methods(class="glmb") for \code{glmb}
 and the methods and generic functions for classes \code{glm} and \code{lm} from which class \code{glmb} inherits.
 
 glmbayes Modeling Functions
