@@ -14,21 +14,20 @@
  *     - EnvelopeSize.cpp
  *     - EnvelopeBuild.cpp
  *     - EnvelopeEval.cpp
- *     - EnvelopeBuild_Ind_Normal_Gamma.cpp
  *     - EnvelopeDispersionBuild.cpp
  *
  * @section UsedBy
  *   These functions are consumed by:
  *     - EnvelopeOrchestrator.cpp (high‑level orchestration)
- *     - rNormalGLM.cpp and rIndepNormalGammaReg.cpp (simulation routines)
- *     - export_wrappers wrappers that expose envelope construction to the user
+ *     - rNormalGLM.cpp (rNormalGLM_std sampler)
+ *     - rIndepNormalGammaReg.cpp (standardized samplers)
+ *     - export_wrappers.cpp (Ex_EnvelopeSize, Ex_EnvelopeEval example exports)
  *
  * @section Responsibilities
  *   Provides the computational kernels for:
  *     - grid sizing and initialization (EnvelopeSize)
  *     - envelope construction for standard GLM families (EnvelopeBuild)
  *     - envelope evaluation at grid points (EnvelopeEval)
- *     - independent Normal–Gamma envelope variants (EnvelopeBuild_Ind_Normal_Gamma)
  *     - dispersion‑aware envelope refinement (EnvelopeDispersionBuild)
  *     - envelope sorting and UB‑list assembly (EnvelopeSort_cpp)
  *     - grid and log‑probability updates (EnvelopeSet_Grid, EnvelopeSet_LogP)
@@ -93,23 +92,6 @@ Rcpp::List EnvelopeEval(const Rcpp::NumericMatrix& G4,   // grid (parameters × 
                         const std::string& link,
                         bool use_opencl = false,
                         bool verbose = false);
-
-List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar,
-                                    NumericMatrix A,
-                                    NumericVector y, 
-                                    NumericMatrix x,
-                                    NumericMatrix mu,
-                                    NumericMatrix P,
-                                    NumericVector alpha,
-                                    NumericVector wt,
-                                    std::string family="binomial",
-                                    std::string link="logit",
-                                    int Gridtype=2, 
-                                    int n=1,
-                                    int n_envopt=-1,
-                                    bool sortgrid=false,
-                                    bool use_opencl    = false,
-                                    bool verbose       = false);
 
 
 List EnvelopeDispersionBuild(

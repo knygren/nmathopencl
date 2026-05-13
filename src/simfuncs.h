@@ -9,31 +9,22 @@
  *
  * @section ImplementedIn
  *   These declarations are implemented in:
- *     - rNormalGLM.cpp
- *     - rIndepNormalGammaReg.cpp
- *     - rNormalGammaReg.cpp
- *     - rGammaGaussian.cpp
- *     - rGammaGamma.cpp
+ *     - rNormalGLM.cpp       (rNormalGLM_std)
+ *     - rIndepNormalGammaReg.cpp  (rIndepNormalGammaReg_std, rIndepNormalGammaReg_std_parallel)
  *     - glmb_Standardize_Model.cpp
  *
  * @section UsedBy
- *   These functions are consumed by:
- *     - export_wrappers.cpp 
+ *   These functions are consumed internally by remaining C++ samplers.
  *
  * @section Responsibilities
  *   Provides simulation kernels for:
- *     - Normal GLM posterior draws (standardized and unstandardized)
- *     - Normal–Gamma regression models
- *     - Independent Normal–Gamma regression models (standard and parallel variants)
- *     - Gamma–Gaussian and Gamma–Gamma models
+ *     - Normal GLM standardized posterior draws
+ *     - Independent Normal–Gamma regression (standard and parallel variants)
  *
  *   All routines:
- *     - assume validated inputs from R wrappers,
+ *     - assume validated inputs,
  *     - use Rcpp::List for structured return objects,
- *   
- *   Some routines:
- *     - rely on envelope objects and f2/f3 functions for accept–reject sampling,
- *     - support optional parallelization and OpenCL where applicable.
+ *     - rely on envelope objects and f2/f3 functions for accept–reject sampling.
  */
 
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
@@ -67,39 +58,6 @@ Rcpp::List  rNormalGLM_std(int n,
                                bool verbose = false                                 
                                  );
 
-Rcpp::List rNormalGLM(
-    int n,
-    NumericVector y,
-    NumericMatrix x,
-    NumericVector mu,
-    NumericMatrix P,
-    NumericVector offset,
-    NumericVector wt,
-    double dispersion,
-    Function f2,
-    Function f3,
-    NumericVector start,
-    std::string family = "binomial",
-    std::string link = "logit",
-    int Gridtype = 2,
-    int n_envopt = -1,
-    bool use_parallel = true,
-    bool use_opencl = false,
-    bool verbose = false
-);
-
-Rcpp::List rNormalReg(int n,NumericVector y,NumericMatrix x, 
-                         NumericVector mu,NumericMatrix P,
-                         NumericVector offset,NumericVector wt,
-                         double dispersion,
-                         Function f2,Function f3,
-                         NumericVector start,
-                         std::string family="gaussian",
-                         std::string link="identity",
-                         int Gridtype=2      
-);
-
-
 
 Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
                                           NumericMatrix mu, /// This is typically standardized to be a zero vector
@@ -131,73 +89,6 @@ Rcpp::List rIndepNormalGammaReg_std_parallel(
 );
 
 
-Rcpp::List rNormalGammaReg(
-    int n,
-    Rcpp::NumericVector y,
-    Rcpp::NumericMatrix x,
-    Rcpp::NumericVector mu,
-    Rcpp::NumericMatrix P,
-    Rcpp::NumericVector offset,
-    Rcpp::NumericVector wt,
-    double shape,
-    double rate,
-    Rcpp::Nullable<double> max_disp_perc,
-    Rcpp::Nullable<double> disp_lower,
-    Rcpp::Nullable<double> disp_upper,
-    bool verbose
-);
-
-
-Rcpp::List rIndepNormalGammaReg(
-    int n,
-    Rcpp::NumericVector y,
-    Rcpp::NumericMatrix x,
-    Rcpp::NumericVector mu,
-    Rcpp::NumericMatrix P,
-    Rcpp::NumericVector offset,
-    Rcpp::NumericVector wt,
-    double shape,
-    double rate,
-    double max_disp_perc,
-    Rcpp::Nullable<Rcpp::NumericVector> disp_lower,
-    Rcpp::Nullable<Rcpp::NumericVector> disp_upper,
-    int Gridtype,
-    int n_envopt,
-    bool use_parallel,
-    bool use_opencl,
-    bool verbose,
-    bool progbar
-);
-
-Rcpp::List rGammaGaussian(
-    int n,
-    Rcpp::NumericVector y,
-    Rcpp::NumericMatrix x,
-    Rcpp::NumericVector beta,
-    Rcpp::NumericVector wt,
-    Rcpp::NumericVector alpha,
-    double shape,
-    double rate,
-    Rcpp::Nullable<double> disp_lower,
-    Rcpp::Nullable<double> disp_upper,
-    bool verbose = false
-);
-
-
-Rcpp::List rGammaGamma(
-    int n,
-    Rcpp::NumericVector y,
-    Rcpp::NumericMatrix x,
-    Rcpp::NumericVector beta,
-    Rcpp::NumericVector wt,
-    Rcpp::NumericVector alpha,
-    double shape,
-    double rate,
-    double max_disp_perc,
-    Rcpp::Nullable<double> disp_lower,
-    Rcpp::Nullable<double> disp_upper,
-    bool verbose = false
-);
 
 Rcpp::List glmb_Standardize_Model(
     NumericVector y, 
