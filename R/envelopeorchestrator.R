@@ -192,12 +192,11 @@ EnvelopeCentering <- function(y, x, mu, P, offset, wt, shape, rate,
 #'         each coordinate is drawn from the **restricted Normal** used in the
 #'         fixed-dispersion construction: cumulative-normal tail probabilities
 #'         \code{loglt[J, ]}, \code{logrt[J, ]}, and subgradient shift
-#'         \code{-cbars[J, ]} (internal \code{rnorm_ct} truncated Normal
-#'         sampling, same structural role as \code{ctrnorm_cpp()} in the GLM path).
+#'         \code{-cbars[J, ]} (truncated Normal sampling, same structural role as \code{ctrnorm_cpp()} in the GLM path).
 #'   \item **Propose dispersion** \eqn{\phi}. A draw is taken from the truncated
 #'         inverse-Gamma / Gamma piece defined by \code{shape3}, \code{rate2},
 #'         \code{disp_lower}, and \code{disp_upper} in \code{gamma_list}
-#'         (\code{rinvgamma_ct_safe}).
+#'         (truncated inverse-Gamma sampling).
 #'   \item **Re-weight the likelihood for** \eqn{\phi}. Observation weights in
 #'         the Gaussian log-likelihood are scaled by \eqn{1/\phi}
 #'         (\code{wt2 = wt / dispersion} in the C++ sources).
@@ -374,7 +373,7 @@ EnvelopeCentering <- function(y, x, mu, P, offset, wt, shape, rate,
 #' * \link[glmbayes]{EnvelopeSort} â€“ envelope sorting and reindexing
 #' * \link[glmbayes]{EnvelopeCentering} â€“ \code{RSS_Post2} and dispersion anchor
 #' * \link[glmbayes]{glmb_Standardize_Model} â€“ standardized inputs for the orchestrator
-#' * \code{\link{EnvelopeEval}}, \code{\link{EnvelopeSort}} - envelope evaluation and sorting
+#' * \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeDispersionBuild}} - envelope construction
 #' * \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeEval}} - envelope construction and evaluation
 #' * Vignettes \code{Chapter-A07}, \code{Chapter-A08}, \code{Chapter-A11}; cited as
 #'   \insertCite{Nygren2006,glmbayesChapterA08,glmbayesIndNormGammaVignette}{nmathopencl}
