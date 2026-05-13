@@ -441,6 +441,5 @@ env_final
 \seealso{
 \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeOrchestrator}},
 \code{\link{EnvelopeCentering}} (for obtaining \code{RSS_post} and anchored dispersion),
-\code{\link{rindepNormalGamma_reg}};
 \code{\link{glmbfamfunc}}.
 }

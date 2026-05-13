@@ -88,5 +88,5 @@ custom split workflows (e.g., after constructing the envelope separately).
 \seealso{
 \code{\link{EnvelopeOrchestrator}} for envelope construction,
 \code{\link{rNormalGLM_std}} for the non-Gaussian standardized sampler,
-\code{\link{rindepNormalGamma_reg}} for the full simulation routine.
+\code{\link{EnvelopeOrchestrator}} for envelope construction.
 }

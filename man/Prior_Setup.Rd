@@ -321,14 +321,7 @@ the same weak-prior limit as the conjugate Normalâ€“Gamma posterior:
 \insertAllCited{}
 }
 \seealso{
-\code{\link{pfamily}} for prior-family objects and the constructors
-\code{\link{dNormal}}, \code{\link{dNormal_Gamma}}, \code{\link{dGamma}},
-and \code{\link{dIndependent_Normal_Gamma}}.
-
-\code{\link{simfuncs}} for functions that take a \code{prior_list}
-assembled from those components (including
-\code{\link{rindepNormalGamma_reg}} for
-\code{\link{dIndependent_Normal_Gamma}()}).
+\code{\link{compute_gaussian_prior}} for internal Gaussian calibration.
 
 \insertCite{zellner1986gprior}{nmathopencl};
 \insertCite{Raiffa1961}{nmathopencl};
@@ -336,8 +329,5 @@ assembled from those components (including
 \insertCite{McCullagh1989}{nmathopencl};
 \insertCite{glmbayesChapter03}{nmathopencl};
 \insertCite{glmbayesChapterA12}{nmathopencl}.
-
-Other prior: 
-\code{\link{Prior_Check}()}
 }
 \concept{prior}

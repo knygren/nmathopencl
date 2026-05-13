@@ -56,7 +56,7 @@ A list with components:
 \item \code{shape_ING} — shape for the independent Normal–Gamma prior.
 \item \code{rate} — Gamma rate for residual precision.
 \item \code{rate_gamma} — Gamma rate for the fixed–\eqn{\beta} path
-(\code{\link{dGamma}}).
+(Gamma dispersion path).
 \item \code{Sigma} — calibrated coefficient–scale covariance.
 \item \code{Sigma_0} — the input dispersion–free covariance.
 }

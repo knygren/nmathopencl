@@ -232,14 +232,7 @@
 #'
 #' @family prior
 #' @seealso
-#' \code{\link{pfamily}} for prior-family objects and the constructors
-#' \code{\link{dNormal}}, \code{\link{dNormal_Gamma}}, \code{\link{dGamma}},
-#' and \code{\link{dIndependent_Normal_Gamma}}.
-#'
-#' \code{\link{simfuncs}} for functions that take a \code{prior_list}
-#' assembled from those components (including
-#' \code{\link{rindepNormalGamma_reg}} for
-#' \code{\link{dIndependent_Normal_Gamma}()}). 
+#' \code{\link{compute_gaussian_prior}} for internal Gaussian calibration. 
 #'
 #' \insertCite{zellner1986gprior}{nmathopencl};
 #' \insertCite{Raiffa1961}{nmathopencl};
@@ -1009,84 +1002,6 @@ print.PriorSetup <- function(x, ...) {
   }
   
   invisible(x)
-}
-
-
-
-#' Checks for Prior-data conflicts
-#'
-#' Checks if the credible intervals for the prior overlap with the implied confidence intervals
-#' from the classical model (obtained via \code{\link[stats]{glm}}). The approach relates to
-#' prior-data conflict checks \insertCite{EvansMoshonov2006}{nmathopencl}.
-#'
-#' @param level the confidence level at which the Prior-data conflict should be checked.
-#' @param pfamily a description of the prior distribution and associated constants. Should be a pfamily function (see \code{\link{pfamily}} for details).
-#' @inheritParams stats::glm
-#' @return A vector where each item provided the ratio of the absolue value for the difference between the 
-#' prior and maximum likelihood estimate divided by the length of the sum of half of the two intervals 
-#' (where normality is assumed)
-#' @seealso \code{\link{Prior_Setup}}; see \insertCite{glmbayesChapter03}{nmathopencl} for prior tailoring;
-#' \insertCite{glmbayesChapterA12}{nmathopencl} for full derivations.
-#' @references
-#' \insertAllCited{}
-#' @importFrom Rdpack reprompt
-#' @family prior
-#' @export
-#' @rdname Prior_Check
-#' @order 1
-
-Prior_Check<-function(formula,family,pfamily,level=0.95,data=NULL, weights, subset,na.action, 
-                      start = NULL, etastart, mustart, offset ,control = list(...) , model = TRUE, 
-                      method = "glm.fit",x = FALSE, y = TRUE, contrasts = NULL, ...){
-  
-  pf=pfamily
-  prior_list=pfamily$prior_list
-  
-  ## For now, the below is really only correct for the dNormal pfamily
-  
-  mu=prior_list$mu
-  Sigma=prior_list$Sigma
-  
-  
-  object=glm(formula=formula,family=family,data=data)
-  
-  Like_est=object$coefficients
-  Like_std=summary(object)$coefficients[,2]
-  
-  if(is.null(mu)){
-    print("No Prior mean vector provided. Variables with needed Priors are:")
-    print(names(Like_est))
-    names(Like_est)    
-    
-  }
-  
-  
-  if(level<=0.5) stop("level must be greater than 0.5")
-  
-  Sigma=as.matrix(Sigma)
-  Prior_std=sqrt(diag(Sigma))
-  
-  print("Variables in the Model Are:")
-  print(names(Like_est))
-  std_dev_sum=qnorm(level)*(Prior_std+Like_std)
-  
-  abs_ratio=matrix(rep(0,length(Like_est),nrow=length(Like_est),ncol=1))
-  abs_diff=abs(mu-Like_est)
-  abs_ratio[1:length(Like_est),]=abs_diff/std_dev_sum
-  
-  rownames(abs_ratio)=names(Like_est)
-  colnames(abs_ratio)=c("abs_ratio")
-  max_abs_ratio=max(abs_ratio)
-  
-  if(max_abs_ratio>1) {
-    print("At least one of the maximum likelihood estimates appears to be inconsistent with the prior")
-  }
-  
-  else{
-    print("The maximum likelihood estimates for all coefficients appear to be roughly consistent with the prior.")
-  }
-  return(abs_ratio)
-  
 }
 
 

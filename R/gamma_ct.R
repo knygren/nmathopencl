@@ -1,4 +1,9 @@
-﻿#' The Central Gamma Distribution
+﻿# Helper: log(exp(b) - exp(a)) for a < b, numerically stable
+logdiffexp <- function(a, b) {
+  b + log(-expm1(a - b))
+}
+
+#' The Central Gamma Distribution
 #'
 #' Distribution function and random generation for the center (between a lower
 #' and an upper bound) of the Gamma distribution with shape and rate parameters.

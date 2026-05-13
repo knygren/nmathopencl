@@ -43,8 +43,7 @@ GPU/OpenCL topics in
 \insertAllCited{}
 }
 \seealso{
-Main interfaces: \code{\link{simfuncs}}; low-level simulation API
-\code{\link{simfuncs}}; envelope construction \code{\link{EnvelopeBuild}}.
+Envelope construction: \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeEval}}, \code{\link{EnvelopeOrchestrator}}.
 
 Useful links:
 \itemize{

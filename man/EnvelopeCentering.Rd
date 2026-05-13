@@ -131,6 +131,5 @@ centering$RSS_post
 \seealso{
 \code{\link{EnvelopeOrchestrator}} for envelope construction;
 \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeDispersionBuild}};
-\code{\link{rindepNormalGamma_reg}} for the full simulation routine;
-\code{\link{simfuncs}} for the sampling functions.
+\code{\link{EnvelopeEval}}, \code{\link{EnvelopeSort}} for downstream envelope steps.
 }
