@@ -11,7 +11,7 @@
 #' \insertAllCited{}
 #'
 #'
-#' @name SimulationPipeline
+#' @name glmbayesEnvelopeExample
 NULL
 
 
@@ -23,14 +23,14 @@ NULL
 #' set of functions that are used during simulation and summarization of models 
 #' using the simulation functions in this package.
 #' 
-#' @name glmbfamfunc
+#' @name Ex_glmbfamfunc
 #' @aliases
-#' glmbfamfunc
-#' print.glmbfamfunc
+#' Ex_glmbfamfunc
+#' print.Ex_glmbfamfunc
 #' @param family an object of class \code{\link{family}}
-#' @param x an object of class \code{"glmbfamfunc"} for which a printed output is desired.
+#' @param x an object of class \code{"Ex_glmbfamfunc"} for which a printed output is desired.
 #' @param \ldots additional optional arguments
-#' @return A list (class \code{"glmbfamfunc"}) whose first four components are **always**
+#' @return A list (class \code{"Ex_glmbfamfunc"}) whose first four components are **always**
 #'   present for every supported \code{family} and \code{link}. The names \code{f1}--\code{f4}
 #'   are stable: they mean the same roles across families (only the internal formulas change).
 #'   \describe{
@@ -49,14 +49,14 @@ NULL
 #'   C++-aligned likelihood/posterior routines and remain commented out in the implementation
 #'   (only \code{f1}, \code{f2}, \code{f3}, \code{f4}, and \code{f7} are assigned in the returned list).
 #' @details
-#'   For simulation, many code paths now pass closed-form objectives into C++ directly; \code{glmbfamfunc}
+#'   For simulation, many code paths now pass closed-form objectives into C++ directly; \code{Ex_glmbfamfunc}
 #'   remains the canonical R closure bundle for the same likelihood/prior/deviance quantities and for
 #'   post-processing of model results.
 #' @export
-#' @rdname glmbfamfunc
+#' @rdname Ex_glmbfamfunc
 #' @order 1
 
-glmbfamfunc<-function(family){
+Ex_glmbfamfunc<-function(family){
   
   # need to add handling for offsets 
   
@@ -404,20 +404,20 @@ glmbfamfunc<-function(family){
   
   out$call<-match.call()
   
-  class(out)<-"glmbfamfunc"
+  class(out)<-"Ex_glmbfamfunc"
   out
   
   
 }
 
 
-#' @rdname glmbfamfunc
+#' @rdname Ex_glmbfamfunc
 #' @order 2
-#' @method print glmbfamfunc
+#' @method print Ex_glmbfamfunc
 #' @export
 
 
-print.glmbfamfunc<-function(x,...)
+print.Ex_glmbfamfunc<-function(x,...)
 {
   cat("Call:\n")
   print(x$call)
@@ -480,7 +480,7 @@ print.glmbfamfunc<-function(x,...)
 #' @export
 
 
-glmb_Standardize_Model<-function(y, x, P, bstar, A1){
+Ex_glmb_Standardize_Model<-function(y, x, P, bstar, A1){
   
   return(.glmb_Standardize_Model_cpp(y, x, P, bstar, A1))
   
@@ -489,8 +489,8 @@ glmb_Standardize_Model<-function(y, x, P, bstar, A1){
 
 #' Envelope Sizing and Optimization
 #'
-#' \code{EnvelopeSize()} is the high-level entry point that constructs
-#' per-dimension grids and expected draw counts, while \code{EnvelopeOpt()}
+#' \code{Ex_EnvelopeSize()} is the high-level entry point that constructs
+#' per-dimension grids and expected draw counts, while \code{Ex_EnvelopeOpt()}
 #' performs the adaptive optimization used when \code{Gridtype = 2}.
 #'
 #' These functions implement the grid sizing logic used in envelope construction
@@ -504,12 +504,12 @@ glmb_Standardize_Model<-function(y, x, P, bstar, A1){
 #' @param Gridtype Integer code controlling grid sizing logic:
 #'   \itemize{
 #'     \item 1 = static threshold test
-#'     \item 2 = adaptive optimization via \code{EnvelopeOpt()}
+#'     \item 2 = adaptive optimization via \code{Ex_EnvelopeOpt()}
 #'     \item 3 = always three-point grid
 #'     \item 4 = always single-point grid
 #'   }
 #' @param n Integer; number of posterior draws to generate (used for grid sizing).
-#' @param n_envopt Integer; effective sample size passed to \code{EnvelopeOpt}.
+#' @param n_envopt Integer; effective sample size passed to \code{Ex_EnvelopeOpt}.
 #'   Defaults to -1, which means "use n".
 #' @param use_opencl Logical; if \code{TRUE}, attempt GPU acceleration.
 #' @param verbose Logical; if \code{TRUE}, print progress messages.
@@ -564,33 +564,33 @@ glmb_Standardize_Model<-function(y, x, P, bstar, A1){
 #' }
 #'
 #' @details
-#' \code{EnvelopeSize()} returns the constructed grid (\code{G2}),
+#' \code{Ex_EnvelopeSize()} returns the constructed grid (\code{G2}),
 #' index vectors (\code{GIndex1}), expected draw count (\code{E_draws}),
 #' and the per-dimension grid index.  
 #'
-#' \code{EnvelopeOpt()} implements the adaptive optimization used in
+#' \code{Ex_EnvelopeOpt()} implements the adaptive optimization used in
 #' \code{Gridtype = 2}, ranking dimensions by posterior variance and
 #' promoting them to three-point tangents when the tradeoff is favorable.
 #'
 #' @return
 #' \describe{
-#'   \item{\code{EnvelopeSize()}}{A list with components \code{G2}, \code{GIndex1},
+#'   \item{\code{Ex_EnvelopeSize()}}{A list with components \code{G2}, \code{GIndex1},
 #'   \code{E_draws}, and \code{gridindex}.}
-#'   \item{\code{EnvelopeOpt()}}{An integer vector of length \eqn{l1} with entries
+#'   \item{\code{Ex_EnvelopeOpt()}}{An integer vector of length \eqn{l1} with entries
 #'   1 (single-point) or 3 (three-point).}
 #' }
 #'
-#' @seealso \code{\link{EnvelopeEval}} for evaluating these grids.
+#' @seealso \code{\link{Ex_EnvelopeEval}} for evaluating these grids.
 #' Vignettes: \insertCite{glmbayesSimmethods,glmbayesChapterA08}{nmathopencl}.
 #'
 #' @references
 #' \insertAllCited{}
 #' @export
-#' @usage EnvelopeSize(a, G1, Gridtype = 2L, n = 1000L, n_envopt = -1,
+#' @usage Ex_EnvelopeSize(a, G1, Gridtype = 2L, n = 1000L, n_envopt = -1,
 #'                     use_opencl = FALSE, verbose = FALSE)
-#' @rdname EnvelopeSize
+#' @rdname Ex_EnvelopeSize
 #' @export
-EnvelopeSize <- function(a,
+Ex_EnvelopeSize <- function(a,
                          G1,
                          Gridtype   = 2L,
                          n          = 1000L,   # <-- updated default
@@ -603,7 +603,7 @@ EnvelopeSize <- function(a,
 
 #' Evaluate Negative Log-Likelihood and Gradients
 #'
-#' @name EnvelopeEval
+#' @name Ex_EnvelopeEval
 NULL
 
 #'
@@ -631,9 +631,9 @@ NULL
 #' @param verbose Logical; if \code{TRUE}, print diagnostic output.
 #' @details
 #' The evaluation workflow has several layers:
-#' **1. High-level dispatch (`EnvelopeEval`)**
+#' **1. High-level dispatch (`Ex_EnvelopeEval`)**
 #'
-#' * `EnvelopeEval()` is the user-facing entry point. It accepts a grid of
+#' * `Ex_EnvelopeEval()` is the user-facing entry point. It accepts a grid of
 #'   parameter values (`G4`) and the data (`y`, `x`, `mu`, `P`, `alpha`, `wt`).
 #' * If the grid is large (>= 14 columns), it first calls
 #'   `run_opencl_pilot` to benchmark OpenCL performance and optionally
@@ -678,7 +678,7 @@ NULL
 #'
 #' * This helper runs a small subset of the grid through the OpenCL backend
 #'   to estimate runtime.
-#' * It is used by `EnvelopeEval()` to inform users (when `verbose = TRUE`)
+#' * It is used by `Ex_EnvelopeEval()` to inform users (when `verbose = TRUE`)
 #'   whether OpenCL acceleration is likely to be beneficial.
 #'
 #' **5. Returned values**
@@ -689,7 +689,7 @@ NULL
 #'   
 #' **6. Role of likelihood and gradients in sampling**
 #'
-#' * The outputs of `EnvelopeEval()` - the negative log-likelihood values
+#' * The outputs of `Ex_EnvelopeEval()` - the negative log-likelihood values
 #'   (`NegLL`) and the gradient matrix (`cbars`) - are not endpoints in
 #'   themselves. They form the *envelope* used in the rejection sampler
 #'   implemented by internal functions such as
@@ -710,7 +710,7 @@ NULL
 #' }
 #'
 #' **Connections between code and notation:**
-#' * The arguments `G4` (in `EnvelopeEval`) and `b` (in `f2_f3_*`) both
+#' * The arguments `G4` (in `Ex_EnvelopeEval`) and `b` (in `f2_f3_*`) both
 #'   represent the grid of tangency points \eqn{\bar{\theta}_j}.
 #' * The output `NegLL` corresponds to
 #'   \eqn{-\log f(y \mid \bar{\theta}_{J(i)})}, i.e. the negative
@@ -731,7 +731,7 @@ NULL
 #' accept-reject procedure can run efficiently while still producing samples
 #' from the true posterior \eqn{\pi(\theta \mid y)}.
 #'
-#' @seealso \code{\link{EnvelopeSize}};
+#' @seealso \code{\link{Ex_EnvelopeSize}};
 #' Vignettes:
 #' \insertCite{glmbayesSimmethods,glmbayesChapterA08,glmbayesChapterA10,glmbayesChapter12}{nmathopencl}.
 #'
@@ -739,7 +739,7 @@ NULL
 #' \insertAllCited{}
 #' @return
 #' \describe{
-#'   \item{EnvelopeEval}{List with components \code{NegLL} (numeric vector of
+#'   \item{Ex_EnvelopeEval}{List with components \code{NegLL} (numeric vector of
 #'   negative log-likelihood values) and \code{cbars} (numeric matrix of gradients).}
 #'   \item{f2_f3_non_opencl}{List with components \code{qf} (negative log-likelihood)
 #'   and \code{grad} (gradients) from the CPU kernel.}
@@ -751,12 +751,12 @@ NULL
 #'
 #' @example inst/examples/Ex_EnvelopeEval.R
 #'
-#' @rdname EnvelopeEval
+#' @rdname Ex_EnvelopeEval
 #' @export
-#' @usage EnvelopeEval(G4, y, x, mu, P, alpha, wt,
+#' @usage Ex_EnvelopeEval(G4, y, x, mu, P, alpha, wt,
 #'                     family, link,
 #'                     use_opencl = FALSE, verbose = FALSE)
-EnvelopeEval <- function(G4, y, x, mu, P, alpha, wt,
+Ex_EnvelopeEval <- function(G4, y, x, mu, P, alpha, wt,
                          family, link,
                          use_opencl = FALSE,
                          verbose = FALSE) {
@@ -781,7 +781,7 @@ EnvelopeEval <- function(G4, y, x, mu, P, alpha, wt,
 
 
 
-#' @title EnvelopeOpt
+#' @title Ex_EnvelopeOpt
 #' @description Internal adaptive grid optimizer called by \code{.EnvelopeSize_cpp}.
 #' @param a1 Numeric vector of diagonal data precision values.
 #' @param n Integer; number of posterior draws.
@@ -789,7 +789,7 @@ EnvelopeEval <- function(G4, y, x, mu, P, alpha, wt,
 #' @return Integer vector of grid sizes (1 or 3) per dimension.
 #' @keywords internal
 #' @export
-EnvelopeOpt <- function(a1, n, core_cnt = 1L) {
+Ex_EnvelopeOpt <- function(a1, n, core_cnt = 1L) {
   core_cnt <- as.integer(core_cnt)
   if (is.na(core_cnt) || core_cnt < 1L) core_cnt <- 1L
   a1rank <- rank(1 / (1 + a1))
@@ -821,7 +821,7 @@ EnvelopeOpt <- function(a1, n, core_cnt = 1L) {
   dimcount[minindex, ]
 }
 
-# Internal log-difference-of-exponentials helper used in glmbfamfunc closures
+# Internal log-difference-of-exponentials helper used in Ex_glmbfamfunc closures
 dpois2 <- function(x, lambda, log = TRUE) {
   if (log) {
     return(x * log(lambda) - lambda - lgamma(x + 1))

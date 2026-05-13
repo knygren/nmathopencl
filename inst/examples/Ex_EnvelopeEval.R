@@ -1,10 +1,10 @@
-############################### Start of EnvelopeEval example ####################
+﻿############################### Start of Ex_EnvelopeEval example ####################
 
-# This example demonstrates EnvelopeEval in isolation. EnvelopeEval evaluates
+# This example demonstrates Ex_EnvelopeEval in isolation. Ex_EnvelopeEval evaluates
 # the negative log-likelihood and gradients at a grid of parameter values.
 # It is called internally by EnvelopeBuild. Here we build the same inputs
-# (grid G4, standardized model) using EnvelopeSize and expand.grid, then
-# call EnvelopeEval directly. The setup mirrors Ex_EnvelopeBuild through
+# (grid G4, standardized model) using Ex_EnvelopeSize and expand.grid, then
+# call Ex_EnvelopeEval directly. The setup mirrors Ex_EnvelopeBuild through
 # the standardization step.
 
 data(menarche, package = "MASS")
@@ -23,7 +23,7 @@ V1 <- 1 * diag(as.numeric(2.0))
 V1[1, 1] <- ((log(0.9 / 0.1) - log(0.5 / 0.5)) / 2)^2
 V1[2, 2] <- (3 * mu[2, 1] / 2)^2
 
-famfunc <- glmbfamfunc(binomial(logit))
+famfunc <- Ex_glmbfamfunc(binomial(logit))
 f2 <- famfunc$f2
 f3 <- famfunc$f3
 
@@ -49,7 +49,7 @@ opt_out <- optim(parin, f2, f3,
 bstar <- opt_out$par
 A1 <- opt_out$hessian
 
-Standard_Mod <- glmb_Standardize_Model(
+Standard_Mod <- Ex_glmb_Standardize_Model(
   y = as.vector(y), x = as.matrix(x), P = as.matrix(P),
   bstar = as.matrix(bstar, ncol = 1), A1 = as.matrix(A1)
 )
@@ -61,23 +61,23 @@ mu2 <- Standard_Mod$mu2
 P2 <- Standard_Mod$P2
 
 ###############################################################################
-# Build grid G4 via EnvelopeSize and expand.grid (as EnvelopeBuild does)
+# Build grid G4 via Ex_EnvelopeSize and expand.grid (as EnvelopeBuild does)
 ###############################################################################
 a <- diag(A)
 omega <- (sqrt(2) - exp(-1.20491 - 0.7321 * sqrt(0.5 + a))) / sqrt(1 + a)
 b2 <- as.vector(bstar2)
 G1 <- rbind(b2 - omega, b2, b2 + omega)
 
-size_info <- EnvelopeSize(a, G1, Gridtype = 3L, n = n)
+size_info <- Ex_EnvelopeSize(a, G1, Gridtype = 3L, n = n)
 G2 <- size_info$G2
 
 G3 <- as.matrix(do.call(expand.grid, G2))
 G4 <- t(G3)
 
 ###############################################################################
-# EnvelopeEval: negative log-likelihood and gradients at grid points
+# Ex_EnvelopeEval: negative log-likelihood and gradients at grid points
 ###############################################################################
-eval_out <- EnvelopeEval(
+eval_out <- Ex_EnvelopeEval(
   G4 = G4,
   y = y,
   x = as.matrix(x2),
@@ -95,5 +95,5 @@ eval_out$NegLL
 eval_out$cbars
 
 ###############################################################################
-# End of EnvelopeEval example
+# End of Ex_EnvelopeEval example
 ###############################################################################

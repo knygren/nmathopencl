@@ -1,4 +1,4 @@
-# -------------------------------------------------------------------------
+﻿# -------------------------------------------------------------------------
 #  Rcpp Interface Wrappers for glmbayes
 #
 #  These functions provide the minimal, strictly positional R → C++ bridges
@@ -94,7 +94,7 @@
 
 # =============================================================================
 #  Tier 2: Envelope & Standardization
-#  Callers: EnvelopeSize, EnvelopeBuild, EnvelopeEval, EnvelopeDispersionBuild,
+#  Callers: Ex_EnvelopeSize, EnvelopeBuild, Ex_EnvelopeEval, EnvelopeDispersionBuild,
 #           EnvelopeOrchestrator, EnvelopeCentering, rNormalGLM_std,
 #           rIndepNormalGammaReg_std; EnvelopeSet_* are internal
 #  User:    Advanced users – understanding algorithm, custom envelope workflows
@@ -226,7 +226,7 @@
 
 # =============================================================================
 #  Tier 3: Model Utilities
-#  Callers: glmb_Standardize_Model
+#  Callers: Ex_glmb_Standardize_Model
 #  User:    Advanced users – model preparation, standardization
 # =============================================================================
 

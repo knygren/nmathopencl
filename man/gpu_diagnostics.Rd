@@ -75,7 +75,7 @@ called individually for programmatic inspection or automated testing.
 GPU acceleration speeds up \strong{envelope construction and grid evaluation}
 (e.g. large \eqn{3^p} grids or many tangency evaluations) when you pass
 \code{use_opencl = TRUE} in modeling and envelope functions such as
-\code{\link{EnvelopeEval}} and related envelope functions. OpenCL is \strong{vendor-neutral}
+\code{\link{Ex_EnvelopeEval}} and related envelope functions. OpenCL is \strong{vendor-neutral}
 (NVIDIA, AMD, Intel); CPU-only builds remain valid and are often used when
 no OpenCL stack is present.
 
@@ -158,8 +158,8 @@ These are optional helpers used by the diagnostic pipeline.
 \code{\link{verify_opencl_runtime}},
 \code{\link{has_opencl}}.
 
-Envelope construction with \code{use_opencl}: \code{\link{EnvelopeEval}}.
-Envelope helpers: \code{\link{EnvelopeEval}}.
+Envelope construction with \code{use_opencl}: \code{\link{Ex_EnvelopeEval}}.
+Envelope helpers: \code{\link{Ex_EnvelopeEval}}.
 
 Full install and troubleshooting: \code{vignette("Chapter-12", package = "nmathopencl")}
 (\insertCite{glmbayesChapter12}{nmathopencl}); implementation notes:
