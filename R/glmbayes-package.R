@@ -29,14 +29,14 @@
 #' examples are in \insertCite{glmbayesChapter00,glmbayesChapterA01}{nmathopencl};
 #' estimation and simulation background in
 #' \insertCite{glmbayesChapterA02,glmbayesSimmethods,glmbayesChapterA08}{nmathopencl};
-#' prior derivations for \code{Prior_Setup()} in
+#' Bayesian prior derivations in
 #' \insertCite{glmbayesChapterA12}{nmathopencl};
 #' GPU/OpenCL topics in
 #' \insertCite{glmbayesChapter12,glmbayesChapterA10}{nmathopencl}.
 #'
 #'
 #' @seealso
-#' Envelope construction: \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeEval}}, \code{\link{EnvelopeOrchestrator}}.
+#' Envelope construction: \code{\link{EnvelopeEval}}.
 #'
 #' Useful links:
 #' \itemize{

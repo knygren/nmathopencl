@@ -1,6 +1,6 @@
 #' Compute Calibrated Gaussian Normal–Gamma Prior Components
 #'
-#' Internal Gaussian calibration routine used by \code{\link{Prior_Setup}}.
+#' Internal Gaussian calibration routine for Normal-Gamma prior components.
 #' Given weighted Gaussian regression inputs and a dispersion–independent
 #' coefficient–scale prior covariance \eqn{\Sigma_0}, this function computes
 #' all Normal–Gamma quantities required by the Gaussian prior families:

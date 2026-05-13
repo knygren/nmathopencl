@@ -2,15 +2,13 @@
 % Please edit documentation in R/simulationpipeline.R
 \name{SimulationPipeline}
 \alias{SimulationPipeline}
-\title{Low-Level Simulation Pipeline for Bayesian GLMs}
+\title{Envelope Evaluation Utilities}
 \description{
-A detailed overview of the low-level simulation pipeline used by
-\code{rglmb()} and related functions. These routines implement the
-optimization -> standardization -> envelope sizing -> envelope construction ->
-sampling -> back-transformation workflow described in \insertCite{Nygren2006}{nmathopencl}.
-}
-\details{
-(summaries of each step)
+Core utilities for envelope-based posterior simulation using GPU-accelerated
+OpenCL kernels. These functions support the construction and evaluation of
+log-likelihood envelopes used in rejection sampling, and serve as an example
+of how downstream packages can build custom OpenCL kernels on top of the
+ported nmath routines in \pkg{nmathopencl}.
 }
 \references{
 \insertAllCited{}

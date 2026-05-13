@@ -45,20 +45,12 @@ for OpenCL evaluation on a pilot subset of the grid.}
 }
 }
 \description{
-\code{EnvelopeEval()} evaluates the negative log-likelihood and gradients
-at a grid of parameter values, optionally using OpenCL acceleration.
-}
-\details{
-The lower-level helpers \code{f2_f3_non_opencl} and \code{f2_f3_opencl}
-are internal C++ kernels used by the CPU and OpenCL backends.
-The internal routine \code{run_opencl_pilot} benchmarks OpenCL performance
-on a pilot subset of the grid to estimate runtime before full evaluation.
-
 These functions implement the grid evaluation logic used in envelope
 construction for rejection sampling. They make use of the theory described
 in \insertCite{Nygren2006}{nmathopencl} and the general implementation outlined
 in \insertCite{glmbayesSimmethods}{nmathopencl}.
-
+}
+\details{
 The evaluation workflow has several layers:
 \strong{1. High-level dispatch (\code{EnvelopeEval})}
 \itemize{
@@ -283,7 +275,7 @@ eval_out$cbars
 \insertAllCited{}
 }
 \seealso{
-\code{\link{EnvelopeBuild}}, \code{\link{EnvelopeSize}}, \code{\link{EnvelopeSort}};
-\code{\link{EnvelopeBuild}}. Vignettes:
+\code{\link{EnvelopeSize}};
+Vignettes:
 \insertCite{glmbayesSimmethods,glmbayesChapterA08,glmbayesChapterA10,glmbayesChapter12}{nmathopencl}.
 }
