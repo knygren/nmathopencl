@@ -1,5 +1,3 @@
-// f2_f3_gaussian.cl
-
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 #pragma OPENCL EXTENSION cl_khr_printf : enable   // for printf
 
