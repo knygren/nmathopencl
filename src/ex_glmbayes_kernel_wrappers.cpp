@@ -4,7 +4,8 @@
 #include "openclPort.h"
 #include <RcppArmadillo.h>
 #include "ex_glmbayes_famfuncs.h"
-#include "opencl.h"
+#include "nmathopencl.h"
+#include "ex_glmbayes_opencl.h"
 
 using namespace Rcpp;
 

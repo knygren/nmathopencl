@@ -14,7 +14,8 @@
 //#include <Rcpp.h>
 #include <RcppArmadillo.h>
 #include "openclPort.h"
-#include "opencl.h"
+#include "nmathopencl.h"
+#include "ex_glmbayes_opencl.h"
 #include <vector>
 #include <string>
 

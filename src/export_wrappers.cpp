@@ -1,6 +1,6 @@
 ﻿#include "RcppArmadillo.h"
 #include "openclPort.h"
-#include "opencl.h"
+#include "nmathopencl.h"
 
 using namespace openclPort;
 

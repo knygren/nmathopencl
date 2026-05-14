@@ -13,7 +13,8 @@
 #include <RcppParallel.h>
 #include "openclPort.h"
 #include "progress_utils.h"
-#include "opencl.h"
+#include "nmathopencl.h"
+#include "ex_glmbayes_opencl.h"
 
 using namespace Rcpp;
 using namespace openclPort;

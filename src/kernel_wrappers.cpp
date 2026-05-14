@@ -3,7 +3,7 @@
 #include <string>
 #include "openclPort.h"
 #include <RcppArmadillo.h>
-#include "opencl.h"
+#include "nmathopencl.h"
 
 using namespace Rcpp;
 
