@@ -59,8 +59,5 @@ Rcpp::List EnvelopeEval(const Rcpp::NumericMatrix& G4,   // grid (parameters × 
 
 
 
-NumericVector RSS(NumericVector y, NumericMatrix x,NumericMatrix b,NumericVector alpha,NumericVector wt);
-
-
 
 #endif

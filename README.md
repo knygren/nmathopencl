@@ -390,6 +390,85 @@ automatically if OpenCL is unavailable.
 
 ---
 
+## nmath dependencies for the glmbayes `f2_f3` kernels
+
+The `f2_f3_*.cl` kernels are the core of the `glmbayes` GPU backend. Each one
+evaluates the negative log-posterior and its gradient for a specific GLM family
+and link function. Understanding exactly which nmath functions they require
+is useful for auditing the dependency graph, validating the port, and reasoning
+about the minimal OpenCL program needed for any given model.
+
+### Direct calls from the six `f2_f3_*.cl` kernels
+
+| Kernel | nmath function(s) called |
+|---|---|
+| `f2_f3_binomial_logit.cl` | `dbinom_raw` |
+| `f2_f3_binomial_probit.cl` | `dbinom_raw`, `pnorm5`, `dnorm4` |
+| `f2_f3_binomial_cloglog.cl` | `dbinom_raw` |
+| `f2_f3_gamma.cl` | `dgamma` |
+| `f2_f3_gaussian.cl` | `dnorm4` |
+| `f2_f3_poisson.cl` | `lgamma` (OpenCL built-in — no nmath file required) |
+
+The Poisson kernel is the simplest case: it evaluates the log-likelihood
+entirely inline as `-mu + y*log(mu) - lgamma(y+1)`, where `lgamma` is a
+standard OpenCL double-precision built-in. It pulls in no ported nmath files.
+
+### Complete set of nmath `.cl` files — including transitive dependencies
+
+The `@all_depends` metadata embedded in each `.cl` file records the full
+transitive closure of its dependencies. Taking the union across `dbinom.cl`,
+`pnorm.cl`, `dnorm.cl`, and `dgamma.cl` yields the minimal set required by
+all six kernels.
+
+| CPU source (`.c`) | GPU port (`.cl`) | Provides / Description | In `glmbayes/src/nmath/`? |
+|---|---|---|---|
+| `dbinom.c` | `dbinom.cl` | `dbinom_raw`, `dbinom` — binomial density | ✓ |
+| `pnorm.c` | `pnorm.cl` | `pnorm5`, `pnorm_both` — normal CDF | ✓ |
+| `dnorm.c` | `dnorm.cl` | `dnorm4` — normal density | ✓ |
+| `dgamma.c` | `dgamma.cl` | `dgamma` — gamma density | ✓ |
+| `dpois.c` | `dpois.cl` | `dpois_raw`, `dpois` — Poisson density (called by `dgamma`) | ✓ |
+| `bd0.c` | `bd0.cl` | `bd0`, `ebd0` — binomial deviance (called by `dbinom`, `dpois`) | ✓ |
+| `stirlerr.c` | `stirlerr.cl` | `stirlerr` — Stirling error term; dispatches to the two fragments below | ✓ |
+| `stirlerr.c` (split) | `stirlerr_cycle_free.cl` | `stirlerr_cycle_free` — table-lookup path for small arguments | ❌ split artifact |
+| `stirlerr.c` (split) | `stirlerr_cycle_dependent.cl` | `stirlerr_cycle_dependent` — series path for large arguments | ❌ split artifact |
+| `pgamma.c` (extracted) | `pgamma_utils.cl` | `log1pmx`, `lgamma1p` — utilities called by `bd0` | ❌ split artifact |
+| `lgamma.c` | `lgamma.cl` | `lgammafn_sign`, `lgammafn` — log-gamma function | ✓ |
+| `gamma.c` | `gamma.cl` | `gammafn` — gamma function | ✓ |
+| `lgammacor.c` | `lgammacor.cl` | `lgammacor` — series correction for large arguments | ✓ |
+| `chebyshev.c` | `chebyshev.cl` | `chebyshev_init`, `chebyshev_eval` — called by `lgammacor` | ✓ |
+| `cospi.c` | `cospi.cl` | `cospi`, `sinpi`, `tanpi` — `sinpi` called by `gammafn` for the negative-argument reflection formula | ✓ |
+| `fmax2.c` | `fmax2.cl` | `fmax2` — max of two doubles, called by `gammalims` | ✓ |
+| `gammalims.c` | `gammalims.cl` | `gammalims` — gamma function overflow/underflow bounds | ✓ |
+| `refactored.h` | `refactored.cl` | Forward declarations for cycle-broken functions | N/A (header) |
+
+### Key observations
+
+**`pnorm.cl` and `dnorm.cl` are self-contained.** Their only dependencies are
+the `nmath.cl` infrastructure shim and `dpq`-style macros. No additional math
+function files are pulled in — the algorithms (Cody's rational approximation for
+`pnorm`, the standard Gaussian density formula for `dnorm`) close entirely on
+primitive arithmetic.
+
+**`dbinom.cl` and `dgamma.cl` share almost the entire gamma function stack.**
+Both require `lgamma`, `gamma`, `lgammacor`, `chebyshev`, `cospi`, `gammalims`,
+`fmax2`, `pgamma_utils`, `stirlerr`, and `bd0`. The only addition from
+`dgamma.cl` is `dpois.cl`, because `dgamma` delegates to `dpois_raw` when the
+shape parameter is less than 1.
+
+**Three `.cl` files have no direct `.c` counterpart in R's nmath.**
+`stirlerr_cycle_free.cl`, `stirlerr_cycle_dependent.cl`, and `pgamma_utils.cl`
+are fragments split out of `stirlerr.c` and `pgamma.c` respectively. The split
+is required to break mutual call cycles: OpenCL's single-translation-unit
+compilation model requires that every symbol be defined before any reference to
+it. Cycles that a standard C linker resolves at link time must instead be broken
+structurally in OpenCL C.
+
+**The Poisson kernel requires no nmath `.cl` files.** It expresses the entire
+log-likelihood using OpenCL built-ins (`exp`, `log`, `lgamma`). This is both
+the simplest kernel and the one with zero nmath dependency footprint.
+
+---
+
 ## References
 
 Nygren, K.N. and Nygren, Å. (2006), Likelihood Subgradient Densities. *Journal
