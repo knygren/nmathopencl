@@ -9,7 +9,6 @@
  * @section ImplementedIn
  *   - EnvelopeSize.cpp
  *   - EnvelopeEval.cpp
- *   - Set_Grid.cpp   (EnvelopeSet_Grid_C2)
  *
  * @section UsedBy
  *   - export_wrappers.cpp (Ex_EnvelopeSize, Ex_EnvelopeEval example exports)
@@ -51,9 +50,6 @@ Rcpp::List EnvelopeEval(const Rcpp::NumericMatrix& G4,   // grid (parameters × 
                         bool use_opencl = false,
                         bool verbose = false);
 
-
-
-void EnvelopeSet_Grid_C2(Rcpp::NumericMatrix GIndex,  Rcpp::NumericMatrix cbars, Rcpp::NumericMatrix Lint,Rcpp::NumericMatrix Down,Rcpp::NumericMatrix Up,Rcpp::NumericMatrix lglt,Rcpp::NumericMatrix lgrt,Rcpp::NumericMatrix lgct,Rcpp::NumericMatrix logU,Rcpp::NumericMatrix logP);
 
 
 } //env
