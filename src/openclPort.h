@@ -119,6 +119,8 @@ int get_opencl_core_count();
 #define CL_TARGET_OPENCL_VERSION 300
 #include <CL/cl.h>
 #include <string>
+#include <sstream>
+#include <stdexcept>
 
 
 // Load a single .cl kernel file from inst/cl/<relative_path>
@@ -144,6 +146,86 @@ struct OpenCLConfig {
 // Probe OpenCL device capabilities and construct build options
 OpenCLConfig configureOpenCL(cl_context context,
                              cl_device_id device);
+
+// -------------------------------------------------------------------------
+// OpenCL error-handling utilities
+// (inline so downstream packages get them via #include "openclPort.h")
+// -------------------------------------------------------------------------
+
+inline const char* opencl_status_name(cl_int status) {
+  switch (status) {
+    case CL_SUCCESS:                     return "CL_SUCCESS";
+    case CL_DEVICE_NOT_FOUND:            return "CL_DEVICE_NOT_FOUND";
+    case CL_DEVICE_NOT_AVAILABLE:        return "CL_DEVICE_NOT_AVAILABLE";
+    case CL_COMPILER_NOT_AVAILABLE:      return "CL_COMPILER_NOT_AVAILABLE";
+    case CL_MEM_OBJECT_ALLOCATION_FAILURE: return "CL_MEM_OBJECT_ALLOCATION_FAILURE";
+    case CL_OUT_OF_RESOURCES:            return "CL_OUT_OF_RESOURCES";
+    case CL_OUT_OF_HOST_MEMORY:          return "CL_OUT_OF_HOST_MEMORY";
+    case CL_BUILD_PROGRAM_FAILURE:       return "CL_BUILD_PROGRAM_FAILURE";
+    case CL_INVALID_VALUE:               return "CL_INVALID_VALUE";
+    case CL_INVALID_DEVICE:              return "CL_INVALID_DEVICE";
+    case CL_INVALID_BINARY:              return "CL_INVALID_BINARY";
+    case CL_INVALID_BUILD_OPTIONS:       return "CL_INVALID_BUILD_OPTIONS";
+    case CL_INVALID_PROGRAM:             return "CL_INVALID_PROGRAM";
+    case CL_INVALID_OPERATION:           return "CL_INVALID_OPERATION";
+    case CL_INVALID_PLATFORM:            return "CL_INVALID_PLATFORM";
+    case CL_INVALID_CONTEXT:             return "CL_INVALID_CONTEXT";
+    default:                             return "UNKNOWN_OR_VENDOR_SPECIFIC";
+  }
+}
+
+inline const char* opencl_status_hint(cl_int status) {
+  switch (status) {
+    case CL_OUT_OF_RESOURCES:
+      return "Device/runtime resource limit exceeded (often kernel execution failure, watchdog timeout, or register/local-memory pressure).";
+    case CL_OUT_OF_HOST_MEMORY:
+      return "Host memory allocation failed while interacting with OpenCL runtime.";
+    case CL_MEM_OBJECT_ALLOCATION_FAILURE:
+      return "Device memory allocation failed for one or more buffers.";
+    case CL_BUILD_PROGRAM_FAILURE:
+      return "Kernel compilation/build failed; inspect CL_PROGRAM_BUILD_LOG.";
+    case CL_INVALID_CONTEXT:
+      return "OpenCL context is invalid; may indicate stale runtime state.";
+    case CL_INVALID_DEVICE:
+      return "Selected OpenCL device is invalid for this operation.";
+    case CL_DEVICE_NOT_AVAILABLE:
+      return "OpenCL device is present but temporarily unavailable.";
+    default:
+      return "No additional hint available.";
+  }
+}
+
+inline std::string opencl_read_platform_info_str(cl_platform_id platform, cl_platform_info param) {
+  if (platform == nullptr) return "unknown";
+  size_t n = 0;
+  if (clGetPlatformInfo(platform, param, 0, nullptr, &n) != CL_SUCCESS || n == 0) return "unknown";
+  std::string out(n, '\0');
+  if (clGetPlatformInfo(platform, param, n, &out[0], nullptr) != CL_SUCCESS) return "unknown";
+  if (!out.empty() && out.back() == '\0') out.pop_back();
+  return out.empty() ? "unknown" : out;
+}
+
+inline std::string opencl_read_device_info_str(cl_device_id device, cl_device_info param) {
+  if (device == nullptr) return "unknown";
+  size_t n = 0;
+  if (clGetDeviceInfo(device, param, 0, nullptr, &n) != CL_SUCCESS || n == 0) return "unknown";
+  std::string out(n, '\0');
+  if (clGetDeviceInfo(device, param, n, &out[0], nullptr) != CL_SUCCESS) return "unknown";
+  if (!out.empty() && out.back() == '\0') out.pop_back();
+  return out.empty() ? "unknown" : out;
+}
+
+inline std::runtime_error opencl_make_context_error(cl_int status, cl_platform_id platform, cl_device_id device) {
+  std::ostringstream msg;
+  msg << "OpenCL error at clCreateContext (status=" << status
+      << ", name=" << opencl_status_name(status) << "). "
+      << "platform_name=" << opencl_read_platform_info_str(platform, CL_PLATFORM_NAME)
+      << ", platform_vendor=" << opencl_read_platform_info_str(platform, CL_PLATFORM_VENDOR)
+      << ", device_name=" << opencl_read_device_info_str(device, CL_DEVICE_NAME)
+      << ", driver_version=" << opencl_read_device_info_str(device, CL_DRIVER_VERSION)
+      << ". This may indicate a transient driver/runtime context failure.";
+  return std::runtime_error(msg.str());
+}
 
 #endif // USE_OPENCL
 
