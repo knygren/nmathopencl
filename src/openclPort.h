@@ -148,6 +148,22 @@ OpenCLConfig configureOpenCL(cl_context context,
                              cl_device_id device);
 
 // -------------------------------------------------------------------------
+// Generic double-scalar kernel runner
+// Runs any OpenCL kernel whose argument layout is:
+//   kernel(double arg0, ..., double argN, __global double* out, int n_out)
+// dargs   : scalar double inputs (any count, including zero)
+// n_out   : number of output doubles to read back
+// out_flat: output buffer (resized to n_out on entry)
+// -------------------------------------------------------------------------
+void opencl_dbl_scalar_kernel_runner(
+    const std::string&         kernel_source,
+    const char*                kernel_name,
+    const std::vector<double>& dargs,
+    int                        n_out,
+    std::vector<double>&       out_flat
+);
+
+// -------------------------------------------------------------------------
 // OpenCL error-handling utilities
 // (inline so downstream packages get them via #include "openclPort.h")
 // -------------------------------------------------------------------------
