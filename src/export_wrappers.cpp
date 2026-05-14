@@ -1,83 +1,18 @@
 ﻿#include "RcppArmadillo.h"
-#include "Envelopefuncs.h"
 #include "openclPort.h"
 #include "opencl.h"
-#include "simfuncs.h"
 
 using namespace openclPort;
-using namespace glmbayes::env;
-using namespace glmbayes::sim;
 
 
 // -----------------------------------------------------------------------------
-// Wrapper organization mirrors R/rcpp_wrappers.R and R/ex_glmbayes_rcpp_wrappers.R:
-//   Tier 2: Envelope (Example) - EnvelopeSize, EnvelopeEval (ex_glmbayes support)
-//   Tier 4: Model Utilities    - glmb_Standardize_Model (ex_glmbayes support)
-//   Tier 5: OpenCL/GPU         - Kernel loading, diagnostics (core nmathopencl)
-//   Phased out: rss_face_at_disp, UB2 (no R wrappers)
+// Wrapper organization mirrors R/rcpp_wrappers.R:
+//   Tier 5: OpenCL/GPU - nmath function runners, kernel loading, diagnostics
+//
+// Example-specific wrappers (EnvelopeSize, EnvelopeEval, glmb_Standardize_Model)
+// have been moved to ex_glmbayes_export_wrappers.cpp.
 // -----------------------------------------------------------------------------
 
-
-// =============================================================================
-// Tier 2: Envelope (Example Support)
-// Callers: Ex_EnvelopeSize (via .EnvelopeSize_cpp), Ex_EnvelopeEval (via .EnvelopeEval_cpp)
-// User:    Downstream packages building custom OpenCL kernels on nmath
-// =============================================================================
-
-// [[Rcpp::export]]
-Rcpp::List EnvelopeSize_cpp_export(
-    const arma::vec& a,
-    const Rcpp::NumericMatrix& G1,
-    int Gridtype,
-    int n,
-    int n_envopt,
-    bool use_opencl,
-    bool verbose
-) {
-  return glmbayes::env::EnvelopeSize(
-    a, G1, Gridtype, n, n_envopt, use_opencl, verbose
-  );
-}
-
-// [[Rcpp::export]]
-Rcpp::List EnvelopeEval_cpp_export(
-    const Rcpp::NumericMatrix& G4,
-    const Rcpp::NumericVector& y,
-    const Rcpp::NumericMatrix& x,
-    const Rcpp::NumericMatrix& mu,
-    const Rcpp::NumericMatrix& P,
-    const Rcpp::NumericVector& alpha,
-    const Rcpp::NumericVector& wt,
-    const std::string& family,
-    const std::string& link,
-    bool use_opencl = false,
-    bool verbose = false
-) {
-  return EnvelopeEval(
-    G4, y, x, mu, P, alpha, wt,
-    family, link,
-    use_opencl, verbose
-  );
-}
-
-// =============================================================================
-// Tier 4: Model Utilities
-// Callers: glmb_Standardize_Model
-// User:    Advanced users - model preparation, standardization
-// =============================================================================
-
-// [[Rcpp::export]]
-Rcpp::List glmb_Standardize_Model_cpp_export(
-    const Rcpp::NumericVector& y,
-    const Rcpp::NumericMatrix& x,
-    const Rcpp::NumericMatrix& P,
-    const Rcpp::NumericMatrix& bstar,
-    const Rcpp::NumericMatrix& A1
-) {
-  return glmb_Standardize_Model(
-    y, x, P, bstar, A1
-  );
-}
 
 
 // =============================================================================
@@ -1606,58 +1541,3 @@ Rcpp::CharacterVector gpu_names_cpp_export() {
 }
 
 
-// =============================================================================
-// Phased Out (no R wrappers; C++ exports commented out)
-// - rss_face_at_disp, UB2: former RSS/UB2 minimization; active path uses
-//   closed-form C++ bounds.
-//
-// To fully remove: delete this block, then (1) remove *.o from src/,
-// (2) uninstall old glmbayes, (3) Rcpp::compileAttributes(),
-// (4) devtools::document(), (5) devtools::install().
-// =============================================================================
-
-/*
-// [[Rcpp::export]]
-double rss_face_at_disp_cpp_export(
-    double dispersion,
-    const Rcpp::List& cache,
-    const Rcpp::NumericVector& cbars_j,
-    const Rcpp::NumericVector& y,
-    const Rcpp::NumericMatrix& x,
-    const Rcpp::NumericVector& alpha,
-    const Rcpp::NumericVector& wt
-) {
-  return rss_face_at_disp(
-    dispersion,
-    cache,
-    cbars_j,
-    y,
-    x,
-    alpha,
-    wt
-  );
-}
-
-// [[Rcpp::export]]
-double UB2_cpp_export(
-    double dispersion,
-    const Rcpp::List& cache,
-    const Rcpp::NumericVector& cbars_j,
-    const Rcpp::NumericVector& y,
-    const Rcpp::NumericMatrix& x,
-    const Rcpp::NumericVector& alpha,
-    const Rcpp::NumericVector& wt,
-    double rss_min_global
-) {
-  return UB2(
-    dispersion,
-    cache,
-    cbars_j,
-    y,
-    x,
-    alpha,
-    wt,
-    rss_min_global
-  );
-}
-*/
