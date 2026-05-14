@@ -3,7 +3,10 @@
 // we only include RcppArmadillo.h which pulls Rcpp.h in for us
 #include "RcppArmadillo.h"
 #include <RcppParallel.h>
-#include "famfuncs.h"
+#define MATHLIB_STANDALONE
+#include "nmath_local.h"
+#include "dpq_local.h"
+#include "ex_glmbayes_famfuncs.h"
 #include "progress_utils.h"
 
 using namespace Rcpp;
@@ -13,58 +16,45 @@ using namespace glmbayes::progress;
 
 
 
-// f1 is negative log-likelihood
-// f2 is negative log-posterior
-// f3 is gradient for log-posterior
-
-
-double dpois2(double x,double lambda,int lg){
-  
-  //test=max(abs(round(x)-x))
-  
-  //if(test>0){
-  //  warning("Non-Integer Values to Poisson Density - Switching to Gamma Function to Evaluate Factorial")
-    return(-lambda+x*log(lambda)-lgamma(x+1));
-  
-  //} 
-  
-  //return(dpois(x,lambda,log=TRUE))
-}
-
 
 namespace glmbayes{
 
 namespace fam {
-
-
-void neg_dpois_glmb_rmat(const RVector<double>& x,     // observed counts
-                       const std::vector<double>& means, // Poisson rates
-                       std::vector<double>& res,         // output buffer (preallocated)
-                       const int lg)                     // log=TRUE?
+void neg_dgamma_glmb_rmat(const RVector<double>& x,           // observations
+                          const RVector<double>& shape,       // shape parameters
+//                          const RVector<double>& scale,       // scale parameters
+                          const std::vector<double>& scale, // scale parameters
+                          std::vector<double>& res,         // output buffer
+                          const int lg)                       // log=TRUE?
 {
-  std::size_t n = x.size();
-  if (res.size() != n)
-    res.resize(n);  // optional: ensure res is sized correctly
+  std::size_t n = x.length();
   
   for (std::size_t i = 0; i < n; ++i) {
-    double count  = std::round(x[i]);     // match integer behavior
-    double lambda = means[i];             // rate parameter
+    double value = x[i];
+    double k     = shape[i];
+    double theta = scale[i];
     
-    res[i] = -dpois2(count, lambda, lg);  // thread-safe Poisson backend
-  }
+    res[i] = -dgamma_local(value, k, theta, lg);  // call to mathlib version
+//    res[i] = -R::dgamma(value, k, theta, lg);  // current R call
+
+      }
 }
 
 
-NumericVector dpois_glmb( NumericVector x, NumericVector means, int lg){
+
+NumericVector dgamma_glmb( NumericVector x, NumericVector shape, NumericVector scale, int lg){
     int n = x.size() ;
     NumericVector res(n) ;
-
-//    for( int i=0; i<n; i++) res[i] = R::dpois( x[i], means[i], lg ) ;
-    for( int i=0; i<n; i++) res[i] = dpois2( x[i], means[i], lg ) ;
+    for( int i=0; i<n; i++) res[i] = R::dgamma( x[i], shape[i],scale[i], lg ) ;
     return res ;
 }
 
-NumericVector  f1_poisson(NumericMatrix b,NumericVector y,NumericMatrix x,NumericMatrix alpha,NumericVector wt)
+
+////////////////////////////////////////////////////////////////
+// See if it is possible to avoid having some or all of these functions exported
+
+
+NumericVector  f1_gamma(NumericMatrix b,NumericVector y,NumericMatrix x,NumericVector alpha,NumericVector wt)
 {
  
     // Get dimensions of x - Note: should match dimensions of
@@ -83,7 +73,8 @@ NumericVector  f1_poisson(NumericMatrix b,NumericVector y,NumericMatrix x,Numeri
 
     arma::mat x2(x.begin(), l1, l2, false); 
     arma::mat alpha2(alpha.begin(), l1, 1, false); 
-
+    arma::mat wt2(wt.begin(), l1, 1, false);
+    
     Rcpp::NumericVector xb(l1);
     arma::colvec xb2(xb.begin(),l1,false); // Reuse memory - update both below
      
@@ -97,14 +88,22 @@ NumericVector  f1_poisson(NumericMatrix b,NumericVector y,NumericMatrix x,Numeri
     b2temp=b(Range(0,l2-1),Range(i,i));
     arma::mat b2(b2temp.begin(), l2, 1, false); 
   
-    
-    xb2=exp(alpha2+ x2 * b2);
 
-    yy=-dpois_glmb(y,xb,true);
+//  mu<-t(exp(alpha+x%*%b))
+//  disp2<-1/wt
+
+//  -sum(dgamma(y,shape=1/disp2,scale=mu*disp2,log=TRUE))
+
+
+    xb2=exp(alpha2+ x2 * b2);
     
     for(int j=0;j<l1;j++){
-    yy[j]=yy[j]*wt[j];  
+      
+    xb[j]=xb[j]/wt[j];  
     }
+
+    yy=-dgamma_glmb(y,wt,xb,true);
+    
 
     res(i) =std::accumulate(yy.begin(), yy.end(), 0.0);
 
@@ -116,8 +115,7 @@ NumericVector  f1_poisson(NumericMatrix b,NumericVector y,NumericMatrix x,Numeri
 
 
 
-
-NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
+NumericVector  f2_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  
     // Get dimensions of x - Note: should match dimensions of
@@ -136,17 +134,15 @@ NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,Numer
 
     arma::mat x2(x.begin(), l1, l2, false); 
     arma::mat alpha2(alpha.begin(), l1, 1, false); 
+    arma::mat wt2(wt.begin(), l1, 1, false);
 
     Rcpp::NumericVector xb(l1);
     arma::colvec xb2(xb.begin(),l1,false); // Reuse memory - update both below
      
-// Note: Seem not to be used - Editing out
-//    NumericVector invwt=1/sqrt(wt);
 
     // Moving Loop inside the function is key for speed
 
     NumericVector yy(l1);
-    NumericVector yy_alt(l1);
     NumericVector res(m1);
     NumericMatrix bmu(l2,1);
 
@@ -158,8 +154,11 @@ NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,Numer
 
     for(int i=0;i<m1;i++){
       Rcpp::checkUserInterrupt();
+      if(progbar==1){ 
+        progress_bar(i, m1-1);
+        if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
+      };  
       
-
       
     b2temp=b(Range(0,l2-1),Range(i,i));
     arma::mat b2(b2temp.begin(), l2, 1, false); 
@@ -169,19 +168,17 @@ NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,Numer
         
     res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
     
-        xb2=exp(alpha2+ x2 * b2);
-
-        yy=-dpois_glmb(y,xb,true);
-
-
+    xb2=exp(alpha2+ x2 * b2);
+    
     for(int j=0;j<l1;j++){
-    yy[j]=yy[j]*wt[j];  
+      
+    xb[j]=xb[j]/wt[j];  
     }
 
+    yy=-dgamma_glmb(y,wt,xb,true);
 
-    
+
     res(i) =std::accumulate(yy.begin(), yy.end(), res1);
-    
 
     }
     
@@ -190,18 +187,27 @@ NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,Numer
 
 
 
-
-// Thread-safe Poisson likelihood using fully wrapped views
-
-arma::vec f2_poisson_rmat(const RMatrix<double>& b,
-                             const RVector<double>& y,
-                             const RMatrix<double>& x,
-                             const RMatrix<double>& mu,
-                             const RMatrix<double>& P,
-                             const RVector<double>& alpha,
-                             const RVector<double>& wt,
-                             const int progbar=0)
-{
+arma::vec f2_gamma_rmat(
+    // NumericMatrix b, NumericVector y,
+    //                              NumericMatrix x, NumericMatrix mu,
+    //                              NumericMatrix P, NumericVector alpha,
+    //                              NumericVector wt, int progbar = 0
+    const RMatrix<double>& b,
+    const RVector<double>& y,
+    const RMatrix<double>& x,
+    const RMatrix<double>& mu,
+    const RMatrix<double>& P,
+    const RVector<double>& alpha,
+    const RVector<double>& wt,
+    const int progbar=0   
+) {
+  //  int l1 = x.nrow(), l2 = x.ncol();
+  //  int m1 = b.ncol();
+  
+  /////////////////////////////////////////////////////////////////////////////
+  
+  
+  
   std::size_t l1 = x.nrow();
   std::size_t l2 = x.ncol();
   std::size_t m1 = b.ncol();
@@ -220,71 +226,54 @@ arma::vec f2_poisson_rmat(const RMatrix<double>& b,
   std::vector<double> xb_temp(l1), yy_temp(l1);
   arma::colvec xb_temp2(xb_temp.data(), l1, false);  // shallow Armadillo view
   
-    
-
-//  Rcpp::NumericVector xb_vec(l1);   // temp buffer for mean
-//  Rcpp::NumericVector yy_vec(l1);   // temp buffer for log-likelihood
-  
-//  RVector<double> xb(xb_vec);       // thread-safe wrapper
-//  RVector<double> yy(yy_vec);       // thread-safe wrapper
-  
-//  arma::colvec xb2(xb.begin(), l1, false);  // view for exp(alpha + x * b)
+  ////////////////////////////////////////////////////////////
   
   
- //       Rcpp::Rcout << "i=" << i  << "\n";
-  
-
   for (std::size_t i = 0; i < m1; ++i) {
+    
     arma::mat b_i(b2full.colptr(i), l2, 1, false);
     
     bmu = b_i - mu2;
     
-//    Rcpp::Rcout << "b_i=" << b_i  << "\n";
-//    Rcpp::Rcout << "mu2=" << mu2  << "\n";
-//    Rcpp::Rcout << "bmu=" << bmu  << "\n";
-    
     double mahal = 0.5 * arma::as_scalar(bmu.t() * P2 * bmu);
-
-//    Rcpp::Rcout << "mahal=" << mahal  << "\n";
     
-    // Compute exp(alpha + X * b)
     
-    xb_temp2 = arma::exp(alpha2 + x2 * b_i);
-//    xb2 = arma::exp(alpha2 + x2 * b_i);
-
-//    Rcpp::Rcout << "xb_temp2=" << xb_temp2  << "\n";
-
+    //xb_temp2 = alpha2+  x2 * b_i;
     
-    // Thread-safe Poisson log-likelihood
-    neg_dpois_glmb_rmat(y, xb_temp, yy_temp, 1);
-    
-//    Rcpp::Rcout << "yy_temp: ";
-//    for (std::size_t j = 0; j < yy_temp.size(); ++j) {
-//      Rcpp::Rcout << yy_temp[j] << " ";
+//    for (std::size_t j = 0; j < l1; j++) {
+//      xb_temp[j] =1-  exp(-exp(xb_temp[j]));
 //    }
-//    Rcpp::Rcout << "\n";
     
-        // Evaluate density using raw RVector views
-//    neg_dpois_glmb_rmat(y, xb, yy, 1);
+    xb_temp2=exp(alpha2+ x2 * b_i);
     
-    for (std::size_t j = 0; j < l1; ++j) {
-//      yy[j] *= wt[j];
-      yy_temp[j] *= wt[j];
+    for (std::size_t  j = 0; j < l1; j++) {      
+      xb_temp[j]=xb_temp[j]/wt[j];  
     }
     
-    res(i) = std::accumulate(yy_temp.begin(), yy_temp.end(), mahal);
-//    res(i) = std::accumulate(yy.begin(), yy.end(), mahal);
+    
+    //    for(int j=0;j<l1;j++){
+    //      xb(j)=1-exp(-exp(xb(j)));
+    //    }
+    
+    
+    // In-place evaluation using your log-scale accurate backend
+    neg_dgamma_glmb_rmat(y, wt, xb_temp, yy_temp,1.0);
+    
+    
+    res(i) =std::accumulate(yy_temp.begin(), yy_temp.end(), mahal);
+    
   }
   
   return res;
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////
 
 
 
-arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
+
+
+arma::mat  f3_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  
     // Get dimensions of x - Note: should match dimensions of
@@ -304,11 +293,14 @@ arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMa
     arma::mat y2(y.begin(), l1, 1, false);
     arma::mat x2(x.begin(), l1, l2, false); 
     arma::mat alpha2(alpha.begin(), l1, 1, false); 
+    arma::mat wt2(wt.begin(), l1, 1, false);
 
     Rcpp::NumericVector xb(l1);
     arma::colvec xb2(xb.begin(),l1,false); // Reuse memory - update both below
        
-   
+// Note: Seem not to be used - Editing out
+//    NumericVector invwt=1/wt;
+
        
     NumericMatrix Ptemp(l1,l1);  
       
@@ -343,28 +335,27 @@ arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMa
         if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
       };  
       
-      
-          b2temp=b(Range(0,l2-1),Range(i,i));
+    b2temp=b(Range(0,l2-1),Range(i,i));
     arma::mat b2(b2temp.begin(), l2, 1, false); 
     
     NumericMatrix::Column outtemp=out(_,i);
     arma::mat outtemp2(outtemp.begin(),1,l2,false);
 
-
+//  		mu2<-t(exp(alpha+x%*%b))
+//		t(x)%*%(t(1-y/mu2)*wt)+P%*%(b-mu)
 
 
     bmu2=b2-mu2;
-    xb2=alpha2+ x2 * b2;
-//    xb2=y2-exp(alpha2+ x2 * b2);
-
+    
+    
+    xb2=exp(alpha2+ x2 * b2);
+    
     for(int j=0;j<l1;j++){
-    xb(j)=(y(j)-exp(xb(j)))*wt(j);  
+      xb[j]=(1-y[j]/xb[j])*wt[j];
+      
     }
 
-
-//        -t(x)%*%((y-exp(alpha+x%*%b))*wt)+P%*%(b-mu)
-
-    outtemp2= P2 * bmu2-x2.t() * xb2;
+    outtemp2= P2 * bmu2+x2.t() * xb2;
     }
     
    // return  b;
@@ -372,7 +363,7 @@ arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMa
     return trans(out2);      
 }
 
-// Rcpp::List f2_f3_poisson(
+// Rcpp::List f2_f3_gamma(
 //     Rcpp::NumericMatrix  b,
 //     Rcpp::NumericVector  y,
 //     Rcpp::NumericMatrix  x,
@@ -382,17 +373,17 @@ arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMa
 //     Rcpp::NumericVector  wt,
 //     int                  progbar
 // ) {
-//   // Dimensions (match original f2/f3)
+//   // Dimensions
 //   int l1 = x.nrow();
 //   int l2 = x.ncol();
 //   int m1 = b.ncol();
 //   
-//   // Outputs (same layout as original f3: we’ll transpose at the end)
+//   // Outputs (same layout as original f3: we transpose at the end)
 //   Rcpp::NumericVector qf(m1);
 //   Rcpp::NumericMatrix grad(l2, m1);
 //   arma::mat grad2(grad.begin(), l2, m1, false);
 //   
-//   // Common Armadillo views
+//   // Armadillo views
 //   arma::mat x2(x.begin(),     l1, l2, false);
 //   arma::mat mu2(mu.begin(),   l2, 1,  false);
 //   arma::mat P2(P.begin(),     l2, l2, false);
@@ -407,6 +398,9 @@ arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMa
 //   arma::mat bmu2(bmu.begin(), l2, 1, false);
 //   
 //   Rcpp::NumericVector yy(l1);
+//   Rcpp::NumericVector p1(l1);     // not used but kept for structural symmetry
+//   Rcpp::NumericVector p2(l1);     // not used but kept for structural symmetry
+//   Rcpp::NumericVector atemp(l1);  // not used but kept for structural symmetry
 //   
 //   for (int i = 0; i < m1; i++) {
 //     Rcpp::checkUserInterrupt();
@@ -424,32 +418,32 @@ arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMa
 //     double mahal = 0.5 * arma::as_scalar(bmu2.t() * P2 * bmu2);
 //     
 //     // =========================
-//     // f2 part (matches f2_poisson)
+//     // f2 part (matches f2_gamma)
 //     // =========================
 //     xb2 = arma::exp(alpha2 + x2 * b2);   // xb = exp(alpha + X b)
 //     
-//     yy = -dpois_glmb(y, xb, true);
-//     
 //     for (int j = 0; j < l1; j++) {
-//       yy[j] *= wt[j];
+//       xb[j] = xb[j] / wt[j];            // EXACTLY as in original f2_gamma
 //     }
+//     
+//     yy = -dgamma_glmb(y, wt, xb, true);
 //     
 //     qf[i] = std::accumulate(yy.begin(), yy.end(), mahal);
 //     
 //     // =========================
-//     // f3 part (matches f3_poisson)
+//     // f3 part (matches f3_gamma)
 //     // =========================
-//     xb2 = alpha2 + x2 * b2;              // eta
+//     xb2 = arma::exp(alpha2 + x2 * b2);  // mu = exp(alpha + Xb)
 //     
 //     for (int j = 0; j < l1; j++) {
-//       xb(j) = (y(j) - std::exp(xb(j))) * wt(j);
+//       xb[j] = (1.0 - y[j] / xb[j]) * wt[j];   // EXACT gradient term
 //     }
 //     
 //     // xb2 shares memory with xb, as in original f3
-//     grad2.col(i) = P2 * bmu2 - x2.t() * xb2;
+//     grad2.col(i) = P2 * bmu2 + x2.t() * xb2;
 //   }
 //   
-//   // Match legacy f3_poisson return orientation (trans(out2))
+//   // Match legacy f3 return orientation (trans(out2))
 //   arma::mat grad_out = grad2.t();
 //   
 //   return Rcpp::List::create(
@@ -458,7 +452,8 @@ arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMa
 //   );
 // }
 
-Rcpp::List f2_f3_poisson(
+
+Rcpp::List f2_f3_gamma(
     Rcpp::NumericMatrix  b,
     Rcpp::NumericVector  y,
     Rcpp::NumericMatrix  x,
@@ -468,21 +463,21 @@ Rcpp::List f2_f3_poisson(
     Rcpp::NumericVector  wt,
     int                  progbar
 ) {
-  // Dimensions (match original f2/f3)
+  // Dimensions
   int l1 = x.nrow();
   int l2 = x.ncol();
   int m1 = b.ncol();
   
-  // Outputs (same layout as original f3: we’ll transpose at the end)
+  // Outputs (same layout as original f3: we transpose at the end)
   Rcpp::NumericVector qf(m1);
   Rcpp::NumericMatrix grad(l2, m1);
   arma::mat grad2(grad.begin(), l2, m1, false);
   
-  // Common Armadillo views
-  arma::mat x2(x.begin(),         l1, l2, false);
-  arma::mat mu2(mu.begin(),       l2, 1,  false);
-  arma::mat P2(P.begin(),         l2, l2, false);
-  arma::mat alpha2(alpha.begin(), l1, 1,  false);
+  // Armadillo views
+  arma::mat x2(x.begin(),          l1, l2, false);
+  arma::mat mu2(mu.begin(),        l2, 1,  false);
+  arma::mat P2(P.begin(),          l2, l2, false);
+  arma::mat alpha2(alpha.begin(),  l1, 1,  false);
   
   // Temporaries matching original f2/f3
   Rcpp::NumericMatrix b2temp(l2, 1);
@@ -519,35 +514,30 @@ Rcpp::List f2_f3_poisson(
     eta2 = alpha2 + x2 * b2;      // eta = alpha + X b
     
     // =========================
-    // f2 part (matches f2_poisson)
+    // f2 part (matches f2_gamma)
     // =========================
-    // mu = exp(eta); copy into xb (mutable) for f2
+    // mu = exp(eta); we copy into xb (mutable) for f2
     for (int j = 0; j < l1; j++) {
-      xb[j] = std::exp(eta[j]);   // xb = mu
+      xb[j] = std::exp(eta[j]) / wt[j];   // EXACTLY as original: xb = exp(eta)/wt
     }
     
-    yy = -dpois_glmb(y, xb, true);
-    
-    for (int j = 0; j < l1; j++) {
-      yy[j] *= wt[j];             // EXACTLY as in original f2_poisson
-    }
-    
+    yy = -dgamma_glmb(y, wt, xb, true);
     qf[i] = std::accumulate(yy.begin(), yy.end(), mahal);
     
     // =========================
-    // f3 part (matches f3_poisson)
+    // f3 part (matches f3_gamma)
     // =========================
     // Reuse eta to get mu again, without recomputing X*b
     for (int j = 0; j < l1; j++) {
-      double mu_j = std::exp(eta[j]);              // mu = exp(eta)
-      xb[j] = (y[j] - mu_j) * wt[j];               // EXACT gradient term
+      double mu_j = std::exp(eta[j]);                 // mu = exp(eta)
+      xb[j] = (1.0 - y[j] / mu_j) * wt[j];            // EXACT gradient term
     }
     
     // xb2 shares memory with xb, as in original f3
-    grad2.col(i) = P2 * bmu2 - x2.t() * xb2;
+    grad2.col(i) = P2 * bmu2 + x2.t() * xb2;
   }
   
-  // Match legacy f3_poisson return orientation (trans(out2))
+  // Match legacy f3 return orientation (trans(out2))
   arma::mat grad_out = grad2.t();
   
   return Rcpp::List::create(
@@ -556,7 +546,8 @@ Rcpp::List f2_f3_poisson(
   );
 }
 
-
 } //famfuncs
 
 } //glmbayes
+
+///////////////////////////////////////////////////////////////////

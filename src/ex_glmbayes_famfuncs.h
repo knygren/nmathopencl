@@ -1,7 +1,7 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 
 /**
- * @file famfuncs.h
+ * @file ex_glmbayes_famfuncs.h
  * @brief Family-specific likelihood and envelope components for glmbayes.
  *
  * @namespace glmbayes::fam
@@ -9,18 +9,15 @@
  *
  * @section ImplementedIn
  *   These declarations are implemented in:
- *     - famfuncs_binomial.cpp
- *     - famfuncs_Gamma.cpp
- *     - famfuncs_gaussian.cpp
- *     - famfuncs_poisson.cpp
+ *     - ex_glmbayes_famfuncs_binomial.cpp
+ *     - ex_glmbayes_famfuncs_Gamma.cpp
+ *     - ex_glmbayes_famfuncs_gaussian.cpp
+ *     - ex_glmbayes_famfuncs_poisson.cpp
  *
  * @section UsedBy
  *   These functions are consumed by:
- *     - Envelopefuncs.cpp
- *     - EnvelopeEval.cpp
- *     - EnvelopeBuild.cpp
- *     - rNormalGLM.cpp
- *     - rIndepNormalGammaReg.cpp
+ *     - ex_glmbayes_EnvelopeEval.cpp
+ *     - ex_glmbayes_EnvelopeSize.cpp
  *
  * @section Responsibilities
  *   Provides f1, f2, f3 components for all GLM families and link functions.
@@ -36,8 +33,8 @@
  */
 
 
-#ifndef GLMBAYES_FAM_H
-#define GLMBAYES_FAM_H
+#ifndef EX_GLMBAYES_FAM_H
+#define EX_GLMBAYES_FAM_H
 
 // we only include RcppArmadillo.h which pulls Rcpp.h in for us
 #include "RcppArmadillo.h"

@@ -1,21 +1,21 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 
 /**
- * @file Envelopefuncs.h
+ * @file ex_glmbayes_Envelopefuncs.h
  * @brief Core envelope–construction routines for glmbayes.
  *
  * @namespace glmbayes::env
  *
  * @section ImplementedIn
- *   - EnvelopeSize.cpp
- *   - EnvelopeEval.cpp
+ *   - ex_glmbayes_EnvelopeSize.cpp
+ *   - ex_glmbayes_EnvelopeEval.cpp
  *
  * @section UsedBy
- *   - export_wrappers.cpp (Ex_EnvelopeSize, Ex_EnvelopeEval example exports)
+ *   - ex_glmbayes_export_wrappers.cpp (Ex_EnvelopeSize, Ex_EnvelopeEval example exports)
  */
 
-#ifndef GLMBAYES_ENV_H
-#define GLMBAYES_ENV_H
+#ifndef EX_GLMBAYES_ENV_H
+#define EX_GLMBAYES_ENV_H
 
 
 // we only include RcppArmadillo.h which pulls Rcpp.h in for us
@@ -55,7 +55,6 @@ Rcpp::List EnvelopeEval(const Rcpp::NumericMatrix& G4,   // grid (parameters × 
 } //env
 
 }  //glmbayes
-
 
 
 

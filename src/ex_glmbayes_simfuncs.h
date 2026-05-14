@@ -1,23 +1,23 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 
 /**
- * @file simfuncs.h
+ * @file ex_glmbayes_simfuncs.h
  * @brief Model standardization routine for glmbayes.
  *
  * @namespace glmbayes::sim
  *
  * @section ImplementedIn
- *   - glmb_Standardize_Model.cpp
+ *   - ex_glmbayes_glmb_Standardize_Model.cpp
  *
  * @section UsedBy
- *   Consumed by export_wrappers.cpp (glmb_Standardize_Model_cpp_export),
+ *   Consumed by ex_glmbayes_export_wrappers.cpp (glmb_Standardize_Model_cpp_export),
  *   which backs the Ex_glmb_Standardize_Model example.
  */
 
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 
-#ifndef GLMBAYES_SIM_H
-#define GLMBAYES_SIM_H
+#ifndef EX_GLMBAYES_SIM_H
+#define EX_GLMBAYES_SIM_H
 
 
 // we only include RcppArmadillo.h which pulls Rcpp.h in for us

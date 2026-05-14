@@ -8,7 +8,7 @@
 #include "nmath_local.h"
 #include "dpq_local.h"
 #include "openclPort.h"
-#include "famfuncs.h"
+#include "ex_glmbayes_famfuncs.h"
 #include "progress_utils.h"
 
 // Namespaces

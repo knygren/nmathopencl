@@ -3,7 +3,7 @@
 #include <string>
 #include "openclPort.h"
 #include <RcppArmadillo.h>
-#include "famfuncs.h"
+#include "ex_glmbayes_famfuncs.h"
 #include "opencl.h"
 
 using namespace Rcpp;

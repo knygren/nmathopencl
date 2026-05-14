@@ -8,8 +8,8 @@
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 
-#include "famfuncs.h"
-#include "Envelopefuncs.h"
+#include "ex_glmbayes_famfuncs.h"
+#include "ex_glmbayes_Envelopefuncs.h"
 #include <RcppParallel.h>
 #include "openclPort.h"
 #include "progress_utils.h"

@@ -1,6 +1,6 @@
 #include "RcppArmadillo.h"
-#include "Envelopefuncs.h"
-#include "simfuncs.h"
+#include "ex_glmbayes_Envelopefuncs.h"
+#include "ex_glmbayes_simfuncs.h"
 
 using namespace glmbayes::env;
 using namespace glmbayes::sim;
