@@ -14,142 +14,13 @@
 using namespace Rcpp;
 using namespace glmbayes::env;
 
-/// New Pointwise implementation (suggested by COPILOT)
-
 namespace glmbayes {
 
 namespace env {
-void EnvelopeSet_Grid_C2_pointwise(
-    NumericMatrix GIndex,
-    NumericMatrix cbars,
-    NumericMatrix Lint,
-    NumericMatrix Down,
-    NumericMatrix Up,
-    NumericMatrix lglt,
-    NumericMatrix lgrt,
-    NumericMatrix lgct,
-    NumericMatrix logU,
-    NumericMatrix logP
-) {
-  int nGrid  = GIndex.nrow();
-  int kParam = GIndex.ncol();
-  
-  // zero‐initialize logP
-  for (int j = 0; j < nGrid; ++j) {
-    logP(j, 0) = 0.0;
-  }
-  
-  for (int j = 0; j < nGrid; ++j) {
-    double logPj = 0.0;
-    
-    for (int i = 0; i < kParam; ++i) {
-      int code = static_cast<int>(GIndex(j, i));
-      double cb  = cbars(j, i);
-      
 
-            
-      // 1. Determine [down, up]
-      double down, up;
-      if (code == 1) {
-        down = R_NegInf;
-        up   = Lint(0, i) + cb;
-      }
-      else if (code == 2) {
-        down = Lint(0, i) + cb;
-        up   = Lint(1, i) + cb;
-      }
-      else if (code == 3) {
-        down = Lint(1, i) + cb;
-        up   = R_PosInf;
-      }
-      else {  // code == 4
-        down = R_NegInf;
-        up   = R_PosInf;
-      }
-      Down(j, i) = down;
-      Up(j,   i) = up;
-      
-
-      // 2. Compute CDFs and log‐CDFs
-      // P(Z <= up), log P(Z <= up)
-//      double p_up_nl    = R::pnorm(up,   0.0, 1.0, /*lower_tail=*/ true,  /*log_p=*/ false);
-      double logp_up    = R::pnorm(up,   0.0, 1.0, /*lower_tail=*/ true,  /*log_p=*/ true);
-      
-      // P(Z > down), log P(Z > down)
-//      double p_down_gt  = R::pnorm(down, 0.0, 1.0, /*lower_tail=*/ false, /*log_p=*/ false);
-      double logp_down_gt = R::pnorm(down, 0.0, 1.0, /*lower_tail=*/ false, /*log_p=*/ true);
-
-
-      // log‐tails for pure lower/upper
-      lglt(j, i) = logp_up;         // log P(Z <= up)
-      lgrt(j, i) = logp_down_gt;   // log P(Z >  down)
-      
-      
-      
-      // 3. Stable mid‐interval probability
-      // p_mid = P(down < Z <= up)
-//      double p_mid;
-      double g1 = -down;
-      double g2 =  up;
-      
-      double logp_mid_branch;  // branch-specific log expression
-      
-      if (g1 >= g2) {
-        // Upper‑anchored branch
-        double logp_down_le = R::pnorm(down, 0.0, 1.0,
-                                       /*lower_tail=*/ true,
-                                       /*log_p=*/ true);
-                                       double delta = logp_down_le - logp_up;
-                                       
-                                       // log p_mid = log P(Z<=up) + log(-expm1(delta))
-                                       logp_mid_branch = logp_up + std::log(-std::expm1(delta));
-
-                                      
-      } else {
-        // Lower‑anchored branch
-        double logp_up_gt = R::pnorm(up, 0.0, 1.0,
-                                     /*lower_tail=*/ false,
-                                     /*log_p=*/ true);
-                                     double delta = logp_up_gt - logp_down_gt;
-                                     
-                                     // log p_mid = log P(Z>down) + log(-expm1(delta))
-                                     logp_mid_branch = logp_down_gt + std::log(-std::expm1(delta));
-  
-
-      }
-      
-      
-      
-      // --- Final step, after the if/else ---
-      double logp_mid = (R_finite(logp_mid_branch) ? logp_mid_branch : R_NaReal);
-      lgct(j, i) = logp_mid;
-      
-      
-      // 4. Choose the correct log‐density for this cell
-      double uji = 0.0;
-      if      (code == 1) uji = logp_up;
-      else if (code == 2) uji = logp_mid;
-      else if (code == 3) uji = logp_down_gt;
-      // code == 4 ⇒ uji = 0
-      
-      logU(j, i)  = uji;
-      logPj      += uji;
-    }
-    
-    logP(j, 0) = logPj;
-  
-    
-      }
-}
-
-
-
-
-// Set_Grid creates new objects and returns them is a list
-// Set_Grid_C is likely an intermediate implementation that takes objects as inputs 
-// and the returns them
-// Set_Grid_C2 take existing allocated objects and populates them
-// In cases where the function is called repeatedly the last approach is preferred
+// Set_Grid creates new objects and returns them in a list.
+// Set_Grid_C2 takes existing allocated objects and populates them in-place
+// (preferred when the function is called repeatedly).
 
 void EnvelopeSet_Grid_C2(Rcpp::NumericMatrix GIndex,  
                  Rcpp::NumericMatrix cbars, 
@@ -220,19 +91,11 @@ void EnvelopeSet_Grid_C2(Rcpp::NumericMatrix GIndex,
     lgrt(_,i) = pnorm(Down(_,i),0.0,1.0,false,true);
     lgct(_,i) = pnorm(Up(_,i),0.0,1.0)-pnorm(Down(_,i),0.0,1.0); 
     
-    // Use loop and if statements here
-    // These calculations seem to yield same values as lgct above
-    // when lgct is correct - should be safer version when differences 
-    // between Up and Down are small
-    
     lgct1(_,i)=pnorm(Up(_,i),0.0,1.0)*
       (1-exp(pnorm(Down(_,i),0.0,1.0,true,true)-pnorm(Up(_,i),0.0,1.0,true,true)));
     
     lgct2(_,i)=pnorm(Down(_,i),0.0,1.0,false)*
       (1-exp(pnorm(Up(_,i),0.0,1.0,false,true)-pnorm(Down(_,i),0.0,1.0,false,true)));
-    
-    // Replace old lgct calculation with results from lgct3 
-    // Keep redundant part for now to allow for testing of impact/further changes
     
     for(int j=0;j<l2;j++) {
       g1=-Down(j,i);
@@ -243,9 +106,6 @@ void EnvelopeSet_Grid_C2(Rcpp::NumericMatrix GIndex,
       lgct(j,i)=lgct3(j,i);
       
     }
-    
-    //     -pnorm(Down(_,i),0.0,1.0); 
-    //     exp(pnorm(q=a,mean=mu,sd=sigma,log.p=TRUE)-pnorm(q=b2,mean=mu,sd=sigma,log.p=TRUE)))
     
   }
   
@@ -287,50 +147,8 @@ void EnvelopeSet_Grid_C2(Rcpp::NumericMatrix GIndex,
   //  Rcpp::Rcout << "lct:" << std::endl << lgct << std::endl;
   //  Rcpp::Rcout << "logU:" << std::endl << logU << std::endl;
   
-  
-  
-}
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////
-//    Set Grid Does not update existing objects - It creates new ones    ////////////////////////
-//   This could be bad when function is called many times                 //////////////  
-
-
-
-Rcpp::List EnvelopeSet_Grid(Rcpp::NumericMatrix GIndex,
-                    Rcpp::NumericMatrix cbars,
-                    Rcpp::NumericMatrix Lint) {
-  
-  int l1 = GIndex.ncol();
-  int l2 = GIndex.nrow();
-  
-  Rcpp::NumericMatrix Down(l2, l1);
-  Rcpp::NumericMatrix Up(l2, l1);
-  Rcpp::NumericMatrix lglt(l2, l1);
-  Rcpp::NumericMatrix lgrt(l2, l1);
-  Rcpp::NumericMatrix lgct(l2, l1);
-  Rcpp::NumericMatrix logU(l2, l1);
-  Rcpp::NumericMatrix logP(l2, 2);
-  
-  // Populate in-place using the numerically-stable implementation
-  EnvelopeSet_Grid_C2(GIndex, cbars, Lint, Down, Up, lglt, lgrt, lgct, logU, logP);
-  
-  return Rcpp::List::create(
-    Rcpp::Named("Down") = Down,
-    Rcpp::Named("Up")   = Up,
-    Rcpp::Named("lglt") = lglt,
-    Rcpp::Named("lgrt") = lgrt,
-    Rcpp::Named("lgct") = lgct,
-    Rcpp::Named("logU") = logU,
-    Rcpp::Named("logP") = logP
-  );
 }
 
 } // env
  
 } // glmbayes
-
-/////////////////////////////////////////////////////////////////////////////
-
