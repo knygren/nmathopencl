@@ -5,38 +5,18 @@
  * @brief Core envelope–construction routines for glmbayes.
  *
  * @namespace glmbayes::env
- * @brief Algorithms for grid construction, envelope building, evaluation,
- *        sorting, and dispersion–aware refinement used in accept–reject
- *        sampling for GLM Bayesian models.
  *
  * @section ImplementedIn
- *   These declarations are implemented in:
- *     - EnvelopeSize.cpp
- *     - EnvelopeBuild.cpp
- *     - EnvelopeEval.cpp
- *     - EnvelopeDispersionBuild.cpp
+ *   - EnvelopeSize.cpp
+ *   - EnvelopeBuild.cpp
+ *   - EnvelopeEval.cpp
+ *   - EnvelopeDispersionBuild.cpp
+ *   - EnvelopeSort.cpp
+ *   - Set_Grid.cpp
+ *   - Set_LogP.cpp
  *
  * @section UsedBy
- *   These functions are consumed by:
- *     - EnvelopeOrchestrator.cpp (high‑level orchestration)
- *     - rNormalGLM.cpp (rNormalGLM_std sampler)
- *     - rIndepNormalGammaReg.cpp (standardized samplers)
- *     - export_wrappers.cpp (Ex_EnvelopeSize, Ex_EnvelopeEval example exports)
- *
- * @section Responsibilities
- *   Provides the computational kernels for:
- *     - grid sizing and initialization (EnvelopeSize)
- *     - envelope construction for standard GLM families (EnvelopeBuild)
- *     - envelope evaluation at grid points (EnvelopeEval)
- *     - dispersion‑aware envelope refinement (EnvelopeDispersionBuild)
- *     - envelope sorting and UB‑list assembly (EnvelopeSort_cpp)
- *     - grid and log‑probability updates (EnvelopeSet_Grid, EnvelopeSet_LogP)
- *
- *   These routines:
- *     - assume validated inputs from R wrappers,
- *     - operate on Armadillo matrices and Rcpp vectors,
- *     - support optional OpenCL and parallel execution where applicable,
- *     - form the backbone of accept–reject sampling in glmbayes.
+ *   - export_wrappers.cpp (Ex_EnvelopeSize, Ex_EnvelopeEval example exports)
  */
 
 #ifndef GLMBAYES_ENV_H
@@ -116,48 +96,6 @@ List EnvelopeDispersionBuild(
 );
 
 
-/// EnvelopeCentering: dispersion anchoring for Normal-Gamma; RSS_post is closed-form
-/// E[RSS] each iteration and drives the Gamma update.
-List EnvelopeCentering(
-    NumericVector y,
-    NumericMatrix x,
-    NumericVector mu,
-    NumericMatrix P,
-    NumericVector offset,
-    NumericVector wt,
-    double shape,
-    double rate,
-    int Gridtype = 2,
-    bool verbose = false
-);
-
-Rcpp::List EnvelopeOrchestrator(
-    NumericVector bstar2,
-    NumericMatrix A,
-    NumericVector y,
-    NumericMatrix x2,
-    NumericMatrix mu2,
-    NumericMatrix P2,
-    NumericVector alpha,
-    NumericVector wt,
-    
-    int n,
-    int Gridtype,
-    Nullable<int> n_envopt,
-    
-    double shape,
-    double rate,
-    double RSS_Post2,
-    double RSS_ML,
-    
-    double max_disp_perc,
-    Nullable<double> disp_lower,
-    Nullable<double> disp_upper,
-    
-    bool use_parallel,
-    bool use_opencl,
-    bool verbose
-);
 
 Rcpp::List EnvelopeSort_cpp(
     int l1,
