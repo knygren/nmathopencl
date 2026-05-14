@@ -208,7 +208,7 @@ std::string load_kernel_source_wrapper(std::string relative_path,
 #ifdef USE_OPENCL
   return load_kernel_source(relative_path, package);
 #else
-  Rcpp::stop("OpenCL support is not available in this build of glmbayes.");
+  Rcpp::stop("OpenCL support is not available in this build of nmathopencl.");
 #endif
 }
 
@@ -221,7 +221,7 @@ std::string load_kernel_library_wrapper(std::string subdir,
 #ifdef USE_OPENCL
   return load_kernel_library(subdir, package, verbose);
 #else
-  Rcpp::stop("OpenCL support is not available in this build of glmbayes.");
+  Rcpp::stop("OpenCL support is not available in this build of nmathopencl.");
 #endif
 }
 

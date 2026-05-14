@@ -8,11 +8,8 @@
 using namespace Rcpp;
 
 using namespace openclPort;
-using namespace glmbayes::opencl;
 
-namespace glmbayes {
-
-namespace opencl {
+namespace nmathopencl {
 
 
 Rcpp::NumericVector dnorm_opencl(
@@ -1667,6 +1664,5 @@ Rcpp::NumericVector r_check_stack_opencl(int n_out, bool verbose) {
   return out;
 }
 
-}
-}
+} // namespace nmathopencl
 

@@ -17,7 +17,7 @@ using namespace Rcpp;
 using namespace RcppParallel;
 using namespace openclPort;
 using namespace glmbayes::fam;
-using namespace glmbayes::progress;
+using namespace nmathopencl::progress;
 
 
 

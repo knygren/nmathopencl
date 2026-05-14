@@ -11,7 +11,7 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 using namespace glmbayes::fam;
-using namespace glmbayes::progress;
+using namespace nmathopencl::progress;
 
 
 
@@ -405,7 +405,7 @@ Rcpp::List f2_f3_gaussian(
   for (int i = 0; i < m1; ++i) {
     Rcpp::checkUserInterrupt();
     if (progbar == 1) {
-      glmbayes::progress::progress_bar(i, m1 - 1);
+      nmathopencl::progress::progress_bar(i, m1 - 1);
       if (i == m1 - 1) Rcpp::Rcout << "" << std::endl;
     }
     

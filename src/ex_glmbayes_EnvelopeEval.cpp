@@ -20,7 +20,7 @@ using namespace openclPort;
 using namespace glmbayes::fam;
 using namespace glmbayes::env;
 using namespace glmbayes::opencl;
-using namespace glmbayes::progress;
+using namespace nmathopencl::progress;
 
 // Internal helper: run OpenCL pilot timing, print diagnostics, and prompt user.
 // Not exported to R.
@@ -40,7 +40,7 @@ double f2_f3_opencl_pilot(const Rcpp::NumericMatrix& G4,
                         double threshold_sec=300) {
   if (!use_opencl) return NA_REAL;
   
-  glmbayes::progress::Timer t_pilot;
+  nmathopencl::progress::Timer t_pilot;
   if (verbose) t_pilot.begin();
   
   
@@ -139,7 +139,7 @@ double f2_f3_opencl_pilot(const Rcpp::NumericMatrix& G4,
     // }
     
     Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Running timed grid slice of size "
-                << glmbayes::progress::format_int_with_commas(static_cast<long long>(m_stage_grid))
+                << nmathopencl::progress::format_int_with_commas(static_cast<long long>(m_stage_grid))
                 << "...\n";
     
     
@@ -160,7 +160,7 @@ double f2_f3_opencl_pilot(const Rcpp::NumericMatrix& G4,
       // Calibration summary (diagnostic: raw seconds OK)
       Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Calibration elapsed = "
                   << time_p << " s for "
-                  << glmbayes::progress::format_int_with_commas(m_stage_grid)
+                  << nmathopencl::progress::format_int_with_commas(m_stage_grid)
                   << " grid points ("
                   << per_grid_sec_parallel << " s/grid).\n";
       
@@ -172,7 +172,7 @@ double f2_f3_opencl_pilot(const Rcpp::NumericMatrix& G4,
       
       // Use your new unified formatter
       Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Refined grid build time estimate = "
-                  << glmbayes::progress::format_hms(total) << "\n";
+                  << nmathopencl::progress::format_hms(total) << "\n";
     }
     
 
@@ -182,7 +182,7 @@ double f2_f3_opencl_pilot(const Rcpp::NumericMatrix& G4,
       
       // Estimated full evaluation time (human‑readable only)
       Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Estimated full f2_f3 evaluation time = "
-                  << glmbayes::progress::format_hms(total) << "\n";
+                  << nmathopencl::progress::format_hms(total) << "\n";
       
       // Components (these are diagnostic, so raw numbers are fine)
       Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:Pilot] Components: fixed="
@@ -199,7 +199,7 @@ double f2_f3_opencl_pilot(const Rcpp::NumericMatrix& G4,
   // PRINT PILOT COMPLETION BEFORE USER PROMPT
   // ---------------------------------------------
   if (verbose) {
-    glmbayes::progress::print_completed(
+    nmathopencl::progress::print_completed(
       "[EnvelopeBuild:EnvelopeEval:Pilot]", 
       t_pilot
     );
@@ -210,7 +210,7 @@ double f2_f3_opencl_pilot(const Rcpp::NumericMatrix& G4,
     long total = static_cast<long>(std::round(refined_est_total_sec));
     
     Rcpp::Rcout << "\nEstimated run time exceeds 5 minutes ("
-                << glmbayes::progress::format_hms(total)
+                << nmathopencl::progress::format_hms(total)
                 << ").\n";
     
     Rcpp::Function r_interactive("interactive");
@@ -489,7 +489,7 @@ Rcpp::List EnvelopeEval(const Rcpp::NumericMatrix& G4,   // grid (parameters × 
       long total = static_cast<long>(std::round(est_time));
       
       Rcpp::Rcout << "[EnvelopeBuild:EnvelopeEval:f2_f3_opencl] Estimated time = "
-                  << glmbayes::progress::format_hms(total) << "\n";
+                  << nmathopencl::progress::format_hms(total) << "\n";
     }
   
   }

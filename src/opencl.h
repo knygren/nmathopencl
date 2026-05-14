@@ -51,8 +51,8 @@
  */
 
 
-#ifndef GLMBAYES_OPENCL_H
-#define GLMBAYES_OPENCL_H
+#ifndef NMATHOPENCL_OPENCL_H
+#define NMATHOPENCL_OPENCL_H
 
 #include <string>
 #include <vector>
@@ -129,6 +129,17 @@ Rcpp::List f2_f3_opencl(
     Rcpp::NumericVector  wt,
     int                  progbar = 0
 );
+
+} // namespace opencl
+} // namespace glmbayes
+
+// =============================================================================
+// nmathopencl namespace
+// Core nmath/R distribution kernel runners and wrappers.
+// These are nmathopencl's primary published product and have no glmbayes
+// dependency.
+// =============================================================================
+namespace nmathopencl {
 
 // -----------------------------------------------------------------------------
 // Simple nmath function runner/wrapper (dnorm)
@@ -1303,7 +1314,6 @@ Rcpp::NumericVector r_check_stack_opencl(
     bool verbose = false
 );
 
-} // namespace opencl
-} // namespace glmbayes
+} // namespace nmathopencl
 
 #endif

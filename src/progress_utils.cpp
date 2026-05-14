@@ -2,9 +2,9 @@
 
 
 using namespace Rcpp;
-using namespace glmbayes::progress;
+using namespace nmathopencl::progress;
 
-namespace glmbayes {
+namespace nmathopencl {
 
 namespace progress {
 

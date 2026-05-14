@@ -2,7 +2,7 @@
  * @file progress_utils.h
  * @brief Timing, timestamping, and console‑progress utilities used throughout glmbayes.
  *
- * @namespace glmbayes::progress
+ * @namespace nmathopencl::progress
  * @brief Lightweight helpers for wall‑clock timing, human‑readable duration
  *        formatting, timestamp generation, and progress‑bar output during
  *        long‑running computations.
@@ -44,7 +44,7 @@
 #include <sstream>
 #include <RcppArmadillo.h>
 
-namespace glmbayes {
+namespace nmathopencl {
 namespace progress {
 
 // Existing now_hms()
@@ -126,6 +126,6 @@ inline std::string format_int_with_commas(long long value) {
 void progress_bar(double x, double N);
 
 } // namespace progress
-} // namespace glmbayes
+} // namespace nmathopencl
 
 #endif

@@ -24,13 +24,10 @@
 #include <string>
 
 using namespace openclPort;
-using namespace glmbayes::opencl;
 
 #ifdef USE_OPENCL
 
-namespace glmbayes {
-
-namespace opencl {
+namespace nmathopencl {
 
 void dnorm_kernel_runner(
     const std::string&         kernel_source,
@@ -446,8 +443,7 @@ void rext_utils_kernel_runner(
   rng_scalar_kernel_runner(kernel_source, kernel_name, {}, n_out, out_flat);
 }
 
-}
-}
+} // namespace nmathopencl
 
 #endif
 
