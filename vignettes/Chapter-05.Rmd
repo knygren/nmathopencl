@@ -1,0 +1,240 @@
+---
+title: "Chapter 05: The nmathopencl R API — Distribution Functions on the GPU"
+author: "Kjell Nygren"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Chapter 05: The nmathopencl R API — Distribution Functions on the GPU}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+## Overview
+
+`nmathopencl` exports a family of R functions that mirror R's
+`stats::` distribution functions but dispatch computation to an OpenCL
+device when one is available. The calling convention is intentionally close
+to the base-R equivalents so that substitution is straightforward.
+
+All exported functions share three common arguments:
+
+| Argument | Type | Default | Meaning |
+|----------|------|---------|---------|
+| `fallback` | logical | `TRUE` | Fall back to the `stats::` equivalent if OpenCL is unavailable or fails |
+| `verbose` | logical | `FALSE` | Print informational messages when a fallback occurs |
+| `log` / `lower.tail` | logical | distribution-specific | Mirror the `stats::` convention for the same function |
+
+## Checking availability
+
+```{r, eval = FALSE}
+library(nmathopencl)
+
+# TRUE only if compiled with USE_OPENCL and a device is found at runtime
+has_opencl()
+
+# List GPU device names recognized by the OpenCL platform
+gpu_names()
+```
+
+Because all functions honor `fallback = TRUE` by default, they are safe to
+call unconditionally: on a machine without OpenCL they silently use the CPU.
+To force GPU-only execution and get an error instead of a fallback, set
+`fallback = FALSE`.
+
+## Normal distribution
+
+```{r, eval = FALSE}
+x  <- rnorm(1e6)
+
+# Density
+d  <- dnorm_opencl(x, mean = 0, sd = 1, log = FALSE)
+
+# CDF (scalar q replicated n times)
+p  <- pnorm_opencl(n = 1e6, q = 1.96, mean = 0, sd = 1)
+
+# Quantile (scalar p replicated n times)
+q  <- qnorm_opencl(n = 1e6, p = 0.975, mean = 0, sd = 1)
+
+# Random draws
+r  <- rnorm_opencl(n = 1e6, mean = 0, sd = 1)
+```
+
+Note the signature difference between `dnorm_opencl` (takes a vector `x`)
+and `pnorm_opencl` / `qnorm_opencl` (take a scalar parameter and replicate
+it `n` times across work-items). This reflects the typical GPU use-case: the
+scalar-replication path avoids transferring a large constant vector to the
+device.
+
+## Distribution families
+
+### Gamma
+
+```{r, eval = FALSE}
+dgamma_opencl(x, shape = 2, rate = 1)
+pgamma_opencl(n, q, shape = 2, rate = 1)
+qgamma_opencl(n, p, shape = 2, rate = 1)
+rgamma_opencl(n, shape = 2, rate = 1)
+```
+
+### Binomial
+
+```{r, eval = FALSE}
+dbinom_opencl(x, size = 10, prob = 0.3)
+pbinom_opencl(n, q, size = 10, prob = 0.3)
+qbinom_opencl(n, p, size = 10, prob = 0.3)
+rbinom_opencl(n, size = 10, prob = 0.3)
+```
+
+### Poisson
+
+```{r, eval = FALSE}
+dpois_opencl(x, lambda = 3)
+ppois_opencl(n, q, lambda = 3)
+qpois_opencl(n, p, lambda = 3)
+rpois_opencl(n, lambda = 3)
+```
+
+### Beta
+
+```{r, eval = FALSE}
+dbeta_opencl(x, shape1 = 2, shape2 = 5)
+pbeta_opencl(n, q, shape1 = 2, shape2 = 5)
+qbeta_opencl(n, p, shape1 = 2, shape2 = 5)
+rbeta_opencl(n, shape1 = 2, shape2 = 5)
+```
+
+### Additional families
+
+All families below follow the same four-function pattern (`d*`, `p*`, `q*`,
+`r*`) with the same `fallback` / `verbose` arguments:
+
+| Family | R file |
+|--------|--------|
+| Cauchy | `cauchy_opencl.R` |
+| Chi-squared | `chisq_opencl.R` |
+| Exponential | `exponential_opencl.R` |
+| F | `f_opencl.R` |
+| Geometric | `geometric_opencl.R` |
+| Hypergeometric | `hypergeometric_opencl.R` |
+| Log-normal | `lnorm_opencl.R` |
+| Logistic | `logistic_opencl.R` |
+| Negative binomial | `negative_binomial_opencl.R` |
+| t | `t_opencl.R` |
+| Uniform | `uniform_opencl.R` |
+| Weibull | `weibull_opencl.R` |
+| Wilcoxon rank-sum | `rwilcox_opencl.R` |
+| Wilcoxon signed-rank | `signrank_opencl.R` |
+| Multivariate discrete | `multinomial_opencl.R` |
+| Tukey | `tukey_opencl.R` |
+| Bessel | `bessel_opencl.R` |
+
+### Noncentral distributions
+
+Noncentral variants (`dnt_opencl`, `dnchisq_opencl`, `dnf_opencl`,
+`dnbeta_opencl`, and their `p*`, `q*` counterparts) are available with the
+noncentrality parameter `ncp`.
+
+## Special functions and math support
+
+```{r, eval = FALSE}
+# Log-gamma
+lgammafn_opencl(n, x)
+lgammafn_sign_opencl(n, x)
+
+# Gamma function
+gammafn_opencl(n, x)
+
+# Log-gamma at x+1
+lgamma1p_opencl(n, x)
+
+# Digamma / polygamma
+digamma_opencl(n, x)
+trigamma_opencl(n, x)
+psigamma_opencl(n, x, deriv)
+
+# Beta and log-beta
+beta_special_opencl(n, a, b)
+lbeta_special_opencl(n, a, b)
+
+# Binomial coefficients
+choose_special_opencl(n_out, n, k)
+lchoose_special_opencl(n_out, n, k)
+
+# Logspace arithmetic
+logspace_add_opencl(n, logx, logy)
+logspace_sub_opencl(n, logx, logy)
+logspace_sum_opencl(n, logx, logy)
+
+# Math support
+fmax2_opencl(n, x, y)
+fmin2_opencl(n, x, y)
+```
+
+These are exported via `special_opencl.R` and `math_support_opencl.R`.
+
+## R extension utilities (`R_ext`)
+
+```{r, eval = FALSE}
+# R-compatible power
+r_pow_opencl(n, x, y)
+r_pow_di_opencl(n, x, i)
+
+# Miscellaneous math helpers
+log1pmx_opencl(n, x)
+log1pexp_opencl(n, x)
+log1mexp_opencl(n, x)
+pow1p_opencl(n, x, y)
+```
+
+These are exported via `rext_utils_opencl.R`.
+
+## RNG core
+
+```{r, eval = FALSE}
+# Base RNG draws
+norm_rand_opencl(n)
+unif_rand_opencl(n)
+exp_rand_opencl(n)
+r_unif_index_opencl(n, dt)
+```
+
+These generate random samples using device-side implementations of the
+same Kinderman–Ramage / Ahrens–Dieter algorithms used by R's internal RNG.
+They are exported via `rng_core_opencl.R`.
+
+## Fallback behavior in detail
+
+The `fallback` logic follows a two-stage check:
+
+1. **Compile-time check** (`has_opencl()`): if the package was not built
+   with `USE_OPENCL`, there is no OpenCL runtime at all. With
+   `fallback = TRUE` the function immediately calls the `stats::` equivalent;
+   with `fallback = FALSE` it throws an error.
+
+2. **Runtime check**: even with a working OpenCL build, a kernel call can
+   fail (device lost, out-of-memory, compilation error). The call is wrapped
+   in `tryCatch`; on error, `fallback = TRUE` silently returns the `stats::`
+   result while `fallback = FALSE` re-throws the error.
+
+```{r, eval = FALSE}
+# Explicit error on GPU failure (no silent fallback):
+dnorm_opencl(x, fallback = FALSE)
+
+# Print a message whenever the fallback is used:
+dnorm_opencl(x, fallback = TRUE, verbose = TRUE)
+```
+
+## Performance notes
+
+GPU acceleration is most beneficial for **large vectors** (≥ ~10,000
+elements) and for functions with non-trivial per-element computation
+(e.g., `pgamma`, `pt`, `qnorm`). For very small inputs the kernel
+compilation overhead and data transfer latency dominate.
+
+The first call in an R session may be slightly slower because OpenCL JIT-
+compiles the kernel source for the specific device. Subsequent calls with
+the same kernel reuse the compiled program from the driver's cache.

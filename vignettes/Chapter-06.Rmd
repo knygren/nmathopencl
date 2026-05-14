@@ -1,0 +1,218 @@
+---
+title: "Chapter 06: Kernel Loading — load_kernel_source and load_kernel_library"
+author: "Kjell Nygren"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Chapter 06: Kernel Loading — load_kernel_source and load_kernel_library}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+## The assembly problem
+
+OpenCL compiles a **single string** of source code for each program.
+The string must be self-contained: all functions used by the kernel must be
+defined in the same string, in order, before they are called. There are no
+separate compilation units and no linker.
+
+When a kernel needs `dnorm4`, and `dnorm4` itself needs `R_D__0` and
+`R_finite`, those definitions must precede `dnorm4` in the string, which
+must precede the kernel body. `nmathopencl` solves this with two R
+functions that assemble and sort source components automatically.
+
+## `load_kernel_source()`
+
+```{r, eval = FALSE}
+load_kernel_source(relative_path, package = "nmathopencl")
+```
+
+Reads and returns the contents of a single `.cl` file from `inst/cl/`
+inside the named package. The `relative_path` is relative to `inst/cl/`:
+
+```{r, eval = FALSE}
+# Load the dnorm kernel entry-point file
+kernel_src <- load_kernel_source("src/dnorm_kernel.cl")
+
+# Load a custom kernel from another package's inst/cl/
+my_kernel   <- load_kernel_source("ex_glmbayes_src/f2_f3_binomial_logit.cl",
+                                   package = "nmathopencl")
+```
+
+The function checks `has_opencl()` and throws an informative error if
+OpenCL is unavailable. The returned character string can be concatenated
+with a library string and passed to the C++ runner.
+
+## `load_kernel_library()`
+
+```{r, eval = FALSE}
+load_kernel_library(subdir, package = "nmathopencl", verbose = FALSE)
+```
+
+Reads **all** `.cl` files from `inst/cl/<subdir>/`, parses the
+`@provides` / `@depends` annotations in each file, performs a topological
+sort, and returns a single concatenated source string with files in
+dependency-correct order.
+
+```{r, eval = FALSE}
+# Load the complete nmath library (all ~180 files)
+nmath_src <- load_kernel_library("nmath")
+
+# Load a smaller subset pre-curated for glmbayes kernels
+nmath_glm <- load_kernel_library("ex_glmbayes_nmath")
+
+# Load with diagnostic output to trace the sort order
+nmath_src <- load_kernel_library("nmath", verbose = TRUE)
+```
+
+## The annotation format
+
+For `load_kernel_library()` to sort correctly, every `.cl` file in the
+subdirectory must begin with an annotation block:
+
+```c
+// @provides: symbol1, symbol2
+// @depends:  fileA, fileB
+// @includes: library_name
+```
+
+| Tag | Required? | Meaning |
+|-----|-----------|---------|
+| `@provides` | Yes | Comma-separated list of function (or symbol) names defined in this file |
+| `@depends` | Yes (may be empty) | Comma-separated list of `.cl` filenames (without extension) that must appear earlier in the output |
+| `@includes` | Optional | Library grouping label; used for diagnostics only |
+
+**Rules for `@depends`:**
+
+- List only **direct** dependencies, not the full transitive set. The
+  resolver computes the transitive closure automatically.
+- Every non-header file must list the library header file (the file whose
+  basename matches the subdirectory name) in `@depends`, so the header is
+  always loaded first.
+- If a file has no dependencies at all (i.e., it is the library header),
+  leave `@depends` empty or omit the tag.
+
+Example for `dgamma.cl`:
+
+```c
+// @provides: dgamma
+// @depends:  nmath, dpois, lgamma
+// @includes: nmath
+```
+
+This tells the resolver: emit `nmath.cl`, `dpois.cl`, and `lgamma.cl`
+before `dgamma.cl`. The resolver handles those files' own dependencies
+recursively.
+
+## The topological sort algorithm
+
+`load_kernel_library()` uses a straightforward iterative topological sort:
+
+1. Parse all `.cl` files and extract their `@provides` and `@depends` tags.
+2. Build a set of "unsorted" files. Initialize the "sorted" set to empty.
+3. In each pass, find every unsorted file whose `@depends` entries are all
+   already in the sorted set. Emit those files and add them to the sorted
+   set.
+4. Repeat until all files are sorted or no progress is made.
+5. If no progress is made but unsorted files remain, throw:
+   `"Dependency sort failed: unresolved dependencies remain."`
+
+Files with an empty `@depends` list are emitted first (pass 1). These are
+always the library header files.
+
+### Verbose output
+
+When `verbose = TRUE`, the function prints each pass of the sort:
+
+```
+Pass 1: emitting nmath.cl, Rmath.cl, dpq.cl
+Pass 2: emitting chebyshev.cl, cospi.cl, fmax2.cl, gammalims.cl
+Pass 3: emitting lgammacor.cl
+Pass 4: emitting lgamma.cl, gamma.cl
+...
+```
+
+This is invaluable for debugging missing or circular `@depends` tags.
+
+## Cycle detection and breaking
+
+If file A lists file B in its `@depends` and file B lists file A, the
+resolver will detect this on the first pass where neither can be promoted,
+and throw an error. If `verbose = TRUE`, it prints the stuck files before
+throwing.
+
+The standard fix is to split one of the mutually dependent files into two:
+
+- A "cycle-free" fragment containing functions that make no forward call.
+- A "cycle-dependent" fragment containing functions that call the
+  cycle-free fragment.
+- A `refactored.cl` that provides forward declarations for any symbols
+  referenced before they are defined.
+
+Chapter 03 describes the three specific cycles in the nmath library and how
+they are resolved.
+
+## Assembling a complete program
+
+A complete OpenCL program string is assembled by concatenating library
+and kernel sources in order:
+
+```{r, eval = FALSE}
+library(nmathopencl)
+
+# 1. Load the nmath library (sorted automatically)
+nmath_src  <- load_kernel_library("nmath")
+
+# 2. Load the kernel entry-point
+kernel_src <- load_kernel_source("src/dnorm_kernel.cl")
+
+# 3. Concatenate into a single program string
+program    <- paste(nmath_src, kernel_src, sep = "\n")
+```
+
+This `program` string is then passed to the C++ runner (see Chapter 07).
+
+## Using libraries from another package
+
+The `package` argument tells `load_kernel_source()` and
+`load_kernel_library()` which package's `inst/cl/` to look in:
+
+```{r, eval = FALSE}
+# Load the curated nmath subset shipped inside nmathopencl
+# for use by a downstream package's kernels
+nmath_sub <- load_kernel_library("ex_glmbayes_nmath",
+                                  package = "nmathopencl")
+
+# Load a custom kernel from the same downstream package
+my_kernel <- load_kernel_source("ex_glmbayes_src/f2_f3_binomial_logit.cl",
+                                 package = "nmathopencl")
+
+program <- paste(nmath_sub, my_kernel, sep = "\n")
+```
+
+This is exactly the pattern used by `f2_f3_opencl()` in the `ex_glmbayes`
+example (see Chapter 08).
+
+## Dependency index cache
+
+After `load_kernel_library()` sorts a directory for the first time, the
+sorted order is cached in a binary file
+`inst/cl/<subdir>/kernel_dependency_index.rds`. Subsequent calls read the
+cache directly without re-parsing every file, making repeated program
+assembly fast.
+
+The `.rds` cache is regenerated automatically if the source files change.
+It is also shipped with the package so that users do not need to rebuild it
+after installation.
+
+## Error messages
+
+| Error | Cause |
+|-------|-------|
+| `"OpenCL support is not available"` | Package built without `USE_OPENCL` |
+| `"Dependency sort failed: unresolved dependencies remain."` | A `@depends` entry names a file that does not exist in the directory, or there is a genuine circular dependency |
+| `"File not found: inst/cl/<path>"` | `relative_path` does not match any file in the package |
