@@ -8,9 +8,7 @@
  *
  * @section ImplementedIn
  *   - EnvelopeSize.cpp
- *   - EnvelopeBuild.cpp
  *   - EnvelopeEval.cpp
- *   - EnvelopeDispersionBuild.cpp
  *   - EnvelopeSort.cpp
  *   - Set_Grid.cpp
  *   - Set_LogP.cpp
@@ -42,24 +40,6 @@ Rcpp::List EnvelopeSize(const arma::vec& a,
 
 
 
-List EnvelopeBuild(NumericVector bStar,
-                       NumericMatrix A,
-                       NumericVector y,
-                       NumericMatrix x,
-                       NumericMatrix mu,
-                       NumericMatrix P,
-                       NumericVector alpha,
-                       NumericVector wt,
-                       std::string family = "binomial",
-                       std::string link   = "logit",
-                       int Gridtype       = 2,
-                       int n              = 1,
-                       int n_envopt       = -1,   // NEW: effective sample size for EnvelopeOpt (defaults to n if -1)
-                       bool sortgrid      = false,
-                       bool use_opencl    = false, // Enables OpenCL acceleration during envelope construction
-                       bool verbose       = false  // Enables diagnostic output
-);
-
 
 Rcpp::List EnvelopeEval(const Rcpp::NumericMatrix& G4,   // grid (parameters × grid points)
                         const Rcpp::NumericVector& y,
@@ -72,28 +52,6 @@ Rcpp::List EnvelopeEval(const Rcpp::NumericMatrix& G4,   // grid (parameters × 
                         const std::string& link,
                         bool use_opencl = false,
                         bool verbose = false);
-
-
-List EnvelopeDispersionBuild(
-    List Env,
-    double Shape,
-    double Rate,
-    NumericMatrix P,
-    NumericVector y,
-    NumericMatrix x,
-    NumericVector alpha,
-    int n_obs,
-    double RSS_post,
-    double RSS_ML,
-    NumericMatrix mu,         // ← new
-    NumericVector wt,         // ← new
-    double max_disp_perc ,
-    Nullable<double> disp_lower ,
-    Nullable<double> disp_upper ,
-    bool verbose ,
-    bool use_parallel    // ← add flag here
-    
-);
 
 
 
