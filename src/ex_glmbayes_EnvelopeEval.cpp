@@ -18,9 +18,9 @@
 
 using namespace Rcpp;
 using namespace openclPort;
-using namespace glmbayes::fam;
-using namespace glmbayes::env;
-using namespace glmbayes::opencl;
+using namespace ex_glmbayes::fam;
+using namespace ex_glmbayes::env;
+using namespace ex_glmbayes::opencl;
 using namespace nmathopencl::progress;
 
 // Internal helper: run OpenCL pilot timing, print diagnostics, and prompt user.
@@ -434,7 +434,7 @@ Rcpp::List f2_f3_non_opencl(
 }
 
 
-namespace glmbayes {
+namespace ex_glmbayes {
 
 namespace env {
 

@@ -4,7 +4,7 @@
  * @file ex_glmbayes_Envelopefuncs.h
  * @brief Core envelope–construction routines for glmbayes.
  *
- * @namespace glmbayes::env
+ * @namespace ex_glmbayes::env
  *
  * @section ImplementedIn
  *   - ex_glmbayes_EnvelopeSize.cpp
@@ -24,7 +24,7 @@
 using namespace Rcpp;
 
 
-namespace glmbayes{
+namespace ex_glmbayes{
 
 namespace env{
 Rcpp::List EnvelopeSize(const arma::vec& a,

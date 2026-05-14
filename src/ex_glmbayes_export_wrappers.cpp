@@ -2,8 +2,8 @@
 #include "ex_glmbayes_Envelopefuncs.h"
 #include "ex_glmbayes_simfuncs.h"
 
-using namespace glmbayes::env;
-using namespace glmbayes::sim;
+using namespace ex_glmbayes::env;
+using namespace ex_glmbayes::sim;
 
 
 // -----------------------------------------------------------------------------
@@ -32,7 +32,7 @@ Rcpp::List EnvelopeSize_cpp_export(
     bool use_opencl,
     bool verbose
 ) {
-  return glmbayes::env::EnvelopeSize(
+  return ex_glmbayes::env::EnvelopeSize(
     a, G1, Gridtype, n, n_envopt, use_opencl, verbose
   );
 }

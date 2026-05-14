@@ -8,7 +8,7 @@
 
 using namespace Rcpp;
 using namespace RcppParallel;
-using namespace glmbayes::fam;
+using namespace ex_glmbayes::fam;
 using namespace nmathopencl::progress;
 
 
@@ -32,7 +32,7 @@ double dpois2(double x,double lambda,int lg){
 }
 
 
-namespace glmbayes{
+namespace ex_glmbayes{
 
 namespace fam {
 

@@ -4,7 +4,7 @@
  * @file ex_glmbayes_famfuncs.h
  * @brief Family-specific likelihood and envelope components for glmbayes.
  *
- * @namespace glmbayes::fam
+ * @namespace ex_glmbayes::fam
  * @brief Core log-likelihood, log-posterior, and corresponding log gradient components for each GLM family.
  *
  * @section ImplementedIn
@@ -46,7 +46,7 @@ using namespace RcppParallel;
 
 
 
-namespace glmbayes{
+namespace ex_glmbayes{
 
 namespace fam {
 

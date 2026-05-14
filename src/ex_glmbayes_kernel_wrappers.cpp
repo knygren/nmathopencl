@@ -10,9 +10,9 @@
 using namespace Rcpp;
 
 using namespace openclPort;
-using namespace glmbayes::opencl;
+using namespace ex_glmbayes::opencl;
 
-namespace glmbayes {
+namespace ex_glmbayes {
 
 namespace opencl {
 
@@ -200,4 +200,4 @@ Rcpp::List f2_f3_opencl(
 }
 
 } // namespace opencl
-} // namespace glmbayes
+} // namespace ex_glmbayes

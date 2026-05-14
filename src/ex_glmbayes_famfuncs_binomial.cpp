@@ -16,7 +16,7 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 using namespace openclPort;
-using namespace glmbayes::fam;
+using namespace ex_glmbayes::fam;
 using namespace nmathopencl::progress;
 
 
@@ -32,7 +32,7 @@ inline double dbinom_raw_local(double x, double n, double p, double q, int give_
 
 ///////////////////////////////////////////////////////////
 
-namespace glmbayes{
+namespace ex_glmbayes{
 
 namespace fam {
 // Neg log binomial likelihood, vectorized

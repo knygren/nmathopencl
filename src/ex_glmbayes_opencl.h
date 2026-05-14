@@ -4,7 +4,7 @@
  *        Declares GPU runners and Rcpp wrappers for f2/f3 log-posterior
  *        and gradient evaluation.
  *
- * @namespace glmbayes::opencl
+ * @namespace ex_glmbayes::opencl
  *
  * @section ImplementedIn
  *   ex_glmbayes_kernel_runners.cpp, ex_glmbayes_kernel_wrappers.cpp
@@ -21,7 +21,7 @@
 #include <vector>
 #include <Rcpp.h>
 
-namespace glmbayes {
+namespace ex_glmbayes {
 namespace opencl {
 
 void f2_f3_kernel_runner(
@@ -56,6 +56,6 @@ Rcpp::List f2_f3_opencl(
 );
 
 } // namespace opencl
-} // namespace glmbayes
+} // namespace ex_glmbayes
 
 #endif // EX_GLMBAYES_OPENCL_H

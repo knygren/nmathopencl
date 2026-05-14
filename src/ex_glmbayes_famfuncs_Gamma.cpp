@@ -11,13 +11,13 @@
 
 using namespace Rcpp;
 using namespace RcppParallel;
-using namespace glmbayes::fam;
+using namespace ex_glmbayes::fam;
 using namespace nmathopencl::progress;
 
 
 
 
-namespace glmbayes{
+namespace ex_glmbayes{
 
 namespace fam {
 void neg_dgamma_glmb_rmat(const RVector<double>& x,           // observations

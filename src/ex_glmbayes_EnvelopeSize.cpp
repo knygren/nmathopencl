@@ -16,11 +16,11 @@
 
 using namespace Rcpp;
 using namespace openclPort;
-using namespace glmbayes::env;
+using namespace ex_glmbayes::env;
 
 // no export tag
 
-namespace glmbayes {
+namespace ex_glmbayes {
 
 namespace env {
 Rcpp::List EnvelopeSize(const arma::vec& a,

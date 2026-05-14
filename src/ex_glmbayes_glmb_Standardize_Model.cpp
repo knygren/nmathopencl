@@ -5,7 +5,7 @@
 
 using namespace Rcpp;
 
-namespace glmbayes {
+namespace ex_glmbayes {
 
 namespace sim {
 
@@ -138,4 +138,4 @@ Rcpp::List glmb_Standardize_Model(
 }
 
 } // namespace sim
-} // namespace glmbayes
+} // namespace ex_glmbayes

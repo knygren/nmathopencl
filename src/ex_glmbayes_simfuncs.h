@@ -4,7 +4,7 @@
  * @file ex_glmbayes_simfuncs.h
  * @brief Model standardization routine for glmbayes.
  *
- * @namespace glmbayes::sim
+ * @namespace ex_glmbayes::sim
  *
  * @section ImplementedIn
  *   - ex_glmbayes_glmb_Standardize_Model.cpp
@@ -26,7 +26,7 @@
 using namespace Rcpp;
 
 
-namespace glmbayes {
+namespace ex_glmbayes {
 
 namespace sim {
 

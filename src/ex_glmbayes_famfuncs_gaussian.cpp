@@ -10,12 +10,12 @@
 
 using namespace Rcpp;
 using namespace RcppParallel;
-using namespace glmbayes::fam;
+using namespace ex_glmbayes::fam;
 using namespace nmathopencl::progress;
 
 
 
-namespace glmbayes{
+namespace ex_glmbayes{
 
 namespace fam {
 

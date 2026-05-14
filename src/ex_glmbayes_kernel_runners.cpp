@@ -20,11 +20,11 @@
 #include <string>
 
 using namespace openclPort;
-using namespace glmbayes::opencl;
+using namespace ex_glmbayes::opencl;
 
 #ifdef USE_OPENCL
 
-namespace glmbayes {
+namespace ex_glmbayes {
 
 namespace opencl {
 
