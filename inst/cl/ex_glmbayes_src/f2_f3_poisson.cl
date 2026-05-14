@@ -1,4 +1,7 @@
 // f2_binomial_logit_prep_parallel.cl
+// @library_deps: (none)
+// @calls_nmath: (none)
+// @calls_opencl_builtin: lgamma
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 #pragma OPENCL EXTENSION cl_khr_printf : enable   // for printf

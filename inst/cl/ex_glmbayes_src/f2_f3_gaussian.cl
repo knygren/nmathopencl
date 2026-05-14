@@ -1,4 +1,10 @@
 // f2_f3_gaussian.cl
+// @library_deps: nmath
+// @calls_nmath: dnorm4
+// @depends_nmath: dnorm
+// @all_depends_nmath_count: 3
+// @all_depends_nmath: Rmath, nmath, dnorm
+// @calls_opencl_builtin: (none)
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 #pragma OPENCL EXTENSION cl_khr_printf : enable   // for printf

@@ -1,4 +1,10 @@
 // f2_binomial_logit_prep_parallel.cl
+// @library_deps: nmath
+// @calls_nmath: dgamma
+// @depends_nmath: dgamma
+// @all_depends_nmath_count: 18
+// @all_depends_nmath: Rmath, nmath, refactored, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, stirlerr_cycle_free, pgamma_utils, stirlerr_cycle_dependent, stirlerr, bd0, dpois, dgamma
+// @calls_opencl_builtin: (none)
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 #pragma OPENCL EXTENSION cl_khr_printf : enable   // for printf
