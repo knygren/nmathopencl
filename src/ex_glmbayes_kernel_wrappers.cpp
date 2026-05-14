@@ -73,7 +73,8 @@ Rcpp::List f2_f3_opencl(
   std::string r_ext_runtime_source    = load_kernel_library("R_ext_runtime", "nmathopencl", false);
   std::string r_ext_internals_source  = load_kernel_library("R_ext_internals", "nmathopencl", false);
   std::string system_source           = load_kernel_library("System", "nmathopencl", false);
-  std::string nmath_source            = load_kernel_library("nmath", "nmathopencl", false);
+  // Old approach — loads all 137 nmath files with full topological sort:
+  // std::string nmath_source = load_kernel_library("nmath", "nmathopencl", false);
   // Old sequence retained for reference during migration:
   // std::string rmath_source = load_kernel_library("rmath","nmathopencl", false);
   // std::string dpq_source   = load_kernel_library("dpq","nmathopencl", false);
@@ -120,8 +121,11 @@ Rcpp::List f2_f3_opencl(
   
   else {
     Rcpp::stop("Unsupported family: " + family);
-  }  
-  
+  }
+
+  // New approach — loads only the subset needed for this kernel via TSV index:
+  std::string nmath_source = load_library_for_kernel(
+      kernel_file, "ex_glmbayes_nmath", "nmathopencl", "depends_nmath");
   
   
   // load & call kernel runner

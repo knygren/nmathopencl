@@ -197,29 +197,27 @@ extract_library_subset <- function(kernel_paths,
                copied = do_copy, stringsAsFactors = FALSE)
   })
 
-  # Always copy the dependency index alongside the .cl files so the extracted
-  # subset is immediately usable with the recommended pre-loaded index pattern.
-  rds_name <- "kernel_dependency_index.rds"
-  rds_src  <- file.path(library_dir, rds_name)
-  rds_dst  <- file.path(dest_dir,    rds_name)
-  rds_row  <- if (file.exists(rds_src)) {
-    do_copy <- isTRUE(overwrite) || !file.exists(rds_dst)
-    if (do_copy) {
-      file.copy(rds_src, rds_dst, overwrite = overwrite)
+  # Always copy both index files (.rds for R, .tsv for C++) alongside the .cl
+  # files so the extracted subset is immediately usable.
+  index_files <- c("kernel_dependency_index.rds", "kernel_dependency_index.tsv")
+  index_rows <- lapply(index_files, function(idx_name) {
+    src <- file.path(library_dir, idx_name)
+    dst <- file.path(dest_dir,    idx_name)
+    if (!file.exists(src)) {
+      warning("No `", idx_name, "` found in `library_dir`; not copied. ",
+              "Run `write_kernel_dependency_index()` to create it.",
+              call. = FALSE)
+      return(NULL)
     }
-    data.frame(stem = rds_name, source = rds_src, dest = rds_dst,
+    do_copy <- isTRUE(overwrite) || !file.exists(dst)
+    if (do_copy) {
+      file.copy(src, dst, overwrite = overwrite)
+    }
+    data.frame(stem = idx_name, source = src, dest = dst,
                copied = do_copy, stringsAsFactors = FALSE)
-  } else {
-    warning("No `kernel_dependency_index.rds` found in `library_dir`; ",
-            "index was not copied. Run `write_kernel_dependency_index()` to create it.",
-            call. = FALSE)
-    NULL
-  }
+  })
 
-  result <- do.call(rbind, result_rows)
-  if (!is.null(rds_row)) {
-    result <- rbind(result, rds_row)
-  }
+  result <- do.call(rbind, c(result_rows, Filter(Negate(is.null), index_rows)))
   invisible(result)
 }
 

@@ -197,17 +197,171 @@ program <- paste(nmath_sub, my_kernel, sep = "\n")
 This is exactly the pattern used by `f2_f3_opencl()` in the `ex_glmbayes`
 example (see Chapter 08).
 
-## Dependency index cache
+## Dependency index — faster, kernel-specific loading
 
-After `load_kernel_library()` sorts a directory for the first time, the
-sorted order is cached in a binary file
-`inst/cl/<subdir>/kernel_dependency_index.rds`. Subsequent calls read the
-cache directly without re-parsing every file, making repeated program
-assembly fast.
+`load_kernel_library()` always sorts and loads **all** files in the
+subdirectory. For a large library like `nmath` (137 files) this is
+thorough but wasteful when only a small subset is needed for a specific
+kernel.
 
-The `.rds` cache is regenerated automatically if the source files change.
-It is also shipped with the package so that users do not need to rebuild it
-after installation.
+`nmathopencl` therefore ships a pre-built dependency index alongside every
+curated library subdirectory. The index encodes the full transitive dependency
+map and the global load order, enabling two important optimisations:
+
+1. **`load_library_for_kernel()` (R)** — loads only the files required by one
+   specific kernel, with no sort at runtime.
+2. **`load_library_for_kernel()` (C++)** — the same function implemented
+   entirely in C++, suitable for use inside Rcpp kernel wrappers.
+
+### Building the index — `write_kernel_dependency_index()`
+
+```{r, eval = FALSE}
+write_kernel_dependency_index(library_dir, verbose = TRUE)
+```
+
+This function analyses a library directory, computes the full transitive
+dependency closure for every stem, and writes **two companion files** next to
+the `.cl` sources:
+
+| File | Format | Consumer |
+|------|--------|----------|
+| `kernel_dependency_index.rds` | Binary R object | R functions |
+| `kernel_dependency_index.tsv` | Tab-separated text | C++ code |
+
+The `.tsv` has a header row and one row per stem in global load order:
+
+```
+stem	all_depends
+refactored	
+Rmath	refactored
+nmath	refactored, Rmath
+chebyshev	refactored, Rmath, nmath
+dbinom	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, ...
+```
+
+Both files are shipped with the package so end users never need to
+regenerate them. Run `write_kernel_dependency_index()` only after adding or
+removing `.cl` files from a library directory.
+
+```{r, eval = FALSE}
+# Regenerate after changing the nmath library
+nmath_dir <- system.file("cl", "nmath", package = "nmathopencl")
+write_kernel_dependency_index(nmath_dir, verbose = TRUE)
+```
+
+### Loading with the index — `load_library_for_kernel()` (R)
+
+```{r, eval = FALSE}
+load_library_for_kernel(kernel_path, library_dir,
+                        depends_tag = "all_depends",
+                        index = NULL)
+```
+
+Reads the annotation tag `@{depends_tag}` from the kernel file to get the
+list of needed stems, looks them up in the pre-loaded index, and returns
+their source concatenated in correct dependency order.  Returns `""` when
+the kernel has no `@{depends_tag}` annotation (e.g. a kernel using only
+OpenCL built-ins).
+
+The `index` argument should always be supplied. Load it once and reuse it
+across all calls to avoid reading from disk on every invocation:
+
+```{r, eval = FALSE}
+nmath_dir <- system.file("cl", "nmath", package = "nmathopencl")
+
+# Load the index once
+idx <- readRDS(file.path(nmath_dir, "kernel_dependency_index.rds"))
+
+# Re-use across multiple kernels — only the subset for each kernel is read
+src_gaussian <- load_library_for_kernel(
+    kernel_path = system.file("cl", "ex_glmbayes_src",
+                              "f2_f3_gaussian.cl", package = "nmathopencl"),
+    library_dir = nmath_dir,
+    depends_tag = "depends_nmath",
+    index       = idx
+)
+src_gamma <- load_library_for_kernel(
+    kernel_path = system.file("cl", "ex_glmbayes_src",
+                              "f2_f3_gamma.cl", package = "nmathopencl"),
+    library_dir = nmath_dir,
+    depends_tag = "depends_nmath",
+    index       = idx
+)
+```
+
+The annotation tag in the kernel file must follow the same format used
+throughout the library:
+
+```c
+// @depends_nmath: dbinom, pnorm, dnorm
+```
+
+### Extracting a subset — `extract_library_subset()`
+
+```{r, eval = FALSE}
+extract_library_subset(kernel_paths, library_dir, dest_dir,
+                       depends_tag = "all_depends",
+                       index = NULL,
+                       overwrite = FALSE)
+```
+
+Given a set of kernel files, reads their `@{depends_tag}` annotations,
+takes the union of all transitive dependencies, and copies exactly those
+`.cl` files (plus both index files) from `library_dir` to `dest_dir` in
+dependency order. The destination directory must already exist.
+
+```{r, eval = FALSE}
+nmath_dir    <- system.file("cl", "nmath",           package = "nmathopencl")
+src_dir      <- system.file("cl", "ex_glmbayes_src", package = "nmathopencl")
+dest_dir     <- "inst/cl/mypkg_nmath"   # must exist
+
+idx <- readRDS(file.path(nmath_dir, "kernel_dependency_index.rds"))
+
+result <- extract_library_subset(
+    kernel_paths = list.files(src_dir, pattern = "\\.cl$", full.names = TRUE),
+    library_dir  = nmath_dir,
+    dest_dir     = dest_dir,
+    depends_tag  = "depends_nmath",
+    index        = idx
+)
+print(result)  # data frame: stem, source, dest, copied
+```
+
+The result includes a row for `kernel_dependency_index.rds` and
+`kernel_dependency_index.tsv` so the extracted subset is immediately usable
+by both R and C++.
+
+### C++ equivalent — `openclPort::load_library_for_kernel()`
+
+For use inside Rcpp kernel wrappers (where calling back into R is not
+permitted), `kernel_loader.cpp` provides a C++ implementation with the
+same semantics:
+
+```cpp
+#include "openclPort.h"   // declares load_library_for_kernel
+
+// Inside a kernel wrapper, after the family/link dispatch has set kernel_file:
+std::string nmath_source = openclPort::load_library_for_kernel(
+    kernel_file,          // e.g. "ex_glmbayes_src/f2_f3_binomial_logit.cl"
+    "ex_glmbayes_nmath",  // library subdirectory
+    "nmathopencl",        // package
+    "depends_nmath"       // annotation tag
+);
+```
+
+The C++ function reads `kernel_dependency_index.tsv` from the library
+directory once per call, parses the annotation tag from the kernel file, and
+loads only the required subset in the pre-computed order.  No topological
+sort is performed at runtime.
+
+The `@depends_nmath` annotation must list the **direct** nmath entry-point
+stems called by the kernel (not the full transitive list):
+
+```c
+// @depends_nmath: dbinom, pnorm, dnorm
+```
+
+The transitive expansion is performed automatically using the TSV index.
 
 ## Error messages
 

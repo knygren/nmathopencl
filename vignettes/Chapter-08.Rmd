@@ -51,7 +51,8 @@ transitive dependency list.
 
 The `@all_depends_nmath` tag in each kernel file gives the complete
 transitive closure. Taking the union across the five non-Poisson kernels
-yields 17 files:
+yields 20 files (17 nmath functions + `Rmath`, `nmath`, `refactored` as
+infrastructure):
 
 ```
 Rmath, nmath, refactored,
@@ -61,15 +62,33 @@ stirlerr_cycle_free, pgamma_utils, stirlerr_cycle_dependent, stirlerr, bd0,
 dpois, dgamma, dnorm, pnorm, dbinom
 ```
 
-These 20 files (17 nmath functions + `Rmath`, `nmath`, `refactored` as
-infrastructure) were copied to `inst/cl/ex_glmbayes_nmath/`. A package
-developer would create an analogous subdirectory for their own kernel set.
-
-The `ex_glmbayes_nmath/` subdirectory is loaded at runtime with:
+These files are stored in `inst/cl/ex_glmbayes_nmath/`. Rather than
+copying them manually, use `extract_library_subset()` to derive this
+directory automatically from the kernel annotations:
 
 ```{r, eval = FALSE}
-nmath_src <- load_kernel_library("ex_glmbayes_nmath", package = "nmathopencl")
+nmath_dir <- system.file("cl", "nmath",           package = "nmathopencl")
+src_dir   <- system.file("cl", "ex_glmbayes_src", package = "nmathopencl")
+
+# Load the pre-built dependency index (read once, reuse across calls)
+idx <- readRDS(file.path(nmath_dir, "kernel_dependency_index.rds"))
+
+result <- extract_library_subset(
+    kernel_paths = list.files(src_dir, pattern = "\\.cl$", full.names = TRUE),
+    library_dir  = nmath_dir,
+    dest_dir     = "inst/cl/ex_glmbayes_nmath",
+    depends_tag  = "depends_nmath",
+    index        = idx
+)
 ```
+
+`extract_library_subset()` copies the 20 `.cl` files **plus both index
+files** (`kernel_dependency_index.rds` and `kernel_dependency_index.tsv`)
+into the destination directory. The index files are required for the
+indexed loading described in Step 5.
+
+A package developer would create an analogous subdirectory for their own
+kernel set using the same function.
 
 ## Step 3 — Write the kernel files
 
@@ -201,9 +220,10 @@ exceptions on failure.
 ## Step 5 — Write the kernel wrapper (C++)
 
 The kernel wrapper is the R-facing `[[Rcpp::export]]` function. It
-validates and converts R inputs, assembles the program string, selects the
-kernel name based on the family/link, calls the runner, and returns results
-as R objects. It lives in `ex_glmbayes_kernel_wrappers.cpp`:
+validates and converts R inputs, selects the kernel name based on
+family/link, assembles the program string using the dependency index, calls
+the runner, and returns results as R objects. It lives in
+`ex_glmbayes_kernel_wrappers.cpp`:
 
 ```cpp
 // ex_glmbayes_kernel_wrappers.cpp (abbreviated)
@@ -225,19 +245,25 @@ Rcpp::List f2_f3_opencl(
     auto B_flat  = openclPort::flattenMatrix(b);
     // ... (all inputs)
 
-    // 2. Select kernel name
-    std::string kernel_name;
-    if (family == "binomial" && link == "logit")
+    // 2. Dispatch: set kernel_name and kernel_file based on family/link
+    std::string kernel_name, kernel_file;
+    if (family == "binomial" && link == "logit") {
         kernel_name = "f2_f3_binomial_logit";
-    else if (family == "binomial" && link == "probit")
-        kernel_name = "f2_f3_binomial_probit";
-    // ... (all families)
+        kernel_file = "ex_glmbayes_src/f2_f3_binomial_logit.cl";
+    } // ... (all families)
 
-    // 3. Assemble program source
-    std::string nmath_src = openclPort::load_kernel_library(
-        "ex_glmbayes_nmath", "nmathopencl");
+    // 3. Assemble program source using the pre-built dependency index.
+    //    load_library_for_kernel() reads @depends_nmath from the kernel file,
+    //    looks up the transitive closure in kernel_dependency_index.tsv, and
+    //    loads only the required subset in the correct order — no sort at runtime.
+    std::string nmath_src = openclPort::load_library_for_kernel(
+        kernel_file,          // kernel .cl path (relative to inst/cl/)
+        "ex_glmbayes_nmath",  // library subdir containing index + .cl files
+        "nmathopencl",        // package
+        "depends_nmath"       // annotation tag listing direct nmath entry points
+    );
     std::string kernel_src = openclPort::load_kernel_source(
-        "ex_glmbayes_src/" + kernel_name + ".cl", "nmathopencl");
+        kernel_file, "nmathopencl");
     std::string program_source = nmath_src + "\n" + kernel_src;
 
     // 4. Allocate output buffers
@@ -258,6 +284,26 @@ Rcpp::List f2_f3_opencl(
 }
 
 }} // namespace ex_glmbayes::opencl
+```
+
+### Why `load_library_for_kernel()` rather than `load_kernel_library()`?
+
+`load_kernel_library()` sorts and concatenates **every** file in the
+subdirectory on every call. For a 137-file library like `nmath` this requires
+reading all files sequentially. `load_library_for_kernel()` reads the
+pre-built `kernel_dependency_index.tsv` once, then reads only the small
+subset of files that the specific kernel actually needs — 3 files for
+`f2_f3_gaussian`, 17 for `f2_f3_binomial_logit`, and so on. The savings are
+significant for large libraries and become important when the kernel wrapper is
+called repeatedly.
+
+The old full-library approach is still available for cases where the exact
+dependency set is unknown or all files are genuinely needed:
+
+```cpp
+// Old approach — loads all files in the subdirectory (kept for reference)
+// std::string nmath_src = openclPort::load_kernel_library(
+//     "ex_glmbayes_nmath", "nmathopencl", false);
 ```
 
 ## Step 6 — Write the Rcpp export wrappers (C++ and R)
@@ -346,10 +392,24 @@ The complete set of files contributing to the `ex_glmbayes` example:
 
 To build a similar component in your own package:
 
-1. **Identify your nmath dependencies** — look at the `@all_depends_nmath`
-   metadata tags of the nmath functions you call. Copy the listed files
-   from `nmathopencl/inst/cl/nmath/` into your package's
-   `inst/cl/<yourpkg_nmath>/`.
+1. **Identify your nmath dependencies** — write the `@depends_nmath`
+   annotation in each of your kernel files (listing the direct nmath entry
+   points your kernel calls). Then call `extract_library_subset()` to copy
+   the exact transitive closure of files, plus the companion index files,
+   into your package's `inst/cl/<yourpkg_nmath>/`:
+
+   ```{r, eval = FALSE}
+   nmath_dir <- system.file("cl", "nmath", package = "nmathopencl")
+   idx <- readRDS(file.path(nmath_dir, "kernel_dependency_index.rds"))
+
+   extract_library_subset(
+       kernel_paths = list.files("inst/cl/mypkg_src", "\\.cl$", full.names = TRUE),
+       library_dir  = nmath_dir,
+       dest_dir     = "inst/cl/mypkg_nmath",  # must exist
+       depends_tag  = "depends_nmath",
+       index        = idx
+   )
+   ```
 
 2. **Write your kernel(s)** — add `@library_deps`, `@calls_nmath`, and
    `@all_depends_nmath` tags at the top of each `.cl` file. Store them in
@@ -363,8 +423,10 @@ To build a similar component in your own package:
 
 4. **Write a kernel wrapper** — flatten your R inputs with
    `openclPort::flattenMatrix` / `openclPort::copyVector`, assemble the
-   program string with `load_kernel_library()` + `load_kernel_source()`,
-   call the runner, and return an R-friendly result.
+   program string with `openclPort::load_library_for_kernel()` +
+   `openclPort::load_kernel_source()`, call the runner, and return an
+   R-friendly result. The `@depends_nmath` annotation in your kernel file
+   drives the subset selection automatically.
 
 5. **Write a CPU fallback** — implement the same computation using standard
    R math (`<Rmath.h>`) or base-R functions. Guard the GPU path with

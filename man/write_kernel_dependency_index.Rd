@@ -2,7 +2,7 @@
 % Please edit documentation in R/write_kernel_dependency_index.R
 \name{write_kernel_dependency_index}
 \alias{write_kernel_dependency_index}
-\title{Build and save a kernel dependency index (RDS)}
+\title{Build and save a kernel dependency index}
 \usage{
 write_kernel_dependency_index(
   library_dir = NULL,
@@ -22,14 +22,16 @@ non-NULL and \code{tags$ok} is \code{TRUE}, reused to avoid recomputing the depe
 sort.}
 
 \item{output_path}{Path for the RDS file. Defaults to
-\verb{file.path(<library_dir>, "kernel_dependency_index.rds")}.}
+\verb{file.path(<library_dir>, "kernel_dependency_index.rds")}. The TSV is
+always written to the same directory with the \code{.tsv} extension.}
 
-\item{write}{If \code{FALSE}, builds the index object and returns it without writing.}
+\item{write}{If \code{FALSE}, builds the index object and returns it without
+writing either file.}
 
-\item{verbose}{If \code{TRUE}, emits a short message with the output path.}
+\item{verbose}{If \code{TRUE}, emits short messages with the output paths.}
 }
 \value{
-Invisibly, the index \code{list()} written to RDS (\code{version} schema):
+Invisibly, the index \code{list()} (\code{version} schema):
 \itemize{
 \item \code{version}: integer schema version.
 \item \code{generated_at}: timestamp from \code{\link[=Sys.time]{Sys.time()}}.
@@ -43,8 +45,21 @@ consistent with global load order).
 }
 }
 \description{
-Writes \code{kernel_dependency_index.rds} next to the \code{.cl} files in the kernel
-library directory. The index matches the dependency sort used by
-\code{\link[=attach_kernel_dependency_tags]{attach_kernel_dependency_tags()}} and is intended for fast runtime assembly
-of minimal source bundles using roots + transitive \verb{@all_depends}.
+Writes two companion index files next to the \code{.cl} files in the kernel
+library directory:
+}
+\details{
+\itemize{
+\item \code{kernel_dependency_index.rds} — binary R index for use by R functions
+such as \code{\link[=load_library_for_kernel]{load_library_for_kernel()}} and \code{\link[=extract_library_subset]{extract_library_subset()}}.
+\item \code{kernel_dependency_index.tsv} — tab-separated text lookup table for use
+by C++ code.  Each row is \verb{stem<TAB>all_depends} where \code{all_depends} is a
+comma-separated, load-order-correct list of transitive dependency stems.
+C++ reads this file once into an
+\verb{unordered_map<string, vector<string>>} and looks up only the stems
+required for a given kernel — no topological sort needed at runtime.
+}
+
+Both files encode the same information and are always written together so
+they remain in sync.
 }

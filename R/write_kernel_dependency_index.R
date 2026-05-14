@@ -1,9 +1,19 @@
-#' Build and save a kernel dependency index (RDS)
+#' Build and save a kernel dependency index
 #'
-#' Writes `kernel_dependency_index.rds` next to the `.cl` files in the kernel
-#' library directory. The index matches the dependency sort used by
-#' [attach_kernel_dependency_tags()] and is intended for fast runtime assembly
-#' of minimal source bundles using roots + transitive `@all_depends`.
+#' Writes two companion index files next to the `.cl` files in the kernel
+#' library directory:
+#'
+#' - `kernel_dependency_index.rds` — binary R index for use by R functions
+#'   such as [load_library_for_kernel()] and [extract_library_subset()].
+#' - `kernel_dependency_index.tsv` — tab-separated text lookup table for use
+#'   by C++ code.  Each row is `stem<TAB>all_depends` where `all_depends` is a
+#'   comma-separated, load-order-correct list of transitive dependency stems.
+#'   C++ reads this file once into an
+#'   `unordered_map<string, vector<string>>` and looks up only the stems
+#'   required for a given kernel — no topological sort needed at runtime.
+#'
+#' Both files encode the same information and are always written together so
+#' they remain in sync.
 #'
 #' @param library_dir Directory containing `.cl` files with `@depends` tags.
 #'   Required when `tags` is `NULL`. When `tags` is non-NULL, optional; if given,
@@ -12,11 +22,13 @@
 #'   non-NULL and `tags$ok` is `TRUE`, reused to avoid recomputing the dependency
 #'   sort.
 #' @param output_path Path for the RDS file. Defaults to
-#'   `file.path(<library_dir>, "kernel_dependency_index.rds")`.
-#' @param write If `FALSE`, builds the index object and returns it without writing.
-#' @param verbose If `TRUE`, emits a short message with the output path.
+#'   `file.path(<library_dir>, "kernel_dependency_index.rds")`. The TSV is
+#'   always written to the same directory with the `.tsv` extension.
+#' @param write If `FALSE`, builds the index object and returns it without
+#'   writing either file.
+#' @param verbose If `TRUE`, emits short messages with the output paths.
 #'
-#' @return Invisibly, the index `list()` written to RDS (`version` schema):
+#' @return Invisibly, the index `list()` (`version` schema):
 #'   - `version`: integer schema version.
 #'   - `generated_at`: timestamp from [Sys.time()].
 #'   - `library_dir`, `library_name`: resolved library path / basename.
@@ -81,9 +93,26 @@ write_kernel_dependency_index <- function(
     stop("`write` must be a single logical value.", call. = FALSE)
   }
   if (isTRUE(write)) {
+    # --- RDS (for R) ---
     saveRDS(idx, file = out_final, compress = TRUE)
     if (isTRUE(verbose)) {
-      message("Wrote kernel dependency index: ", out_final)
+      message("Wrote kernel dependency index (rds): ", out_final)
+    }
+
+    # --- TSV (for C++) ---
+    # Format: header row + one row per stem in load order.
+    # Columns: stem <TAB> all_depends (comma-separated, load-order-correct).
+    tsv_final <- sub("\\.rds$", ".tsv", out_final, ignore.case = TRUE)
+    tsv_lines <- c(
+      paste("stem", "all_depends", sep = "\t"),
+      vapply(idx$stems_ordered, function(stem) {
+        deps <- idx$all_depends[[stem]]
+        paste(stem, paste(deps, collapse = ", "), sep = "\t")
+      }, character(1L))
+    )
+    writeLines(tsv_lines, con = tsv_final, useBytes = FALSE)
+    if (isTRUE(verbose)) {
+      message("Wrote kernel dependency index (tsv): ", tsv_final)
     }
   }
   invisible(idx)

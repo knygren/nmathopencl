@@ -12,6 +12,8 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <unordered_map>
+#include <unordered_set>
 #include <string>
 #include <stdexcept>
 #include <algorithm>
@@ -184,6 +186,192 @@ std::string load_kernel_library(const std::string& subdir, const std::string& pa
   }
   
   return combined_source;
+}
+
+
+// ---------------------------------------------------------------------------
+// Internal helpers for load_library_for_kernel
+// ---------------------------------------------------------------------------
+namespace {
+
+// Parse a comma-separated annotation tag from the lines of a .cl file.
+// Matches lines like:  // @depends_nmath: dbinom, pnorm, dnorm
+std::vector<std::string> parse_cl_tag(
+    const std::vector<std::string>& lines,
+    const std::string& tag)
+{
+  std::vector<std::string> result;
+  std::string pattern = "@" + tag;
+  for (const auto& line : lines) {
+    auto pos = line.find(pattern);
+    if (pos == std::string::npos) continue;
+    auto colon = line.find(':', pos + pattern.size());
+    if (colon == std::string::npos) continue;
+    std::istringstream ss(line.substr(colon + 1));
+    std::string tok;
+    while (std::getline(ss, tok, ',')) {
+      tok.erase(0, tok.find_first_not_of(" \t\r\n"));
+      auto last = tok.find_last_not_of(" \t\r\n");
+      if (last != std::string::npos) tok.erase(last + 1);
+      if (!tok.empty()) result.push_back(tok);
+    }
+  }
+  return result;
+}
+
+// Dependency index loaded from kernel_dependency_index.tsv.
+struct KernelDepIndex {
+  std::vector<std::string>                                    stems_ordered;
+  std::unordered_map<std::string, std::vector<std::string>>  all_depends;
+};
+
+// Read kernel_dependency_index.tsv into a KernelDepIndex.
+// Format: header row, then  stem<TAB>dep1, dep2, ...  per stem.
+KernelDepIndex read_tsv_index(const std::string& tsv_path)
+{
+  KernelDepIndex idx;
+  std::ifstream f(tsv_path);
+  if (!f.is_open()) {
+    throw std::runtime_error(
+        "kernel_dependency_index.tsv not found: " + tsv_path +
+        ". Run write_kernel_dependency_index() from R to generate it.");
+  }
+  std::string line;
+  bool header = true;
+  while (std::getline(f, line)) {
+    if (header) { header = false; continue; }   // skip "stem\tall_depends"
+    // trim trailing CR (Windows line endings)
+    if (!line.empty() && line.back() == '\r') line.pop_back();
+    if (line.empty()) continue;
+
+    auto tab = line.find('\t');
+    std::string stem = (tab == std::string::npos) ? line : line.substr(0, tab);
+    if (stem.empty()) continue;
+    idx.stems_ordered.push_back(stem);
+
+    std::vector<std::string> deps;
+    if (tab != std::string::npos && tab + 1 < line.size()) {
+      std::istringstream ss(line.substr(tab + 1));
+      std::string tok;
+      while (std::getline(ss, tok, ',')) {
+        tok.erase(0, tok.find_first_not_of(" \t\r\n"));
+        auto last = tok.find_last_not_of(" \t\r\n");
+        if (last != std::string::npos) tok.erase(last + 1);
+        if (!tok.empty()) deps.push_back(tok);
+      }
+    }
+    idx.all_depends[stem] = std::move(deps);
+  }
+  return idx;
+}
+
+} // anonymous namespace
+
+
+// ---------------------------------------------------------------------------
+// load_library_for_kernel
+//
+// C++ equivalent of the R function of the same name.  Uses the pre-built
+// kernel_dependency_index.tsv to load only the library files required by a
+// specific kernel, in correct dependency order — no topological sort at
+// runtime.
+//
+// Parameters:
+//   kernel_relative_path  - path to the kernel .cl file relative to inst/cl/
+//                           (e.g. "ex_glmbayes_src/f2_f3_binomial_logit.cl")
+//   library_subdir        - inst/cl/ subdirectory containing the library files
+//                           and kernel_dependency_index.tsv
+//                           (e.g. "ex_glmbayes_nmath")
+//   package               - R package name (used to resolve inst/cl/ paths)
+//   depends_tag           - annotation tag in the kernel file listing its
+//                           direct library entry-point stems
+//                           (default: "depends_nmath")
+//
+// Returns:
+//   Concatenated source of exactly the required library files in dependency
+//   order.  Returns "" when the kernel carries no @{depends_tag} annotation
+//   (e.g. a kernel that uses only OpenCL built-ins).
+// ---------------------------------------------------------------------------
+std::string load_library_for_kernel(
+    const std::string& kernel_relative_path,
+    const std::string& library_subdir,
+    const std::string& package,
+    const std::string& depends_tag)
+{
+  // Resolve kernel absolute path via system.file
+  std::string kernel_path = Rcpp::as<std::string>(
+      Rcpp::Function("system.file")(
+          "cl", kernel_relative_path,
+          Rcpp::Named("package") = package));
+  if (kernel_path.empty()) {
+    throw std::runtime_error(
+        "Kernel file not found via system.file: " + kernel_relative_path);
+  }
+
+  // Resolve library directory absolute path via system.file
+  std::string lib_dir = Rcpp::as<std::string>(
+      Rcpp::Function("system.file")(
+          "cl", library_subdir,
+          Rcpp::Named("package") = package));
+  if (lib_dir.empty()) {
+    throw std::runtime_error(
+        "Library directory not found via system.file: " + library_subdir);
+  }
+
+  // Read kernel file lines
+  std::ifstream kf(kernel_path);
+  if (!kf.is_open()) {
+    throw std::runtime_error("Cannot open kernel file: " + kernel_path);
+  }
+  std::vector<std::string> klines;
+  {
+    std::string kl;
+    while (std::getline(kf, kl)) klines.push_back(kl);
+  }
+  kf.close();
+
+  // Parse direct library entry-point stems from @{depends_tag} annotation
+  std::vector<std::string> direct_stems = parse_cl_tag(klines, depends_tag);
+  if (direct_stems.empty()) {
+    return "";  // no library dependencies (e.g. kernel uses only OpenCL built-ins)
+  }
+
+  // Load the TSV index
+  std::string tsv_path = lib_dir + "/kernel_dependency_index.tsv";
+  KernelDepIndex idx = read_tsv_index(tsv_path);
+
+  // Build the needed set: for each direct stem include all_depends + stem itself
+  std::unordered_set<std::string> needed_set;
+  for (const auto& stem : direct_stems) {
+    auto it = idx.all_depends.find(stem);
+    if (it != idx.all_depends.end()) {
+      for (const auto& dep : it->second) needed_set.insert(dep);
+    }
+    needed_set.insert(stem);
+  }
+
+  // Collect stems in global load order (preserves correct compilation order)
+  std::vector<std::string> to_load;
+  to_load.reserve(needed_set.size());
+  for (const auto& stem : idx.stems_ordered) {
+    if (needed_set.count(stem)) to_load.push_back(stem);
+  }
+
+  // Read and concatenate
+  std::string combined;
+  for (const auto& stem : to_load) {
+    std::string cl_path = lib_dir + "/" + stem + ".cl";
+    std::ifstream cf(cl_path);
+    if (!cf.is_open()) {
+      throw std::runtime_error(
+          "Library file not found for stem '" + stem + "': " + cl_path);
+    }
+    std::ostringstream oss;
+    oss << cf.rdbuf();
+    combined += oss.str() + "\n\n";
+  }
+
+  return combined;
 }
 #endif
 

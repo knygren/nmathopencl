@@ -136,6 +136,16 @@ std::string load_kernel_library(
     bool verbose = false
 );
 
+// Load only the library files required by a specific kernel, in dependency
+// order, using the pre-built kernel_dependency_index.tsv.  No topological
+// sort at runtime.  Returns "" if the kernel has no @{depends_tag} annotation.
+std::string load_library_for_kernel(
+    const std::string& kernel_relative_path,
+    const std::string& library_subdir,
+    const std::string& package    = "nmathopencl",
+    const std::string& depends_tag = "depends_nmath"
+);
+
 
 struct OpenCLConfig {
   bool have_expm1;

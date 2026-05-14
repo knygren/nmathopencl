@@ -20,7 +20,10 @@ file is scanned for the annotation tag given by \code{depends_tag}.}
 \item{library_dir}{Path to the source library directory.}
 
 \item{dest_dir}{Path to the destination directory.  Must already exist; a
-warning is issued and the function returns invisibly if it does not.}
+warning is issued and the function returns invisibly if it does not.
+In addition to the \code{.cl} files, \code{kernel_dependency_index.rds} is copied
+here so the extracted subset can be used immediately with a pre-loaded
+index.}
 
 \item{depends_tag}{Name of the annotation tag listing library file stems.
 Defaults to \code{"all_depends"}.  Pass \code{"all_depends_nmath"} for kernels that
@@ -35,9 +38,12 @@ are not overwritten — the copy is skipped and \code{copied = FALSE} in the
 returned data frame.}
 }
 \value{
-A data frame (returned invisibly) with one row per stem and columns:
+A data frame (returned invisibly) with one row per copied file
+(\code{.cl} files in dependency order, followed by
+\code{kernel_dependency_index.rds}) and columns:
 \describe{
-\item{\code{stem}}{Stem name (filename without \code{.cl}).}
+\item{\code{stem}}{Stem name (filename without \code{.cl}), or
+\code{"kernel_dependency_index.rds"} for the index.}
 \item{\code{source}}{Full path to the source file in \code{library_dir}.}
 \item{\code{dest}}{Full path to the destination file in \code{dest_dir}.}
 \item{\code{copied}}{\code{TRUE} if the file was copied; \code{FALSE} if it already
