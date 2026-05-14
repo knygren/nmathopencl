@@ -34,55 +34,22 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, a copy is available at
  *  https://www.R-project.org/Licenses/
- *
- *  SYNOPSIS
- *
- *    #include <Rmath.h>
- *    double lgammafn_sign(double x, int *sgn);
- *    double lgammafn(double x);
- *
- *  DESCRIPTION
- *
- *    The function lgammafn computes log|gamma(x)|.  The function
- *    lgammafn_sign in addition assigns the sign of the gamma function
- *    to the address in the second argument if this is not NULL.
- *
- *  NOTES
- *
- *    This routine is a translation into C of a Fortran subroutine
- *    by W. Fullerton of Los Alamos Scientific Laboratory.
- *
- *    The accuracy of this routine compares (very) favourably
- *    with those of the Sun Microsystems portable mathematical
- *    library.
- *
- *  ./toms708.c  has  gamln()
  */
 
 // openclport: include directives disabled for OpenCL C compilation.
 // openclport: preload equivalent ported headers/shims in program assembly.
 // openclport-disabled-include: #include "nmath.h"
 
-double lgammafn_sign(double x, int *sgn)
-{
-    double ans, y, sinpiy;
-
-#ifdef NOMORE_FOR_THREADS
-    static double xmax = 0.;
-    static double dxrel = 0.;
-
-    if (xmax == 0) {/* initialize machine dependent constants _ONCE_ */
-	xmax = d1mach(2)/log(d1mach(2));/* = 2.533 e305	 for IEEE double */
-	dxrel = sqrt (d1mach(4));/* sqrt(Eps) ~ 1.49 e-8  for IEEE double */
-    }
-#else
 /* For IEEE double precision DBL_EPSILON = 2^-52 = 2.220446049250313e-16 :
    xmax  = DBL_MAX / log(DBL_MAX) = 2^1024 / (1024 * log(2)) = 2^1014 / log(2)
    dxrel = sqrt(DBL_EPSILON) = 2^-26 = 5^26 * 1e-26 (is *exact* below !)
- */
+*/
 #define xmax  2.5327372760800758e+305
 #define dxrel 1.490116119384765625e-8
-#endif
+
+double lgammafn_sign(double x, int *sgn)
+{
+    double ans, y, sinpiy;
 
     if (sgn != NULL) *sgn = 1;
 
@@ -94,7 +61,6 @@ double lgammafn_sign(double x, int *sgn)
 	*sgn = -1;
 
     if (x <= 0 && x == trunc(x)) { /* Negative integer argument */
-	// No warning: this is the best answer; was  ML_WARNING(ME_RANGE, "lgamma");
 	return ML_POSINF;/* +Inf, since lgamma(x) = log|gamma(x)| */
     }
 
@@ -102,11 +68,8 @@ double lgammafn_sign(double x, int *sgn)
 
     if (y < 1e-306) return -log(y); // denormalized range, R change
     if (y <= 10) return log(fabs(gammafn(x)));
-    /*
-      ELSE  y = |x| > 10 ---------------------- */
 
     if (y > xmax) {
-	// No warning: +Inf is the best answer
 	return ML_POSINF;
     }
 

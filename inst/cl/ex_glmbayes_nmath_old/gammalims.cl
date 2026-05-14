@@ -25,22 +25,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, a copy is available at
  *  https://www.R-project.org/Licenses/
- *
- *  SYNOPSIS
- *
- *    #include <Rmath.h>
- *    void gammalims(double *xmin, double *xmax);
- *
- *  DESCRIPTION
- *
- *    This function calculates the minimum and maximum legal bounds
- *    for x in gammafn(x).  These are not the only bounds, but they
- *    are the only non-trivial ones to calculate.
- *
- *  NOTES
- *
- *    This routine is a translation into C of a Fortran subroutine
- *    by W. Fullerton of Los Alamos Scientific Laboratory.
  */
 
 // openclport: include directives disabled for OpenCL C compilation.

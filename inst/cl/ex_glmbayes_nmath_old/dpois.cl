@@ -37,17 +37,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, a copy is available at
  *  https://www.R-project.org/Licenses/
- *
- *
- * DESCRIPTION
- *
- *    dpois() checks argument validity and calls dpois_raw().
- *
- *    dpois_raw() computes the Poisson probability  lb^x exp(-lb) / x!.
- *      This does not check that x is an integer, since dgamma() may
- *      call this with a fractional x argument. Any necessary argument
- *      checks should be done in the calling function.
- *
  */
 
 // openclport: include directives disabled for OpenCL C compilation.
@@ -56,32 +45,26 @@
 // openclport-disabled-include: #include "dpq.h"
 
 #define M_SQRT_2PI	2.50662827463100050241576528481104525301  /* sqrt(2*pi) */
-// sqrt(2 * Rmpfr::Const("pi", 128))
 #define x_LRG           2.86111748575702815380240589208115399625e+307 /* = 2^1023 / pi */
 
 // called also from dgamma.c, pgamma.c, dnbeta.c, dnbinom.c, dnchisq.c :
 double dpois_raw(double x, double lambda, int give_log)
 {
-    /*       x >= 0 ; integer for dpois(), but not e.g. for pgamma()!
-        lambda >= 0
-    */
     if (lambda == 0) return( (x == 0) ? R_D__1 : R_D__0 );
-    if (!R_FINITE(lambda)) return R_D__0; // including for the case where  x = lambda = +Inf
+    if (!R_FINITE(lambda)) return R_D__0;
     if (x < 0) return( R_D__0 );
     if (x <= lambda * DBL_MIN) return(R_D_exp(-lambda) );
     if (lambda < x * DBL_MIN) {
-	if (!R_FINITE(x)) // lambda < x = +Inf
+	if (!R_FINITE(x))
 	    return R_D__0;
-	// else
 	return(R_D_exp(-lambda + x*log(lambda) -lgammafn(x+1)));
     }
-    // R <= 4.0.x  had   return(R_D_fexp( M_2PI*x, -stirlerr(x)-bd0(x,lambda) ));
     double yh, yl;
     ebd0 (x, lambda, &yh, &yl);
     yl += stirlerr(x);
-    bool Lrg_x = (x >= x_LRG); //really large x  <==>  2*pi*x  overflows
+    bool Lrg_x = (x >= x_LRG);
     double r = Lrg_x
-	? M_SQRT_2PI * sqrt(x) // sqrt(.): avoid overflow for very large x
+	? M_SQRT_2PI * sqrt(x)
 	: M_2PI * x;
     return give_log
 	? -yl - yh - (Lrg_x ? log(r) : 0.5 * log(r))

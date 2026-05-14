@@ -38,44 +38,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, a copy is available at
  *  https://www.R-project.org/Licenses/
- *
- *  SYNOPSIS
- *
- *   #include <Rmath.h>
- *
- *   double pnorm5(double x, double mu, double sigma, int lower_tail,int log_p);
- *	   {pnorm (..) is synonymous and preferred inside R}
- *
- *   void   pnorm_both(double x, double *cum, double *ccum,
- *		       int i_tail, int log_p);
- *
- *  DESCRIPTION
- *
- *	The main computation evaluates near-minimax approximations derived
- *	from those in "Rational Chebyshev approximations for the error
- *	function" by W. J. Cody, Math. Comp., 1969, 631-637.  This
- *	transportable program uses rational functions that theoretically
- *	approximate the normal distribution function to at least 18
- *	significant decimal digits.  The accuracy achieved depends on the
- *	arithmetic system, the compiler, the intrinsic functions, and
- *	proper selection of the machine-dependent constants.
- *
- *  REFERENCE
- *
- *	Cody, W. D. (1993).
- *	ALGORITHM 715: SPECFUN - A Portable FORTRAN Package of
- *	Special Function Routines and Test Drivers".
- *	ACM Transactions on Mathematical Software. 19, 22-32.
- *
- *  EXTENSIONS
- *
- *  The "_both" , lower, upper, and log_p  variants were added by
- *  Martin Maechler, Jan.2000;
- *  as well as log1p() and similar improvements later on.
- *
- *  James M. Rath contributed bug report PR#699 and patches correcting SIXTEN
- *  and if() clauses {with a bug: "|| instead of &&" -> PR #2883) more in line
- *  with the original Cody code.
  */
 
 // openclport: include directives disabled for OpenCL C compilation.
@@ -87,9 +49,6 @@ double pnorm5(double x, double mu, double sigma, int lower_tail, int log_p)
 {
     double p, cp;
 
-    /* Note: The structure of these checks has been carefully thought through.
-     * For example, if x == mu and sigma == 0, we get the correct answer 1.
-     */
 #ifdef IEEE_754
     if(ISNAN(x) || ISNAN(mu) || ISNAN(sigma))
 	return x + mu + sigma;
@@ -113,10 +72,6 @@ double pnorm5(double x, double mu, double sigma, int lower_tail, int log_p)
 
 void pnorm_both(double x, double *cum, double *ccum, int i_tail, int log_p)
 {
-/* i_tail in {0,1,2} means: "lower", "upper", or "both" :
-   if(lower) return  *cum := P[X <= x]
-   if(upper) return *ccum := P[X >  x] = 1 - P[X <= x]
-*/
     const static double a[5] = {
 	2.2352520354606839287,
 	161.02823106855587881,
@@ -174,15 +129,13 @@ void pnorm_both(double x, double *cum, double *ccum, int i_tail, int log_p)
     if(ISNAN(x)) { *cum = *ccum = x; return; }
 #endif
 
-    /* Consider changing these : */
     eps = DBL_EPSILON * 0.5;
 
-    /* i_tail in {0,1,2} =^= {lower, upper, both} */
     lower = i_tail != 1;
     upper = i_tail != 0;
 
     y = fabs(x);
-    if (y <= 0.67448975) { /* qnorm(3/4) = .6744.... -- earlier had 0.66291 */
+    if (y <= 0.67448975) {
 	if (y > eps) {
 	    xsq = x * x;
 	    xnum = a[4] * xsq;
@@ -202,8 +155,6 @@ void pnorm_both(double x, double *cum, double *ccum, int i_tail, int log_p)
 	}
     }
     else if (y <= M_SQRT_32) {
-
-	/* Evaluate pnorm for 0.674.. = qnorm(3/4) < |x| <= sqrt(32) ~= 5.657 */
 
 	xnum = c[8] * y;
 	xden = y;
@@ -238,45 +189,12 @@ void pnorm_both(double x, double *cum, double *ccum, int i_tail, int log_p)
 	swap_tail;
     }
 
-/* else	  |x| > sqrt(32) = 5.657 :
- * the next two case differentiations were really for lower=T, log=F
- * Particularly	 *not*	for  log_p !
-
- * Cody had (-37.5193 < x  &&  x < 8.2924) ; R originally had y < 50
- *
- * Note that we do want symmetry(0), lower/upper -> hence use y
- */
-    else if((log_p && y < 1e170) /* avoid underflow below */
-	/*  ^^^^^ MM FIXME: could speed up for log_p and  y := |x| >> 5.657 !
-	 * Then, make use of  Abramowitz & Stegun, 26.2.13, p.932,  something like
-
-	 * Even smarter: work with   example(pnormAsymp, package="DPQ")
-
-	 xsq = x*x;
-
-	 if(xsq * DBL_EPSILON < 1.)
-	    del = (1. - (1. - 5./(xsq+6.)) / (xsq+4.)) / (xsq+2.);
-	 else
-	    del = 0.;
-	 *cum = -.5*xsq - M_LN_SQRT_2PI - log(x) + log1p(-del);
-	 *ccum = log1p(-exp(*cum)); /.* ~ log(1) = 0 *./
-
- 	 swap_tail;
-
-	 Yes, but xsq might be infinite;
- 	 well, actually  x = -1.34..e154 = -sqrt(DBL_MAX) already overflows x^2
-	 The largest x for which  x/2*x is finite is
-	 x = +/- 1.89615038e154 ~= sqrt(2) * sqrt(.Machine$double.xmax)
-
-	 NB: allowing "DENORMS" ==> boundaries at +/- 38.4674  <--> qnorm(log(2^-1074), log.p=TRUE)
-	 --                               rather than 37.5193 (up to R 4.4.x)
-	*/
+    else if((log_p && y < 1e170)
 	    || (lower && -38.4674 < x  &&  x < 8.2924)
 	    || (upper && -8.2924  < x  &&  x < 38.4674)
 	) {
 
-	/* Evaluate pnorm for x in (-37.5, -5.657) union (5.657, 37.5) */
-	xsq = 1.0 / (x * x); /* (1./x)*(1./x) might be better */
+	xsq = 1.0 / (x * x);
 	xnum = p[5] * xsq;
 	xden = xsq;
 	for (i = 0; i < 4; ++i) {
@@ -293,9 +211,7 @@ void pnorm_both(double x, double *cum, double *ccum, int i_tail, int log_p)
 	else {	        *cum = R_D__0; *ccum = R_D__1;	}
     }
 
-
 #ifdef NO_DENORMS
-    /* do not return "denormalized" -- we do in R */
     double min = DBL_MIN;
     if(log_p) {
 	if(*cum > -min)	 *cum = -0.;

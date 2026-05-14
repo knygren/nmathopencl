@@ -180,17 +180,17 @@ extern "C" {
 
 #ifndef M_LN_SQRT_PI
 #define M_LN_SQRT_PI	0.572364942924700087071713675677	/* log(sqrt(pi))
-								   == log(pi)/2 */
+							   == log(pi)/2 */
 #endif
 
 #ifndef M_LN_SQRT_2PI
 #define M_LN_SQRT_2PI	0.918938533204672741780329736406	/* log(sqrt(2*pi))
-								 == log(2*pi)/2 */
+							 == log(2*pi)/2 */
 #endif
 
 #ifndef M_LN_SQRT_PId2
 #define M_LN_SQRT_PId2	0.225791352644727432363097614947	/* log(sqrt(pi/2))
-								   == log(pi/2)/2 */
+							   == log(pi/2)/2 */
 #endif
 
 
@@ -389,13 +389,6 @@ extern "C" {
 
 	double  pow1p(double, double); /* pow1p(x, y) := (1+x)^y  accurately also for |x| << 1 */
 
-	/* Compute the log of a sum or difference from logs of terms, i.e.,
-	 *
-	 *     log (exp (logx) + exp (logy))
-	 * or  log (exp (logx) - exp (logy))
-	 *
-	 * without causing overflows or throwing away too much accuracy:
-	 */
 	double  logspace_add(double logx, double logy);
 	double  logspace_sub(double logx, double logy);
 	double  logspace_sum(const double*, int);
@@ -521,15 +514,6 @@ extern "C" {
 	double	dnbeta(double, double, double, double, int);
 	double	pnbeta(double, double, double, double, int, int);
 	double	qnbeta(double, double, double, double, int, int);
-#if defined(COMPILING_RCPP)
-# if RCPP_VERSION <= Rcpp_Version(1,1,0)
-	// Rcpp 1.1.0 relies on this declaration existing
-	double rnbeta(double, double, double);
-# endif
-#elif defined(RcppCommon_h) || defined(Rcpp_Rmath_h) || defined(__cplusplus)
-	// Rcpp revdeps may also need this declaration to exist for now
-	double rnbeta(double, double, double);
-# endif
 
 	/* Non-central F Distribution */
 
@@ -554,14 +538,12 @@ extern "C" {
 	double pwilcox(double, double, double, int, int);
 	double qwilcox(double, double, double, int, int);
 	double rwilcox(double, double);
-	void wilcox_free(void); // not remapped
-	/* Wilcoxon Signed Rank Distribution */
-
+	void wilcox_free(void);
 	double dsignrank(double, double, int);
 	double psignrank(double, double, int, int);
 	double qsignrank(double, double, int, int);
 	double rsignrank(double);
-	void signrank_free(void); // not remapped
+	void signrank_free(void);
 
 	/* Gamma and Related Functions */
 	double	gammafn(double);
@@ -604,175 +586,14 @@ extern "C" {
 	double	fsign(double, double);
 	double	ftrunc(double);
 
-	/* More accurate cos(pi*x), sin(pi*x), tan(pi*x)
-
-	   These declarations might clash with system headers if someone had
-	   already included math.h with __STDC_WANT_IEC_60559_FUNCS_EXT__
-	   defined (and we try, above).
-	   We check for that via the value of __STDC_IEC_60559_FUNCS__
-	*/
 #if !defined(__OPENCL_VERSION__) && !defined(__OPENCL_C_VERSION__)
 # if !(defined(__STDC_IEC_60559_FUNCS__) && __STDC_IEC_60559_FUNCS__ >= 201506L)
 	double cospi(double);
 	double sinpi(double);
 	double tanpi(double);
 # endif
-	double Rtanpi(double); /* host-side own helper */
+	double Rtanpi(double);
 #endif
-
-
-#if defined(R_NO_REMAP_RMATH)
-#undef bessel_i
-#undef bessel_j
-#undef bessel_k
-#undef bessel_y
-#undef bessel_i_ex
-#undef bessel_j_ex
-#undef bessel_k_ex
-#undef bessel_y_ex
-#undef beta
-#undef choose
-#undef dbeta
-#undef dbinom
-#undef dbinom_raw
-#undef dcauchy
-#undef dchisq
-#undef dexp
-#undef df
-#undef dgamma
-#undef dgeom
-#undef dhyper
-#undef digamma
-#undef dlnorm
-#undef dlogis
-#undef dnbeta
-#undef dnbinom
-#undef dnbinom_mu
-#undef dnchisq
-#undef dnf
-#undef dnorm4
-#undef dnt
-#undef dpois_raw
-#undef dpois
-#undef dpsifn
-#undef dsignrank
-#undef dt
-#undef dtukey
-#undef dunif
-#undef dweibull
-#undef dwilcox
-#undef fmax2
-#undef fmin2
-#undef fprec
-#undef fround
-#undef ftrunc
-#undef fsign
-#undef gammafn
-#undef imax2
-#undef imin2
-#undef lbeta
-#undef lchoose
-#undef lgammafn
-#undef lgammafn_sign
-#undef lgamma1p
-#undef pow1p
-#undef log1mexp
-#undef log1pexp
-#undef log1pmx
-#undef logspace_add
-#undef logspace_sub
-#undef logspace_sum
-#undef pbeta
-#undef pbeta_raw
-#undef pbinom
-#undef pcauchy
-#undef pchisq
-#undef pentagamma
-#undef pexp
-#undef pf
-#undef pgamma
-#undef pgeom
-#undef phyper
-#undef plnorm
-#undef plogis
-#undef pnbeta
-#undef pnbinom
-#undef pnbinom_mu
-#undef pnchisq
-#undef pnf
-#undef pnorm5
-#undef pnorm_both
-#undef pnt
-#undef ppois
-#undef psignrank
-#undef psigamma
-#undef pt
-#undef ptukey
-#undef punif
-#undef pweibull
-#undef pwilcox
-#undef qbeta
-#undef qbinom
-#undef qcauchy
-#undef qchisq
-#undef qchisq_appr
-#undef qexp
-#undef qf
-#undef qgamma
-#undef qgeom
-#undef qhyper
-#undef qlnorm
-#undef qlogis
-#undef qnbeta
-#undef qnbinom
-#undef qnbinom_mu
-#undef qnchisq
-#undef qnf
-#undef qnorm5
-#undef qnt
-#undef qpois
-#undef qsignrank
-#undef qt
-#undef qtukey
-#undef qunif
-#undef qweibull
-#undef qwilcox
-#undef rbeta
-#undef rbinom
-#undef rcauchy
-#undef rchisq
-#undef rexp
-#undef rf
-#undef rgamma
-#undef rgeom
-#undef rhyper
-#undef rlnorm
-#undef rlogis
-#undef rmultinom
-#undef rnbeta
-#undef rnbinom
-#undef rnbinom_mu
-#undef rnchisq
-#undef rnf
-#undef rnorm
-#undef rnt
-#undef rpois
-#undef rsignrank
-#undef rt
-#undef rtukey
-#undef runif
-#undef rweibull
-#undef rwilcox
-#undef sign
-#undef tetragamma
-#undef trigamma
-
-#undef dnorm
-#undef pnorm
-#undef qnorm
-#endif /* R_NO_REMAP_RMATH */
-
-	/* ----------------- Private part of the header file ------------------- */
 
 
 #ifdef  __cplusplus

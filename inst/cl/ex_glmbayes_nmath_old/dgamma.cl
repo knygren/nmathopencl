@@ -29,20 +29,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, a copy is available at
  *  https://www.R-project.org/Licenses/
- *
- *
- * DESCRIPTION
- *
- *   Computes the density of the gamma distribution,
- *
- *                   1/s (x/s)^{a-1} exp(-x/s)
- *        p(x;a,s) = -----------------------
- *                            (a-1)!
- *
- *   where 's' is the scale (= 1/lambda in other parametrizations)
- *     and 'a' is the shape parameter ( = alpha in other contexts).
- *
- * The old (R 1.1.1) version of the code is available via '#define D_non_pois'
  */
 
 // openclport: include directives disabled for OpenCL C compilation.
@@ -72,11 +58,10 @@ double dgamma(double x, double shape, double scale, int give_log)
     if (shape < 1) {
 	pr = dpois_raw(shape, x/scale, give_log);
 	return (
-	    give_log/* NB: currently *always*  shape/x > 0  if shape < 1:
-		     * -- overflow to Inf happens, but underflow to 0 does NOT : */
+	    give_log
 	    ? pr + (R_FINITE(shape/x)
 		    ? log(shape/x)
-		    : /* shape/x overflows to +Inf */ log(shape) - log(x))
+		    : log(shape) - log(x))
 	    : pr*shape / x);
     }
     /* else  shape >= 1 */

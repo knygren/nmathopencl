@@ -24,29 +24,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, a copy is available at
  *  https://www.R-project.org/Licenses/
- *
- *  SYNOPSIS
- *
- *    int chebyshev_init(double *dos, int nos, double eta)
- *    double chebyshev_eval(double x, double *a, int n)
- *
- *  DESCRIPTION
- *
- *    "chebyshev_init" determines the number of terms for the
- *    double precision orthogonal series "dos" needed to insure
- *    the error is no larger than "eta".  Ordinarily eta will be
- *    chosen to be one-tenth machine precision.
- *
- *    "chebyshev_eval" evaluates the n-term Chebyshev series
- *    "a" at "x".
- *
- *  NOTES
- *
- *    These routines are translations into C of Fortran routines
- *    by W. Fullerton of Los Alamos Scientific Laboratory.
- *
- *    Based on the Fortran routine dcsevl by W. Fullerton.
- *    Adapted from R. Broucke, Algorithm 446, CACM., 16, 254 (1973).
  */
 
 // openclport: include directives disabled for OpenCL C compilation.

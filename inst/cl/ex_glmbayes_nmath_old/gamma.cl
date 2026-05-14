@@ -44,27 +44,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, a copy is available at
  *  https://www.R-project.org/Licenses/
- *
- *  SYNOPSIS
- *
- *    #include <Rmath.h>
- *    double gammafn(double x);
- *
- *  DESCRIPTION
- *
- *    This function computes the value of the gamma function.
- *
- *  NOTES
- *
- *    This function is a translation into C of a Fortran subroutine
- *    by W. Fullerton of Los Alamos Scientific Laboratory.
- *    (e.g. http://www.netlib.org/slatec/fnlib/gamma.f)
- *
- *    The accuracy of this routine compares (very) favourably
- *    with those of the Sun Microsystems portable mathematical
- *    library.
- *
- *    MM specialized the case of  n!  for n < 50 - for even better precision
  */
 
 // openclport: include directives disabled for OpenCL C compilation.
@@ -119,20 +98,6 @@ double gammafn(double x)
 	-.5793070335782135784625493333333e-31
     };
 
-#ifdef NOMORE_FOR_THREADS
-    static int ngam = 0;
-    static double xmin = 0, xmax = 0., xsml = 0., dxrel = 0.;
-
-    /* Initialize machine dependent constants, the first time gamma() is called.
-	FIXME for threads ! */
-    if (ngam == 0) {
-	ngam = chebyshev_init(gamcs, 42, DBL_EPSILON/20);/*was .1*d1mach(3)*/
-	gammalims(&xmin, &xmax);/*-> ./gammalims.c */
-	xsml = exp(fmax2(log(DBL_MIN), -log(DBL_MAX)) + 0.01);
-	/*   = exp(.01)*DBL_MIN = 2.247e-308 for IEEE */
-	dxrel = sqrt(DBL_EPSILON);/*was sqrt(d1mach(4)) */
-    }
-#else
 /* For IEEE double precision DBL_EPSILON = 2^-52 = 2.220446049250313e-16 :
  * (xmin, xmax) are non-trivial, see ./gammalims.c
  * xsml = exp(.01)*DBL_MIN
@@ -143,7 +108,6 @@ double gammafn(double x)
 # define xmax  171.61447887182298
 # define xsml 2.2474362225598545e-308
 # define dxrel 1.490116119384765696e-8
-#endif
 
     if(ISNAN(x)) return x;
 
@@ -209,12 +173,10 @@ double gammafn(double x)
 	/* gamma(x) for	 y = |x| > 10. */
 
 	if (x > xmax) {			/* Overflow */
-	    // No warning: +Inf is the best answer
 	    return ML_POSINF;
 	}
 
 	if (x < xmin) {			/* Underflow */
-	    // No warning: 0 is the best answer
 	    return 0.;
 	}
 
@@ -229,7 +191,6 @@ double gammafn(double x)
 
 	if (x > 0)
 	    return value;
-	// else:  x < 0, not an integer :
 
 	if (fabs((x - (int)(x - 0.5))/x) < dxrel) {
 	    /* The answer is less than half precision because */

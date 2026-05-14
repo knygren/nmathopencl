@@ -102,6 +102,9 @@ load_library_for_kernel <- function(kernel_path,
 #' @param library_dir Path to the source library directory.
 #' @param dest_dir Path to the destination directory.  Must already exist; a
 #'   warning is issued and the function returns invisibly if it does not.
+#'   In addition to the `.cl` files, `kernel_dependency_index.rds` is copied
+#'   here so the extracted subset can be used immediately with a pre-loaded
+#'   index.
 #' @param depends_tag Name of the annotation tag listing library file stems.
 #'   Defaults to `"all_depends"`.  Pass `"all_depends_nmath"` for kernels that
 #'   annotate their nmath dependencies with that tag.
@@ -112,9 +115,12 @@ load_library_for_kernel <- function(kernel_path,
 #'   are not overwritten — the copy is skipped and `copied = FALSE` in the
 #'   returned data frame.
 #'
-#' @return A data frame (returned invisibly) with one row per stem and columns:
+#' @return A data frame (returned invisibly) with one row per copied file
+#'   (`.cl` files in dependency order, followed by
+#'   `kernel_dependency_index.rds`) and columns:
 #'   \describe{
-#'     \item{`stem`}{Stem name (filename without `.cl`).}
+#'     \item{`stem`}{Stem name (filename without `.cl`), or
+#'       `"kernel_dependency_index.rds"` for the index.}
 #'     \item{`source`}{Full path to the source file in `library_dir`.}
 #'     \item{`dest`}{Full path to the destination file in `dest_dir`.}
 #'     \item{`copied`}{`TRUE` if the file was copied; `FALSE` if it already
@@ -191,7 +197,30 @@ extract_library_subset <- function(kernel_paths,
                copied = do_copy, stringsAsFactors = FALSE)
   })
 
-  invisible(do.call(rbind, result_rows))
+  # Always copy the dependency index alongside the .cl files so the extracted
+  # subset is immediately usable with the recommended pre-loaded index pattern.
+  rds_name <- "kernel_dependency_index.rds"
+  rds_src  <- file.path(library_dir, rds_name)
+  rds_dst  <- file.path(dest_dir,    rds_name)
+  rds_row  <- if (file.exists(rds_src)) {
+    do_copy <- isTRUE(overwrite) || !file.exists(rds_dst)
+    if (do_copy) {
+      file.copy(rds_src, rds_dst, overwrite = overwrite)
+    }
+    data.frame(stem = rds_name, source = rds_src, dest = rds_dst,
+               copied = do_copy, stringsAsFactors = FALSE)
+  } else {
+    warning("No `kernel_dependency_index.rds` found in `library_dir`; ",
+            "index was not copied. Run `write_kernel_dependency_index()` to create it.",
+            call. = FALSE)
+    NULL
+  }
+
+  result <- do.call(rbind, result_rows)
+  if (!is.null(rds_row)) {
+    result <- rbind(result, rds_row)
+  }
+  invisible(result)
 }
 
 

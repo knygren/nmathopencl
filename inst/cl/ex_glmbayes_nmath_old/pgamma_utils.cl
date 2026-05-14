@@ -48,11 +48,6 @@ logcf(double x, double i, double d,
     double b2 = d * d * x;
     double a2 = c4 * c2 - b2;
 
-#if 0
-    assert (i > 0);
-    assert (d >= 0);
-#endif
-
     b2 = c4 * b1 - i * b2;
 
     while (fabs(a2 * b1 - a1 * b2) > fabs(eps * b1 * b2)) {
@@ -166,13 +161,6 @@ double lgamma1p(double a)
     const double c = 0.2273736845824652515226821577978691e-12; /* zeta(N+2)-1 */
     const double tol_logcf = 1e-14;
 
-    /* Abramowitz & Stegun 6.1.33 : for |x| < 2,
-     * <==> log(gamma(1+x)) = -(log(1+x) - x) - gamma*x + x^2 * \sum_{n=0}^\infty c_n (-x)^n
-     * where c_n := (Zeta(n+2) - 1)/(n+2)  = coeffs[n]
-     *
-     * Here, another convergence acceleration trick is used to compute
-     * lgam(x) :=  sum_{n=0..Inf} c_n (-x)^n
-     */
     double lgam = c * logcf(-a / 2, N + 2, 1, tol_logcf);
     for (int i = N - 1; i >= 0; i--)
         lgam = coeffs[i] - a * lgam;

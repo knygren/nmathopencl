@@ -38,28 +38,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, a copy is available at
  *  https://www.R-project.org/Licenses/
- *
- *
- *  DESCRIPTION
- *	Evaluates the "deviance part"
- *	bd0(x,M) :=  M * D0(x/M) = M*[ x/M * log(x/M) + 1 - (x/M) ] =
- *		  =  x * log(x/M) + M - x
- *	where M = E[X] = n*p (or = lambda), for	  x, M > 0
- *
- *	in a manner that should be stable (with small relative error)
- *	for all x and M=np. In particular for x/np close to 1, direct
- *	evaluation fails, and evaluation is based on the Taylor series
- *	of log((1+v)/(1-v)) with v = (x-M)/(x+M) = (x-np)/(x+np).
- *
- * Martyn Plummer had the nice idea to use log1p() and Martin Maechler
- * emphasized the extra need to control cancellation.
- *
- * MP:   t := (x-M)/M  ( <==> 1+t = x/M  ==>
- *
- * bd0 = M*[ x/M * log(x/M) + 1 - (x/M) ] = M*[ (1+t)*log1p(t) + 1 - (1+t) ]
- *     = M*[ (1+t)*log1p(t) - t ] =: M * p1log1pm(t) =: M * p1l1(t)
- * MM: The above is very nice, as the "simple" p1l1() function would be useful
- *    to have available in a fast numerical stable way more generally.
  */
 // openclport: include directives disabled for OpenCL C compilation.
 // openclport: preload equivalent ported headers/shims in program assembly.
@@ -72,34 +50,27 @@ attribute_hidden double bd0(double x, double np)
     if (fabs(x-np) < 0.1*(x+np)) {
     	double d = x - np,
 	    v = d/(x+np);
-	if((d != 0.0)  && (v == 0.0)) {  // v has underflown to 0 (as  x+np = inf)
+	if((d != 0.0)  && (v == 0.0)) {
 	    double
 		x_ = ldexp(x, -2),
 		n_ = ldexp(np,-2);
 	    v = (x_ - n_)/(x_ + n_);
 	}
-	double s = ldexp(d, -1) * v; // was d * v
+	double s = ldexp(d, -1) * v;
 	if(fabs(ldexp(s, 1)) < DBL_MIN) return ldexp(s, 1);
-	double ej = x * v; // as 2*x*v could overflow:  v > 1/2  <==> ej = 2xv > x
-	v *= v; // "v = v^2"
-	for (int j = 1; j < 1000; j++) { /* Taylor series; 1000: no infinite loop
-					    as |v| < .1,  v^2000 is "zero" */
-	    ej *= v;// = x v^(2j+1)
+	double ej = x * v;
+	v *= v;
+	for (int j = 1; j < 1000; j++) {
+	    ej *= v;
 	    double s_ = s;
 	    s += ej/((j<<1)+1);
-	    if (s == s_) { /* last term was effectively 0 */
-#ifdef DEBUG_bd0
-		REprintf("bd0(%g, %g): T.series w/ %d terms -> bd0=%g\n", x, np, j, ldexp(s, 1));
-#endif
-		return ldexp(s, 1); // 2*s ; as we dropped '2 *' above
+	    if (s == s_) {
+		return ldexp(s, 1);
 	    }
 	}
-	/* ---- the following should _never_ happen ------------ */
 	MATHLIB_WARNING4("bd0(%g, %g): T.series failed to converge in 1000 it.; s=%g, ej/(2j+1)=%g\n",
 			 x, np, s, ej/((1000<<1)+1));
     }
-    /* else:  | x - np |  is not too small */
-    /* NB: x/np |--> inf (overflow)  doesn't happen when called from rpois_raw() */
 #define lg_x_n (R_FINITE(x/np) ? log(x/np) : (log(x) - log(np)))
     return (x > np) ? x*(lg_x_n -1.) + np
 	            : x* lg_x_n + np -x;
@@ -109,16 +80,6 @@ attribute_hidden double bd0(double x, double np)
 
 // ebd0(): R Bugzilla PR#15628 -- proposed accuracy improvement by Morten Welinder
 
-/*
- * A table of logs for scaling purposes.  Each value has four parts with
- * 23 bits in each.  That means each part can be multiplied by a double
- * with at most 30 bits set and not have any rounding error.  Note, that
- * the first entry is log(2).
- *
- * Entry i is associated with the value r = 0.5 + i / 256.0.  The
- * argument to log is p/q where q=1024 and p=floor(q / r + 0.5).
- * Thus r*p/q is close to 1.
- */
 static const float bd0_scale[128 + 1][4] = {
 	{ +0x1.62e430p-1, -0x1.05c610p-29, -0x1.950d88p-54, +0x1.d9cc02p-79 }, /* 128: log(2048/1024.) */
 	{ +0x1.5ee02cp-1, -0x1.6dbe98p-25, -0x1.51e540p-50, +0x1.2bfa48p-74 }, /* 129: log(2032/1024.) */
@@ -252,17 +213,11 @@ static const float bd0_scale[128 + 1][4] = {
 };
 
 
-/*
- * Compute x * log (x / M) + (M - x)
- * aka -x * log1pmx ((M - x) / x)
- *
- * Deliver the result back in two parts, *yh and *yl.
- */
 attribute_hidden void ebd0(double x, double M, double *yh, double *yl)
 {
 	const int Sb = 10;
-	const double S = 1u << Sb; // = 2^10 = 1024
-	const int N = 128; // == ? == G_N_ELEMENTS(bd0_scale) - 1; <<<< FIXME:
+	const double S = 1u << Sb;
+	const int N = 128;
 
 	*yl = *yh = 0;
 
@@ -270,108 +225,39 @@ attribute_hidden void ebd0(double x, double M, double *yh, double *yl)
 	if (x == 0) { *yh = M;         return; }
 	if (M == 0) { *yh = ML_POSINF; return; }
 
-	if (M/x == ML_POSINF) { *yh = M; return; }//  as when (x == 0)
+	if (M/x == ML_POSINF) { *yh = M; return; }
 
 	int e;
-	// NB: M/x overflow handled above; underflow should be handled by fg = Inf
-	double r = frexp (M / x, &e); // => r in  [0.5, 1) and 'e' (int) such that  M/x = r * 2^e
+	double r = frexp (M / x, &e);
 
-	// prevent later overflow
 	if (M_LN2 * ((double) -e)  > 1. + DBL_MAX / x) { *yh = ML_POSINF; return; }
 
 	int i = (int) floor ((r - 0.5) * (2 * N) + 0.5);
-	// now,  0 <= i <= N
 	double f = floor (S / (0.5 + i / (2.0 * N)) + 0.5);
-	double fg = ldexp (f, -(e + Sb)); // ldexp(f, E) := f * 2^E
-#ifdef DEBUG_bd0
-	REprintf("ebd0(x=%g, M=%g): M/x = (r=%.15g) * 2^(e=%d); i=%d,\n  f=%g, fg=f*2^-(e+%d)=%g\n",
-		 x, M, r,e, i, f, Sb, fg);
-	if (fg == ML_POSINF) {
-	    REprintf(" --> fg = +Inf --> return( +Inf )\n");
-	    *yh = fg; return;
-	}
-	REprintf("     bd0_sc[0][0..3]= ("); for(int j=0; j < 4; j++) REprintf("%g ", bd0_scale[0][j]); REprintf(")\n");
-	REprintf("i -> bd0_sc[i][0..3]= ("); for(int j=0; j < 4; j++) REprintf("%g ", bd0_scale[i][j]); REprintf(")\n");
-	REprintf( "  small(?)  (M*fg-x)/x = (M*fg)/x - 1 = %.16g\n", (M*fg-x)/x);
-#else
-	if (fg == ML_POSINF) {
-	    *yh = fg; return;
-	}
-#endif
-	/* We now have (M * fg / x) close to 1.  */
+	double fg = ldexp (f, -(e + Sb));
 
-	/*
-	 * We need to compute this:
-	 * (x/M)^x * exp(M-x) =
-	 * (M/x)^-x * exp(M-x) =
-	 * (M*fg/x)^-x * (fg)^x * exp(M-x) =
-	 * (M*fg/x)^-x * (fg)^x * exp(M*fg-x) * exp(M-M*fg)
-	 *
-	 * In log terms:
-	 * log((x/M)^x * exp(M-x)) =
-	 * log((M*fg/x)^-x * (fg)^x * exp(M*fg-x) * exp(M-M*fg)) =
-	 * log((M*fg/x)^-x * exp(M*fg-x)) + x*log(fg) + (M-M*fg) =
-	 * -x*log1pmx((M*fg-x)/x) + x*log(fg) + M - M*fg =
-	 *
-	 * Note, that fg has at most 10 bits.  If M and x are suitably
-	 * "nice" -- such as being integers or half-integers -- then
-	 * we can compute M*fg as well as x * bd0_scale[.][.] without
-	 * rounding errors.
-	 */
+	if (fg == ML_POSINF) {
+	    *yh = fg; return;
+	}
 
 #define ADD1(d_) do {				\
    volatile double d = (d_);			\
 	    double d1 = floor (d + 0.5);	\
-	    double d2 = d - d1;/* in [-.5,.5) */ \
+	    double d2 = d - d1;			\
 	    *yh += d1;				\
 	    *yl += d2;				\
 	} while(0)
 
-#ifdef DEBUG_bd0
-	{
-	    double log1__ = log1pmx((M * fg - x) / x),
-		xl = -x * log1__;
-	    REprintf(" 1a. before adding  -x * log1pmx(.) = -x * %g = %g\n", log1__, xl);
-	    ADD1(xl);
-	    REprintf(" 1. after A.(-x*l..):       yl,yh = (%13g, %13g); yl+yh= %g\n",
-		     *yl, *yh, (*yl)+(*yh));
-	}
-        if(fg == 1) {
-            REprintf("___ fg = 1 ___ skipping further steps\n");
-            return;
-        }
-	// else  [ fg != 1 ]
-	REprintf(" 2:  A(x*b[i,j]) and A(-x*e*b[0,j]), j=1:4:\n");
-	for (int j = 0; j < 4; j++) {
- 	    ADD1( x * bd0_scale[i][j]);     // handles  x*log(fg*2^e)
-	    REprintf(" j=%d: (%13g, %13g);", j, *yl, *yh);
-	    ADD1(-x * bd0_scale[0][j] * e); // handles  x*log(1/ 2^e)
-	    REprintf(" (%13g, %13g); yl+yh= %g\n", *yl, *yh, (*yl)+(*yh));
-            if(!R_FINITE(*yh)) {
-                REprintf(" non-finite yh --> return((yh=Inf, yl=0))\n");
-		*yh = ML_POSINF; *yl = 0; return;
-            }
-	}
-#else
 	ADD1(-x * log1pmx ((M * fg - x) / x));
         if(fg == 1) return;
-	// else (fg != 1) :
 	for (int j = 0; j < 4; j++) {
-	    ADD1( x * bd0_scale[i][j]);     // handles  x*log(fg*2^e)
-	    ADD1(-x * bd0_scale[0][j] * e); // handles  x*log(1/ 2^e)
-	    //                        ^^^ at end prevents overflow in  ebd0(1e307, 1e300)
+	    ADD1( x * bd0_scale[i][j]);
+	    ADD1(-x * bd0_scale[0][j] * e);
             if(!R_FINITE(*yh)) { *yh = ML_POSINF; *yl = 0; return; }
 	}
-#endif
 
 	ADD1(M);
-#ifdef DEBUG_bd0
-	REprintf(" 3. after ADD1(M):            yl,yh = (%13g, %13g); yl+yh= %g\n", *yl, *yh, (*yl)+(*yh));
-#endif
 	ADD1(-M * fg);
-#ifdef DEBUG_bd0
-	REprintf(" 4. after ADD1(- M*fg):       yl,yh = (%13g, %13g); yl+yh= %g\n\n", *yl, *yh, (*yl)+(*yh));
-#endif
 }
 
 #undef ADD1

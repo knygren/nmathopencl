@@ -30,12 +30,6 @@
    host-style variants here when this file is ported to .cl. */
 #ifndef __OPENCL_VERSION__
 
-/* HAVE_COSPI etc will not be defined in standalone-use: the
-   intention is to make the versions here available in that case.
-
-   The __cospi etc variants are from macOS (and perhaps other BSD-based systems).
-*/
-
 #ifdef HAVE_COSPI
 #elif defined HAVE___COSPI
 double cospi(double x) {
@@ -84,7 +78,6 @@ double sinpi(double x) {
 #endif
 
 // tan(pi * x)  -- exact when x = k/4  for all integer k and half-values give NaN
-// ----------- e.g. used in ../main/arithmetic.c : 
 double Rtanpi(double x)
 {
 #ifdef IEEE_754
