@@ -1,4 +1,3 @@
-// f2_binomial_logit_prep_parallel.cl
 // @library_deps: nmath
 // @calls_nmath: dbinom_raw, pnorm5, dnorm4
 // @depends_nmath: dbinom, pnorm, dnorm

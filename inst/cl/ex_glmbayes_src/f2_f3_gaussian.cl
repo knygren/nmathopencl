@@ -1,4 +1,3 @@
-// f2_f3_gaussian.cl
 // @library_deps: nmath
 // @calls_nmath: dnorm4
 // @depends_nmath: dnorm

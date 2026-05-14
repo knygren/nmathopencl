@@ -1,4 +1,3 @@
-// f2_binomial_logit_prep_parallel.cl
 // @library_deps: nmath
 // @calls_nmath: dgamma
 // @depends_nmath: dgamma
