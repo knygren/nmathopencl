@@ -206,67 +206,6 @@ void rbinom_kernel_runner(
     std::vector<double>& out_flat
 );
 
-void rmath_runtime_kernel_runner(
-    const std::string&   kernel_source,
-    const char*          kernel_name,
-    int                  n_out,
-    double               x,
-    double               y,
-    double               z,
-    std::vector<double>& out_flat
-);
-
-void rmath_rng_kernel_runner(
-    const std::string&   kernel_source,
-    const char*          kernel_name,
-    int                  n_out,
-    double               a,
-    double               b,
-    double               index_upper,
-    std::vector<double>& out_flat
-);
-
-void rmath_discrete_kernel_runner(
-    const std::string&   kernel_source,
-    const char*          kernel_name,
-    int                  n_out,
-    double               size,
-    double               prob,
-    double               lambda,
-    double               mu,
-    std::vector<double>& out_flat
-);
-
-void rmath_noncentral_kernel_runner(
-    const std::string&   kernel_source,
-    const char*          kernel_name,
-    int                  n_out,
-    double               x,
-    double               df,
-    double               ncp,
-    double               df2,
-    double               p,
-    std::vector<double>& out_flat
-);
-
-void rmath_distribution_kernel_runner(
-    const std::string&   kernel_source,
-    const char*          kernel_name,
-    int                  n_out,
-    double               a,
-    double               b,
-    double               c,
-    double               d,
-    double               e,
-    std::vector<double>& out_flat
-);
-
-void rext_utils_kernel_runner(
-    const std::string&   kernel_source,
-    const char*          kernel_name,
-    int                  n_out,
-    std::vector<double>& out_flat
-);
 
 Rcpp::NumericVector runif_opencl(
     int    n,
