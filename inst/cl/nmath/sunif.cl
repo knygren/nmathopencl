@@ -1,7 +1,7 @@
 // @source_type: c
 // @source_origin: sunif.c
 // @includes: math.h, stdint.h
-// @provides: set_seed, get_seed, unif_rand, R_unif_index
+// @provides: get_seed, R_unif_index, set_seed, unif_rand
 // @all_depends_count: 0
 // @load_order: 7
 

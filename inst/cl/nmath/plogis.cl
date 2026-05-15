@@ -1,11 +1,11 @@
 // @source_type: c
 // @source_origin: plogis.c
 // @includes: nmath.h, dpq.h
-// @depends: nmath, dpq
-// @provides: log1pexp, log1mexp, plogis
-// @all_depends_count: 3
-// @all_depends: dpq, Rmath, nmath
-// @load_order: 11
+// @depends: log1p, nmath, dpq
+// @provides: log1mexp, log1pexp, plogis
+// @all_depends_count: 5
+// @all_depends: dpq, Rmath, nmath, chebyshev, log1p
+// @load_order: 48
 
 /*
  *  R : A Computer Language for Statistical Data Analysis

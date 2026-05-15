@@ -1,10 +1,10 @@
 // @source_type: c
 // @source_origin: lbeta.c
 // @includes: nmath.h
-// @depends: gamma, lgamma, lgammacor, nmath
+// @depends: gamma, lgamma, lgammacor, log1p, nmath
 // @provides: lbeta
-// @all_depends_count: 11
-// @all_depends: refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma
+// @all_depends_count: 12
+// @all_depends: refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma
 // @load_order: 83
 
 /*

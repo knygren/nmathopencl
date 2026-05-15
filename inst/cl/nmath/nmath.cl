@@ -132,45 +132,14 @@ void R_CheckUserInterrupt(void);
 /*	and underflow occurred (important for IEEE)*/
 
 
-#if defined(__OPENCL_VERSION__) || defined(__OPENCL_C_VERSION__)
-
-/* OpenCL device build: suppress host warning plumbing */
+/* Device-only ports: string literals live in __constant address space, so the
+ * host nmath.h pattern (char *msg = _("...")) is ill-formed in OpenCL C.  Some
+ * implementations also compile device programs without defining
+ * __OPENCL_VERSION__ / __OPENCL_C_VERSION__, which would incorrectly select the
+ * host branch—always use no-op warnings here (matching R's ML_WARNING for
+ * ME_DOMAIN anyway). */
 #define ML_WARNING(x, s) ((void)0)
 #define ML_WARN_return_NAN { return ML_NAN; }
-
-#else
-
-#define ML_WARN_return_NAN { ML_WARNING(ME_DOMAIN, ""); return ML_NAN; }
-
-/* For a long time prior to R 2.3.0 ML_WARNING did nothing.
-   We don't report ME_DOMAIN errors as the callers collect ML_NANs into
-   a single warning.
- */
-#define ML_WARNING(x, s) { \
-   if(x > ME_DOMAIN) { \
-       char *msg = ""; \
-       switch(x) { \
-       case ME_DOMAIN: \
-           msg = _("argument out of domain in '%s'\n"); \
-           break; \
-       case ME_RANGE: \
-           msg = _("value out of range in '%s'\n"); \
-           break; \
-       case ME_NOCONV: \
-           msg = _("convergence failed in '%s'\n"); \
-           break; \
-       case ME_PRECISION: \
-           msg = _("full precision may not have been achieved in '%s'\n"); \
-           break; \
-       case ME_UNDERFLOW: \
-           msg = _("underflow occurred in '%s'\n"); \
-           break; \
-       } \
-       MATHLIB_WARNING(msg, s); \
-   } \
-}
-
-#endif
 
 /* Wilcoxon Rank Sum Distribution */
 

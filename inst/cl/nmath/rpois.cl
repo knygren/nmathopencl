@@ -3,8 +3,8 @@
 // @includes: nmath.h
 // @depends: fsign, imax2, imin2, sexp, snorm, sunif, nmath
 // @provides: rpois
-// @all_depends_count: 10
-// @all_depends: Rmath, sunif, nmath, sexp, fmax2, fmin2, fsign, imax2, imin2, snorm
+// @all_depends_count: 14
+// @all_depends: dpq, Rmath, sunif, nmath, sexp, chebyshev, fmax2, fmin2, fsign, imax2, imin2, log1p, qnorm, snorm
 // @load_order: 78
 // @local_macros: a0, a1, a2, a3, a4, a5, a6, a7, one_7, one_12, one_24, repeat
 

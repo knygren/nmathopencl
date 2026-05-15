@@ -2,7 +2,7 @@
 // @source_origin: nmath.h
 // @includes: config.h, math.h, float.h, Rconfig.h, Rmath.h, RS.h, Print.h, Error.h, Arith.h, libintl.h
 // @depends: Rmath
-// @provides: MATHLIB_PRIVATE_H, LDOUBLE, __STDC_WANT_IEC_60559_FUNCS_EXT__, R_forceint, R_nonint, MATHLIB_ERROR, MATHLIB_WARNING, MATHLIB_WARNING2, MATHLIB_WARNING3, MATHLIB_WARNING4, MATHLIB_WARNING5, MATHLIB_WARNING6, ML_POSINF, ML_NEGINF, ML_NAN, calloc, free, _, ML_VALID, ME_NONE, ME_DOMAIN, ME_RANGE, ME_NOCONV, ME_PRECISION, ME_UNDERFLOW, ML_WARNING, ML_WARN_return_NAN, WILCOX_MAX, attribute_hidden, bd0, ebd0, chebyshev_eval, chebyshev_init, gammalims, lfastchoose, lgammacor, stirlerr, pnchisq_raw, pgamma_raw, pnbeta_raw, pnbeta2, bratio, Rf_d1mach, Rf_gamma_cody, R_CheckUserInterrupt, lgammacor , stirlerr  , log1pmx, lgamma1p, pbeta_raw, qchisq_appr, Rf_i1mach
+// @provides: _, __STDC_WANT_IEC_60559_FUNCS_EXT__, attribute_hidden, bd0, bratio, calloc, chebyshev_eval, chebyshev_init, ebd0, free, gammalims, LDOUBLE, lfastchoose, lgamma1p, lgammacor, lgammacor , log1pmx, MATHLIB_ERROR, MATHLIB_PRIVATE_H, MATHLIB_WARNING, MATHLIB_WARNING2, MATHLIB_WARNING3, MATHLIB_WARNING4, MATHLIB_WARNING5, MATHLIB_WARNING6, ME_DOMAIN, ME_NOCONV, ME_NONE, ME_PRECISION, ME_RANGE, ME_UNDERFLOW, ML_NAN, ML_NEGINF, ML_POSINF, ML_VALID, ML_WARN_return_NAN, ML_WARNING, pbeta_raw, pgamma_raw, pnbeta_raw, pnbeta2, pnchisq_raw, qchisq_appr, R_CheckUserInterrupt, R_forceint, R_nonint, Rf_d1mach, Rf_gamma_cody, Rf_i1mach, stirlerr, stirlerr  , WILCOX_MAX
 // @all_depends_count: 1
 // @all_depends: Rmath
 // @load_order: 8
@@ -132,14 +132,6 @@ void R_CheckUserInterrupt(void);
 /*	and underflow occurred (important for IEEE)*/
 
 
-#if defined(__OPENCL_VERSION__) || defined(__OPENCL_C_VERSION__)
-
-/* OpenCL device build: suppress host warning plumbing */
-#define ML_WARNING(x, s) ((void)0)
-#define ML_WARN_return_NAN { return ML_NAN; }
-
-#else
-
 #define ML_WARN_return_NAN { ML_WARNING(ME_DOMAIN, ""); return ML_NAN; }
 
 /* For a long time prior to R 2.3.0 ML_WARNING did nothing.
@@ -151,26 +143,24 @@ void R_CheckUserInterrupt(void);
        char *msg = ""; \
        switch(x) { \
        case ME_DOMAIN: \
-           msg = _("argument out of domain in '%s'\n"); \
-           break; \
+	   msg = _("argument out of domain in '%s'\n");	\
+	   break; \
        case ME_RANGE: \
-           msg = _("value out of range in '%s'\n"); \
-           break; \
+	   msg = _("value out of range in '%s'\n");	\
+	   break; \
        case ME_NOCONV: \
-           msg = _("convergence failed in '%s'\n"); \
-           break; \
+	   msg = _("convergence failed in '%s'\n");	\
+	   break; \
        case ME_PRECISION: \
-           msg = _("full precision may not have been achieved in '%s'\n"); \
-           break; \
+	   msg = _("full precision may not have been achieved in '%s'\n"); \
+	   break; \
        case ME_UNDERFLOW: \
-           msg = _("underflow occurred in '%s'\n"); \
-           break; \
+	   msg = _("underflow occurred in '%s'\n");	\
+	   break; \
        } \
        MATHLIB_WARNING(msg, s); \
    } \
 }
-
-#endif
 
 /* Wilcoxon Rank Sum Distribution */
 

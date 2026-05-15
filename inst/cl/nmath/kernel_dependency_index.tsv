@@ -8,14 +8,9 @@ Rmath
 sunif	
 nmath	Rmath
 pcauchy	dpq, Rmath, nmath
-plnorm	dpq, Rmath, nmath
-plogis	dpq, Rmath, nmath
-pnorm	dpq, Rmath, nmath
 punif	dpq, Rmath, nmath
 qexp	dpq, Rmath, nmath
-qlnorm	dpq, Rmath, nmath
 qlogis	dpq, Rmath, nmath
-qnorm	dpq, Rmath, nmath
 qunif	dpq, Rmath, nmath
 qweibull	dpq, Rmath, nmath
 r_check_user_interrupt	Rmath, nmath
@@ -37,7 +32,6 @@ dlogis	dpq, Rmath, nmath
 dnorm	dpq, Rmath, nmath
 dunif	dpq, Rmath, nmath
 dweibull	dpq, Rmath, nmath
-expm1	Rmath, nmath
 fmax2	Rmath, nmath
 fmin2	Rmath, nmath
 fprec	Rmath, nmath
@@ -52,87 +46,93 @@ imin2	Rmath, nmath
 lgammacor	Rmath, nmath, chebyshev
 log1p	Rmath, nmath, chebyshev
 mlutils	Rmath, nmath
-pexp	dpq, Rmath, nmath, expm1
-pgeom	dpq, Rmath, nmath, expm1
+plogis	dpq, Rmath, nmath, chebyshev, log1p
+pnorm	dpq, Rmath, nmath, chebyshev, log1p
 polygamma	Rmath, nmath, d1mach, fmax2, fmin2, i1mach, imin2
-pweibull	dpq, Rmath, nmath, expm1
 qbinom	dpq, qDiscrete_search, Rmath, nmath, fmax2
-qcauchy	dpq, Rmath, nmath, cospi, expm1
-qgeom	dpq, Rmath, nmath, fmax2
+qgeom	dpq, Rmath, nmath, chebyshev, fmax2, log1p
 qnbinom	dpq, qDiscrete_search, Rmath, nmath, fmax2
+qnorm	dpq, Rmath, nmath, chebyshev, log1p
 qpois	dpq, qDiscrete_search, Rmath, nmath, fmax2
 rbinom	dpq, qDiscrete_search, Rmath, sunif, nmath, fmax2, fmin2, qbinom
 rexp	Rmath, sunif, nmath, sexp
 rmultinom	dpq, qDiscrete_search, Rmath, sunif, nmath, fmax2, fmin2, qbinom, rbinom
 signrank	dpq, Rmath, sunif, nmath, r_check_user_interrupt, imin2
-snorm	Rmath, sunif, nmath, fmax2, fmin2
+snorm	dpq, Rmath, sunif, nmath, chebyshev, fmax2, fmin2, log1p, qnorm
 bessel_i	bessel, Rmath, nmath, bessel_k, cospi, fmax2, gamma_cody
 bessel_j_cycle_free	bessel, refactored, Rmath, nmath, cospi, fmax2, gamma_cody
 bessel_y_cycle_dependent	bessel, refactored, Rmath, nmath, cospi, fmax2, gamma_cody, bessel_j_cycle_free
 bessel_y_cycle_free	bessel, refactored, Rmath, nmath, cospi
+expm1	Rmath, nmath, chebyshev, log1p
 gamma	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor
 lgamma	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma
-pgamma_utils	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma
+pexp	dpq, Rmath, nmath, chebyshev, log1p, expm1
+pgamma_utils	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma
+pgeom	dpq, Rmath, nmath, chebyshev, log1p, expm1
+plnorm	dpq, Rmath, nmath, chebyshev, log1p, pnorm
+pweibull	dpq, Rmath, nmath, chebyshev, log1p, expm1
+qcauchy	dpq, Rmath, nmath, chebyshev, cospi, log1p, expm1
+qlnorm	dpq, Rmath, nmath, chebyshev, log1p, qnorm
 qnbinom_mu	dpq, qDiscrete_search, Rmath, nmath, fmax2, qpois
-rgamma	Rmath, sunif, nmath, sexp, expm1, fmax2, fmin2, snorm
-rnorm	Rmath, sunif, nmath, fmax2, fmin2, snorm
-rpois	Rmath, sunif, nmath, sexp, fmax2, fmin2, fsign, imax2, imin2, snorm
-stirlerr_cycle_dependent	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils
-bd0	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils
+rgamma	dpq, Rmath, sunif, nmath, sexp, chebyshev, fmax2, fmin2, log1p, qnorm, snorm, expm1
+rnorm	dpq, Rmath, sunif, nmath, chebyshev, fmax2, fmin2, log1p, qnorm, snorm
+rpois	dpq, Rmath, sunif, nmath, sexp, chebyshev, fmax2, fmin2, fsign, imax2, imin2, log1p, qnorm, snorm
+stirlerr_cycle_dependent	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils
+bd0	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils
 bessel_j_cycle_dependent	bessel, refactored, Rmath, nmath, cospi, bessel_y_cycle_free
 bessel_y	bessel, refactored, Rmath, nmath, cospi, fmax2, gamma_cody, bessel_j_cycle_free, bessel_y_cycle_dependent, bessel_y_cycle_free
-lbeta	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma
-rgeom	Rmath, sunif, nmath, sexp, fmax2, fmin2, fsign, imax2, imin2, snorm, rpois
-rlnorm	Rmath, sunif, nmath, fmax2, fmin2, snorm, rnorm
-rnbinom	Rmath, sunif, nmath, sexp, expm1, fmax2, fmin2, fsign, imax2, imin2, snorm, rgamma, rpois
-stirlerr	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent
+lbeta	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma
+rgeom	dpq, Rmath, sunif, nmath, sexp, chebyshev, fmax2, fmin2, fsign, imax2, imin2, log1p, qnorm, snorm, rpois
+rlnorm	dpq, Rmath, sunif, nmath, chebyshev, fmax2, fmin2, log1p, qnorm, snorm, rnorm
+rnbinom	dpq, Rmath, sunif, nmath, sexp, chebyshev, fmax2, fmin2, fsign, imax2, imin2, log1p, qnorm, snorm, expm1, rgamma, rpois
+stirlerr	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent
 bessel_j	bessel, refactored, Rmath, nmath, cospi, fmax2, gamma_cody, bessel_j_cycle_free, bessel_y_cycle_free, bessel_j_cycle_dependent
-beta	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, lbeta
-choose	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, lbeta
-dbinom	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr
-dgeom	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom
-dhyper	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom
-dpois	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr
-dt	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr
-pgamma	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, expm1, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois
-phyper	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dhyper
-ppois	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, expm1, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois, pgamma
-qhyper	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, fmin2, gammalims, lgammacor, gamma, lgamma, lbeta, choose
-rbeta	refactored, Rmath, sunif, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, fmin2, gammalims, lgammacor, gamma, lgamma, lbeta, beta
-rhyper	dpq, qDiscrete_search, refactored, Rmath, sunif, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, fmin2, gammalims, imax2, imin2, lgammacor, qbinom, rbinom, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, choose, dt, qhyper
-toms708	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma
-wilcox	dpq, refactored, Rmath, sunif, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, imax2, lgammacor, gamma, lgamma, lbeta, choose
-dbeta	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, dbinom
-dgamma	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois
-dnbeta	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, dbinom, dpois, dbeta
-dnbinom	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois
-pbeta	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, toms708
-pbinom	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, toms708, pbeta
-pnbeta	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, toms708
-pnbinom	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, ppois, toms708, pbeta
-pt	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, toms708, pbeta
-qbeta	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, fmin2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, toms708, pbeta
-qgamma	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, expm1, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois, pgamma, dgamma
-qnbeta	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, fmin2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, toms708, pnbeta
-qt	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, fmin2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, dt, pgamma, toms708, pbeta, pt
-df	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma
-pchisq	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, expm1, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, pgamma, dgamma, df
-pf	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, pgamma, toms708, dgamma, pbeta, df, pchisq
-pnchisq	dpq, refactored, Rmath, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, expm1, fmax2, fmin2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, pgamma, dgamma, df, pchisq
-pnf	dpq, refactored, Rmath, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, fmin2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, pgamma, toms708, dgamma, pnbeta, df, pchisq, pnchisq
-pnt	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, fmin2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, pgamma, toms708, dgamma, pbeta, pt, df
-ptukey	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df
-qchisq	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, expm1, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, pgamma, dgamma, qgamma, df
-qf	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, fmin2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, pgamma, toms708, dgamma, pbeta, qbeta, qgamma, df, qchisq
-qnchisq	dpq, refactored, Rmath, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, expm1, fmax2, fmin2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, pgamma, dgamma, qgamma, df, pchisq, pnchisq, qchisq
-qnf	dpq, refactored, Rmath, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, fmin2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, pgamma, toms708, dgamma, pnbeta, qgamma, qnbeta, df, pchisq, pnchisq, qchisq, qnchisq
-qnt	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, fmin2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, dt, pgamma, toms708, dgamma, pbeta, pt, qt, df, pnt
-qtukey	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df, ptukey
-rchisq	dpq, refactored, Rmath, sunif, nmath, sexp, stirlerr_cycle_free, chebyshev, cospi, expm1, fmax2, fmin2, gammalims, lgammacor, snorm, gamma, lgamma, pgamma_utils, rgamma, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df
-rf	dpq, refactored, Rmath, sunif, nmath, sexp, stirlerr_cycle_free, chebyshev, cospi, expm1, fmax2, fmin2, gammalims, lgammacor, snorm, gamma, lgamma, pgamma_utils, rgamma, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df, rchisq
-rnchisq	dpq, refactored, Rmath, sunif, nmath, sexp, stirlerr_cycle_free, chebyshev, cospi, expm1, fmax2, fmin2, fsign, gammalims, imax2, imin2, lgammacor, snorm, gamma, lgamma, pgamma_utils, rgamma, rpois, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df, rchisq
-rt	dpq, refactored, Rmath, sunif, nmath, sexp, stirlerr_cycle_free, chebyshev, cospi, expm1, fmax2, fmin2, gammalims, lgammacor, snorm, gamma, lgamma, pgamma_utils, rgamma, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df, rchisq
-dchisq	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df
-dnchisq	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df, dchisq
-dnf	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, dbinom, dpois, dbeta, dgamma, dnbeta, df, dchisq, dnchisq
-dnt	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, fmin2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, dt, pgamma, toms708, dgamma, pbeta, pt, df, pnt
+beta	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, lbeta
+choose	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, lbeta
+dbinom	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr
+dgeom	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom
+dhyper	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom
+dpois	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr
+dt	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr
+pgamma	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, gammalims, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois
+phyper	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dhyper
+ppois	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, gammalims, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois, pgamma
+qhyper	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, fmin2, gammalims, lgammacor, log1p, gamma, lgamma, lbeta, choose
+rbeta	refactored, Rmath, sunif, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, fmin2, gammalims, lgammacor, log1p, gamma, lgamma, lbeta, beta
+rhyper	dpq, qDiscrete_search, refactored, Rmath, sunif, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, fmin2, gammalims, imax2, imin2, lgammacor, log1p, qbinom, rbinom, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, choose, dt, qhyper
+toms708	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, gammalims, i1mach, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma
+wilcox	dpq, refactored, Rmath, sunif, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, imax2, lgammacor, log1p, gamma, lgamma, lbeta, choose
+dbeta	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, dbinom
+dgamma	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois
+dnbeta	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, dbinom, dpois, dbeta
+dnbinom	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois
+pbeta	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, gammalims, i1mach, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, toms708
+pbinom	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, gammalims, i1mach, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, toms708, pbeta
+pnbeta	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, gammalims, i1mach, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, toms708
+pnbinom	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, gammalims, i1mach, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, ppois, toms708, pbeta
+pt	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, gammalims, i1mach, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, toms708, pbeta
+qbeta	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, fmin2, gammalims, i1mach, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, toms708, pbeta
+qgamma	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, gammalims, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois, pgamma, dgamma
+qnbeta	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, fmin2, gammalims, i1mach, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, toms708, pnbeta
+qt	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, fmin2, gammalims, i1mach, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, dt, pgamma, toms708, pbeta, pt
+df	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma
+pchisq	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, gammalims, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, pgamma, dgamma, df
+pf	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, gammalims, i1mach, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, pgamma, toms708, dgamma, pbeta, df, pchisq
+pnchisq	dpq, refactored, Rmath, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, fmin2, gammalims, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, pgamma, dgamma, df, pchisq
+pnf	dpq, refactored, Rmath, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, fmin2, gammalims, i1mach, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, pgamma, toms708, dgamma, pnbeta, df, pchisq, pnchisq
+pnt	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, fmin2, gammalims, i1mach, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, pgamma, toms708, dgamma, pbeta, pt, df
+ptukey	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, pnorm, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df
+qchisq	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, gammalims, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, pgamma, dgamma, qgamma, df
+qf	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, fmin2, gammalims, i1mach, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, pgamma, toms708, dgamma, pbeta, qbeta, qgamma, df, qchisq
+qnchisq	dpq, refactored, Rmath, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, fmin2, gammalims, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, pgamma, dgamma, qgamma, df, pchisq, pnchisq, qchisq
+qnf	dpq, refactored, Rmath, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, fmin2, gammalims, i1mach, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, pgamma, toms708, dgamma, pnbeta, qgamma, qnbeta, df, pchisq, pnchisq, qchisq, qnchisq
+qnt	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, fmin2, gammalims, i1mach, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, dt, pgamma, toms708, dgamma, pbeta, pt, qt, df, pnt
+qtukey	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, pnorm, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df, ptukey
+rchisq	dpq, refactored, Rmath, sunif, nmath, sexp, stirlerr_cycle_free, chebyshev, cospi, fmax2, fmin2, gammalims, lgammacor, log1p, qnorm, snorm, expm1, gamma, lgamma, pgamma_utils, rgamma, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df
+rf	dpq, refactored, Rmath, sunif, nmath, sexp, stirlerr_cycle_free, chebyshev, cospi, fmax2, fmin2, gammalims, lgammacor, log1p, qnorm, snorm, expm1, gamma, lgamma, pgamma_utils, rgamma, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df, rchisq
+rnchisq	dpq, refactored, Rmath, sunif, nmath, sexp, stirlerr_cycle_free, chebyshev, cospi, fmax2, fmin2, fsign, gammalims, imax2, imin2, lgammacor, log1p, qnorm, snorm, expm1, gamma, lgamma, pgamma_utils, rgamma, rpois, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df, rchisq
+rt	dpq, refactored, Rmath, sunif, nmath, sexp, stirlerr_cycle_free, chebyshev, cospi, fmax2, fmin2, gammalims, lgammacor, log1p, qnorm, snorm, expm1, gamma, lgamma, pgamma_utils, rgamma, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df, rchisq
+dchisq	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df
+dnchisq	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df, dchisq
+dnf	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, dbinom, dpois, dbeta, dgamma, dnbeta, df, dchisq, dnchisq
+dnt	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, fmin2, gammalims, i1mach, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, dt, pgamma, toms708, dgamma, pbeta, pt, df, pnt

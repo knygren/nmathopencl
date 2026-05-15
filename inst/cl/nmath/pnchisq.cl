@@ -1,10 +1,10 @@
 // @source_type: c
 // @source_origin: pnchisq.c
 // @includes: nmath.h, dpq.h
-// @depends: df, expm1, fmin2, lgamma, pchisq, pgamma, r_check_user_interrupt, nmath, dpq
+// @depends: df, expm1, fmin2, lgamma, log1p, pchisq, pgamma, r_check_user_interrupt, nmath, dpq
 // @provides: pnchisq, pnchisq_raw
-// @all_depends_count: 25
-// @all_depends: dpq, refactored, Rmath, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, expm1, fmax2, fmin2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, pgamma, dgamma, df, pchisq
+// @all_depends_count: 28
+// @all_depends: dpq, refactored, Rmath, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, fmin2, gammalims, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, pgamma, dgamma, df, pchisq
 // @load_order: 120
 // @local_macros: EXP, FABS, LOG, EXP, FABS, LOG, _L
 

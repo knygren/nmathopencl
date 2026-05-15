@@ -5,7 +5,7 @@
 // @provides: stirlerr_cycle_free
 // @all_depends_count: 2
 // @all_depends: Rmath, nmath
-// @load_order: 27
+// @load_order: 22
 // @local_macros: S0, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

@@ -1,10 +1,10 @@
 // @source_type: c
 // @source_origin: qnt.c
 // @includes: nmath.h, dpq.h
-// @depends: df, fmax2, fmin2, pnt, qt, nmath, dpq
+// @depends: df, fmax2, fmin2, pnt, qnorm, qt, nmath, dpq
 // @provides: qnt
-// @all_depends_count: 33
-// @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, fmin2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, dt, pgamma, toms708, dgamma, pbeta, pt, qt, df, pnt
+// @all_depends_count: 37
+// @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, fmin2, gammalims, i1mach, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, dt, pgamma, toms708, dgamma, pbeta, pt, qt, df, pnt
 // @load_order: 128
 
 /*

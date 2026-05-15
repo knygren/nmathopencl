@@ -2,10 +2,10 @@
 // @source_origin: signrank.c
 // @includes: nmath.h, dpq.h
 // @depends: imin2, r_check_user_interrupt, sunif, nmath, dpq
-// @provides: signrank_free, dsignrank, psignrank, qsignrank, rsignrank
+// @provides: dsignrank, psignrank, qsignrank, rsignrank, signrank_free
 // @all_depends_count: 6
 // @all_depends: dpq, Rmath, sunif, nmath, r_check_user_interrupt, imin2
-// @load_order: 66
+// @load_order: 59
 
 /*
  *  Mathlib : A C Library of Special Functions

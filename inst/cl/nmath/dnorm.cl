@@ -2,10 +2,10 @@
 // @source_origin: dnorm.c
 // @includes: nmath.h, dpq.h
 // @depends: nmath, dpq
-// @provides: dnorm4
+// @provides: dnorm, dnorm4
 // @all_depends_count: 3
 // @all_depends: dpq, Rmath, nmath
-// @load_order: 36
+// @load_order: 31
 
 /*
  *  Mathlib : A C Library of Special Functions

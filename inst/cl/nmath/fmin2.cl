@@ -5,7 +5,7 @@
 // @provides: fmin2
 // @all_depends_count: 2
 // @all_depends: Rmath, nmath
-// @load_order: 41
+// @load_order: 35
 
 /*
  *  R : A Computer Language for Statistical Data Analysis

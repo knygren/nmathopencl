@@ -1,6 +1,8 @@
 // @library_deps: nmath
 // @calls_nmath: dgamma
 // @depends_nmath: dgamma
+// @all_depends_nmath_count: 19
+// @all_depends_nmath: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois, dgamma
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 

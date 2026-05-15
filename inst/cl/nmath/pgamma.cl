@@ -1,10 +1,10 @@
 // @source_type: c
 // @source_origin: pgamma.c
 // @includes: nmath.h, dpq.h
-// @depends: dpois, expm1, fmax2, lgamma, pgamma_utils, nmath, dpq
-// @provides: logspace_add, logspace_sub, logspace_sum, pgamma_raw, pgamma
-// @all_depends_count: 18
-// @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, expm1, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois
+// @depends: dnorm, dpois, expm1, fmax2, lgamma, log1p, pgamma_utils, pnorm, nmath, dpq
+// @provides: logspace_add, logspace_sub, logspace_sum, pgamma, pgamma_raw
+// @all_depends_count: 21
+// @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, gammalims, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois
 // @load_order: 96
 // @local_macros: EXP, LOG, EXP, LOG, NEEDED_SCALE, max_it
 

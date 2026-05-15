@@ -5,7 +5,7 @@
 // @provides: rmultinom
 // @all_depends_count: 9
 // @all_depends: dpq, qDiscrete_search, Rmath, sunif, nmath, fmax2, fmin2, qbinom, rbinom
-// @load_order: 65
+// @load_order: 58
 // @local_macros: ML_WARN_ret_NAN
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

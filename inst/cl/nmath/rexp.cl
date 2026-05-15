@@ -5,7 +5,7 @@
 // @provides: rexp
 // @all_depends_count: 4
 // @all_depends: Rmath, sunif, nmath, sexp
-// @load_order: 64
+// @load_order: 57
 
 /*
  *  Mathlib : A C Library of Special Functions

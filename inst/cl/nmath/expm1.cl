@@ -1,11 +1,11 @@
 // @source_type: c
 // @source_origin: expm1.c
 // @includes: config.h, nmath.h
-// @depends: nmath
+// @depends: log1p, nmath
 // @provides: expm1
-// @all_depends_count: 2
-// @all_depends: Rmath, nmath
-// @load_order: 39
+// @all_depends_count: 4
+// @all_depends: Rmath, nmath, chebyshev, log1p
+// @load_order: 65
 
 /*
  *  Mathlib : A C Library of Special Functions

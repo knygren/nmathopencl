@@ -1,6 +1,8 @@
 // @library_deps: nmath
 // @calls_nmath: dunif
 // @depends_nmath: dunif
+// @all_depends_nmath_count: 4
+// @all_depends_nmath: dpq, Rmath, nmath, dunif
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 

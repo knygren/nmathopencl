@@ -3,8 +3,8 @@
 // @includes: Rmath.h, nmath.h, dpq.h, Utils.h
 // @depends: choose, imax2, r_check_user_interrupt, sunif, Rmath, nmath, dpq
 // @provides: dwilcox, pwilcox, qwilcox, rwilcox, wilcox_free
-// @all_depends_count: 17
-// @all_depends: dpq, refactored, Rmath, sunif, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, imax2, lgammacor, gamma, lgamma, lbeta, choose
+// @all_depends_count: 18
+// @all_depends: dpq, refactored, Rmath, sunif, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, imax2, lgammacor, log1p, gamma, lgamma, lbeta, choose
 // @load_order: 103
 
 /*

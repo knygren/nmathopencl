@@ -3,8 +3,8 @@
 // @includes: nmath.h
 // @depends: gamma, gammalims, lbeta, nmath
 // @provides: beta
-// @all_depends_count: 12
-// @all_depends: refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, lbeta
+// @all_depends_count: 13
+// @all_depends: refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, lbeta
 // @load_order: 89
 // @local_macros: xmin, xmax, lnsml
 

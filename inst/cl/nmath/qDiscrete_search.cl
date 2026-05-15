@@ -1,6 +1,6 @@
 // @source_type: h
 // @source_origin: qDiscrete_search.h
-// @provides: PST_0, PASTE, CHR_0, AS_CHAR, _pDIST_, _qDIST_, DO_SEARCH_FUN, DO_SEARCH_, P_DIST, MAYBE_R_CheckUserInterrupt, q_DISCRETE_01_CHECKS, q_DISCR_CHECK_BOUNDARY, q_DISCRETE_BODY, R_DBG_printf
+// @provides: _pDIST_, _qDIST_, AS_CHAR, CHR_0, DO_SEARCH_, DO_SEARCH_FUN, MAYBE_R_CheckUserInterrupt, P_DIST, PASTE, PST_0, q_DISCR_CHECK_BOUNDARY, q_DISCRETE_01_CHECKS, q_DISCRETE_BODY, R_DBG_printf
 // @all_depends_count: 0
 // @load_order: 4
 

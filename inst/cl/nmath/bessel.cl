@@ -1,6 +1,6 @@
 // @source_type: h
 // @source_origin: bessel.h
-// @provides: nsig_BESS, ensig_BESS, rtnsig_BESS, enmten_BESS, enten_BESS, exparg_BESS, xlrg_BESS_IJ, xlrg_BESS_Y, thresh_BESS_Y, xmax_BESS_K, sqxmin_BESS_K, M_eps_sinc
+// @provides: enmten_BESS, ensig_BESS, enten_BESS, exparg_BESS, M_eps_sinc, nsig_BESS, rtnsig_BESS, sqxmin_BESS_K, thresh_BESS_Y, xlrg_BESS_IJ, xlrg_BESS_Y, xmax_BESS_K
 // @all_depends_count: 0
 // @load_order: 1
 

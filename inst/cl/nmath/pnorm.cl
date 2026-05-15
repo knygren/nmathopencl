@@ -1,11 +1,11 @@
 // @source_type: c
 // @source_origin: pnorm.c
 // @includes: nmath.h, dpq.h
-// @depends: nmath, dpq
-// @provides: pnorm5, pnorm_both
-// @all_depends_count: 3
-// @all_depends: dpq, Rmath, nmath
-// @load_order: 12
+// @depends: log1p, nmath, dpq
+// @provides: pnorm, pnorm_both, pnorm5
+// @all_depends_count: 5
+// @all_depends: dpq, Rmath, nmath, chebyshev, log1p
+// @load_order: 49
 // @local_macros: d_2, do_del, swap_tail
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

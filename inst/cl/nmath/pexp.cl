@@ -3,9 +3,9 @@
 // @includes: nmath.h, dpq.h
 // @depends: expm1, nmath, dpq
 // @provides: pexp
-// @all_depends_count: 4
-// @all_depends: dpq, Rmath, nmath, expm1
-// @load_order: 54
+// @all_depends_count: 6
+// @all_depends: dpq, Rmath, nmath, chebyshev, log1p, expm1
+// @load_order: 68
 
 /*
  *  Mathlib : A C Library of Special Functions

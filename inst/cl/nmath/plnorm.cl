@@ -1,11 +1,11 @@
 // @source_type: c
 // @source_origin: plnorm.c
 // @includes: nmath.h, dpq.h
-// @depends: nmath, dpq
+// @depends: pnorm, nmath, dpq
 // @provides: plnorm
-// @all_depends_count: 3
-// @all_depends: dpq, Rmath, nmath
-// @load_order: 10
+// @all_depends_count: 6
+// @all_depends: dpq, Rmath, nmath, chebyshev, log1p, pnorm
+// @load_order: 71
 
 /*
  *  Mathlib : A C Library of Special Functions

@@ -1,10 +1,10 @@
 // @source_type: c
 // @source_origin: ptukey.c
 // @includes: nmath.h, dpq.h
-// @depends: df, lgamma, nmath, dpq
+// @depends: df, lgamma, pnorm, nmath, dpq
 // @provides: ptukey
-// @all_depends_count: 20
-// @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df
+// @all_depends_count: 22
+// @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, pnorm, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df
 // @load_order: 123
 // @local_macros: nleg, ihalf, nlegq, ihalfq
 

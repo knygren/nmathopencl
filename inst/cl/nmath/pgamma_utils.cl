@@ -1,11 +1,11 @@
 // @source_type: c
 // @source_origin: pgamma_utils.c
 // @includes: nmath.h
-// @depends: lgamma, nmath
-// @provides: log1pmx, lgamma1p
-// @all_depends_count: 11
-// @all_depends: refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma
-// @load_order: 74
+// @depends: lgamma, log1p, nmath
+// @provides: lgamma1p, log1pmx
+// @all_depends_count: 12
+// @all_depends: refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma
+// @load_order: 69
 // @local_macros: SQR
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

@@ -5,7 +5,7 @@
 // @provides: fprec
 // @all_depends_count: 2
 // @all_depends: Rmath, nmath
-// @load_order: 42
+// @load_order: 36
 // @local_macros: FPREC_MAX_DIGITS
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

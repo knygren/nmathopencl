@@ -1,11 +1,11 @@
 // @source_type: c
 // @source_origin: pgeom.c
 // @includes: nmath.h, dpq.h
-// @depends: expm1, nmath, dpq
+// @depends: expm1, log1p, nmath, dpq
 // @provides: pgeom
-// @all_depends_count: 4
-// @all_depends: dpq, Rmath, nmath, expm1
-// @load_order: 55
+// @all_depends_count: 6
+// @all_depends: dpq, Rmath, nmath, chebyshev, log1p, expm1
+// @load_order: 70
 
 /*
  *  Mathlib : A C Library of Special Functions

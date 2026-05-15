@@ -1,10 +1,10 @@
 // @source_type: c
 // @source_origin: phyper.c
 // @includes: nmath.h, dpq.h
-// @depends: dhyper, nmath, dpq
+// @depends: dhyper, log1p, nmath, dpq
 // @provides: phyper
-// @all_depends_count: 18
-// @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dhyper
+// @all_depends_count: 19
+// @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dhyper
 // @load_order: 97
 
 /*

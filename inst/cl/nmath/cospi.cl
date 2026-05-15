@@ -2,10 +2,10 @@
 // @source_origin: cospi.c
 // @includes: nmath.h
 // @depends: nmath
-// @provides: cospi, sinpi, Rtanpi, tanpi
+// @provides: cospi, Rtanpi, sinpi, tanpi
 // @all_depends_count: 2
 // @all_depends: Rmath, nmath
-// @load_order: 30
+// @load_order: 25
 
 /*
  *  Mathlib : A C Library of Special Functions

@@ -2,10 +2,10 @@
 // @source_origin: chebyshev.c
 // @includes: nmath.h
 // @depends: nmath
-// @provides: chebyshev_init, chebyshev_eval
+// @provides: chebyshev_eval, chebyshev_init
 // @all_depends_count: 2
 // @all_depends: Rmath, nmath
-// @load_order: 29
+// @load_order: 24
 
 /*
  *  Mathlib : A C Library of Special Functions

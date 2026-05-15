@@ -1,10 +1,10 @@
 // @source_type: c
 // @source_origin: toms708.c
 // @includes: nmath.h, dpq.h, limits.h
-// @depends: beta, d1mach, expm1, i1mach, pgamma, nmath, dpq
+// @depends: beta, d1mach, expm1, i1mach, log1p, pgamma, nmath, dpq
 // @provides: bratio, fpser, rexpm1
-// @all_depends_count: 23
-// @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, expm1, fmax2, gammalims, i1mach, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma
+// @all_depends_count: 26
+// @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, gammalims, i1mach, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma
 // @load_order: 102
 // @local_macros: min, max, R_ifDEBUG_printf, R_ifDEBUG_printf, TOMS708_Log1_Exp, SET_0_noswap, SET_0_swap, bfrac_MAXIT, n_terms_bgrat, num_IT
 

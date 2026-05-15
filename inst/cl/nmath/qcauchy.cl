@@ -3,9 +3,9 @@
 // @includes: nmath.h, dpq.h
 // @depends: cospi, expm1, nmath, dpq
 // @provides: qcauchy
-// @all_depends_count: 5
-// @all_depends: dpq, Rmath, nmath, cospi, expm1
-// @load_order: 59
+// @all_depends_count: 7
+// @all_depends: dpq, Rmath, nmath, chebyshev, cospi, log1p, expm1
+// @load_order: 73
 // @local_macros: my_INF
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

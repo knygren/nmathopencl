@@ -5,7 +5,7 @@
 // @provides: qnbinom
 // @all_depends_count: 5
 // @all_depends: dpq, qDiscrete_search, Rmath, nmath, fmax2
-// @load_order: 61
+// @load_order: 53
 // @local_macros: R_DBG_printf, R_DBG_printf, _thisDIST_, _dist_PARS_DECL_, _dist_PARS_, DO_SEARCH_
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

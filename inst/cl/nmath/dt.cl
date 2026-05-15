@@ -1,10 +1,10 @@
 // @source_type: c
 // @source_origin: dt.c
 // @includes: nmath.h, dpq.h
-// @depends: bd0, stirlerr, nmath, dpq
+// @depends: bd0, dnorm, log1p, stirlerr, nmath, dpq
 // @provides: dt
-// @all_depends_count: 16
-// @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr
+// @all_depends_count: 18
+// @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr
 // @load_order: 95
 
 /*

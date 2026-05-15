@@ -2,10 +2,10 @@
 // @source_origin: lgamma.c
 // @includes: nmath.h
 // @depends: cospi, gamma, lgammacor, nmath
-// @provides: lgammafn_sign, lgammafn
+// @provides: lgammafn, lgammafn_sign
 // @all_depends_count: 10
 // @all_depends: refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma
-// @load_order: 73
+// @load_order: 67
 // @local_macros: xmax, dxrel
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

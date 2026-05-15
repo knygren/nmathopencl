@@ -1,9 +1,9 @@
 // @library_deps: nmath
 // @calls_nmath: dnorm4
 // @depends_nmath: dnorm
-// @all_depends_nmath_count: 3
-// @all_depends_nmath: Rmath, nmath, dnorm
 // @calls_opencl_builtin: (none)
+// @all_depends_nmath_count: 4
+// @all_depends_nmath: dpq, Rmath, nmath, dnorm
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 #pragma OPENCL EXTENSION cl_khr_printf : enable   // for printf

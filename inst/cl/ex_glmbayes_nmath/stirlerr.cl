@@ -3,8 +3,8 @@
 // @includes: nmath.h, refactored.h
 // @depends: stirlerr_cycle_dependent, stirlerr_cycle_free, nmath, refactored
 // @provides: stirlerr
-// @all_depends_count: 13
-// @all_depends: refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent
+// @all_depends_count: 14
+// @all_depends: refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent
 // @load_order: 87
 
 // openclport: include directives disabled for OpenCL C compilation.

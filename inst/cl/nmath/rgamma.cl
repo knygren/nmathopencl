@@ -3,8 +3,8 @@
 // @includes: nmath.h
 // @depends: expm1, sexp, snorm, sunif, nmath
 // @provides: rgamma
-// @all_depends_count: 8
-// @all_depends: Rmath, sunif, nmath, sexp, expm1, fmax2, fmin2, snorm
+// @all_depends_count: 12
+// @all_depends: dpq, Rmath, sunif, nmath, sexp, chebyshev, fmax2, fmin2, log1p, qnorm, snorm, expm1
 // @load_order: 76
 // @local_macros: repeat
 

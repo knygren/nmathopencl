@@ -3,8 +3,8 @@
 // @includes: nmath.h
 // @depends: snorm, nmath
 // @provides: rnorm
-// @all_depends_count: 6
-// @all_depends: Rmath, sunif, nmath, fmax2, fmin2, snorm
+// @all_depends_count: 10
+// @all_depends: dpq, Rmath, sunif, nmath, chebyshev, fmax2, fmin2, log1p, qnorm, snorm
 // @load_order: 77
 
 /*

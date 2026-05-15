@@ -5,7 +5,7 @@
 // @provides: R_CheckUserInterrupt
 // @all_depends_count: 2
 // @all_depends: Rmath, nmath
-// @load_order: 20
+// @load_order: 15
 
 /*
  * Portability shim for OpenCL conversion workflows.

@@ -5,7 +5,7 @@
 // @provides: gammalims
 // @all_depends_count: 3
 // @all_depends: Rmath, nmath, fmax2
-// @load_order: 47
+// @load_order: 41
 
 /*
  *  Mathlib : A C Library of Special Functions

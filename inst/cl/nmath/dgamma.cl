@@ -3,8 +3,8 @@
 // @includes: nmath.h, dpq.h
 // @depends: dpois, nmath, dpq
 // @provides: dgamma
-// @all_depends_count: 17
-// @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois
+// @all_depends_count: 18
+// @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois
 // @load_order: 105
 
 /*

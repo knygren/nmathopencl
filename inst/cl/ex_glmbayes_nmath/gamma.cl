@@ -5,7 +5,7 @@
 // @provides: gammafn
 // @all_depends_count: 9
 // @all_depends: refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor
-// @load_order: 72
+// @load_order: 66
 // @local_macros: ngam, xmin, xmax, xsml, dxrel
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

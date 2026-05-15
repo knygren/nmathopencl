@@ -1,11 +1,11 @@
 // @source_type: c
 // @source_origin: qnorm.c
 // @includes: nmath.h, dpq.h
-// @depends: nmath, dpq
-// @provides: qnorm5
-// @all_depends_count: 3
-// @all_depends: dpq, Rmath, nmath
-// @load_order: 17
+// @depends: log1p, nmath, dpq
+// @provides: qnorm, qnorm5
+// @all_depends_count: 5
+// @all_depends: dpq, Rmath, nmath, chebyshev, log1p
+// @load_order: 54
 
 /*
  *  Mathlib : A C Library of Special Functions

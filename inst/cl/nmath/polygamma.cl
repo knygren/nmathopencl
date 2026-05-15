@@ -2,10 +2,10 @@
 // @source_origin: polygamma.c
 // @includes: nmath.h
 // @depends: d1mach, fmax2, fmin2, i1mach, imin2, nmath
-// @provides: dpsifn, psigamma, digamma, trigamma, tetragamma, pentagamma
+// @provides: digamma, dpsifn, pentagamma, psigamma, tetragamma, trigamma
 // @all_depends_count: 7
 // @all_depends: Rmath, nmath, d1mach, fmax2, fmin2, i1mach, imin2
-// @load_order: 56
+// @load_order: 50
 // @local_macros: n_max, ML_TREAT_psigam
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

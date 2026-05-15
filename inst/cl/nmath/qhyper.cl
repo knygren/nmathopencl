@@ -3,8 +3,8 @@
 // @includes: nmath.h, dpq.h
 // @depends: choose, fmax2, fmin2, nmath, dpq
 // @provides: qhyper
-// @all_depends_count: 15
-// @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, fmin2, gammalims, lgammacor, gamma, lgamma, lbeta, choose
+// @all_depends_count: 16
+// @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, fmin2, gammalims, lgammacor, log1p, gamma, lgamma, lbeta, choose
 // @load_order: 99
 
 /*

@@ -1,6 +1,8 @@
 // @library_deps: nmath
 // @calls_nmath: pnorm5
 // @depends_nmath: pnorm
+// @all_depends_nmath_count: 6
+// @all_depends_nmath: dpq, Rmath, nmath, chebyshev, log1p, pnorm
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 

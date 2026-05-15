@@ -5,7 +5,7 @@
 // @provides: rlogis
 // @all_depends_count: 3
 // @all_depends: Rmath, sunif, nmath
-// @load_order: 22
+// @load_order: 17
 
 /*
  *  R : A Computer Language for Statistical Data Analysis

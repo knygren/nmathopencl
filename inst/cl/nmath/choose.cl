@@ -2,9 +2,9 @@
 // @source_origin: choose.c
 // @includes: nmath.h
 // @depends: fmax2, lbeta, lgamma, nmath
-// @provides: lfastchoose, lchoose, choose
-// @all_depends_count: 12
-// @all_depends: refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, lbeta
+// @provides: choose, lchoose, lfastchoose
+// @all_depends_count: 13
+// @all_depends: refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, lbeta
 // @load_order: 90
 // @local_macros: ODD, R_IS_INT, non_INT_WARN_ROUNDING, k_small_max
 

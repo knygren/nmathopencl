@@ -5,7 +5,7 @@
 // @provides: rcauchy
 // @all_depends_count: 3
 // @all_depends: Rmath, sunif, nmath
-// @load_order: 21
+// @load_order: 16
 
 /*
  *  Mathlib : A C Library of Special Functions

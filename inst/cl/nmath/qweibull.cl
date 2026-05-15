@@ -5,7 +5,7 @@
 // @provides: qweibull
 // @all_depends_count: 3
 // @all_depends: dpq, Rmath, nmath
-// @load_order: 19
+// @load_order: 14
 
 /*
  *  Mathlib : A C Library of Special Functions

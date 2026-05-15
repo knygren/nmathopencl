@@ -5,7 +5,7 @@
 // @provides: runif
 // @all_depends_count: 3
 // @all_depends: Rmath, sunif, nmath
-// @load_order: 23
+// @load_order: 18
 
 /*
  *  Mathlib : A C Library of Special Functions

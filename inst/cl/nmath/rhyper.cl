@@ -3,8 +3,8 @@
 // @includes: nmath.h, dpq.h, limits.h
 // @depends: dt, imax2, imin2, qhyper, rbinom, sunif, nmath, dpq
 // @provides: rhyper
-// @all_depends_count: 27
-// @all_depends: dpq, qDiscrete_search, refactored, Rmath, sunif, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, fmin2, gammalims, imax2, imin2, lgammacor, qbinom, rbinom, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, choose, dt, qhyper
+// @all_depends_count: 29
+// @all_depends: dpq, qDiscrete_search, refactored, Rmath, sunif, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, fmin2, gammalims, imax2, imin2, lgammacor, log1p, qbinom, rbinom, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, choose, dt, qhyper
 // @load_order: 101
 
 /*

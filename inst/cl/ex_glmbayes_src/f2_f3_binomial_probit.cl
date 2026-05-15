@@ -1,9 +1,9 @@
 // @library_deps: nmath
 // @calls_nmath: dbinom_raw, pnorm5, dnorm4
 // @depends_nmath: dbinom, pnorm, dnorm
-// @all_depends_nmath_count: 19
-// @all_depends_nmath: Rmath, nmath, refactored, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma, lgamma, stirlerr_cycle_free, pgamma_utils, stirlerr_cycle_dependent, stirlerr, bd0, dbinom, dnorm, pnorm
 // @calls_opencl_builtin: (none)
+// @all_depends_nmath_count: 20
+// @all_depends_nmath: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, gammalims, lgammacor, log1p, pnorm, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 #pragma OPENCL EXTENSION cl_khr_printf : enable   // for printf
