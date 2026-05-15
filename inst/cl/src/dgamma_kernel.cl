@@ -1,3 +1,7 @@
+// @library_deps: nmath
+// @calls_nmath: dgamma
+// @depends_nmath: dgamma
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void dgamma_kernel(

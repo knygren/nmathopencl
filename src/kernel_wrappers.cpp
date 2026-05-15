@@ -47,7 +47,10 @@ Rcpp::NumericVector dnorm_opencl(
     std::string r_ext_runtime_source    = load_kernel_library("R_ext_runtime", "nmathopencl", false);
     std::string r_ext_internals_source  = load_kernel_library("R_ext_internals", "nmathopencl", false);
     std::string system_source           = load_kernel_library("System", "nmathopencl", false);
-    std::string nmath_source            = load_kernel_library("nmath", "nmathopencl", false);
+    // Old approach — loads all 137 nmath files with full topological sort:
+    // std::string nmath_source = load_kernel_library("nmath", "nmathopencl", false);
+    // New approach — loads only the subset needed for dnorm via index:
+    std::string nmath_source            = load_library_for_kernel("src/dnorm_kernel.cl", "nmath", "nmathopencl", "all_depends_nmath");
     std::string kernel_source  = load_kernel_source("src/dnorm_kernel.cl");
 
     std::string all_src = OPENCL_source +
@@ -342,6 +345,27 @@ static std::string build_rmath_program_with_kernel(const std::string& kernel_rel
     "\n" + load_kernel_source(kernel_rel_path);
 }
 
+// Indexed variant — reads @depends_nmath from the kernel file and loads only the
+// required nmath subset via the pre-built kernel_dependency_index.tsv.  No
+// topological sort at runtime.  Falls back to the full library if the kernel has
+// no @depends_nmath annotation (load_library_for_kernel returns "").
+static std::string build_rmath_program_indexed(const std::string& kernel_rel_path) {
+  std::string nmath_src = load_library_for_kernel(
+      kernel_rel_path, "nmath", "nmathopencl", "all_depends_nmath");
+  if (nmath_src.empty()) {
+    nmath_src = load_kernel_library("nmath", "nmathopencl", false);
+  }
+  return load_kernel_source("OPENCL.cl") +
+    "\n" + load_kernel_library("libR_shims", "nmathopencl", false) +
+    "\n" + load_kernel_library("R_ext_types", "nmathopencl", false) +
+    "\n" + load_kernel_library("R_shims", "nmathopencl", false) +
+    "\n" + load_kernel_library("R_ext_runtime", "nmathopencl", false) +
+    "\n" + load_kernel_library("R_ext_internals", "nmathopencl", false) +
+    "\n" + load_kernel_library("System", "nmathopencl", false) +
+    "\n" + nmath_src +
+    "\n" + load_kernel_source(kernel_rel_path);
+}
+
 Rcpp::NumericVector r_pow_opencl(int n_out, double x, double y, bool verbose) {
   if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
   Rcpp::NumericVector out(n_out);
@@ -552,7 +576,7 @@ Rcpp::NumericVector pnorm_opencl(int n_out, double x, double mu, double sigma, b
   Rcpp::NumericVector out(n_out);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_with_kernel("src/pnorm_kernel.cl"), "pnorm_kernel", {x, mu, sigma, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/pnorm_kernel.cl"), "pnorm_kernel", {x, mu, sigma, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
 #endif
   return out;
 }
@@ -570,7 +594,7 @@ Rcpp::NumericVector dunif_opencl(int n_out, double x, double min, double max, bo
   Rcpp::NumericVector out(n_out);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_with_kernel("src/dunif_kernel.cl"), "dunif_kernel", {x, min, max, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/dunif_kernel.cl"), "dunif_kernel", {x, min, max, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
 #endif
   return out;
 }
@@ -597,7 +621,7 @@ Rcpp::NumericVector dgamma_opencl(int n_out, double x, double shape, double scal
   Rcpp::NumericVector out(n_out);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_with_kernel("src/dgamma_kernel.cl"), "dgamma_kernel", {x, shape, scale, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/dgamma_kernel.cl"), "dgamma_kernel", {x, shape, scale, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
 #endif
   return out;
 }
@@ -606,7 +630,7 @@ Rcpp::NumericVector pgamma_opencl(int n_out, double x, double shape, double scal
   Rcpp::NumericVector out(n_out);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_with_kernel("src/pgamma_kernel.cl"), "pgamma_kernel", {x, shape, scale, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/pgamma_kernel.cl"), "pgamma_kernel", {x, shape, scale, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
 #endif
   return out;
 }
@@ -705,7 +729,7 @@ Rcpp::NumericVector dchisq_opencl(int n_out, double x, double df, bool verbose) 
   Rcpp::NumericVector out(n_out);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_with_kernel("src/dchisq_kernel.cl"), "dchisq_kernel", {x, df, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/dchisq_kernel.cl"), "dchisq_kernel", {x, df, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
 #endif
   return out;
 }
@@ -831,7 +855,7 @@ Rcpp::NumericVector dbinom_raw_opencl(int n_out, double x, double n_size, double
   Rcpp::NumericVector out(n_out);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_with_kernel("src/dbinom_raw_kernel.cl"), "dbinom_raw_kernel", {x, n_size, prob, qprob, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/dbinom_raw_kernel.cl"), "dbinom_raw_kernel", {x, n_size, prob, qprob, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
 #endif
   return out;
 }
@@ -840,7 +864,7 @@ Rcpp::NumericVector dbinom_opencl(int n_out, double x, double size, double prob,
   Rcpp::NumericVector out(n_out);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_with_kernel("src/dbinom_kernel.cl"), "dbinom_kernel", {x, size, prob, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/dbinom_kernel.cl"), "dbinom_kernel", {x, size, prob, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
 #endif
   return out;
 }
@@ -1074,7 +1098,7 @@ Rcpp::NumericVector dpois_raw_opencl(int n_out, double x, double lambda, bool ve
   Rcpp::NumericVector out(n_out);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_with_kernel("src/dpois_raw_kernel.cl"), "dpois_raw_kernel", {x, lambda, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/dpois_raw_kernel.cl"), "dpois_raw_kernel", {x, lambda, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
 #endif
   return out;
 }
@@ -1398,7 +1422,7 @@ Rcpp::NumericVector lgammafn_sign_opencl(int n_out, double x, bool verbose) {
   Rcpp::NumericVector out(n_out);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_with_kernel("src/lgammafn_sign_kernel.cl"), "lgammafn_sign_kernel", {x, 0.0, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/lgammafn_sign_kernel.cl"), "lgammafn_sign_kernel", {x, 0.0, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
 #endif
   return out;
 }

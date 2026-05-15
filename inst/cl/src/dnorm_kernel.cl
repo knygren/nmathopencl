@@ -1,5 +1,8 @@
 // dnorm_kernel.cl
 // Vectorized wrapper kernel for the public Mathlib dnorm interface.
+// @library_deps: nmath
+// @calls_nmath: dnorm4
+// @depends_nmath: dnorm
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 

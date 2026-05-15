@@ -1,3 +1,7 @@
+// @library_deps: nmath
+// @calls_nmath: lgammafn_sign
+// @depends_nmath: lgamma
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void lgammafn_sign_kernel(

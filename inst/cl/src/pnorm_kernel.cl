@@ -1,3 +1,7 @@
+// @library_deps: nmath
+// @calls_nmath: pnorm5
+// @depends_nmath: pnorm
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void pnorm_kernel(

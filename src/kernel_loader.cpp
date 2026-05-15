@@ -330,27 +330,21 @@ std::string load_library_for_kernel(
   }
   kf.close();
 
-  // Parse direct library entry-point stems from @{depends_tag} annotation
-  std::vector<std::string> direct_stems = parse_cl_tag(klines, depends_tag);
-  if (direct_stems.empty()) {
+  // Parse the full pre-computed stem list directly from @{depends_tag}.
+  // The annotation (e.g. @all_depends_nmath) already contains the complete
+  // transitive closure — no expansion needed here.  This mirrors the R
+  // load_library_for_kernel() which reads the same tag the same way.
+  std::vector<std::string> needed_stems = parse_cl_tag(klines, depends_tag);
+  if (needed_stems.empty()) {
     return "";  // no library dependencies (e.g. kernel uses only OpenCL built-ins)
   }
 
-  // Load the TSV index
+  // Load the TSV index — used only to determine the correct load order.
   std::string tsv_path = lib_dir + "/kernel_dependency_index.tsv";
   KernelDepIndex idx = read_tsv_index(tsv_path);
 
-  // Build the needed set: for each direct stem include all_depends + stem itself
-  std::unordered_set<std::string> needed_set;
-  for (const auto& stem : direct_stems) {
-    auto it = idx.all_depends.find(stem);
-    if (it != idx.all_depends.end()) {
-      for (const auto& dep : it->second) needed_set.insert(dep);
-    }
-    needed_set.insert(stem);
-  }
-
-  // Collect stems in global load order (preserves correct compilation order)
+  // Collect stems in global load order (preserves correct compilation order).
+  std::unordered_set<std::string> needed_set(needed_stems.begin(), needed_stems.end());
   std::vector<std::string> to_load;
   to_load.reserve(needed_set.size());
   for (const auto& stem : idx.stems_ordered) {

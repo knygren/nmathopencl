@@ -1,3 +1,7 @@
+// @library_deps: nmath
+// @calls_nmath: dpois_raw
+// @depends_nmath: dpois
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void dpois_raw_kernel(

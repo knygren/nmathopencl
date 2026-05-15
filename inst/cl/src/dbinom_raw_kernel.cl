@@ -1,3 +1,7 @@
+// @library_deps: nmath
+// @calls_nmath: dbinom_raw
+// @depends_nmath: dbinom
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void dbinom_raw_kernel(

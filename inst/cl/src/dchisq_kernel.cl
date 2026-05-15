@@ -1,3 +1,7 @@
+// @library_deps: nmath
+// @calls_nmath: dchisq
+// @depends_nmath: dchisq
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void dchisq_kernel(

@@ -123,9 +123,10 @@ Rcpp::List f2_f3_opencl(
     Rcpp::stop("Unsupported family: " + family);
   }
 
-  // New approach — loads only the subset needed for this kernel via TSV index:
+  // New approach — reads @all_depends_nmath from the kernel file (full
+  // pre-computed transitive list) and loads those files in index order:
   std::string nmath_source = load_library_for_kernel(
-      kernel_file, "ex_glmbayes_nmath", "nmathopencl", "depends_nmath");
+      kernel_file, "ex_glmbayes_nmath", "nmathopencl", "all_depends_nmath");
   
   
   // load & call kernel runner

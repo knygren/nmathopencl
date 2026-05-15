@@ -1,3 +1,7 @@
+// @library_deps: nmath
+// @calls_nmath: pgamma
+// @depends_nmath: pgamma
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void pgamma_kernel(
