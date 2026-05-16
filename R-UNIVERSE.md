@@ -4,18 +4,11 @@ This note is for **maintainers**: how **`nmathopencl`** surfaces on
 **[r-universe](https://docs.r-universe.dev/)** (manual, vignettes, binaries)
 and how that relates to **`packages.json`**.
 
-**No substitute:** A **`packages.json` in `nmathopencl`/`glmbayes` does *not*
-replace **`knygren/knygren.r-universe.dev`**. Those root files are for your convenience
-only. R‑universe discovers **which repos to clone** solely from (**a**) **`packages.json`**
-committed to **`knygren/knygren.r-universe.dev`**, (**b**) a **fallback scan of CRAN** for packages whose
-DESCRIPTION lists your GitHub—see [docs §11.3.1](https://docs.r-universe.dev/publish/set-up.html)—or **(c)** a mix when you add **`packages.json`**
-later (manual registry then takes precedence).
+**Canonical registry (`knygren` universe):** Keep **`packages.json`** on **`knygren/knygren.r-universe.dev` `main`** in the **[documented](https://docs.r-universe.dev/publish/set-up.html)** JSON **array** form (`package` + `url`). Packages on **CRAN** with your GitHub in DESCRIPTION can additionally be **[auto-listed](https://docs.r-universe.dev/publish/set-up.html#sec-special-case-of-cran-packages)**.
 
-**Practical implication:** **`glmbayes`** often appears on `knygren.r-universe.dev`
-automatically because it is on CRAN and its DESCRIPTION links your GitHub repo.
-**`nmathopencl`** is not on CRAN, so it is **not** included by that scraper and
-generally **needs** a conforming **`packages.json`** in **`knygren/knygren.r-universe.dev`**
-to be built (until you publish elsewhere with a discoverable Git URL, if applicable).
+**Operational trigger (`glmbayes`, `nmathopencl`):** Maintainer practice under **`github.com/knygren`**: pushing an updated **`packages.json` at that package’s repo root** (same shorthand **`"pkg":"user/repo"`** map mirrored in **`glmbayes`** and **`nmathopencl`**) has reliably **kick-started / refreshed** builds on **`knygren.r-universe.dev`**, including cases where **`r-universe[bot]`** bumps **`github.com/r-universe/knygren/.ghapp`** **`repositories`** once **`nmathopencl`** is part of your universe lineup. **`R CMD build`** can ignore that file (**`.Rbuildignore`** here); pushes still ship it to GitHub for clones and automation hooks.
+
+Treat the **two** artefacts together: authoritative listing on **`knygren.r-universe.dev`** plus an occasional **repo-root** `packages.json` push whenever you intentionally **signal** fresh universe work—as you’ve done historically for **`glmbayes`**.
 
 ## Canonical R-universe registry (what builders actually read)
 
@@ -41,10 +34,9 @@ The registry file **`packages.json` in that repo** must follow the [**documented
 ]
 ```
 
-Universe sync does **not** automatically ingest a `packages.json` that only
-lives inside a **package repo** (**`glmbayes`** / **`nmathopencl`**)—you still need
-those entries mirrored into **`knygren/knygren.r-universe.dev`** using the documented
-schema.
+The **canonical** **`packages.json`** still lives under **`knygren/knygren.r-universe.dev`**
+(documented schema). **Empirically** for **`knygren`**, syncing **repository-root **`packages.json`**
+inside **`glmbayes`** / **`nmathopencl`** with GitHub has **paired** that registry—not replaced it—for **kick-starting rebuilds**.
 
 If the control-panel / subdomain-repo workflow fails, usual causes are naming
 (repo must match **`hostname.r-universe.dev`**), JSON shape, Actions disabled,
@@ -90,7 +82,7 @@ Understanding **what** R-universe watches avoids confusion:
 | What you push | Typical effect |
 |---------------|----------------|
 | **`knygren/knygren.r-universe.dev`** only (valid `packages.json`) | Registers or updates **which repos** Universe builds from. Requires the **[R-universe GitHub app](https://github.com/apps/r-universe/installations/new)** installed on your GitHub user/org (recommended: all repositories). |
-| **`knygren/glmbayes`** or **`knygren/nmathopencl`** | Does **not** change the registry file. Once a repo is listed in `packages.json`, the build system pulls from that Git URL **on its own cadence**, not instantly on every git push. The first dashboard appearance can take **up to roughly an hour**; later updates appear after periodic sync rebuilds (**metadata-only** tweaks may wait until **30 days** or need a triggering commit per [docs](https://docs.r-universe.dev/publish/set-up.html)). |
+| **`knygren/glmbayes`** or **`knygren/nmathopencl`** (repo-root **`packages.json`**) | **Operational trigger** for **`knygren`** maintainers once that repo sits in **`r-universe/knygren/.ghapp` `repositories`**: pushes have **often** restarted matrix builds—not a substitute for the registry file **`knygren.r-universe.dev`**. Cadence varies; **[docs timing](https://docs.r-universe.dev/publish/set-up.html)** still apply for edge cases (**metadata-only** rows, periodic rescans ~**30 days** mention). |
 
 **JSON shape:** If `packages.json` in **`knygren.r-universe.dev`** used the shorthand `{"glmbayes":"knygren/glmbayes"}` instead of the required **`[{"package":"...","url":"https://..."}, ...]`** array, the formal registry may be ignored → fix the schema and push again ([example](https://github.com/maelle/maelle.r-universe.dev/blob/main/packages.json)).
 

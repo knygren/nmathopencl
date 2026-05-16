@@ -11,8 +11,9 @@ using namespace openclPort;
 
 namespace nmathopencl {
 
+#ifdef USE_OPENCL
 static std::string build_rmath_program_indexed(const std::string& kernel_rel_path);
-
+#endif
 
 Rcpp::NumericVector dnorm_opencl(
     const Rcpp::NumericVector& x,
@@ -269,6 +270,7 @@ Rcpp::NumericVector rbinom_opencl(
 #endif
 }
 
+#ifdef USE_OPENCL
 // Assemble OpenCL program: infrastructure shims + `inst/cl/nmath` stems from
 // `@all_depends_nmath` via load_library_for_kernel() (kernel_dependency_index.tsv).
 // Exceptions — full `load_kernel_library("nmath", ...)`: (1) kernels whose tags list
@@ -300,6 +302,7 @@ static std::string build_rmath_program_indexed(const std::string& kernel_rel_pat
     "\n" + nmath_src +
     "\n" + load_kernel_source(kernel_rel_path);
 }
+#endif
 
 Rcpp::NumericVector r_pow_opencl(int n_out, double x, double y, bool verbose) {
   if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");

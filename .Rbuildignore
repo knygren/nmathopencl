@@ -27,6 +27,7 @@
 ^scripts$
 ^tarballs$
 ^cran-comments\.md$
+^R-UNIVERSE\.md$
 ^\.github$
 ^\.positai$
 ^\.claude$

@@ -50,6 +50,13 @@ std::string load_kernel_source(const std::string& relative_path,
   oss << file.rdbuf();
   return oss.str();
 }
+#else
+std::string load_kernel_source(const std::string& relative_path,
+                               const std::string& package) {
+  (void)relative_path;
+  (void)package;
+  return "";
+}
 #endif
 
 /////////////////////////////
@@ -409,6 +416,37 @@ bool kernel_all_depends_nmath_includes_qDiscrete_search(
       }
     }
   }
+  return false;
+}
+#else
+std::string load_kernel_library(const std::string& subdir,
+                                const std::string& package,
+                                bool verbose) {
+  (void)subdir;
+  (void)package;
+  (void)verbose;
+  return "";
+}
+
+std::string load_library_for_kernel(
+    const std::string& kernel_relative_path,
+    const std::string& library_subdir,
+    const std::string& package,
+    const std::string& depends_tag)
+{
+  (void)kernel_relative_path;
+  (void)library_subdir;
+  (void)package;
+  (void)depends_tag;
+  return "";
+}
+
+bool kernel_all_depends_nmath_includes_qDiscrete_search(
+    const std::string& kernel_relative_path,
+    const std::string& package)
+{
+  (void)kernel_relative_path;
+  (void)package;
   return false;
 }
 #endif

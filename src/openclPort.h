@@ -109,6 +109,33 @@ std::string load_kernel_library_wrapper(
 bool has_opencl();
 int get_opencl_core_count();
 
+// -------------------------------------------------------------------------
+// Kernel file loading (implemented in kernel_loader.cpp). Declared
+// unconditionally so optional .cpp sources can compile without -DUSE_OPENCL;
+// stubs return safe defaults and are only linked when OpenCL is disabled.
+// -------------------------------------------------------------------------
+std::string load_kernel_source(
+    const std::string& relative_path,
+    const std::string& package = "nmathopencl"
+);
+
+std::string load_kernel_library(
+    const std::string& subdir,
+    const std::string& package = "nmathopencl",
+    bool verbose = false
+);
+
+std::string load_library_for_kernel(
+    const std::string& kernel_relative_path,
+    const std::string& library_subdir,
+    const std::string& package    = "nmathopencl",
+    const std::string& depends_tag = "depends_nmath"
+);
+
+bool kernel_all_depends_nmath_includes_qDiscrete_search(
+    const std::string& kernel_relative_path,
+    const std::string& package = "nmathopencl");
+
 
 // -------------------------------------------------------------------------
 // Conditional declarations: only available when USE_OPENCL is defined
@@ -122,34 +149,6 @@ int get_opencl_core_count();
 #include <sstream>
 #include <stdexcept>
 
-
-// Load a single .cl kernel file from inst/cl/<relative_path>
-std::string load_kernel_source(
-    const std::string& relative_path,
-    const std::string& package = "nmathopencl"
-);
-
-// Load and concatenate all .cl files in a subdirectory (inst/cl/<subdir>/)
-std::string load_kernel_library(
-    const std::string& subdir,
-    const std::string& package = "nmathopencl",
-    bool verbose = false
-);
-
-// Load only the library files required by a specific kernel, in dependency
-// order, using the pre-built kernel_dependency_index.tsv.  No topological
-// sort at runtime.  Returns "" if the kernel has no @{depends_tag} annotation.
-std::string load_library_for_kernel(
-    const std::string& kernel_relative_path,
-    const std::string& library_subdir,
-    const std::string& package    = "nmathopencl",
-    const std::string& depends_tag = "depends_nmath"
-);
-
-// True if the kernel's `// @all_depends_nmath:` line lists stem `qDiscrete_search`.
-bool kernel_all_depends_nmath_includes_qDiscrete_search(
-    const std::string& kernel_relative_path,
-    const std::string& package = "nmathopencl");
 
 struct OpenCLConfig {
   bool have_expm1;
