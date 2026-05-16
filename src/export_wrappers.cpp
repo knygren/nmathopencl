@@ -213,13 +213,28 @@ Rcpp::NumericVector exp_rand_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector pnorm_opencl_cpp_export(
-    int n,
-    double x,
-    double mu,
-    double sigma,
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& mean,
+    const Rcpp::NumericVector& sd,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int opencl_parallel_code,
     bool verbose = false
 ) {
-  return nmathopencl::pnorm_opencl(n, x, mu, sigma, verbose);
+  if (static_cast<int>(mean.size()) != q.size()
+      || static_cast<int>(sd.size()) != q.size()
+      || static_cast<int>(lower_tail.size()) != q.size()
+      || static_cast<int>(log_p.size()) != q.size()) {
+    Rcpp::stop("INTERNAL: q, mean, sd, lower_tail, log_p must have identical length.");
+  }
+  return nmathopencl::pnorm_opencl(
+      q,
+      mean,
+      sd,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]

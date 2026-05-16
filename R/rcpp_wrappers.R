@@ -219,8 +219,17 @@
 
 #' @noRd
 #' @keywords internal
-.pnorm_opencl <- function(n, x, mu, sigma, verbose = FALSE) {
-  .Call(`_nmathopencl_pnorm_opencl_cpp_export`, n, x, mu, sigma, verbose)
+.pnorm_opencl <- function(q, mean, sd, lower_tail, log_p, opencl_parallel, verbose = FALSE) {
+  .Call(
+    `_nmathopencl_pnorm_opencl_cpp_export`,
+    q,
+    mean,
+    sd,
+    as.integer(lower_tail),
+    as.integer(log_p),
+    as.integer(opencl_parallel)[1L],
+    verbose
+  )
 }
 
 #' @noRd

@@ -16,7 +16,16 @@ dnorm_opencl(
   verbose = FALSE
 )
 
-pnorm_opencl(n, q, mean = 0, sd = 1, fallback = TRUE, verbose = FALSE)
+pnorm_opencl(
+  q,
+  mean = 0,
+  sd = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 qnorm_opencl(n, p, mean = 0, sd = 1, fallback = TRUE, verbose = FALSE)
 
@@ -25,10 +34,27 @@ rnorm_opencl(n, mean = 0, sd = 1, fallback = TRUE, verbose = FALSE)
 \arguments{
 \item{x}{Numeric vector of quantiles.}
 
-\item{mean}{Numeric scalar mean.}
+\item{q}{Numeric vector of quantiles for \code{pnorm_opencl} (same role as \code{stats::pnorm}).}
 
-\item{sd}{Numeric scalar standard deviation (must be positive for p/q wrappers;
-non-negative for \code{dnorm_opencl} and \code{rnorm_opencl}).}
+\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+
+\item{n}{Number of observations (non-negative integer scalar). Used by \code{qnorm_opencl}
+and \code{rnorm_opencl}; not an argument to \code{pnorm_opencl}.}
+
+\item{mean}{Location parameter. Scalar for \code{dnorm_opencl} and \code{rnorm_opencl}.
+For \code{pnorm_opencl}, recycled like \code{stats::pnorm}.}
+
+\item{sd}{Scale parameter. Scalar (\code{sd >= 0}) for \code{dnorm_opencl} and
+\code{rnorm_opencl}. For \code{pnorm_opencl}, recycled like \code{stats::pnorm}.
+The GPU path runs only when every recycled value is strictly positive (\code{sd > 0});
+\code{sd == 0} is evaluated with \code{stats::pnorm}.}
+
+\item{lower.tail, log.p}{As in \code{stats::pnorm} (recycled). Row-wise semantics follow
+full recycling; for some combinations of arguments, plain \code{stats::pnorm} with vector
+arguments may replicate only scalar \code{lower.tail}/\code{log.p}.}
+
+\item{opencl_parallel}{Single logical: \code{TRUE} forces parallel dispatch when implemented,
+\code{FALSE} serial, \code{NA} automatic (reserved; not yet used by \code{pnorm_opencl} GPU dispatch).}
 
 \item{log}{Logical; if \code{TRUE}, return log densities.}
 
@@ -36,12 +62,6 @@ non-negative for \code{dnorm_opencl} and \code{rnorm_opencl}).}
 when OpenCL is unavailable or the OpenCL call fails.}
 
 \item{verbose}{Logical; print informational fallback messages.}
-
-\item{n}{Number of observations. Non-negative integer scalar.}
-
-\item{q}{Numeric scalar quantile used by linkage wrappers.}
-
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
 \value{
 Numeric vector result from the corresponding normal-family operation.
@@ -51,13 +71,32 @@ OpenCL-backed density, distribution, quantile, and random generation wrappers
 for the normal distribution. These mirror the base \code{stats} normal family
 while adding OpenCL dispatch and optional CPU fallback behavior.
 }
+\details{
+\code{\link{pnorm_opencl}} uses the same first five statistical arguments as
+\code{\link[stats]{pnorm}}, in the same order: \code{q}, \code{mean}, \code{sd},
+\code{lower.tail}, and \code{log.p}, with identical defaults (\code{mean = 0}, \code{sd = 1},
+\code{lower.tail = TRUE}, \code{log.p = FALSE}). It adds \code{opencl_parallel},
+\code{fallback}, and \code{verbose}. There is no leading \code{n} argument (that convention
+applies to \code{\link{qnorm_opencl}} / \code{\link{rnorm_opencl}}).
+Recycling for \code{pnorm_opencl} follows \code{\link[stats]{pnorm}} once those arguments are aligned.
+On the GPU path, each
+recycled parameter row is evaluated with the existing scalar \code{pnorm_kernel} one after
+another (\code{len} submissions; useful before a batched kernel).
+Combining vector \code{q}, \code{mean}, \code{sd}, \code{lower.tail}, and \code{log.p} yields
+one OpenCL scalar evaluation per output index (full recycling to common length).
+If \code{q} has length zero, \code{numeric(0)} is returned immediately (matching
+\code{\link[stats]{pnorm}}). Missing or non-finite
+values (after recycling), or any \code{sd == 0}, are evaluated with CPU
+\code{\link[stats]{pnorm}}. Undefined zero-length recycling stops with an error; negative
+\code{sd} stops with an error.
+}
 \examples{
 if (has_opencl()) {
   n <- 5L
   x <- c(-1, 0, 1)
 
   dnorm_opencl(x, mean = 0, sd = 1, fallback = FALSE, verbose = TRUE)
-  pnorm_opencl(n, q = 0.2, mean = 0, sd = 1, fallback = FALSE, verbose = TRUE)
+  pnorm_opencl(q = 0.2, mean = 0, sd = 1, fallback = FALSE, verbose = TRUE)
   qnorm_opencl(n, p = 0.8, mean = 0, sd = 1, fallback = FALSE, verbose = TRUE)
   rnorm_opencl(n, mean = 0, sd = 1, fallback = FALSE, verbose = TRUE)
 } else {

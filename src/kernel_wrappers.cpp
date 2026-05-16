@@ -510,11 +510,38 @@ Rcpp::NumericVector exp_rand_opencl(int n_out, bool verbose) {
   return out;
 }
 
-Rcpp::NumericVector pnorm_opencl(int n_out, double x, double mu, double sigma, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector pnorm_opencl(
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& mean,
+    const Rcpp::NumericVector& sd,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int    opencl_parallel_code,
+    bool   verbose
+) {
+  (void)opencl_parallel_code;  // 0 serial, 1 parallel, 2 auto — reserved for dispatch
+  const int len = q.size();
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/pnorm_kernel.cl"), "pnorm_kernel", {x, mu, sigma, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+
+  try {
+    for (int i = 0; i < len; ++i) {
+      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
+      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
+      std::vector<double> out_flat;
+      opencl_dbl_scalar_kernel_runner(
+          build_rmath_program_indexed("src/pnorm_kernel.cl"),
+          "pnorm_kernel",
+          {q[i], mean[i], sd[i], lt_d, lp_d},
+          1,
+          out_flat);
+      out[i] = out_flat[0];
+    }
+  } catch (const std::exception& e) {
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
+  }
 #endif
   return out;
 }

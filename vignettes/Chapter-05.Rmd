@@ -53,10 +53,17 @@ x  <- rnorm(1e6)
 # Density
 d  <- dnorm_opencl(x, mean = 0, sd = 1, log = FALSE)
 
-# CDF (scalar q replicated n times)
-p  <- pnorm_opencl(n = 1e6, q = 1.96, mean = 0, sd = 1)
+# CDF — same core arguments as stats::pnorm(q, mean, sd, lower.tail, log.p);
+#          plus opencl_parallel, fallback, verbose. Long outputs use recycling length.
+p <- pnorm_opencl(
+  rep(1.96, 1e6),
+  mean = 0,
+  sd = 1,
+  lower.tail = TRUE,
+  log.p = FALSE
+)
 
-# Quantile (scalar p replicated n times)
+# Quantile (`qnorm_opencl` retains leading `n` + scalar `p`, unlike `stats::qnorm`-style vectors)
 q  <- qnorm_opencl(n = 1e6, p = 0.975, mean = 0, sd = 1)
 
 # Random draws
@@ -64,10 +71,10 @@ r  <- rnorm_opencl(n = 1e6, mean = 0, sd = 1)
 ```
 
 Note the signature difference between `dnorm_opencl` (takes a vector `x`)
-and `pnorm_opencl` / `qnorm_opencl` (take a scalar parameter and replicate
-it `n` times across work-items). This reflects the typical GPU use-case: the
-scalar-replication path avoids transferring a large constant vector to the
-device.
+and `qnorm_opencl` / `rnorm_opencl`, which retain a leading `n` argument for replicate-many quantiles (`qnorm`) or draws (`rnorm`).
+For the CDF, `pnorm_opencl` parallels `stats::pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)` and adds only `opencl_parallel`, `fallback`, and `verbose`.
+Output length is the usual recycled length (`max(length(q), ...)`, as in stats).
+On GPU (when used), each output element runs `pnorm_kernel` once in sequence (high overhead until a batched kernel is added).
 
 ## Distribution families
 

@@ -52,3 +52,20 @@
   }
   out
 }
+
+# Encode logical NA / TRUE / FALSE for C++ (int): 0 = serial, 1 = parallel, 2 = auto
+.encode_opencl_parallel <- function(x) {
+  if (length(x) != 1L) {
+    stop("`opencl_parallel` must have length 1.")
+  }
+  if (isTRUE(x)) {
+    return(1L)
+  }
+  if (identical(x, FALSE)) {
+    return(0L)
+  }
+  if (is.logical(x) && is.na(x)) {
+    return(2L)
+  }
+  stop("`opencl_parallel` must be TRUE, FALSE, or NA.")
+}

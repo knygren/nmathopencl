@@ -4,13 +4,41 @@
 #' for the normal distribution. These mirror the base \code{stats} normal family
 #' while adding OpenCL dispatch and optional CPU fallback behavior.
 #'
+#' @details
+#' \code{\link{pnorm_opencl}} uses the same first five statistical arguments as
+#' \code{\link[stats]{pnorm}}, in the same order: \code{q}, \code{mean}, \code{sd},
+#' \code{lower.tail}, and \code{log.p}, with identical defaults (\code{mean = 0}, \code{sd = 1},
+#' \code{lower.tail = TRUE}, \code{log.p = FALSE}). It adds \code{opencl_parallel},
+#' \code{fallback}, and \code{verbose}. There is no leading \code{n} argument (that convention
+#' applies to \code{\link{qnorm_opencl}} / \code{\link{rnorm_opencl}}).
+#' Recycling for \code{pnorm_opencl} follows \code{\link[stats]{pnorm}} once those arguments are aligned.
+#' On the GPU path, each
+#' recycled parameter row is evaluated with the existing scalar \code{pnorm_kernel} one after
+#' another (\code{len} submissions; useful before a batched kernel).
+#' Combining vector \code{q}, \code{mean}, \code{sd}, \code{lower.tail}, and \code{log.p} yields
+#' one OpenCL scalar evaluation per output index (full recycling to common length).
+#' If \code{q} has length zero, \code{numeric(0)} is returned immediately (matching
+#' \code{\link[stats]{pnorm}}). Missing or non-finite
+#' values (after recycling), or any \code{sd == 0}, are evaluated with CPU
+#' \code{\link[stats]{pnorm}}. Undefined zero-length recycling stops with an error; negative
+#' \code{sd} stops with an error.
+#'
 #' @param x Numeric vector of quantiles.
-#' @param q Numeric scalar quantile used by linkage wrappers.
+#' @param q Numeric vector of quantiles for \code{pnorm_opencl} (same role as \code{stats::pnorm}).
 #' @param p Numeric scalar probability in \code{[0, 1]}.
-#' @param n Number of observations. Non-negative integer scalar.
-#' @param mean Numeric scalar mean.
-#' @param sd Numeric scalar standard deviation (must be positive for p/q wrappers;
-#'   non-negative for \code{dnorm_opencl} and \code{rnorm_opencl}).
+#' @param n Number of observations (non-negative integer scalar). Used by \code{qnorm_opencl}
+#'   and \code{rnorm_opencl}; not an argument to \code{pnorm_opencl}.
+#' @param mean Location parameter. Scalar for \code{dnorm_opencl} and \code{rnorm_opencl}.
+#'   For \code{pnorm_opencl}, recycled like \code{stats::pnorm}.
+#' @param sd Scale parameter. Scalar (\code{sd >= 0}) for \code{dnorm_opencl} and
+#'   \code{rnorm_opencl}. For \code{pnorm_opencl}, recycled like \code{stats::pnorm}.
+#'   The GPU path runs only when every recycled value is strictly positive (\code{sd > 0});
+#'   \code{sd == 0} is evaluated with \code{stats::pnorm}.
+#' @param lower.tail,log.p As in \code{stats::pnorm} (recycled). Row-wise semantics follow
+#'   full recycling; for some combinations of arguments, plain \code{stats::pnorm} with vector
+#'   arguments may replicate only scalar \code{lower.tail}/\code{log.p}.
+#' @param opencl_parallel Single logical: \code{TRUE} forces parallel dispatch when implemented,
+#'   \code{FALSE} serial, \code{NA} automatic (reserved; not yet used by \code{pnorm_opencl} GPU dispatch).
 #' @param log Logical; if \code{TRUE}, return log densities.
 #' @param fallback Logical; if \code{TRUE}, fall back to CPU \code{stats} function
 #'   when OpenCL is unavailable or the OpenCL call fails.
@@ -70,16 +98,100 @@ dnorm_opencl <- function(
 
 #' @rdname normal_opencl
 #' @export
-pnorm_opencl <- function(n, q, mean = 0, sd = 1, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(q, "q")
-  .validate_scalar_num(mean, "mean")
-  .validate_scalar_num(sd, "sd", 0, Inf, open_lower = TRUE)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+pnorm_opencl <- function(
+    q,
+    mean = 0,
+    sd = 1,
+    lower.tail = TRUE,
+    log.p = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(q)) {
+    stop("`q` must be numeric.")
+  }
+  if (!is.numeric(mean)) {
+    stop("`mean` must be numeric.")
+  }
+  if (!is.numeric(sd)) {
+    stop("`sd` must be numeric.")
+  }
+  if (!is.logical(lower.tail) || any(is.na(lower.tail))) {
+    stop("`lower.tail` must be logical with no missing values.")
+  }
+  if (!is.logical(log.p) || any(is.na(log.p))) {
+    stop("`log.p` must be logical with no missing values.")
+  }
+
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(q) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(
+    length(q),
+    length(mean),
+    length(sd),
+    length(lower.tail),
+    length(log.p)
+  )
+  len <- max(lens)
+  if (len == 0L) {
+    return(numeric(0))
+  }
+  if (len > 0L && any(lens == 0L)) {
+    stop(
+      "arguments of length zero cannot be recycled when the output length is positive (see ?pnorm).",
+      call. = FALSE
+    )
+  }
+  if (len > .Machine$integer.max) {
+    stop("`q` / `mean` / `sd` / `lower.tail` / `log.p` are too long for the OpenCL interface.", call. = FALSE)
+  }
+
+  qv <- rep_len(q, len)
+  mv <- rep_len(mean, len)
+  sv <- rep_len(sd, len)
+  ltv <- rep_len(lower.tail, len)
+  lpv <- rep_len(log.p, len)
+
+  fallback_full <- function() {
+    stats::pnorm(q, mean = mean, sd = sd, lower.tail = lower.tail, log.p = log.p)
+  }
+
+  if (any(!is.finite(qv) | !is.finite(mv) | !is.finite(sv))) {
+    return(fallback_full())
+  }
+
+  if (any(sv < 0)) {
+    stop("`sd` must be non-negative (after recycling to common length).", call. = FALSE)
+  }
+
+  if (any(sv == 0)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+
+  lt_int <- as.integer(ltv)
+  lp_int <- as.integer(lpv)
+
+  # GPU path (stage 1): one scalar pnorm_kernel launch per recycled row — matches stats recycling.
+  qv <- as.double(qv)
+  mv <- as.double(mv)
+  sv <- as.double(sv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .pnorm_opencl(n, q, mean, sd, verbose = verbose),
-    fallback_expr = function() rep(stats::pnorm(q, mean = mean, sd = sd), n),
-    fallback = fallback, verbose = verbose, fn_name = "pnorm_opencl"
+    opencl_expr = function() {
+      .pnorm_opencl(qv, mv, sv, lt_int, lp_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "pnorm_opencl"
   )
 }
 

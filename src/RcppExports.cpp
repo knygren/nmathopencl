@@ -334,17 +334,19 @@ BEGIN_RCPP
 END_RCPP
 }
 // pnorm_opencl_cpp_export
-Rcpp::NumericVector pnorm_opencl_cpp_export(int n, double x, double mu, double sigma, bool verbose);
-RcppExport SEXP _nmathopencl_pnorm_opencl_cpp_export(SEXP nSEXP, SEXP xSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP verboseSEXP) {
+Rcpp::NumericVector pnorm_opencl_cpp_export(const Rcpp::NumericVector& q, const Rcpp::NumericVector& mean, const Rcpp::NumericVector& sd, const Rcpp::IntegerVector& lower_tail, const Rcpp::IntegerVector& log_p, int opencl_parallel_code, bool verbose);
+RcppExport SEXP _nmathopencl_pnorm_opencl_cpp_export(SEXP qSEXP, SEXP meanSEXP, SEXP sdSEXP, SEXP lower_tailSEXP, SEXP log_pSEXP, SEXP opencl_parallel_codeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< double >::type x(xSEXP);
-    Rcpp::traits::input_parameter< double >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type q(qSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type mean(meanSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type sd(sdSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type lower_tail(lower_tailSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type log_p(log_pSEXP);
+    Rcpp::traits::input_parameter< int >::type opencl_parallel_code(opencl_parallel_codeSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(pnorm_opencl_cpp_export(n, x, mu, sigma, verbose));
+    rcpp_result_gen = Rcpp::wrap(pnorm_opencl_cpp_export(q, mean, sd, lower_tail, log_p, opencl_parallel_code, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -2206,7 +2208,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_nmathopencl_unif_rand_opencl_cpp_export", (DL_FUNC) &_nmathopencl_unif_rand_opencl_cpp_export, 2},
     {"_nmathopencl_r_unif_index_opencl_cpp_export", (DL_FUNC) &_nmathopencl_r_unif_index_opencl_cpp_export, 3},
     {"_nmathopencl_exp_rand_opencl_cpp_export", (DL_FUNC) &_nmathopencl_exp_rand_opencl_cpp_export, 2},
-    {"_nmathopencl_pnorm_opencl_cpp_export", (DL_FUNC) &_nmathopencl_pnorm_opencl_cpp_export, 5},
+    {"_nmathopencl_pnorm_opencl_cpp_export", (DL_FUNC) &_nmathopencl_pnorm_opencl_cpp_export, 7},
     {"_nmathopencl_qnorm_opencl_cpp_export", (DL_FUNC) &_nmathopencl_qnorm_opencl_cpp_export, 5},
     {"_nmathopencl_dunif_opencl_cpp_export", (DL_FUNC) &_nmathopencl_dunif_opencl_cpp_export, 5},
     {"_nmathopencl_punif_opencl_cpp_export", (DL_FUNC) &_nmathopencl_punif_opencl_cpp_export, 5},

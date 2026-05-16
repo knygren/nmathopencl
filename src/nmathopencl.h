@@ -210,10 +210,12 @@ Rcpp::NumericVector exp_rand_opencl(
 );
 
 Rcpp::NumericVector pnorm_opencl(
-    int    n_out,
-    double x,
-    double mu,
-    double sigma,
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& mean,
+    const Rcpp::NumericVector& sd,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int    opencl_parallel_code,
     bool   verbose = false
 );
 

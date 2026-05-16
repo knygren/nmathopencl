@@ -93,8 +93,8 @@ exp_rand_opencl_cpp_export <- function(n, verbose = FALSE) {
     .Call(`_nmathopencl_exp_rand_opencl_cpp_export`, n, verbose)
 }
 
-pnorm_opencl_cpp_export <- function(n, x, mu, sigma, verbose = FALSE) {
-    .Call(`_nmathopencl_pnorm_opencl_cpp_export`, n, x, mu, sigma, verbose)
+pnorm_opencl_cpp_export <- function(q, mean, sd, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_pnorm_opencl_cpp_export`, q, mean, sd, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 qnorm_opencl_cpp_export <- function(n, p, mu, sigma, verbose = FALSE) {
