@@ -5,7 +5,7 @@
 // @provides: Rf_gamma_cody
 // @all_depends_count: 3
 // @all_depends: Rmath, nmath, cospi
-// @load_order: 40
+// @load_order: 39
 
 /* From http://www.netlib.org/specfun/gamma	Fortran translated by f2c,...
  *	------------------------------#####	Martin Maechler, ETH Zurich

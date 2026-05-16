@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: dlogis
+// @all_depends_nmath_count: 4
+// @all_depends_nmath: dpq, Rmath, nmath, dlogis
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void dlogis_kernel(

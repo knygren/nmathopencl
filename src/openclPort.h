@@ -146,6 +146,10 @@ std::string load_library_for_kernel(
     const std::string& depends_tag = "depends_nmath"
 );
 
+// True if the kernel's `// @all_depends_nmath:` line lists stem `qDiscrete_search`.
+bool kernel_all_depends_nmath_includes_qDiscrete_search(
+    const std::string& kernel_relative_path,
+    const std::string& package = "nmathopencl");
 
 struct OpenCLConfig {
   bool have_expm1;

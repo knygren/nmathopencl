@@ -5,7 +5,7 @@
 // @provides: stirlerr_cycle_dependent
 // @all_depends_count: 13
 // @all_depends: refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils
-// @load_order: 79
+// @load_order: 75
 
 // openclport: include directives disabled for OpenCL C compilation.
 // openclport: preload equivalent ported headers/shims in program assembly.

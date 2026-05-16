@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: bessel_y
+// @all_depends_nmath_count: 11
+// @all_depends_nmath: bessel, refactored, Rmath, nmath, cospi, fmax2, gamma_cody, bessel_j_cycle_free, bessel_y_cycle_dependent, bessel_y_cycle_free, bessel_y
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void bessel_y_ex_kernel(

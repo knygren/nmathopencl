@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: rlnorm
+// @all_depends_nmath_count: 12
+// @all_depends_nmath: dpq, Rmath, sunif, nmath, chebyshev, fmax2, fmin2, log1p, qnorm, snorm, rnorm, rlnorm
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void rlnorm_kernel(

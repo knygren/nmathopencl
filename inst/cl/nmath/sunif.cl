@@ -3,7 +3,7 @@
 // @includes: math.h, stdint.h
 // @provides: get_seed, R_unif_index, set_seed, unif_rand
 // @all_depends_count: 0
-// @load_order: 7
+// @load_order: 6
 
 /*
  *  Mathlib : A C Library of Special Functions

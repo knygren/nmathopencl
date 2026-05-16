@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: qlogis
+// @all_depends_nmath_count: 4
+// @all_depends_nmath: dpq, Rmath, nmath, qlogis
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void qlogis_kernel(

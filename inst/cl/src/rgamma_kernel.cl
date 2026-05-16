@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: rgamma
+// @all_depends_nmath_count: 13
+// @all_depends_nmath: dpq, Rmath, sunif, nmath, sexp, chebyshev, fmax2, fmin2, log1p, qnorm, snorm, expm1, rgamma
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void rgamma_kernel(

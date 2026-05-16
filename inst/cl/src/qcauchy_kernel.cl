@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: qcauchy
+// @all_depends_nmath_count: 8
+// @all_depends_nmath: dpq, Rmath, nmath, chebyshev, cospi, log1p, expm1, qcauchy
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void qcauchy_kernel(

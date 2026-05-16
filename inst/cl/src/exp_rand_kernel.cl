@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: sexp
+// @all_depends_nmath_count: 4
+// @all_depends_nmath: Rmath, sunif, nmath, sexp
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void exp_rand_kernel(

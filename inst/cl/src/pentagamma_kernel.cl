@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: polygamma
+// @all_depends_nmath_count: 8
+// @all_depends_nmath: Rmath, nmath, d1mach, fmax2, fmin2, i1mach, imin2, polygamma
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void pentagamma_kernel(

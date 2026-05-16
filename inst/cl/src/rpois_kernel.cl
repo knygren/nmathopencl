@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: rpois
+// @all_depends_nmath_count: 15
+// @all_depends_nmath: dpq, Rmath, sunif, nmath, sexp, chebyshev, fmax2, fmin2, fsign, imax2, imin2, log1p, qnorm, snorm, rpois
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void rpois_kernel(

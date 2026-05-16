@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: rgeom
+// @all_depends_nmath_count: 16
+// @all_depends_nmath: dpq, Rmath, sunif, nmath, sexp, chebyshev, fmax2, fmin2, fsign, imax2, imin2, log1p, qnorm, snorm, rpois, rgeom
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void rgeom_kernel(

@@ -5,7 +5,7 @@
 // @provides: rpois
 // @all_depends_count: 14
 // @all_depends: dpq, Rmath, sunif, nmath, sexp, chebyshev, fmax2, fmin2, fsign, imax2, imin2, log1p, qnorm, snorm
-// @load_order: 78
+// @load_order: 74
 // @local_macros: a0, a1, a2, a3, a4, a5, a6, a7, one_7, one_12, one_24, repeat
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

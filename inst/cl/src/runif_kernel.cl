@@ -1,6 +1,11 @@
 // runif_kernel.cl
 // Single-work-item RNG kernel to avoid shared-state races in sunif.c globals.
 
+// @library_deps: nmath
+// @depends_nmath: runif
+// @all_depends_nmath_count: 4
+// @all_depends_nmath: Rmath, sunif, nmath, runif
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void runif_kernel(

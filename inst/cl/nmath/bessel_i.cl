@@ -5,7 +5,7 @@
 // @provides: bessel_i, bessel_i_ex
 // @all_depends_count: 7
 // @all_depends: bessel, Rmath, nmath, bessel_k, cospi, fmax2, gamma_cody
-// @load_order: 61
+// @load_order: 55
 // @local_macros: min0
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

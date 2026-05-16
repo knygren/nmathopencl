@@ -5,7 +5,7 @@
 // @provides: plnorm
 // @all_depends_count: 6
 // @all_depends: dpq, Rmath, nmath, chebyshev, log1p, pnorm
-// @load_order: 71
+// @load_order: 65
 
 /*
  *  Mathlib : A C Library of Special Functions

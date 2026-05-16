@@ -5,7 +5,7 @@
 // @provides: rgeom
 // @all_depends_count: 15
 // @all_depends: dpq, Rmath, sunif, nmath, sexp, chebyshev, fmax2, fmin2, fsign, imax2, imin2, log1p, qnorm, snorm, rpois
-// @load_order: 84
+// @load_order: 83
 
 /*
  *  Mathlib : A C Library of Special Functions

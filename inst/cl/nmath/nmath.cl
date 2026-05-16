@@ -5,7 +5,7 @@
 // @provides: MATHLIB_PRIVATE_H, LDOUBLE, __STDC_WANT_IEC_60559_FUNCS_EXT__, R_forceint, R_nonint, MATHLIB_ERROR, MATHLIB_WARNING, MATHLIB_WARNING2, MATHLIB_WARNING3, MATHLIB_WARNING4, MATHLIB_WARNING5, MATHLIB_WARNING6, ML_POSINF, ML_NEGINF, ML_NAN, calloc, free, _, ML_VALID, ME_NONE, ME_DOMAIN, ME_RANGE, ME_NOCONV, ME_PRECISION, ME_UNDERFLOW, ML_WARNING, ML_WARN_return_NAN, WILCOX_MAX, attribute_hidden, bd0, ebd0, chebyshev_eval, chebyshev_init, gammalims, lfastchoose, lgammacor, stirlerr, pnchisq_raw, pgamma_raw, pnbeta_raw, pnbeta2, bratio, Rf_d1mach, Rf_gamma_cody, R_CheckUserInterrupt, lgammacor , stirlerr  , log1pmx, lgamma1p, pbeta_raw, qchisq_appr, Rf_i1mach
 // @all_depends_count: 1
 // @all_depends: Rmath
-// @load_order: 8
+// @load_order: 7
 
 /*
  *  Mathlib : A C Library of Special Functions

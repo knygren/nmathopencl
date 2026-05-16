@@ -5,7 +5,7 @@
 // @provides: lgammacor
 // @all_depends_count: 3
 // @all_depends: Rmath, nmath, chebyshev
-// @load_order: 45
+// @load_order: 44
 // @local_macros: nalgm, xbig, xmax
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

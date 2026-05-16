@@ -5,7 +5,7 @@
 // @provides: expm1
 // @all_depends_count: 4
 // @all_depends: Rmath, nmath, chebyshev, log1p
-// @load_order: 65
+// @load_order: 59
 
 /*
  *  Mathlib : A C Library of Special Functions

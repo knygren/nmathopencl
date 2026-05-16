@@ -367,6 +367,50 @@ std::string load_library_for_kernel(
 
   return combined;
 }
+
+bool kernel_all_depends_nmath_includes_qDiscrete_search(
+    const std::string& kernel_relative_path,
+    const std::string& package)
+{
+  std::string kernel_path = Rcpp::as<std::string>(
+      Rcpp::Function("system.file")(
+          "cl", kernel_relative_path,
+          Rcpp::Named("package") = package));
+  if (kernel_path.empty()) {
+    return false;
+  }
+
+  std::ifstream kf(kernel_path);
+  if (!kf.is_open()) {
+    return false;
+  }
+
+  static const std::string key = "@all_depends_nmath:";
+  std::string line;
+  while (std::getline(kf, line)) {
+    if (!line.empty() && line.back() == '\r') {
+      line.pop_back();
+    }
+    auto pos = line.find(key);
+    if (pos == std::string::npos) {
+      continue;
+    }
+    std::string rest = line.substr(pos + key.size());
+    std::istringstream ss(rest);
+    std::string tok;
+    while (std::getline(ss, tok, ',')) {
+      tok.erase(0, tok.find_first_not_of(" \t\r\n"));
+      auto last = tok.find_last_not_of(" \t\r\n");
+      if (last != std::string::npos) {
+        tok.erase(last + 1);
+      }
+      if (tok == "qDiscrete_search") {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 #endif
 
 }

@@ -5,7 +5,7 @@
 // @provides: log1mexp, log1pexp, plogis
 // @all_depends_count: 5
 // @all_depends: dpq, Rmath, nmath, chebyshev, log1p
-// @load_order: 48
+// @load_order: 47
 
 /*
  *  R : A Computer Language for Statistical Data Analysis

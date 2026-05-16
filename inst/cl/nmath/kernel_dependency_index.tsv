@@ -2,7 +2,6 @@ stem	all_depends
 bessel	
 dpq	
 nmath2	
-qDiscrete_search	
 refactored	
 Rmath	
 sunif	
@@ -49,14 +48,9 @@ mlutils	Rmath, nmath
 plogis	dpq, Rmath, nmath, chebyshev, log1p
 pnorm	dpq, Rmath, nmath, chebyshev, log1p
 polygamma	Rmath, nmath, d1mach, fmax2, fmin2, i1mach, imin2
-qbinom	dpq, qDiscrete_search, Rmath, nmath, fmax2
 qgeom	dpq, Rmath, nmath, chebyshev, fmax2, log1p
-qnbinom	dpq, qDiscrete_search, Rmath, nmath, fmax2
 qnorm	dpq, Rmath, nmath, chebyshev, log1p
-qpois	dpq, qDiscrete_search, Rmath, nmath, fmax2
-rbinom	dpq, qDiscrete_search, Rmath, sunif, nmath, fmax2, fmin2, qbinom
 rexp	Rmath, sunif, nmath, sexp
-rmultinom	dpq, qDiscrete_search, Rmath, sunif, nmath, fmax2, fmin2, qbinom, rbinom
 signrank	dpq, Rmath, sunif, nmath, r_check_user_interrupt, imin2
 snorm	dpq, Rmath, sunif, nmath, chebyshev, fmax2, fmin2, log1p, qnorm
 bessel_i	bessel, Rmath, nmath, bessel_k, cospi, fmax2, gamma_cody
@@ -72,8 +66,10 @@ pgeom	dpq, Rmath, nmath, chebyshev, log1p, expm1
 plnorm	dpq, Rmath, nmath, chebyshev, log1p, pnorm
 pweibull	dpq, Rmath, nmath, chebyshev, log1p, expm1
 qcauchy	dpq, Rmath, nmath, chebyshev, cospi, log1p, expm1
+qDiscrete_search	dpq, Rmath, nmath, chebyshev, log1p, qnorm
 qlnorm	dpq, Rmath, nmath, chebyshev, log1p, qnorm
-qnbinom_mu	dpq, qDiscrete_search, Rmath, nmath, fmax2, qpois
+qnbinom	dpq, Rmath, nmath, chebyshev, fmax2, log1p, qnorm, qDiscrete_search
+qpois	dpq, Rmath, nmath, chebyshev, fmax2, log1p, qnorm, qDiscrete_search
 rgamma	dpq, Rmath, sunif, nmath, sexp, chebyshev, fmax2, fmin2, log1p, qnorm, snorm, expm1
 rnorm	dpq, Rmath, sunif, nmath, chebyshev, fmax2, fmin2, log1p, qnorm, snorm
 rpois	dpq, Rmath, sunif, nmath, sexp, chebyshev, fmax2, fmin2, fsign, imax2, imin2, log1p, qnorm, snorm
@@ -82,8 +78,12 @@ bd0	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gamm
 bessel_j_cycle_dependent	bessel, refactored, Rmath, nmath, cospi, bessel_y_cycle_free
 bessel_y	bessel, refactored, Rmath, nmath, cospi, fmax2, gamma_cody, bessel_j_cycle_free, bessel_y_cycle_dependent, bessel_y_cycle_free
 lbeta	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma
+qbinom	dpq, Rmath, nmath, chebyshev, fmax2, log1p, qnorm, qDiscrete_search
+qnbinom_mu	dpq, Rmath, nmath, chebyshev, fmax2, log1p, qnorm, qDiscrete_search, qpois
+rbinom	dpq, Rmath, sunif, nmath, chebyshev, fmax2, fmin2, log1p, qnorm, qDiscrete_search, qbinom
 rgeom	dpq, Rmath, sunif, nmath, sexp, chebyshev, fmax2, fmin2, fsign, imax2, imin2, log1p, qnorm, snorm, rpois
 rlnorm	dpq, Rmath, sunif, nmath, chebyshev, fmax2, fmin2, log1p, qnorm, snorm, rnorm
+rmultinom	dpq, Rmath, sunif, nmath, chebyshev, fmax2, fmin2, log1p, qnorm, qDiscrete_search, qbinom, rbinom
 rnbinom	dpq, Rmath, sunif, nmath, sexp, chebyshev, fmax2, fmin2, fsign, imax2, imin2, log1p, qnorm, snorm, expm1, rgamma, rpois
 stirlerr	refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent
 bessel_j	bessel, refactored, Rmath, nmath, cospi, fmax2, gamma_cody, bessel_j_cycle_free, bessel_y_cycle_free, bessel_j_cycle_dependent
@@ -99,7 +99,7 @@ phyper	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fma
 ppois	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, gammalims, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois, pgamma
 qhyper	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, fmin2, gammalims, lgammacor, log1p, gamma, lgamma, lbeta, choose
 rbeta	refactored, Rmath, sunif, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, fmin2, gammalims, lgammacor, log1p, gamma, lgamma, lbeta, beta
-rhyper	dpq, qDiscrete_search, refactored, Rmath, sunif, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, fmin2, gammalims, imax2, imin2, lgammacor, log1p, qbinom, rbinom, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, choose, dt, qhyper
+rhyper	dpq, refactored, Rmath, sunif, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, fmin2, gammalims, imax2, imin2, lgammacor, log1p, qnorm, gamma, lgamma, pgamma_utils, qDiscrete_search, stirlerr_cycle_dependent, bd0, lbeta, qbinom, rbinom, stirlerr, choose, dt, qhyper
 toms708	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, gammalims, i1mach, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma
 wilcox	dpq, refactored, Rmath, sunif, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, imax2, lgammacor, log1p, gamma, lgamma, lbeta, choose
 dbeta	dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, dbinom

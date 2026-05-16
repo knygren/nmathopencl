@@ -1,6 +1,6 @@
 Package: nmathopencl
 Type: Package
-Title: Bayesian Generalized Linear Models (IID Samples)
+Title: OpenCL-Ported R Mathlib for GPU-Accelerated Packages
 Version: 0.1.0
 Date: 2026-04-30
 Authors@R: c(
@@ -21,16 +21,14 @@ Authors@R: c(
     person("Martin", "Maechler", role = "ctb",
            comment = "Portions of R Mathlib")
     )
-Description: Provides Bayesian linear and generalized linear model fitting
-    with independent and identically distributed (iid) posterior samples. The
-    main functions mirror R's lm() and glm() interfaces while adding prior
-    family specifications for Gaussian, Poisson, binomial, and Gamma models
-    with log-concave likelihoods. Sampling for supported non-conjugate models
-    uses accept-reject methods based on likelihood subgradients as in Nygren
-    and Nygren (2006) <doi:10.1198/016214506000000357>. The package also
-    includes tools for prior setup, posterior summaries, prediction,
-    diagnostics, simulation, vignettes, and optional 'OpenCL' acceleration for
-    larger models.
+Description: Ships statistical and mathematical routines from R internal
+    'nmath' (Mathlib) as OpenCL C sources under directory 'inst/cl/', with R
+    wrappers that use the GPU when 'OpenCL' is available at compile time and
+    fall back to 'stats' equivalents otherwise. Aimed at package developers
+    building custom kernels (for example Bayesian GLMs via suggested package
+    'glmbayes') using 'load_kernel_library()' and related helpers. Contains
+    translated shims, an illustrative GLM-related kernel subsystem, vignettes,
+    and optional GPU acceleration.
 License: GPL-2
 URL: https://github.com/knygren/nmathopencl, https://knygren.r-universe.dev/nmathopencl
 BugReports: https://github.com/knygren/nmathopencl/issues
@@ -43,6 +41,7 @@ RdMacros: Rdpack
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel
 Depends: MASS, R (>= 3.5.0)
 Suggests:
+    glmbayes (>= 0.9.3),
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),

@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: gamma
+// @all_depends_nmath_count: 10
+// @all_depends_nmath: refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, gamma
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void gammafn_kernel(

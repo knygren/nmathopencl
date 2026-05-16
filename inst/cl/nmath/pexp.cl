@@ -5,7 +5,7 @@
 // @provides: pexp
 // @all_depends_count: 6
 // @all_depends: dpq, Rmath, nmath, chebyshev, log1p, expm1
-// @load_order: 68
+// @load_order: 62
 
 /*
  *  Mathlib : A C Library of Special Functions

@@ -5,7 +5,7 @@
 // @provides: norm_rand
 // @all_depends_count: 9
 // @all_depends: dpq, Rmath, sunif, nmath, chebyshev, fmax2, fmin2, log1p, qnorm
-// @load_order: 60
+// @load_order: 54
 // @local_macros: repeat, C1, C2, g, BIG
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

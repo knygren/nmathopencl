@@ -5,7 +5,7 @@
 // @provides: rgamma
 // @all_depends_count: 12
 // @all_depends: dpq, Rmath, sunif, nmath, sexp, chebyshev, fmax2, fmin2, log1p, qnorm, snorm, expm1
-// @load_order: 76
+// @load_order: 72
 // @local_macros: repeat
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

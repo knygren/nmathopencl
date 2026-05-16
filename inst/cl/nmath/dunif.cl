@@ -5,7 +5,7 @@
 // @provides: dunif
 // @all_depends_count: 3
 // @all_depends: dpq, Rmath, nmath
-// @load_order: 32
+// @load_order: 31
 
 /*
  *  Mathlib : A C Library of Special Functions

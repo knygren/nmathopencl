@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: plnorm
+// @all_depends_nmath_count: 7
+// @all_depends_nmath: dpq, Rmath, nmath, chebyshev, log1p, pnorm, plnorm
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void plnorm_kernel(

@@ -5,7 +5,7 @@
 // @provides: pnorm, pnorm_both, pnorm5
 // @all_depends_count: 5
 // @all_depends: dpq, Rmath, nmath, chebyshev, log1p
-// @load_order: 49
+// @load_order: 48
 // @local_macros: d_2, do_del, swap_tail
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

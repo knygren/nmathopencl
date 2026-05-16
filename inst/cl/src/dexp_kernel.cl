@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: dexp
+// @all_depends_nmath_count: 4
+// @all_depends_nmath: dpq, Rmath, nmath, dexp
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void dexp_kernel(

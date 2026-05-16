@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: rbeta
+// @all_depends_nmath_count: 17
+// @all_depends_nmath: refactored, Rmath, sunif, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, fmin2, gammalims, lgammacor, log1p, gamma, lgamma, lbeta, beta, rbeta
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void rbeta_kernel(

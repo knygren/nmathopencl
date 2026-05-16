@@ -1,6 +1,10 @@
 # Refresh @all_depends_nmath / @all_depends_nmath_count on inst/cl/src kernels from
 # the current inst/cl/nmath/kernel_dependency_index.rds.
 #
+# C++: [build_rmath_program_indexed()] (kernel_wrappers.cpp) loads partial nmath from
+# these tags via load_library_for_kernel(), except full-tree load when tags list
+# `qDiscrete_search` or the launcher is `norm_rand_kernel.cl` (see kernel_wrappers.cpp).
+#
 # Run from the package root, or pass the root explicitly:
 #   Rscript tools/refresh_src_kernel_nmath_tags.R
 #   Rscript tools/refresh_src_kernel_nmath_tags.R /path/to/nmathopencl

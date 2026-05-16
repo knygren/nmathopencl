@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: pweibull
+// @all_depends_nmath_count: 7
+// @all_depends_nmath: dpq, Rmath, nmath, chebyshev, log1p, expm1, pweibull
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void pweibull_kernel(

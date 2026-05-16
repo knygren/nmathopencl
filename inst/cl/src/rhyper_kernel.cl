@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: rhyper
+// @all_depends_nmath_count: 31
+// @all_depends_nmath: dpq, refactored, Rmath, sunif, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, fmin2, gammalims, imax2, imin2, lgammacor, log1p, qnorm, gamma, lgamma, pgamma_utils, qDiscrete_search, stirlerr_cycle_dependent, bd0, lbeta, qbinom, rbinom, stirlerr, choose, dt, qhyper, rhyper
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void rhyper_kernel(

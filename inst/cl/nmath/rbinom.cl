@@ -3,9 +3,9 @@
 // @includes: nmath.h, dpq.h, stdlib.h, limits.h
 // @depends: fmin2, qbinom, sunif, nmath, dpq
 // @provides: rbinom
-// @all_depends_count: 8
-// @all_depends: dpq, qDiscrete_search, Rmath, sunif, nmath, fmax2, fmin2, qbinom
-// @load_order: 56
+// @all_depends_count: 11
+// @all_depends: dpq, Rmath, sunif, nmath, chebyshev, fmax2, fmin2, log1p, qnorm, qDiscrete_search, qbinom
+// @load_order: 82
 // @local_macros: repeat
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

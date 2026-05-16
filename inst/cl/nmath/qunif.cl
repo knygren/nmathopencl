@@ -5,7 +5,7 @@
 // @provides: qunif
 // @all_depends_count: 3
 // @all_depends: dpq, Rmath, nmath
-// @load_order: 13
+// @load_order: 12
 
 /*
  *  Mathlib : A C Library of Special Functions

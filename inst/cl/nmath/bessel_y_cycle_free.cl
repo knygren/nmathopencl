@@ -5,7 +5,7 @@
 // @provides: bessel_y_cycle_free, bessel_y_cycle_free_ex
 // @all_depends_count: 5
 // @all_depends: bessel, refactored, Rmath, nmath, cospi
-// @load_order: 64
+// @load_order: 58
 // @local_macros: min0
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

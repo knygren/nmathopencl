@@ -3,9 +3,9 @@
 // @includes: nmath.h, dpq.h, qDiscrete_search.h
 // @depends: fmax2, qpois, nmath, dpq, qDiscrete_search
 // @provides: qnbinom_mu
-// @all_depends_count: 6
-// @all_depends: dpq, qDiscrete_search, Rmath, nmath, fmax2, qpois
-// @load_order: 75
+// @all_depends_count: 9
+// @all_depends: dpq, Rmath, nmath, chebyshev, fmax2, log1p, qnorm, qDiscrete_search, qpois
+// @load_order: 81
 // @local_macros: R_DBG_printf, R_DBG_printf, _thisDIST_, _dist_PARS_DECL_, _dist_PARS_, DO_SEARCH_
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

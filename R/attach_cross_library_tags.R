@@ -93,10 +93,33 @@ attach_cross_library_tags <- function(kernel_paths,
       ))
     }
 
+    # Explicit "no nmath": only shims/built-ins; emits @all_*_count 0 and clears
+    # @all_* stems (C++ load_library_for_kernel then loads no nmath files).
+    if (length(direct_stems) == 1L && direct_stems[[1L]] == "none") {
+      sorted_stems <- character()
+      n            <- 0L
+      updated      <- set_port_annotation(lines, all_tag_count, as.character(n))
+      updated      <- set_port_annotation(updated, all_tag, sorted_stems)
+
+      changed <- !identical(lines, updated)
+      if (changed && !isTRUE(dry_run)) {
+        writeLines(updated, path, useBytes = TRUE)
+      }
+
+      return(data.frame(
+        file              = basename(path),
+        direct_stems      = "none",
+        all_depends_count = n,
+        all_depends       = "",
+        changed           = changed,
+        stringsAsFactors  = FALSE
+      ))
+    }
+
     # Expand: union of (idx$all_depends[[stem]] + stem) for each direct stem
     all_needed <- character()
     for (stem in direct_stems) {
-      deps <- index$all_depends[[stem]]
+      deps <- index[["all_depends"]][[stem]]
       if (is.null(deps)) {
         warning("Stem '", stem, "' not found in index (file: ",
                 basename(path), ")", call. = FALSE)
@@ -106,14 +129,14 @@ attach_cross_library_tags <- function(kernel_paths,
     }
 
     # Sort by global load order; warn about any unknown stems
-    known   <- all_needed[all_needed %in% names(index$load_order)]
+    known   <- all_needed[all_needed %in% names(index[["load_order"]])]
     unknown <- setdiff(all_needed, known)
     if (length(unknown) > 0L) {
       warning("Stems not found in index (skipped): ",
               paste(unknown, collapse = ", "),
               " (file: ", basename(path), ")", call. = FALSE)
     }
-    sorted_stems <- known[order(index$load_order[known])]
+    sorted_stems <- known[order(index[["load_order"]][known])]
     n            <- length(sorted_stems)
 
     # Write tags using set_port_annotation (same mechanism as

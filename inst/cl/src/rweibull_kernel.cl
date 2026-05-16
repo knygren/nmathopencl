@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: rweibull
+// @all_depends_nmath_count: 4
+// @all_depends_nmath: Rmath, sunif, nmath, rweibull
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void rweibull_kernel(

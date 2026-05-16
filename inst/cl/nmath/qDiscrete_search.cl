@@ -1,8 +1,10 @@
 // @source_type: h
 // @source_origin: qDiscrete_search.h
+// @depends: qnorm
 // @provides: _pDIST_, _qDIST_, AS_CHAR, CHR_0, DO_SEARCH_, DO_SEARCH_FUN, MAYBE_R_CheckUserInterrupt, P_DIST, PASTE, PST_0, q_DISCR_CHECK_BOUNDARY, q_DISCRETE_01_CHECKS, q_DISCRETE_BODY, R_DBG_printf
-// @all_depends_count: 0
-// @load_order: 4
+// @all_depends_count: 6
+// @all_depends: dpq, Rmath, nmath, chebyshev, log1p, qnorm
+// @load_order: 68
 
 /*
  *  Mathlib : A C Library of Special Functions

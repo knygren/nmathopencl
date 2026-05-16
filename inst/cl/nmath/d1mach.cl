@@ -5,7 +5,7 @@
 // @provides: Rf_d1mach
 // @all_depends_count: 2
 // @all_depends: Rmath, nmath
-// @load_order: 26
+// @load_order: 25
 
 /*
  *  Mathlib - A Mathematical Function Library

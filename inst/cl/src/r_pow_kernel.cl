@@ -1,3 +1,6 @@
+// @depends_nmath: none
+// @all_depends_nmath_count: 0
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void r_pow_kernel(

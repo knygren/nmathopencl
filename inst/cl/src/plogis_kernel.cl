@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: plogis
+// @all_depends_nmath_count: 6
+// @all_depends_nmath: dpq, Rmath, nmath, chebyshev, log1p, plogis
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void plogis_kernel(

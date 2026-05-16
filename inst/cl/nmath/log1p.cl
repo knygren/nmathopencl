@@ -5,7 +5,7 @@
 // @provides: log1p, Rlog1p
 // @all_depends_count: 3
 // @all_depends: Rmath, nmath, chebyshev
-// @load_order: 46
+// @load_order: 45
 // @local_macros: nlnrel
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

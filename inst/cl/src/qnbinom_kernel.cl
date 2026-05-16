@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: qnbinom
+// @all_depends_nmath_count: 9
+// @all_depends_nmath: dpq, Rmath, nmath, chebyshev, fmax2, log1p, qnorm, qDiscrete_search, qnbinom
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void qnbinom_kernel(

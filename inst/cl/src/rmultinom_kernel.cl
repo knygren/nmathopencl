@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: rmultinom
+// @all_depends_nmath_count: 13
+// @all_depends_nmath: dpq, Rmath, sunif, nmath, chebyshev, fmax2, fmin2, log1p, qnorm, qDiscrete_search, qbinom, rbinom, rmultinom
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void rmultinom_kernel(

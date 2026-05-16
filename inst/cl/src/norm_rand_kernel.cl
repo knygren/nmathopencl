@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: snorm
+// @all_depends_nmath_count: 10
+// @all_depends_nmath: dpq, Rmath, sunif, nmath, chebyshev, fmax2, fmin2, log1p, qnorm, snorm
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void norm_rand_kernel(

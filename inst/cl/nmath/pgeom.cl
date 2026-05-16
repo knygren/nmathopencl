@@ -5,7 +5,7 @@
 // @provides: pgeom
 // @all_depends_count: 6
 // @all_depends: dpq, Rmath, nmath, chebyshev, log1p, expm1
-// @load_order: 70
+// @load_order: 64
 
 /*
  *  Mathlib : A C Library of Special Functions

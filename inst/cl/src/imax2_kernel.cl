@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: imax2
+// @all_depends_nmath_count: 3
+// @all_depends_nmath: Rmath, nmath, imax2
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void imax2_kernel(

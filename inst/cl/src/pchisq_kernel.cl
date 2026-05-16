@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: pchisq
+// @all_depends_nmath_count: 26
+// @all_depends_nmath: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, gammalims, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, pgamma, dgamma, df, pchisq
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void pchisq_kernel(

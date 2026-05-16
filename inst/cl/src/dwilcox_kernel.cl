@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: wilcox
+// @all_depends_nmath_count: 19
+// @all_depends_nmath: dpq, refactored, Rmath, sunif, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, imax2, lgammacor, log1p, gamma, lgamma, lbeta, choose, wilcox
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void dwilcox_kernel(

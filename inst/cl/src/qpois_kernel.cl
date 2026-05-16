@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: qpois
+// @all_depends_nmath_count: 9
+// @all_depends_nmath: dpq, Rmath, nmath, chebyshev, fmax2, log1p, qnorm, qDiscrete_search, qpois
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void qpois_kernel(

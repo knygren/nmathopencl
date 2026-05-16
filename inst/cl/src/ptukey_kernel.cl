@@ -1,3 +1,8 @@
+// @library_deps: nmath
+// @depends_nmath: ptukey
+// @all_depends_nmath_count: 23
+// @all_depends_nmath: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, pnorm, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois, dgamma, df, ptukey
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void ptukey_kernel(

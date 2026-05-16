@@ -5,7 +5,7 @@
 // @provides: bessel_y, bessel_y_ex
 // @all_depends_count: 10
 // @all_depends: bessel, refactored, Rmath, nmath, cospi, fmax2, gamma_cody, bessel_j_cycle_free, bessel_y_cycle_dependent, bessel_y_cycle_free
-// @load_order: 82
+// @load_order: 78
 
 // openclport: include directives disabled for OpenCL C compilation.
 // openclport: preload equivalent ported headers/shims in program assembly.

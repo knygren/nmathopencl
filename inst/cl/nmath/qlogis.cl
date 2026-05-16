@@ -5,7 +5,7 @@
 // @provides: qlogis
 // @all_depends_count: 3
 // @all_depends: dpq, Rmath, nmath
-// @load_order: 12
+// @load_order: 11
 
 /*
  *  R : A Computer Language for Statistical Data Analysis

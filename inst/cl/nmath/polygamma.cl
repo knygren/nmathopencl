@@ -5,7 +5,7 @@
 // @provides: digamma, dpsifn, pentagamma, psigamma, tetragamma, trigamma
 // @all_depends_count: 7
 // @all_depends: Rmath, nmath, d1mach, fmax2, fmin2, i1mach, imin2
-// @load_order: 50
+// @load_order: 49
 // @local_macros: n_max, ML_TREAT_psigam
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

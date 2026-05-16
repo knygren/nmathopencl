@@ -1,6 +1,7 @@
 # nmathopencl
 
 ![License: GPL-2](https://img.shields.io/badge/license-GPL--2-blue.svg)
+[![R-universe](https://knygren.r-universe.dev/badges/nmathopencl)](https://knygren.r-universe.dev/nmathopencl)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/knygren/nmathopencl?label=version)
 
 `nmathopencl` is an OpenCL port of R's Mathlib (`nmath`) — the C library
@@ -360,11 +361,35 @@ which will reduce first-call compilation time.
 
 ## Installation
 
+### R-universe and CRAN-style repos
+
+Browsing [the package dashboard on **R-universe**](https://knygren.r-universe.dev/nmathopencl) lists **binaries**, **DESCRIPTION**, **exported objects**, rendered **manual** pages, **vignettes**, and dependency graphs—useful both for users and for ongoing development visibility.
+
+Pick your mirror order (prefer R-universe first if you rely on nightly builds):
+
 ```r
-install.packages("nmathopencl",
-                 repos = c("https://cloud.r-project.org",
-                           "https://knygren.r-universe.dev"))
+opts <- options(
+  repos = c(
+    knygren        = "https://knygren.r-universe.dev",
+    CRAN           = "https://cloud.r-project.org"
+  )
+)
+
+install.packages("nmathopencl")
+options(opts) # restore prior repos if desired
 ```
+
+For a minimal one-off install combining both:
+
+```r
+install.packages(
+  "nmathopencl",
+  repos = c("https://knygren.r-universe.dev",
+            "https://cloud.r-project.org")
+)
+```
+
+Maintainers: registering the GitHub source repo in your universe and what to expect from automated builds are summarized in **`R-UNIVERSE.md`** at the package root.
 
 OpenCL support requires a GPU with an installed OpenCL runtime (NVIDIA CUDA,
 AMD ROCm/OpenCL, Intel OpenCL, or Apple Metal via OpenCL compatibility). The

@@ -1,6 +1,11 @@
 // rnorm_kernel.cl
 // Single-work-item RNG kernel to avoid shared-state races in sunif/snorm globals.
 
+// @library_deps: nmath
+// @depends_nmath: rnorm
+// @all_depends_nmath_count: 11
+// @all_depends_nmath: dpq, Rmath, sunif, nmath, chebyshev, fmax2, fmin2, log1p, qnorm, snorm, rnorm
+
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void rnorm_kernel(

@@ -5,7 +5,7 @@
 // @provides: qgeom
 // @all_depends_count: 6
 // @all_depends: dpq, Rmath, nmath, chebyshev, fmax2, log1p
-// @load_order: 52
+// @load_order: 50
 
 /*
  *  Mathlib : A C Library of Special Functions

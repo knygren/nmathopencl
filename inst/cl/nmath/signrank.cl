@@ -5,7 +5,7 @@
 // @provides: dsignrank, psignrank, qsignrank, rsignrank, signrank_free
 // @all_depends_count: 6
 // @all_depends: dpq, Rmath, sunif, nmath, r_check_user_interrupt, imin2
-// @load_order: 59
+// @load_order: 53
 
 /*
  *  Mathlib : A C Library of Special Functions
