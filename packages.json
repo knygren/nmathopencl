@@ -1,7 +1,5 @@
 {
-  "glmbayes": "knygren/glmbayes"
+  "glmbayes": "knygren/glmbayes",
+  "nmathopencl": "knygren/nmathopencl"
 }
-
-
-
 
