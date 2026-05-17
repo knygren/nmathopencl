@@ -7,7 +7,14 @@
 \alias{rsignrank_opencl}
 \title{The Wilcoxon Signed Rank Distribution (OpenCL)}
 \usage{
-dsignrank_opencl(n, x, nsize, fallback = TRUE, verbose = FALSE)
+dsignrank_opencl(
+  x,
+  nsize,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 psignrank_opencl(
   q,
@@ -24,11 +31,13 @@ qsignrank_opencl(n, p, nsize, fallback = TRUE, verbose = FALSE)
 rsignrank_opencl(n, nsize, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile (must be >= 0).}
 
 \item{nsize}{Number of observations used by signed-rank routines (must be > 0).}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{dsignrank_opencl} (like \code{\link[stats]{dsignrank}}).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{psignrank_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -38,7 +47,7 @@ rsignrank_opencl(n, nsize, fallback = TRUE, verbose = FALSE)
 
 \item{lower.tail, log.p}{As in \code{stats::psignrank} for \code{psignrank_opencl} (vector inputs recycled).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{psignrank_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{n}{Number of observations. Non-negative integer scalar.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }

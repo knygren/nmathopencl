@@ -7,7 +7,15 @@
 \alias{rwilcox_opencl}
 \title{The Wilcoxon Rank Sum Distribution (OpenCL)}
 \usage{
-dwilcox_opencl(n, x, m, nn, fallback = TRUE, verbose = FALSE)
+dwilcox_opencl(
+  x,
+  m,
+  nn,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 pwilcox_opencl(
   q,
@@ -25,13 +33,15 @@ qwilcox_opencl(n, p, m, nn, fallback = TRUE, verbose = FALSE)
 rwilcox_opencl(n, m, nn, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile (must be >= 0).}
 
 \item{m}{Number of observations in one sample (must be > 0).}
 
 \item{nn}{Number of observations in the other sample (must be > 0).}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{dwilcox_opencl} (like \code{\link[stats]{dwilcox}}).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{pwilcox_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -41,7 +51,7 @@ rwilcox_opencl(n, m, nn, fallback = TRUE, verbose = FALSE)
 
 \item{lower.tail, log.p}{As in \code{stats::pwilcox} for \code{pwilcox_opencl} (vector inputs recycled).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{pwilcox_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{n}{Number of observations. Non-negative integer scalar.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }

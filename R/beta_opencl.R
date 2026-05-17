@@ -4,8 +4,9 @@
 #' for the beta distribution. These mirror the base \code{stats} beta family
 #' while adding OpenCL dispatch and optional CPU fallback behavior.
 #'
-#' @param n Number of observations. Non-negative integer scalar.
-#' @param x Numeric scalar quantile in \code{[0, 1]}.
+#' @param n Number of observations (non-negative integer scalar). Used by \code{qbeta_opencl}
+#'   and \code{rbeta_opencl}; density functions take a vector \code{x} first (like \code{stats::dbeta}).
+#' @param x Numeric vector of quantiles in \code{[0, 1]} for \code{dbeta_opencl} / \code{dnbeta_opencl}.
 #' @param p Numeric scalar probability in \code{[0, 1]}.
 #' @param shape1 First shape parameter (must be > 0).
 #' @param shape2 Second shape parameter (must be > 0).
@@ -16,6 +17,8 @@
 #' @param q Numeric vector of quantiles for \code{pbeta_opencl}; recycled like \code{stats::pbeta}.
 #' @param lower.tail,log.p As in \code{stats::pbeta} for \code{pbeta_opencl} (vector inputs recycled).
 #' @param opencl_parallel OpenCL dispatch hint for \code{pbeta_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.
+#' @param log Logical; if \code{TRUE}, return log-density for \code{dbeta_opencl} / \code{dnbeta_opencl}
+#'   (like \code{\link[stats]{dbeta}}'s \code{log} argument).
 #'
 #' @section Known OpenCL limitations:
 #' \code{qbeta_opencl()} in the non-central path (\code{ncp > 0}, via
@@ -26,32 +29,138 @@
 #' @example inst/examples/Ex_beta_opencl.R
 #' @rdname beta_opencl
 #' @export
-dbeta_opencl <- function(n, x, shape1, shape2, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x", 0, 1)
-  .validate_scalar_num(shape1, "shape1", 0, Inf, open_lower = TRUE)
-  .validate_scalar_num(shape2, "shape2", 0, Inf, open_lower = TRUE)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+dbeta_opencl <- function(
+    x,
+    shape1,
+    shape2,
+    log = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.")
+  }
+  if (!is.numeric(shape1)) {
+    stop("`shape1` must be numeric.")
+  }
+  if (!is.numeric(shape2)) {
+    stop("`shape2` must be numeric.")
+  }
+  .validate_d_stage1_log(log)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(x) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(x), length(shape1), length(shape2), length(log))
+  len <- .p_stage1_recycle_len(lens, "?dbeta")
+
+  xv <- rep_len(as.double(x), len)
+  a <- rep_len(as.double(shape1), len)
+  b <- rep_len(as.double(shape2), len)
+  logv <- rep_len(log, len)
+
+  fallback_full <- function() {
+    stats::dbeta(x, shape1 = shape1, shape2 = shape2, log = log)
+  }
+
+  if (any(!is.finite(xv) | !is.finite(a) | !is.finite(b))) {
+    return(fallback_full())
+  }
+
+  if (any(xv < 0 | xv > 1)) {
+    stop("`x` must lie in [0, 1] (after recycling).", call. = FALSE)
+  }
+
+  if (any(a <= 0 | b <= 0)) {
+    stop("`shape1` and `shape2` must be strictly positive (after recycling).", call. = FALSE)
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  log_int <- as.integer(logv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .dbeta_opencl(n, x, shape1, shape2, verbose = verbose),
-    fallback_expr = function() rep(stats::dbeta(x, shape1 = shape1, shape2 = shape2), n),
-    fallback = fallback, verbose = verbose, fn_name = "dbeta_opencl"
+    opencl_expr = function() {
+      .dbeta_opencl(xv, a, b, log_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "dbeta_opencl"
   )
 }
 
 #' @rdname beta_opencl
 #' @export
-dnbeta_opencl <- function(n, x, shape1, shape2, ncp, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x", 0, 1)
-  .validate_scalar_num(shape1, "shape1", 0, Inf, open_lower = TRUE)
-  .validate_scalar_num(shape2, "shape2", 0, Inf, open_lower = TRUE)
-  .validate_scalar_num(ncp, "ncp", 0, Inf)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+dnbeta_opencl <- function(
+    x,
+    shape1,
+    shape2,
+    ncp,
+    log = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.")
+  }
+  if (!is.numeric(shape1)) {
+    stop("`shape1` must be numeric.")
+  }
+  if (!is.numeric(shape2)) {
+    stop("`shape2` must be numeric.")
+  }
+  if (!is.numeric(ncp)) {
+    stop("`ncp` must be numeric.")
+  }
+  .validate_d_stage1_log(log)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(x) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(x), length(shape1), length(shape2), length(ncp), length(log))
+  len <- .p_stage1_recycle_len(lens, "?dbeta")
+
+  xv <- rep_len(as.double(x), len)
+  a <- rep_len(as.double(shape1), len)
+  b <- rep_len(as.double(shape2), len)
+  nv <- rep_len(as.double(ncp), len)
+  logv <- rep_len(log, len)
+
+  fallback_full <- function() {
+    stats::dbeta(x, shape1 = shape1, shape2 = shape2, ncp = ncp, log = log)
+  }
+
+  if (any(!is.finite(xv) | !is.finite(a) | !is.finite(b) | !is.finite(nv))) {
+    return(fallback_full())
+  }
+
+  if (any(xv < 0 | xv > 1)) {
+    stop("`x` must lie in [0, 1] (after recycling).", call. = FALSE)
+  }
+
+  if (any(a <= 0 | b <= 0 | nv < 0)) {
+    stop("`shape1`/`shape2` must be positive and `ncp` non-negative (after recycling).", call. = FALSE)
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  log_int <- as.integer(logv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .dnbeta_opencl(n, x, shape1, shape2, ncp, verbose = verbose),
-    fallback_expr = function() rep(stats::dbeta(x, shape1 = shape1, shape2 = shape2, ncp = ncp), n),
-    fallback = fallback, verbose = verbose, fn_name = "dnbeta_opencl"
+    opencl_expr = function() {
+      .dnbeta_opencl(xv, a, b, nv, log_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "dnbeta_opencl"
   )
 }
 

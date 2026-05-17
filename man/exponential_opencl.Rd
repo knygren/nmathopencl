@@ -7,7 +7,14 @@
 \alias{rexp_opencl}
 \title{The Exponential Distribution (OpenCL)}
 \usage{
-dexp_opencl(n, x, rate = 1, fallback = TRUE, verbose = FALSE)
+dexp_opencl(
+  x,
+  rate = 1,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 pexp_opencl(
   q,
@@ -24,11 +31,13 @@ qexp_opencl(n, p, rate = 1, fallback = TRUE, verbose = FALSE)
 rexp_opencl(n, rate = 1, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile.}
 
 \item{rate}{Rate parameter (must be > 0).}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{dexp_opencl} (like \code{\link[stats]{dexp}}).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{pexp_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -38,7 +47,7 @@ rexp_opencl(n, rate = 1, fallback = TRUE, verbose = FALSE)
 
 \item{lower.tail, log.p}{As in \code{stats::pexp} for \code{pexp_opencl} (vector inputs recycled).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{pexp_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{n}{Number of observations. Non-negative integer scalar.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -53,7 +62,7 @@ for the exponential distribution.
 if (has_opencl()) {
   n <- 5L
 
-  dexp_opencl(n, x = 1.2, rate = 1, fallback = FALSE, verbose = TRUE)
+  dexp_opencl(rep(1.2, n), rate = 1, fallback = FALSE, verbose = TRUE)
   pexp_opencl(q = 1.2, rate = 1, fallback = FALSE, verbose = TRUE)
   qexp_opencl(n, p = 0.8, rate = 1, fallback = FALSE, verbose = TRUE)
   rexp_opencl(n, rate = 1, fallback = FALSE, verbose = TRUE)

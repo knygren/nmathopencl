@@ -7,7 +7,15 @@
 \alias{rt_opencl}
 \title{The Student t Distribution (OpenCL)}
 \usage{
-dt_opencl(n, x, df, ncp = 0, fallback = TRUE, verbose = FALSE)
+dt_opencl(
+  x,
+  df,
+  ncp = 0,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 pt_opencl(
   q,
@@ -25,13 +33,15 @@ qt_opencl(n, p, df, ncp = 0, fallback = TRUE, verbose = FALSE)
 rt_opencl(n, df, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar (\code{dt_opencl}, \code{qt_opencl}, \code{rt_opencl}).}
-
-\item{x}{Numeric scalar quantile (\code{dt_opencl}).}
+\item{x}{Numeric vector of quantiles (\code{dt_opencl}).}
 
 \item{df}{Degrees of freedom (must be > 0).}
 
 \item{ncp}{Non-centrality parameter.}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{dt_opencl} (like \code{\link[stats]{dt}}).}
+
+\item{opencl_parallel}{Reserved for future parallel dispatch (\code{pt_opencl}; unused).}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -41,7 +51,8 @@ rt_opencl(n, df, fallback = TRUE, verbose = FALSE)
 
 \item{lower.tail, log.p}{As in \code{stats::pt} for \code{pt_opencl} (vector inputs recycled).}
 
-\item{opencl_parallel}{Reserved for future parallel dispatch (\code{pt_opencl}; unused).}
+\item{n}{Number of observations (non-negative integer scalar). Used by \code{qt_opencl} and \code{rt_opencl};
+\code{dt_opencl} takes vector \code{x} first (like \code{stats::dt}).}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]} (\code{qt_opencl}).}
 }
@@ -57,8 +68,8 @@ for the Student t distribution.
 if (has_opencl()) {
   n <- 5L
 
-  dt_opencl(n, x = 1.5, df = 8, ncp = 0, fallback = FALSE, verbose = TRUE)
-  dt_opencl(n, x = 1.5, df = 8, ncp = 1.2, fallback = FALSE, verbose = TRUE)
+  dt_opencl(rep(1.5, n), df = 8, ncp = 0, fallback = FALSE, verbose = TRUE)
+  dt_opencl(rep(1.5, n), df = 8, ncp = 1.2, fallback = FALSE, verbose = TRUE)
   pt_opencl(q = 1.5, df = 8, ncp = 0, fallback = FALSE, verbose = TRUE)
   pt_opencl(q = 1.5, df = 8, ncp = 1.2, fallback = FALSE, verbose = TRUE)
   qt_opencl(n, p = 0.8, df = 8, ncp = 0, fallback = FALSE, verbose = TRUE)

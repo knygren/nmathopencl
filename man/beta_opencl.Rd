@@ -8,9 +8,26 @@
 \alias{rbeta_opencl}
 \title{The Beta Distribution (OpenCL)}
 \usage{
-dbeta_opencl(n, x, shape1, shape2, fallback = TRUE, verbose = FALSE)
+dbeta_opencl(
+  x,
+  shape1,
+  shape2,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-dnbeta_opencl(n, x, shape1, shape2, ncp, fallback = TRUE, verbose = FALSE)
+dnbeta_opencl(
+  x,
+  shape1,
+  shape2,
+  ncp,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 pbeta_opencl(
   q,
@@ -29,13 +46,16 @@ qbeta_opencl(n, p, shape1, shape2, ncp = 0, fallback = TRUE, verbose = FALSE)
 rbeta_opencl(n, shape1, shape2, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
-\item{x}{Numeric scalar quantile in \code{[0, 1]}.}
+\item{x}{Numeric vector of quantiles in \code{[0, 1]} for \code{dbeta_opencl} / \code{dnbeta_opencl}.}
 
 \item{shape1}{First shape parameter (must be > 0).}
 
 \item{shape2}{Second shape parameter (must be > 0).}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{dbeta_opencl} / \code{dnbeta_opencl}
+(like \code{\link[stats]{dbeta}}'s \code{log} argument).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{pbeta_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -48,7 +68,8 @@ rbeta_opencl(n, shape1, shape2, fallback = TRUE, verbose = FALSE)
 
 \item{lower.tail, log.p}{As in \code{stats::pbeta} for \code{pbeta_opencl} (vector inputs recycled).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{pbeta_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{n}{Number of observations (non-negative integer scalar). Used by \code{qbeta_opencl}
+and \code{rbeta_opencl}; density functions take a vector \code{x} first (like \code{stats::dbeta}).}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -71,8 +92,8 @@ parameter regions on some GPUs.
 if (has_opencl()) {
   n <- 5L
 
-  dbeta_opencl(n, x = 0.6, shape1 = 2.5, shape2 = 4, fallback = FALSE, verbose = TRUE)
-  dnbeta_opencl(n, x = 0.6, shape1 = 2.5, shape2 = 4, ncp = 0.8, fallback = FALSE, verbose = TRUE)
+  dbeta_opencl(rep(0.6, n), shape1 = 2.5, shape2 = 4, fallback = FALSE, verbose = TRUE)
+  dnbeta_opencl(rep(0.6, n), shape1 = 2.5, shape2 = 4, ncp = 0.8, fallback = FALSE, verbose = TRUE)
   pbeta_opencl(q = 0.6, shape1 = 2.5, shape2 = 4, ncp = 0, fallback = FALSE, verbose = TRUE)
   qbeta_opencl(n, p = 0.8, shape1 = 2.5, shape2 = 4, ncp = 0, fallback = FALSE, verbose = TRUE)
   rbeta_opencl(n, shape1 = 2.5, shape2 = 4, fallback = FALSE, verbose = TRUE)

@@ -14,40 +14,144 @@
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p As in \code{stats::pbinom} for \code{pbinom_opencl} (vector inputs recycled).
 #' @param opencl_parallel OpenCL dispatch hint for \code{pbinom_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.
+#' @param log Logical; if \code{TRUE}, return log-density for \code{dbinom_raw_opencl} / \code{dbinom_opencl}
+#'   (like \code{\link[stats]{dbinom}}'s \code{log} argument).
 #'
 #' @return Numeric vector of length \code{n}.
 #' @example inst/examples/Ex_binomial_opencl.R
 #' @rdname binomial_opencl
 #' @export
-dbinom_raw_opencl <- function(n, x, size, prob, qprob = NULL, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x", 0, Inf)
-  .validate_scalar_num(size, "size", 0, Inf)
-  .validate_scalar_num(prob, "prob", 0, 1)
-  if (is.null(qprob)) {
-    qprob <- 1 - prob
+dbinom_raw_opencl <- function(
+    x,
+    size,
+    prob,
+    qprob = NULL,
+    log = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.")
   }
-  .validate_scalar_num(qprob, "qprob", 0, 1)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+  if (!is.numeric(size)) {
+    stop("`size` must be numeric.")
+  }
+  if (!is.numeric(prob)) {
+    stop("`prob` must be numeric.")
+  }
+  if (!is.null(qprob) && !is.numeric(qprob)) {
+    stop("`qprob` must be numeric or NULL.")
+  }
+  .validate_d_stage1_log(log)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(x) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(x), length(size), length(prob), length(log))
+  if (!is.null(qprob)) {
+    lens <- c(lens, length(qprob))
+  }
+  len <- .p_stage1_recycle_len(lens, "?dbinom")
+
+  xv <- rep_len(as.double(x), len)
+  sv <- rep_len(as.double(size), len)
+  pv <- rep_len(as.double(prob), len)
+  qpv <- if (is.null(qprob)) {
+    (1 - pv)
+  } else {
+    rep_len(as.double(qprob), len)
+  }
+  logv <- rep_len(log, len)
+
+  fallback_full <- function() {
+    stats::dbinom(x, size = size, prob = prob, log = log)
+  }
+
+  if (any(!is.finite(xv) | !is.finite(sv) | !is.finite(pv) | !is.finite(qpv))) {
+    return(fallback_full())
+  }
+
+  if (any(sv < 0 | pv < 0 | pv > 1 | qpv < 0 | qpv > 1)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  log_int <- as.integer(logv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .dbinom_raw_opencl(n, x, size, prob, qprob, verbose = verbose),
-    fallback_expr = function() rep(stats::dbinom(x, size = size, prob = prob), n),
-    fallback = fallback, verbose = verbose, fn_name = "dbinom_raw_opencl"
+    opencl_expr = function() {
+      .dbinom_raw_opencl(xv, sv, pv, qpv, log_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "dbinom_raw_opencl"
   )
 }
 
 #' @rdname binomial_opencl
 #' @export
-dbinom_opencl <- function(n, x, size, prob, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x", 0, Inf)
-  .validate_scalar_num(size, "size", 0, Inf)
-  .validate_scalar_num(prob, "prob", 0, 1)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+dbinom_opencl <- function(
+    x,
+    size,
+    prob,
+    log = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.")
+  }
+  if (!is.numeric(size)) {
+    stop("`size` must be numeric.")
+  }
+  if (!is.numeric(prob)) {
+    stop("`prob` must be numeric.")
+  }
+  .validate_d_stage1_log(log)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(x) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(x), length(size), length(prob), length(log))
+  len <- .p_stage1_recycle_len(lens, "?dbinom")
+
+  xv <- rep_len(as.double(x), len)
+  sv <- rep_len(as.double(size), len)
+  pv <- rep_len(as.double(prob), len)
+  logv <- rep_len(log, len)
+
+  fallback_full <- function() {
+    stats::dbinom(x, size = size, prob = prob, log = log)
+  }
+
+  if (any(!is.finite(xv) | !is.finite(sv) | !is.finite(pv))) {
+    return(fallback_full())
+  }
+
+  if (any(sv < 0 | pv < 0 | pv > 1)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  log_int <- as.integer(logv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .dbinom_opencl(n, x, size, prob, verbose = verbose),
-    fallback_expr = function() rep(stats::dbinom(x, size = size, prob = prob), n),
-    fallback = fallback, verbose = verbose, fn_name = "dbinom_opencl"
+    opencl_expr = function() {
+      .dbinom_opencl(xv, sv, pv, log_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "dbinom_opencl"
   )
 }
 

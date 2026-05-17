@@ -7,7 +7,15 @@
 \alias{rlnorm_opencl}
 \title{The Lognormal Distribution (OpenCL)}
 \usage{
-dlnorm_opencl(n, x, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE)
+dlnorm_opencl(
+  x,
+  meanlog = 0,
+  sdlog = 1,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 plnorm_opencl(
   q,
@@ -25,13 +33,15 @@ qlnorm_opencl(n, p, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE)
 rlnorm_opencl(n, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile (must be >= 0).}
 
 \item{meanlog}{Mean of the distribution on the log scale.}
 
 \item{sdlog}{Standard deviation on the log scale (must be > 0).}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{dlnorm_opencl} (like \code{\link[stats]{dlnorm}}).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{plnorm_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -41,7 +51,7 @@ rlnorm_opencl(n, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE)
 
 \item{lower.tail, log.p}{As in \code{stats::plnorm} for \code{plnorm_opencl} (vector inputs recycled).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{plnorm_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{n}{Number of observations. Non-negative integer scalar.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -56,7 +66,7 @@ for the lognormal distribution.
 if (has_opencl()) {
   n <- 5L
 
-  dlnorm_opencl(n, x = 1.2, meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
+  dlnorm_opencl(rep(1.2, n), meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
   plnorm_opencl(q = 1.2, meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
   qlnorm_opencl(n, p = 0.8, meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
   rlnorm_opencl(n, meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)

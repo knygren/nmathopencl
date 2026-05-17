@@ -7,7 +7,16 @@
 \alias{rf_opencl}
 \title{The F Distribution (OpenCL)}
 \usage{
-df_opencl(n, x, df1, df2, ncp = 0, fallback = TRUE, verbose = FALSE)
+df_opencl(
+  x,
+  df1,
+  df2,
+  ncp = 0,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 pf_opencl(
   q,
@@ -26,9 +35,7 @@ qf_opencl(n, p, df1, df2, ncp = 0, fallback = TRUE, verbose = FALSE)
 rf_opencl(n, df1, df2, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar (\code{df_opencl}, \code{qf_opencl}, \code{rf_opencl}).}
-
-\item{x}{Numeric scalar quantile (\code{df_opencl}).}
+\item{x}{Numeric vector of quantiles (\code{df_opencl}).}
 
 \item{df1}{Numerator degrees of freedom (must be > 0).}
 
@@ -36,6 +43,10 @@ rf_opencl(n, df1, df2, fallback = TRUE, verbose = FALSE)
 
 \item{ncp}{Non-centrality parameter (must be >= 0). Used by
 \code{df_opencl()}, \code{pf_opencl()}, and \code{qf_opencl()}.}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{df_opencl} (like \code{\link[stats]{df}}).}
+
+\item{opencl_parallel}{Reserved for future parallel dispatch (\code{pf_opencl}; unused).}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -45,7 +56,8 @@ rf_opencl(n, df1, df2, fallback = TRUE, verbose = FALSE)
 
 \item{lower.tail, log.p}{As in \code{stats::pf} for \code{pf_opencl} (vector inputs recycled).}
 
-\item{opencl_parallel}{Reserved for future parallel dispatch (\code{pf_opencl}; unused).}
+\item{n}{Number of observations (non-negative integer scalar). Used by \code{qf_opencl} and \code{rf_opencl};
+\code{df_opencl} takes vector \code{x} first (like \code{stats::df}).}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]} (\code{qf_opencl}).}
 }
@@ -68,8 +80,8 @@ non-central settings, with non-central paths typically more fragile.
 if (has_opencl()) {
   n <- 5L
 
-  df_opencl(n, x = 2, df1 = 5, df2 = 9, ncp = 0, fallback = FALSE, verbose = TRUE)
-  df_opencl(n, x = 2, df1 = 5, df2 = 9, ncp = 1.1, fallback = FALSE, verbose = TRUE)
+  df_opencl(rep(2, n), df1 = 5, df2 = 9, ncp = 0, fallback = FALSE, verbose = TRUE)
+  df_opencl(rep(2, n), df1 = 5, df2 = 9, ncp = 1.1, fallback = FALSE, verbose = TRUE)
   pf_opencl(q = 2, df1 = 5, df2 = 9, ncp = 0, fallback = FALSE, verbose = TRUE)
   pf_opencl(q = 2, df1 = 5, df2 = 9, ncp = 1.1, fallback = FALSE, verbose = TRUE)
   rf_opencl(n, df1 = 5, df2 = 9, fallback = FALSE, verbose = TRUE)

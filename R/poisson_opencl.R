@@ -12,34 +12,121 @@
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p As in \code{stats::ppois} for \code{ppois_opencl} (vector inputs recycled).
 #' @param opencl_parallel OpenCL dispatch hint for \code{ppois_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.
+#' @param log Logical; if \code{TRUE}, return log-density for \code{dpois_raw_opencl} / \code{dpois_opencl} (like \code{\link[stats]{dpois}}).
 #'
 #' @return Numeric vector of length \code{n}.
 #' @example inst/examples/Ex_poisson_opencl.R
 #' @rdname poisson_opencl
 #' @export
-dpois_raw_opencl <- function(n, x, lambda, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x", 0, Inf)
-  .validate_scalar_num(lambda, "lambda", 0, Inf)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+dpois_raw_opencl <- function(
+    x,
+    lambda,
+    log = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.")
+  }
+  if (!is.numeric(lambda)) {
+    stop("`lambda` must be numeric.")
+  }
+  .validate_d_stage1_log(log)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(x) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(x), length(lambda), length(log))
+  len <- .p_stage1_recycle_len(lens, "?dpois")
+
+  xv <- rep_len(as.double(x), len)
+  lv <- rep_len(as.double(lambda), len)
+  logv <- rep_len(log, len)
+
+  fallback_full <- function() {
+    stats::dpois(x, lambda = lambda, log = log)
+  }
+
+  if (any(!is.finite(xv) | !is.finite(lv))) {
+    return(fallback_full())
+  }
+
+  if (any(xv < 0 | lv < 0)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  log_int <- as.integer(logv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .dpois_raw_opencl(n, x, lambda, verbose = verbose),
-    fallback_expr = function() rep(stats::dpois(x, lambda = lambda), n),
-    fallback = fallback, verbose = verbose, fn_name = "dpois_raw_opencl"
+    opencl_expr = function() {
+      .dpois_raw_opencl(xv, lv, log_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "dpois_raw_opencl"
   )
 }
 
 #' @rdname poisson_opencl
 #' @export
-dpois_opencl <- function(n, x, lambda, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x", 0, Inf)
-  .validate_scalar_num(lambda, "lambda", 0, Inf)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+dpois_opencl <- function(
+    x,
+    lambda,
+    log = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.")
+  }
+  if (!is.numeric(lambda)) {
+    stop("`lambda` must be numeric.")
+  }
+  .validate_d_stage1_log(log)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(x) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(x), length(lambda), length(log))
+  len <- .p_stage1_recycle_len(lens, "?dpois")
+
+  xv <- rep_len(as.double(x), len)
+  lv <- rep_len(as.double(lambda), len)
+  logv <- rep_len(log, len)
+
+  fallback_full <- function() {
+    stats::dpois(x, lambda = lambda, log = log)
+  }
+
+  if (any(!is.finite(xv) | !is.finite(lv))) {
+    return(fallback_full())
+  }
+
+  if (any(xv < 0 | lv < 0)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  log_int <- as.integer(logv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .dpois_opencl(n, x, lambda, verbose = verbose),
-    fallback_expr = function() rep(stats::dpois(x, lambda = lambda), n),
-    fallback = fallback, verbose = verbose, fn_name = "dpois_opencl"
+    opencl_expr = function() {
+      .dpois_opencl(xv, lv, log_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "dpois_opencl"
   )
 }
 

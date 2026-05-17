@@ -12,20 +12,64 @@
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p As in \code{stats::pexp} for \code{pexp_opencl} (vector inputs recycled).
 #' @param opencl_parallel OpenCL dispatch hint for \code{pexp_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.
+#' @param log Logical; if \code{TRUE}, return log-density for \code{dexp_opencl} (like \code{\link[stats]{dexp}}).
 #'
 #' @return Numeric vector of length \code{n}.
 #' @example inst/examples/Ex_exponential_opencl.R
 #' @rdname exponential_opencl
 #' @export
-dexp_opencl <- function(n, x, rate = 1, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x", 0, Inf)
-  .validate_scalar_num(rate, "rate", 0, Inf, open_lower = TRUE)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+dexp_opencl <- function(
+    x,
+    rate = 1,
+    log = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.")
+  }
+  if (!is.numeric(rate)) {
+    stop("`rate` must be numeric.")
+  }
+  .validate_d_stage1_log(log)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(x) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(x), length(rate), length(log))
+  len <- .p_stage1_recycle_len(lens, "?dexp")
+
+  xv <- rep_len(as.double(x), len)
+  rv <- rep_len(as.double(rate), len)
+  logv <- rep_len(log, len)
+
+  fallback_full <- function() {
+    stats::dexp(x, rate = rate, log = log)
+  }
+
+  if (any(!is.finite(xv) | !is.finite(rv))) {
+    return(fallback_full())
+  }
+
+  if (any(xv < 0 | rv <= 0)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  log_int <- as.integer(logv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .dexp_opencl(n, x, rate, verbose = verbose),
-    fallback_expr = function() rep(stats::dexp(x, rate = rate), n),
-    fallback = fallback, verbose = verbose, fn_name = "dexp_opencl"
+    opencl_expr = function() {
+      .dexp_opencl(xv, rv, log_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "dexp_opencl"
   )
 }
 

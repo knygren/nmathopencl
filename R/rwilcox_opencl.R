@@ -13,6 +13,7 @@
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p As in \code{stats::pwilcox} for \code{pwilcox_opencl} (vector inputs recycled).
 #' @param opencl_parallel OpenCL dispatch hint for \code{pwilcox_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.
+#' @param log Logical; if \code{TRUE}, return log-density for \code{dwilcox_opencl} (like \code{\link[stats]{dwilcox}}).
 #'
 #' @section Known OpenCL limitations:
 #' Wilcoxon kernels can still hit runtime-shim gaps depending on device and
@@ -23,16 +24,63 @@
 #' @example inst/examples/Ex_wilcox_opencl.R
 #' @rdname wilcox_opencl
 #' @export
-dwilcox_opencl <- function(n, x, m, nn, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x", 0, Inf)
-  .validate_scalar_num(m, "m", 0, Inf, open_lower = TRUE)
-  .validate_scalar_num(nn, "nn", 0, Inf, open_lower = TRUE)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+dwilcox_opencl <- function(
+    x,
+    m,
+    nn,
+    log = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.")
+  }
+  if (!is.numeric(m)) {
+    stop("`m` must be numeric.")
+  }
+  if (!is.numeric(nn)) {
+    stop("`nn` must be numeric.")
+  }
+  .validate_d_stage1_log(log)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(x) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(x), length(m), length(nn), length(log))
+  len <- .p_stage1_recycle_len(lens, "?dwilcox")
+
+  xv <- rep_len(as.double(x), len)
+  mv <- rep_len(as.double(m), len)
+  n2v <- rep_len(as.double(nn), len)
+  logv <- rep_len(log, len)
+
+  fallback_full <- function() {
+    stats::dwilcox(x, m = m, n = nn, log = log)
+  }
+
+  if (any(!is.finite(xv) | !is.finite(mv) | !is.finite(n2v))) {
+    return(fallback_full())
+  }
+
+  if (any(xv < 0 | mv <= 0 | n2v <= 0)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  log_int <- as.integer(logv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .dwilcox_opencl(n, x, m, nn, verbose = verbose),
-    fallback_expr = function() rep(stats::dwilcox(x, m = m, n = nn), n),
-    fallback = fallback, verbose = verbose, fn_name = "dwilcox_opencl"
+    opencl_expr = function() {
+      .dwilcox_opencl(xv, mv, n2v, log_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "dwilcox_opencl"
   )
 }
 

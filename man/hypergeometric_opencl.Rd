@@ -7,7 +7,16 @@
 \alias{rhyper_opencl}
 \title{The Hypergeometric Distribution (OpenCL)}
 \usage{
-dhyper_opencl(n, x, m, n_black, k, fallback = TRUE, verbose = FALSE)
+dhyper_opencl(
+  x,
+  m,
+  n_black,
+  k,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 phyper_opencl(
   q,
@@ -26,8 +35,6 @@ qhyper_opencl(n, p, m, n_black, k, fallback = TRUE, verbose = FALSE)
 rhyper_opencl(n, m, n_black, k, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile.}
 
 \item{m}{Number of white balls in the urn (must be >= 0).}
@@ -35,6 +42,10 @@ rhyper_opencl(n, m, n_black, k, fallback = TRUE, verbose = FALSE)
 \item{n_black}{Number of black balls in the urn (must be >= 0).}
 
 \item{k}{Number of draws (must be >= 0).}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{dhyper_opencl} (like \code{\link[stats]{dhyper}}).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{phyper_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -44,7 +55,7 @@ rhyper_opencl(n, m, n_black, k, fallback = TRUE, verbose = FALSE)
 
 \item{lower.tail, log.p}{As in \code{stats::phyper} for \code{phyper_opencl} (vector inputs recycled).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{phyper_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{n}{Number of observations. Non-negative integer scalar.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -59,7 +70,7 @@ for the hypergeometric distribution.
 if (has_opencl()) {
   n <- 5L
 
-  dhyper_opencl(n, x = 3, m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
+  dhyper_opencl(rep(3, n), m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
   phyper_opencl(q = 3, m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
   qhyper_opencl(n, p = 0.8, m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
   rhyper_opencl(n, m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)

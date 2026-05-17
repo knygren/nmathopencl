@@ -7,7 +7,14 @@
 \alias{rgeom_opencl}
 \title{The Geometric Distribution (OpenCL)}
 \usage{
-dgeom_opencl(n, x, prob, fallback = TRUE, verbose = FALSE)
+dgeom_opencl(
+  x,
+  prob,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 pgeom_opencl(
   q,
@@ -24,11 +31,13 @@ qgeom_opencl(n, p, prob, fallback = TRUE, verbose = FALSE)
 rgeom_opencl(n, prob, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile.}
 
 \item{prob}{Probability of success in \code{[0, 1]}.}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{dgeom_opencl} (like \code{\link[stats]{dgeom}}).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{pgeom_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -38,7 +47,7 @@ rgeom_opencl(n, prob, fallback = TRUE, verbose = FALSE)
 
 \item{lower.tail, log.p}{As in \code{stats::pgeom} for \code{pgeom_opencl} (vector inputs recycled).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{pgeom_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{n}{Number of observations. Non-negative integer scalar.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -53,7 +62,7 @@ for the geometric distribution.
 if (has_opencl()) {
   n <- 5L
 
-  dgeom_opencl(n, x = 4, prob = 0.3, fallback = FALSE, verbose = TRUE)
+  dgeom_opencl(rep(4, n), prob = 0.3, fallback = FALSE, verbose = TRUE)
   pgeom_opencl(q = 4, prob = 0.3, fallback = FALSE, verbose = TRUE)
   qgeom_opencl(n, p = 0.8, prob = 0.3, fallback = FALSE, verbose = TRUE)
   rgeom_opencl(n, prob = 0.3, fallback = FALSE, verbose = TRUE)

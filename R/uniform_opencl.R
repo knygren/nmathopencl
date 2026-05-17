@@ -9,28 +9,76 @@
 #' @param lower.tail,log.p As in \code{stats::punif} for \code{punif_opencl} (recycled).
 #' @param opencl_parallel Reserved for future parallel dispatch (\code{punif_opencl}; unused).
 #' @param p Numeric scalar probability in \code{[0, 1]}.
-#' @param n Number of observations. Non-negative integer scalar (\code{dunif_opencl}, \code{qunif_opencl}, \code{runif_opencl}); not used by \code{punif_opencl}.
+#' @param n Number of observations (non-negative integer scalar). Used by \code{qunif_opencl} and \code{runif_opencl};
+#'   \code{dunif_opencl} takes vector \code{x} first (like \code{stats::dunif}). Not used by \code{punif_opencl}.
 #' @param min Lower limit of the distribution.
 #' @param max Upper limit of the distribution.
 #' @param fallback Logical; if \code{TRUE}, fall back to CPU \code{stats} function
 #'   when OpenCL is unavailable or the OpenCL call fails.
 #' @param verbose Logical; print informational fallback messages.
+#' @param log Logical; if \code{TRUE}, return log-density for \code{dunif_opencl} (like \code{\link[stats]{dunif}}).
 #'
 #' @return Numeric vector result from the corresponding uniform-family operation.
 #' @example inst/examples/Ex_uniform_opencl.R
 #' @rdname uniform_opencl
 #' @export
-dunif_opencl <- function(n, x, min = 0, max = 1, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x")
-  .validate_scalar_num(min, "min")
-  .validate_scalar_num(max, "max")
-  if (max < min) stop("`max` must be >= `min`.")
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+dunif_opencl <- function(
+    x,
+    min = 0,
+    max = 1,
+    log = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.")
+  }
+  if (!is.numeric(min)) {
+    stop("`min` must be numeric.")
+  }
+  if (!is.numeric(max)) {
+    stop("`max` must be numeric.")
+  }
+  .validate_d_stage1_log(log)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(x) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(x), length(min), length(max), length(log))
+  len <- .p_stage1_recycle_len(lens, "?dunif")
+
+  xv <- rep_len(as.double(x), len)
+  minv <- rep_len(as.double(min), len)
+  maxv <- rep_len(as.double(max), len)
+  logv <- rep_len(log, len)
+
+  fallback_full <- function() {
+    stats::dunif(x, min = min, max = max, log = log)
+  }
+
+  if (any(!is.finite(xv) | !is.finite(minv) | !is.finite(maxv))) {
+    return(fallback_full())
+  }
+
+  if (any(maxv < minv)) {
+    stop("`max` must be >= `min` (after recycling to common length).", call. = FALSE)
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  log_int <- as.integer(logv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .dunif_opencl(n, x, min, max, verbose = verbose),
-    fallback_expr = function() rep(stats::dunif(x, min = min, max = max), n),
-    fallback = fallback, verbose = verbose, fn_name = "dunif_opencl"
+    opencl_expr = function() {
+      .dunif_opencl(xv, minv, maxv, log_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "dunif_opencl"
   )
 }
 

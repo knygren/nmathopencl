@@ -25,12 +25,24 @@ using namespace openclPort;
 // [[Rcpp::export]]
 Rcpp::NumericVector dnorm_opencl_cpp_export(
     const Rcpp::NumericVector& x,
-    double mu = 0.0,
-    double sigma = 1.0,
-    bool give_log = false,
-    bool verbose = false
+    const Rcpp::NumericVector& mean,
+    const Rcpp::NumericVector& sd,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dnorm_opencl(x, mu, sigma, give_log, verbose);
+  if (static_cast<int>(mean.size()) != x.size()
+      || static_cast<int>(sd.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, mean, sd, give_log must have identical length.");
+  }
+  return nmathopencl::dnorm_opencl(
+      x,
+      mean,
+      sd,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -250,13 +262,25 @@ Rcpp::NumericVector qnorm_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dunif_opencl_cpp_export(
-    int n,
-    double x,
-    double min,
-    double max,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& min,
+    const Rcpp::NumericVector& max,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dunif_opencl(n, x, min, max, verbose);
+  if (static_cast<int>(min.size()) != x.size()
+      || static_cast<int>(max.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, min, max, give_log must have identical length.");
+  }
+  return nmathopencl::dunif_opencl(
+      x,
+      min,
+      max,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -292,13 +316,25 @@ Rcpp::NumericVector qunif_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dgamma_opencl_cpp_export(
-    int n,
-    double x,
-    double shape,
-    double scale,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& shape,
+    const Rcpp::NumericVector& scale,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dgamma_opencl(n, x, shape, scale, verbose);
+  if (static_cast<int>(shape.size()) != x.size()
+      || static_cast<int>(scale.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, shape, scale, give_log must have identical length.");
+  }
+  return nmathopencl::dgamma_opencl(
+      x,
+      shape,
+      scale,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -344,13 +380,25 @@ Rcpp::NumericVector rgamma_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dbeta_opencl_cpp_export(
-    int n,
-    double x,
-    double a,
-    double b,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& shape1,
+    const Rcpp::NumericVector& shape2,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dbeta_opencl(n, x, a, b, verbose);
+  if (static_cast<int>(shape1.size()) != x.size()
+      || static_cast<int>(shape2.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, shape1, shape2, give_log must have identical length.");
+  }
+  return nmathopencl::dbeta_opencl(
+      x,
+      shape1,
+      shape2,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -398,13 +446,25 @@ Rcpp::NumericVector rbeta_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dlnorm_opencl_cpp_export(
-    int n,
-    double x,
-    double meanlog,
-    double sdlog,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& meanlog,
+    const Rcpp::NumericVector& sdlog,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dlnorm_opencl(n, x, meanlog, sdlog, verbose);
+  if (static_cast<int>(meanlog.size()) != x.size()
+      || static_cast<int>(sdlog.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, meanlog, sdlog, give_log must have identical length.");
+  }
+  return nmathopencl::dlnorm_opencl(
+      x,
+      meanlog,
+      sdlog,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -450,12 +510,25 @@ Rcpp::NumericVector rlnorm_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dchisq_opencl_cpp_export(
-    int n,
-    double x,
-    double df,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& df,
+    const Rcpp::NumericVector& ncp,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dchisq_opencl(n, x, df, verbose);
+  if (static_cast<int>(df.size()) != x.size()
+      || static_cast<int>(ncp.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, df, ncp, give_log must have identical length.");
+  }
+  return nmathopencl::dchisq_opencl(
+      x,
+      df,
+      ncp,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -498,17 +571,6 @@ Rcpp::NumericVector rchisq_opencl_cpp_export(
 }
 
 // [[Rcpp::export]]
-Rcpp::NumericVector dnchisq_opencl_cpp_export(
-    int n,
-    double x,
-    double df,
-    double ncp,
-    bool verbose = false
-) {
-  return nmathopencl::dnchisq_opencl(n, x, df, ncp, verbose);
-}
-
-// [[Rcpp::export]]
 Rcpp::NumericVector rnchisq_opencl_cpp_export(
     int n,
     double df,
@@ -520,13 +582,28 @@ Rcpp::NumericVector rnchisq_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector df_opencl_cpp_export(
-    int n,
-    double x,
-    double df1,
-    double df2,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& df1,
+    const Rcpp::NumericVector& df2,
+    const Rcpp::NumericVector& ncp,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::df_opencl(n, x, df1, df2, verbose);
+  if (static_cast<int>(df1.size()) != x.size()
+      || static_cast<int>(df2.size()) != x.size()
+      || static_cast<int>(ncp.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, df1, df2, ncp, give_log must have identical length.");
+  }
+  return nmathopencl::df_opencl(
+      x,
+      df1,
+      df2,
+      ncp,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -574,12 +651,25 @@ Rcpp::NumericVector rf_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dt_opencl_cpp_export(
-    int n,
-    double x,
-    double df,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& df,
+    const Rcpp::NumericVector& ncp,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dt_opencl(n, x, df, verbose);
+  if (static_cast<int>(df.size()) != x.size()
+      || static_cast<int>(ncp.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, df, ncp, give_log must have identical length.");
+  }
+  return nmathopencl::dt_opencl(
+      x,
+      df,
+      ncp,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -623,25 +713,51 @@ Rcpp::NumericVector rt_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dbinom_raw_opencl_cpp_export(
-    int n,
-    double x,
-    double n_size,
-    double prob,
-    double qprob,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& n_size,
+    const Rcpp::NumericVector& prob,
+    const Rcpp::NumericVector& qprob,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dbinom_raw_opencl(n, x, n_size, prob, qprob, verbose);
+  if (static_cast<int>(n_size.size()) != x.size()
+      || static_cast<int>(prob.size()) != x.size()
+      || static_cast<int>(qprob.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, n_size, prob, qprob, give_log must have identical length.");
+  }
+  return nmathopencl::dbinom_raw_opencl(
+      x,
+      n_size,
+      prob,
+      qprob,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dbinom_opencl_cpp_export(
-    int n,
-    double x,
-    double size,
-    double prob,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& size,
+    const Rcpp::NumericVector& prob,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dbinom_opencl(n, x, size, prob, verbose);
+  if (static_cast<int>(size.size()) != x.size()
+      || static_cast<int>(prob.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, size, prob, give_log must have identical length.");
+  }
+  return nmathopencl::dbinom_opencl(
+      x,
+      size,
+      prob,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -666,13 +782,25 @@ Rcpp::NumericVector pbinom_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dnbinom_opencl_cpp_export(
-    int n,
-    double x,
-    double size,
-    double prob,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& size,
+    const Rcpp::NumericVector& prob,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dnbinom_opencl(n, x, size, prob, verbose);
+  if (static_cast<int>(size.size()) != x.size()
+      || static_cast<int>(prob.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, size, prob, give_log must have identical length.");
+  }
+  return nmathopencl::dnbinom_opencl(
+      x,
+      size,
+      prob,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -718,13 +846,25 @@ Rcpp::NumericVector rnbinom_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dnbinom_mu_opencl_cpp_export(
-    int n,
-    double x,
-    double size,
-    double mu,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& size,
+    const Rcpp::NumericVector& mu,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dnbinom_mu_opencl(n, x, size, mu, verbose);
+  if (static_cast<int>(size.size()) != x.size()
+      || static_cast<int>(mu.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, size, mu, give_log must have identical length.");
+  }
+  return nmathopencl::dnbinom_mu_opencl(
+      x,
+      size,
+      mu,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -759,13 +899,25 @@ Rcpp::NumericVector rmultinom_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dcauchy_opencl_cpp_export(
-    int n,
-    double x,
-    double location,
-    double scale,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& location,
+    const Rcpp::NumericVector& scale,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dcauchy_opencl(n, x, location, scale, verbose);
+  if (static_cast<int>(location.size()) != x.size()
+      || static_cast<int>(scale.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, location, scale, give_log must have identical length.");
+  }
+  return nmathopencl::dcauchy_opencl(
+      x,
+      location,
+      scale,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -811,12 +963,22 @@ Rcpp::NumericVector rcauchy_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dexp_opencl_cpp_export(
-    int n,
-    double x,
-    double rate,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& rate,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dexp_opencl(n, x, rate, verbose);
+  if (static_cast<int>(rate.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, rate, give_log must have identical length.");
+  }
+  return nmathopencl::dexp_opencl(
+      x,
+      rate,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -849,12 +1011,22 @@ Rcpp::NumericVector qexp_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dgeom_opencl_cpp_export(
-    int n,
-    double x,
-    double prob,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& prob,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dgeom_opencl(n, x, prob, verbose);
+  if (static_cast<int>(prob.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, prob, give_log must have identical length.");
+  }
+  return nmathopencl::dgeom_opencl(
+      x,
+      prob,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -896,14 +1068,28 @@ Rcpp::NumericVector rgeom_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dhyper_opencl_cpp_export(
-    int n,
-    double x,
-    double r,
-    double b,
-    double n1,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& r,
+    const Rcpp::NumericVector& b,
+    const Rcpp::NumericVector& n1,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dhyper_opencl(n, x, r, b, n1, verbose);
+  if (static_cast<int>(r.size()) != x.size()
+      || static_cast<int>(b.size()) != x.size()
+      || static_cast<int>(n1.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, r, b, n1, give_log must have identical length.");
+  }
+  return nmathopencl::dhyper_opencl(
+      x,
+      r,
+      b,
+      n1,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -974,22 +1160,42 @@ Rcpp::NumericVector qpois_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dpois_raw_opencl_cpp_export(
-    int n,
-    double x,
-    double lambda,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& lambda,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dpois_raw_opencl(n, x, lambda, verbose);
+  if (static_cast<int>(lambda.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, lambda, give_log must have identical length.");
+  }
+  return nmathopencl::dpois_raw_opencl(
+      x,
+      lambda,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dpois_opencl_cpp_export(
-    int n,
-    double x,
-    double lambda,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& lambda,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dpois_opencl(n, x, lambda, verbose);
+  if (static_cast<int>(lambda.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, lambda, give_log must have identical length.");
+  }
+  return nmathopencl::dpois_opencl(
+      x,
+      lambda,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -1042,13 +1248,25 @@ Rcpp::NumericVector rnbinom_mu_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dweibull_opencl_cpp_export(
-    int n,
-    double x,
-    double shape,
-    double scale,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& shape,
+    const Rcpp::NumericVector& scale,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dweibull_opencl(n, x, shape, scale, verbose);
+  if (static_cast<int>(shape.size()) != x.size()
+      || static_cast<int>(scale.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, shape, scale, give_log must have identical length.");
+  }
+  return nmathopencl::dweibull_opencl(
+      x,
+      shape,
+      scale,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -1094,13 +1312,25 @@ Rcpp::NumericVector rweibull_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dlogis_opencl_cpp_export(
-    int n,
-    double x,
-    double location,
-    double scale,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& location,
+    const Rcpp::NumericVector& scale,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dlogis_opencl(n, x, location, scale, verbose);
+  if (static_cast<int>(location.size()) != x.size()
+      || static_cast<int>(scale.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, location, scale, give_log must have identical length.");
+  }
+  return nmathopencl::dlogis_opencl(
+      x,
+      location,
+      scale,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -1156,18 +1386,6 @@ Rcpp::NumericVector qnchisq_opencl_cpp_export(
 }
 
 // [[Rcpp::export]]
-Rcpp::NumericVector dnf_opencl_cpp_export(
-    int n,
-    double x,
-    double df1,
-    double df2,
-    double ncp,
-    bool verbose = false
-) {
-  return nmathopencl::dnf_opencl(n, x, df1, df2, ncp, verbose);
-}
-
-// [[Rcpp::export]]
 Rcpp::NumericVector qnf_opencl_cpp_export(
     int n,
     double p,
@@ -1193,25 +1411,28 @@ Rcpp::NumericVector qnbeta_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dnbeta_opencl_cpp_export(
-    int n,
-    double x,
-    double a,
-    double b,
-    double ncp,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& shape1,
+    const Rcpp::NumericVector& shape2,
+    const Rcpp::NumericVector& ncp,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dnbeta_opencl(n, x, a, b, ncp, verbose);
-}
-
-// [[Rcpp::export]]
-Rcpp::NumericVector dnt_opencl_cpp_export(
-    int n,
-    double x,
-    double df,
-    double ncp,
-    bool verbose = false
-) {
-  return nmathopencl::dnt_opencl(n, x, df, ncp, verbose);
+  if (static_cast<int>(shape1.size()) != x.size()
+      || static_cast<int>(shape2.size()) != x.size()
+      || static_cast<int>(ncp.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, shape1, shape2, ncp, give_log must have identical length.");
+  }
+  return nmathopencl::dnbeta_opencl(
+      x,
+      shape1,
+      shape2,
+      ncp,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -1261,13 +1482,25 @@ Rcpp::NumericVector qtukey_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dwilcox_opencl_cpp_export(
-    int n,
-    double x,
-    double m,
-    double n2,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& m,
+    const Rcpp::NumericVector& n2,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dwilcox_opencl(n, x, m, n2, verbose);
+  if (static_cast<int>(m.size()) != x.size()
+      || static_cast<int>(n2.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, m, n2, give_log must have identical length.");
+  }
+  return nmathopencl::dwilcox_opencl(
+      x,
+      m,
+      n2,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -1303,12 +1536,22 @@ Rcpp::NumericVector qwilcox_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dsignrank_opencl_cpp_export(
-    int n,
-    double x,
-    double nsize,
-    bool verbose = false
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nsize,
+    const Rcpp::IntegerVector& give_log,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::dsignrank_opencl(n, x, nsize, verbose);
+  if (static_cast<int>(nsize.size()) != x.size()
+      || static_cast<int>(give_log.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x, nsize, give_log must have identical length.");
+  }
+  return nmathopencl::dsignrank_opencl(
+      x,
+      nsize,
+      give_log,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]

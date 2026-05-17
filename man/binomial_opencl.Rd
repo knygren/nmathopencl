@@ -9,16 +9,25 @@
 \title{The Binomial Distribution (OpenCL)}
 \usage{
 dbinom_raw_opencl(
-  n,
   x,
   size,
   prob,
   qprob = NULL,
+  log = FALSE,
+  opencl_parallel = NA,
   fallback = TRUE,
   verbose = FALSE
 )
 
-dbinom_opencl(n, x, size, prob, fallback = TRUE, verbose = FALSE)
+dbinom_opencl(
+  x,
+  size,
+  prob,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 pbinom_opencl(
   q,
@@ -36,8 +45,6 @@ qbinom_opencl(n, p, size, prob, fallback = TRUE, verbose = FALSE)
 rbinom_opencl(n, size, prob, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile.}
 
 \item{size}{Number of trials (must be >= 0).}
@@ -45,6 +52,11 @@ rbinom_opencl(n, size, prob, fallback = TRUE, verbose = FALSE)
 \item{prob}{Probability of success in \code{[0, 1]}.}
 
 \item{qprob}{Complementary probability. If \code{NULL}, uses \code{1 - prob}.}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{dbinom_raw_opencl} / \code{dbinom_opencl}
+(like \code{\link[stats]{dbinom}}'s \code{log} argument).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{pbinom_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -54,7 +66,7 @@ rbinom_opencl(n, size, prob, fallback = TRUE, verbose = FALSE)
 
 \item{lower.tail, log.p}{As in \code{stats::pbinom} for \code{pbinom_opencl} (vector inputs recycled).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{pbinom_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{n}{Number of observations. Non-negative integer scalar.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -69,8 +81,8 @@ for the binomial distribution.
 if (has_opencl()) {
   n <- 5L
 
-  dbinom_raw_opencl(n, x = 6, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
-  dbinom_opencl(n, x = 6, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
+  dbinom_raw_opencl(rep(6, n), size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
+  dbinom_opencl(rep(6, n), size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
   pbinom_opencl(q = 6, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
   qbinom_opencl(n, p = 0.8, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
   rbinom_opencl(n, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)

@@ -4,14 +4,16 @@
 #' for the gamma distribution. These mirror the base \code{stats} gamma family
 #' while adding OpenCL dispatch and optional CPU fallback behavior.
 #'
-#' @param x Numeric scalar quantile for \code{dgamma_opencl}.
+#' @param x Numeric vector of quantiles for \code{dgamma_opencl}.
 #' @param q Numeric vector of quantiles for \code{pgamma_opencl} (same role as \code{stats::pgamma}).
 #' @param p Numeric scalar probability in \code{[0, 1]} for \code{qgamma_opencl}.
-#' @param n Number of observations. Non-negative integer scalar (\code{dgamma_opencl}, \code{qgamma_opencl}, \code{rgamma_opencl}).
+#' @param n Number of observations (non-negative integer scalar). Used by \code{qgamma_opencl}
+#'   and \code{rgamma_opencl}; \code{dgamma_opencl} takes vector \code{x} first (like \code{stats::dgamma}).
 #' @param shape Shape parameter (must be > 0).
 #' @param scale Scale parameter (must be > 0). For \code{pgamma_opencl}, combined with \code{rate}
 #'   like \code{stats::pgamma}.
 #' @param rate Optional rate for \code{pgamma_opencl}; see \code{\link[stats]{pgamma}}.
+#' @param log Logical; if \code{TRUE}, return log-density for \code{dgamma_opencl} (like \code{\link[stats]{dgamma}}).
 #' @param lower.tail,log.p As in \code{stats::pgamma} for \code{pgamma_opencl} (recycled).
 #' @param opencl_parallel Single logical passed through for future parallel dispatch (\code{pgamma_opencl}; unused).
 #' @param fallback Logical; if \code{TRUE}, fall back to CPU \code{stats} function
@@ -34,16 +36,63 @@
 #' @example inst/examples/Ex_gamma_opencl.R
 #' @rdname gamma_opencl
 #' @export
-dgamma_opencl <- function(n, x, shape, scale = 1, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x")
-  .validate_scalar_num(shape, "shape", 0, Inf, open_lower = TRUE)
-  .validate_scalar_num(scale, "scale", 0, Inf, open_lower = TRUE)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+dgamma_opencl <- function(
+    x,
+    shape,
+    scale = 1,
+    log = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.")
+  }
+  if (!is.numeric(shape)) {
+    stop("`shape` must be numeric.")
+  }
+  if (!is.numeric(scale)) {
+    stop("`scale` must be numeric.")
+  }
+  .validate_d_stage1_log(log)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(x) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(x), length(shape), length(scale), length(log))
+  len <- .p_stage1_recycle_len(lens, "?dgamma")
+
+  xv <- rep_len(as.double(x), len)
+  shv <- rep_len(as.double(shape), len)
+  scv <- rep_len(as.double(scale), len)
+  logv <- rep_len(log, len)
+
+  fallback_full <- function() {
+    stats::dgamma(x, shape = shape, scale = scale, log = log)
+  }
+
+  if (any(!is.finite(xv) | !is.finite(shv) | !is.finite(scv))) {
+    return(fallback_full())
+  }
+
+  if (any(shv <= 0 | scv <= 0)) {
+    stop("`shape` and `scale` must be strictly positive (after recycling).", call. = FALSE)
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  log_int <- as.integer(logv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .dgamma_opencl(n, x, shape, scale, verbose = verbose),
-    fallback_expr = function() rep(stats::dgamma(x, shape = shape, scale = scale), n),
-    fallback = fallback, verbose = verbose, fn_name = "dgamma_opencl"
+    opencl_expr = function() {
+      .dgamma_opencl(xv, shv, scv, log_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "dgamma_opencl"
   )
 }
 

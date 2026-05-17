@@ -7,7 +7,15 @@
 \alias{rweibull_opencl}
 \title{The Weibull Distribution (OpenCL)}
 \usage{
-dweibull_opencl(n, x, shape, scale = 1, fallback = TRUE, verbose = FALSE)
+dweibull_opencl(
+  x,
+  shape,
+  scale = 1,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 pweibull_opencl(
   q,
@@ -25,13 +33,15 @@ qweibull_opencl(n, p, shape, scale = 1, fallback = TRUE, verbose = FALSE)
 rweibull_opencl(n, shape, scale = 1, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile (must be >= 0).}
 
 \item{shape}{Shape parameter (must be > 0).}
 
 \item{scale}{Scale parameter (must be > 0).}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{dweibull_opencl} (like \code{\link[stats]{dweibull}}).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{pweibull_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -41,7 +51,7 @@ rweibull_opencl(n, shape, scale = 1, fallback = TRUE, verbose = FALSE)
 
 \item{lower.tail, log.p}{As in \code{stats::pweibull} for \code{pweibull_opencl} (vector inputs recycled).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{pweibull_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{n}{Number of observations. Non-negative integer scalar.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -56,7 +66,7 @@ for the Weibull distribution.
 if (has_opencl()) {
   n <- 5L
 
-  dweibull_opencl(n, x = 1.2, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
+  dweibull_opencl(rep(1.2, n), shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
   pweibull_opencl(q = 1.2, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
   qweibull_opencl(n, p = 0.8, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
   rweibull_opencl(n, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)

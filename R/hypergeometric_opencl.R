@@ -14,22 +14,74 @@
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p As in \code{stats::phyper} for \code{phyper_opencl} (vector inputs recycled).
 #' @param opencl_parallel OpenCL dispatch hint for \code{phyper_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.
+#' @param log Logical; if \code{TRUE}, return log-density for \code{dhyper_opencl} (like \code{\link[stats]{dhyper}}).
 #'
 #' @return Numeric vector of length \code{n}.
 #' @example inst/examples/Ex_hypergeometric_opencl.R
 #' @rdname hypergeometric_opencl
 #' @export
-dhyper_opencl <- function(n, x, m, n_black, k, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x", 0, Inf)
-  .validate_scalar_num(m, "m", 0, Inf)
-  .validate_scalar_num(n_black, "n_black", 0, Inf)
-  .validate_scalar_num(k, "k", 0, Inf)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+dhyper_opencl <- function(
+    x,
+    m,
+    n_black,
+    k,
+    log = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.")
+  }
+  if (!is.numeric(m)) {
+    stop("`m` must be numeric.")
+  }
+  if (!is.numeric(n_black)) {
+    stop("`n_black` must be numeric.")
+  }
+  if (!is.numeric(k)) {
+    stop("`k` must be numeric.")
+  }
+  .validate_d_stage1_log(log)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(x) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(x), length(m), length(n_black), length(k), length(log))
+  len <- .p_stage1_recycle_len(lens, "?dhyper")
+
+  xv <- rep_len(as.double(x), len)
+  mv <- rep_len(as.double(m), len)
+  bv <- rep_len(as.double(n_black), len)
+  kv <- rep_len(as.double(k), len)
+  logv <- rep_len(log, len)
+
+  fallback_full <- function() {
+    stats::dhyper(x, m = m, n = n_black, k = k, log = log)
+  }
+
+  if (any(!is.finite(xv) | !is.finite(mv) | !is.finite(bv) | !is.finite(kv))) {
+    return(fallback_full())
+  }
+
+  if (any(xv < 0 | mv < 0 | bv < 0 | kv < 0)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  log_int <- as.integer(logv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .dhyper_opencl(n, x, m, n_black, k, verbose = verbose),
-    fallback_expr = function() rep(stats::dhyper(x, m = m, n = n_black, k = k), n),
-    fallback = fallback, verbose = verbose, fn_name = "dhyper_opencl"
+    opencl_expr = function() {
+      .dhyper_opencl(xv, mv, bv, kv, log_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "dhyper_opencl"
   )
 }
 

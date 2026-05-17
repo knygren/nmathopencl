@@ -7,7 +7,15 @@
 \alias{rlogis_opencl}
 \title{The Logistic Distribution (OpenCL)}
 \usage{
-dlogis_opencl(n, x, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
+dlogis_opencl(
+  x,
+  location = 0,
+  scale = 1,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 plogis_opencl(
   q,
@@ -25,13 +33,15 @@ qlogis_opencl(n, p, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
 rlogis_opencl(n, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile.}
 
 \item{location}{Location parameter.}
 
 \item{scale}{Scale parameter (must be > 0).}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{dlogis_opencl} (like \code{\link[stats]{dlogis}}).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{plogis_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -41,7 +51,7 @@ rlogis_opencl(n, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
 
 \item{lower.tail, log.p}{As in \code{stats::plogis} for \code{plogis_opencl} (vector inputs recycled).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{plogis_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{n}{Number of observations. Non-negative integer scalar.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -56,7 +66,7 @@ for the logistic distribution.
 if (has_opencl()) {
   n <- 5L
 
-  dlogis_opencl(n, x = 0.2, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
+  dlogis_opencl(rep(0.2, n), location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
   plogis_opencl(q = 0.2, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
   qlogis_opencl(n, p = 0.8, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
   rlogis_opencl(n, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)

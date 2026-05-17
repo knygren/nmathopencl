@@ -11,7 +11,15 @@
 \alias{rnbinom_mu_opencl}
 \title{The Negative Binomial Distribution (OpenCL)}
 \usage{
-dnbinom_opencl(n, x, size, prob, fallback = TRUE, verbose = FALSE)
+dnbinom_opencl(
+  x,
+  size,
+  prob,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 pnbinom_opencl(
   q,
@@ -28,7 +36,15 @@ qnbinom_opencl(n, p, size, prob, fallback = TRUE, verbose = FALSE)
 
 rnbinom_opencl(n, size, prob, fallback = TRUE, verbose = FALSE)
 
-dnbinom_mu_opencl(n, x, size, mu, fallback = TRUE, verbose = FALSE)
+dnbinom_mu_opencl(
+  x,
+  size,
+  mu,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 pnbinom_mu_opencl(
   q,
@@ -46,13 +62,16 @@ qnbinom_mu_opencl(n, p, size, mu, fallback = TRUE, verbose = FALSE)
 rnbinom_mu_opencl(n, size, mu, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile (must be >= 0).}
 
 \item{size}{Dispersion/size parameter (must be >= 0).}
 
 \item{prob}{Probability of success in \code{[0, 1]}.}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{dnbinom_opencl} / \code{dnbinom_mu_opencl}
+(like \code{\link[stats]{dnbinom}}).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{pnbinom_opencl} / \code{pnbinom_mu_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -62,7 +81,7 @@ rnbinom_mu_opencl(n, size, mu, fallback = TRUE, verbose = FALSE)
 
 \item{lower.tail, log.p}{As in \code{stats::pnbinom} for \code{pnbinom_opencl} / \code{pnbinom_mu_opencl} (vector inputs recycled).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{pnbinom_opencl} / \code{pnbinom_mu_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{n}{Number of observations. Non-negative integer scalar.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 
@@ -80,12 +99,12 @@ for the negative binomial distribution, with variants parameterized by
 if (has_opencl()) {
   n <- 5L
 
-  dnbinom_opencl(n, x = 4, size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
+  dnbinom_opencl(rep(4, n), size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
   pnbinom_opencl(q = 4, size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
   qnbinom_opencl(n, p = 0.8, size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
   rnbinom_opencl(n, size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
 
-  dnbinom_mu_opencl(n, x = 4, size = 7, mu = 5, fallback = FALSE, verbose = TRUE)
+  dnbinom_mu_opencl(rep(4, n), size = 7, mu = 5, fallback = FALSE, verbose = TRUE)
   pnbinom_mu_opencl(q = 4, size = 7, mu = 5, fallback = FALSE, verbose = TRUE)
   qnbinom_mu_opencl(n, p = 0.8, size = 7, mu = 5, fallback = FALSE, verbose = TRUE)
   rnbinom_mu_opencl(n, size = 7, mu = 5, fallback = FALSE, verbose = TRUE)

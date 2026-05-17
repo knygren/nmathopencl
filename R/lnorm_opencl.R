@@ -13,21 +13,73 @@
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p As in \code{stats::plnorm} for \code{plnorm_opencl} (vector inputs recycled).
 #' @param opencl_parallel OpenCL dispatch hint for \code{plnorm_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.
+#' @param log Logical; if \code{TRUE}, return log-density for \code{dlnorm_opencl} (like \code{\link[stats]{dlnorm}}).
 #'
 #' @return Numeric vector of length \code{n}.
 #' @example inst/examples/Ex_lnorm_opencl.R
 #' @rdname lnorm_opencl
 #' @export
-dlnorm_opencl <- function(n, x, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x", 0, Inf)
-  .validate_scalar_num(meanlog, "meanlog")
-  .validate_scalar_num(sdlog, "sdlog", 0, Inf, open_lower = TRUE)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+dlnorm_opencl <- function(
+    x,
+    meanlog = 0,
+    sdlog = 1,
+    log = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.")
+  }
+  if (!is.numeric(meanlog)) {
+    stop("`meanlog` must be numeric.")
+  }
+  if (!is.numeric(sdlog)) {
+    stop("`sdlog` must be numeric.")
+  }
+  .validate_d_stage1_log(log)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(x) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(x), length(meanlog), length(sdlog), length(log))
+  len <- .p_stage1_recycle_len(lens, "?dlnorm")
+
+  xv <- rep_len(as.double(x), len)
+  ml <- rep_len(as.double(meanlog), len)
+  sl <- rep_len(as.double(sdlog), len)
+  logv <- rep_len(log, len)
+
+  fallback_full <- function() {
+    stats::dlnorm(x, meanlog = meanlog, sdlog = sdlog, log = log)
+  }
+
+  if (any(!is.finite(xv) | !is.finite(ml) | !is.finite(sl))) {
+    return(fallback_full())
+  }
+
+  if (any(xv < 0)) {
+    stop("`x` must be non-negative (after recycling).", call. = FALSE)
+  }
+
+  if (any(sl <= 0)) {
+    stop("`sdlog` must be strictly positive (after recycling).", call. = FALSE)
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  log_int <- as.integer(logv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .dlnorm_opencl(n, x, meanlog, sdlog, verbose = verbose),
-    fallback_expr = function() rep(stats::dlnorm(x, meanlog = meanlog, sdlog = sdlog), n),
-    fallback = fallback, verbose = verbose, fn_name = "dlnorm_opencl"
+    opencl_expr = function() {
+      .dlnorm_opencl(xv, ml, sl, log_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "dlnorm_opencl"
   )
 }
 

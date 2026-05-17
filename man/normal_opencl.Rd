@@ -12,6 +12,7 @@ dnorm_opencl(
   mean = 0,
   sd = 1,
   log = FALSE,
+  opencl_parallel = NA,
   fallback = TRUE,
   verbose = FALSE
 )
@@ -44,6 +45,9 @@ The GPU path runs only when every recycled value is strictly positive (\code{sd 
 
 \item{log}{Logical; if \code{TRUE}, return log densities.}
 
+\item{opencl_parallel}{Single logical: \code{TRUE} forces parallel dispatch when implemented,
+\code{FALSE} serial, \code{NA} automatic (reserved; not yet used by \code{pnorm_opencl} GPU dispatch).}
+
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU \code{stats} function
 when OpenCL is unavailable or the OpenCL call fails.}
 
@@ -54,9 +58,6 @@ when OpenCL is unavailable or the OpenCL call fails.}
 \item{lower.tail, log.p}{As in \code{stats::pnorm} (recycled). Row-wise semantics follow
 full recycling; for some combinations of arguments, plain \code{stats::pnorm} with vector
 arguments may replicate only scalar \code{lower.tail}/\code{log.p}.}
-
-\item{opencl_parallel}{Single logical: \code{TRUE} forces parallel dispatch when implemented,
-\code{FALSE} serial, \code{NA} automatic (reserved; not yet used by \code{pnorm_opencl} GPU dispatch).}
 
 \item{n}{Number of observations (non-negative integer scalar). Used by \code{qnorm_opencl}
 and \code{rnorm_opencl}; not an argument to \code{pnorm_opencl}.}

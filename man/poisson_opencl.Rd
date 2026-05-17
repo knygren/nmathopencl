@@ -8,9 +8,23 @@
 \alias{rpois_opencl}
 \title{The Poisson Distribution (OpenCL)}
 \usage{
-dpois_raw_opencl(n, x, lambda, fallback = TRUE, verbose = FALSE)
+dpois_raw_opencl(
+  x,
+  lambda,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-dpois_opencl(n, x, lambda, fallback = TRUE, verbose = FALSE)
+dpois_opencl(
+  x,
+  lambda,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 ppois_opencl(
   q,
@@ -27,11 +41,13 @@ qpois_opencl(n, p, lambda, fallback = TRUE, verbose = FALSE)
 rpois_opencl(n, lambda, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile (must be >= 0).}
 
 \item{lambda}{Mean/rate parameter (must be >= 0).}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{dpois_raw_opencl} / \code{dpois_opencl} (like \code{\link[stats]{dpois}}).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{ppois_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -41,7 +57,7 @@ rpois_opencl(n, lambda, fallback = TRUE, verbose = FALSE)
 
 \item{lower.tail, log.p}{As in \code{stats::ppois} for \code{ppois_opencl} (vector inputs recycled).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{ppois_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{n}{Number of observations. Non-negative integer scalar.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -56,8 +72,8 @@ for the Poisson distribution.
 if (has_opencl()) {
   n <- 5L
 
-  dpois_raw_opencl(n, x = 4, lambda = 4, fallback = FALSE, verbose = TRUE)
-  dpois_opencl(n, x = 4, lambda = 4, fallback = FALSE, verbose = TRUE)
+  dpois_raw_opencl(rep(4, n), lambda = 4, fallback = FALSE, verbose = TRUE)
+  dpois_opencl(rep(4, n), lambda = 4, fallback = FALSE, verbose = TRUE)
   ppois_opencl(q = 4, lambda = 4, fallback = FALSE, verbose = TRUE)
   qpois_opencl(n, p = 0.8, lambda = 4, fallback = FALSE, verbose = TRUE)
   rpois_opencl(n, lambda = 4, fallback = FALSE, verbose = TRUE)

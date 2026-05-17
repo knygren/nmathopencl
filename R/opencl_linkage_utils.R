@@ -79,6 +79,12 @@
   }
 }
 
+.validate_d_stage1_log <- function(log) {
+  if (!is.logical(log) || any(is.na(log))) {
+    stop("`log` must be logical with no missing values.", call. = FALSE)
+  }
+}
+
 .p_stage1_recycle_len <- function(lens, stats_help_topic) {
   len <- max(lens)
   if (len == 0L) {

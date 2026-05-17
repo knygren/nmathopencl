@@ -7,7 +7,15 @@
 \alias{rgamma_opencl}
 \title{The Gamma Distribution (OpenCL)}
 \usage{
-dgamma_opencl(n, x, shape, scale = 1, fallback = TRUE, verbose = FALSE)
+dgamma_opencl(
+  x,
+  shape,
+  scale = 1,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 pgamma_opencl(
   q,
@@ -26,14 +34,16 @@ qgamma_opencl(n, p, shape, scale = 1, fallback = TRUE, verbose = FALSE)
 rgamma_opencl(n, shape, scale = 1, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar (\code{dgamma_opencl}, \code{qgamma_opencl}, \code{rgamma_opencl}).}
-
-\item{x}{Numeric scalar quantile for \code{dgamma_opencl}.}
+\item{x}{Numeric vector of quantiles for \code{dgamma_opencl}.}
 
 \item{shape}{Shape parameter (must be > 0).}
 
 \item{scale}{Scale parameter (must be > 0). For \code{pgamma_opencl}, combined with \code{rate}
 like \code{stats::pgamma}.}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{dgamma_opencl} (like \code{\link[stats]{dgamma}}).}
+
+\item{opencl_parallel}{Single logical passed through for future parallel dispatch (\code{pgamma_opencl}; unused).}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU \code{stats} function
 when OpenCL is unavailable or the OpenCL call fails.}
@@ -46,7 +56,8 @@ when OpenCL is unavailable or the OpenCL call fails.}
 
 \item{lower.tail, log.p}{As in \code{stats::pgamma} for \code{pgamma_opencl} (recycled).}
 
-\item{opencl_parallel}{Single logical passed through for future parallel dispatch (\code{pgamma_opencl}; unused).}
+\item{n}{Number of observations (non-negative integer scalar). Used by \code{qgamma_opencl}
+and \code{rgamma_opencl}; \code{dgamma_opencl} takes vector \code{x} first (like \code{stats::dgamma}).}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]} for \code{qgamma_opencl}.}
 }
@@ -72,10 +83,12 @@ once with \code{n_out = 1}. Missing or non-finite values after recycling, or non
 }
 \examples{
 if (has_opencl()) {
-  dgamma_opencl(n = 5L, x = 1.2, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
+  n <- 5L
+
+  dgamma_opencl(rep(1.2, n), shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
   pgamma_opencl(q = 1.2, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
-  qgamma_opencl(n = 5L, p = 0.8, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
-  rgamma_opencl(n = 5L, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
+  qgamma_opencl(n, p = 0.8, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
+  rgamma_opencl(n, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")
 }

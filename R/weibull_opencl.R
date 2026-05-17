@@ -13,21 +13,69 @@
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p As in \code{stats::pweibull} for \code{pweibull_opencl} (vector inputs recycled).
 #' @param opencl_parallel OpenCL dispatch hint for \code{pweibull_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.
+#' @param log Logical; if \code{TRUE}, return log-density for \code{dweibull_opencl} (like \code{\link[stats]{dweibull}}).
 #'
 #' @return Numeric vector of length \code{n}.
 #' @example inst/examples/Ex_weibull_opencl.R
 #' @rdname weibull_opencl
 #' @export
-dweibull_opencl <- function(n, x, shape, scale = 1, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x", 0, Inf)
-  .validate_scalar_num(shape, "shape", 0, Inf, open_lower = TRUE)
-  .validate_scalar_num(scale, "scale", 0, Inf, open_lower = TRUE)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+dweibull_opencl <- function(
+    x,
+    shape,
+    scale = 1,
+    log = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.")
+  }
+  if (!is.numeric(shape)) {
+    stop("`shape` must be numeric.")
+  }
+  if (!is.numeric(scale)) {
+    stop("`scale` must be numeric.")
+  }
+  .validate_d_stage1_log(log)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(x) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(x), length(shape), length(scale), length(log))
+  len <- .p_stage1_recycle_len(lens, "?dweibull")
+
+  xv <- rep_len(as.double(x), len)
+  shv <- rep_len(as.double(shape), len)
+  scv <- rep_len(as.double(scale), len)
+  logv <- rep_len(log, len)
+
+  fallback_full <- function() {
+    stats::dweibull(x, shape = shape, scale = scale, log = log)
+  }
+
+  if (any(!is.finite(xv) | !is.finite(shv) | !is.finite(scv))) {
+    return(fallback_full())
+  }
+
+  if (any(xv < 0 | shv <= 0 | scv <= 0)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  log_int <- as.integer(logv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .dweibull_opencl(n, x, shape, scale, verbose = verbose),
-    fallback_expr = function() rep(stats::dweibull(x, shape = shape, scale = scale), n),
-    fallback = fallback, verbose = verbose, fn_name = "dweibull_opencl"
+    opencl_expr = function() {
+      .dweibull_opencl(xv, shv, scv, log_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "dweibull_opencl"
   )
 }
 

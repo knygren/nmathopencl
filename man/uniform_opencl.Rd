@@ -7,7 +7,15 @@
 \alias{runif_opencl}
 \title{The Uniform Distribution (OpenCL)}
 \usage{
-dunif_opencl(n, x, min = 0, max = 1, fallback = TRUE, verbose = FALSE)
+dunif_opencl(
+  x,
+  min = 0,
+  max = 1,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 punif_opencl(
   q,
@@ -25,13 +33,15 @@ qunif_opencl(n, p, min = 0, max = 1, fallback = TRUE, verbose = FALSE)
 runif_opencl(n, min = 0, max = 1, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar (\code{dunif_opencl}, \code{qunif_opencl}, \code{runif_opencl}); not used by \code{punif_opencl}.}
-
 \item{x}{Numeric scalar quantile for \code{dunif_opencl}.}
 
 \item{min}{Lower limit of the distribution.}
 
 \item{max}{Upper limit of the distribution.}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{dunif_opencl} (like \code{\link[stats]{dunif}}).}
+
+\item{opencl_parallel}{Reserved for future parallel dispatch (\code{punif_opencl}; unused).}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU \code{stats} function
 when OpenCL is unavailable or the OpenCL call fails.}
@@ -42,7 +52,8 @@ when OpenCL is unavailable or the OpenCL call fails.}
 
 \item{lower.tail, log.p}{As in \code{stats::punif} for \code{punif_opencl} (recycled).}
 
-\item{opencl_parallel}{Reserved for future parallel dispatch (\code{punif_opencl}; unused).}
+\item{n}{Number of observations (non-negative integer scalar). Used by \code{qunif_opencl} and \code{runif_opencl};
+\code{dunif_opencl} takes vector \code{x} first (like \code{stats::dunif}). Not used by \code{punif_opencl}.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -58,7 +69,7 @@ family while adding OpenCL dispatch and optional CPU fallback behavior.
 if (has_opencl()) {
   n <- 5L
 
-  dunif_opencl(n, x = 0.4, min = 0, max = 1, fallback = FALSE, verbose = TRUE)
+  dunif_opencl(rep(0.4, n), min = 0, max = 1, fallback = FALSE, verbose = TRUE)
   punif_opencl(q = 0.4, min = 0, max = 1, fallback = FALSE, verbose = TRUE)
   qunif_opencl(n, p = 0.8, min = 0, max = 1, fallback = FALSE, verbose = TRUE)
   runif_opencl(n, min = 0, max = 1, fallback = FALSE, verbose = TRUE)

@@ -13,21 +13,69 @@
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p As in \code{stats::plogis} for \code{plogis_opencl} (vector inputs recycled).
 #' @param opencl_parallel OpenCL dispatch hint for \code{plogis_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.
+#' @param log Logical; if \code{TRUE}, return log-density for \code{dlogis_opencl} (like \code{\link[stats]{dlogis}}).
 #'
 #' @return Numeric vector of length \code{n}.
 #' @example inst/examples/Ex_logistic_opencl.R
 #' @rdname logistic_opencl
 #' @export
-dlogis_opencl <- function(n, x, location = 0, scale = 1, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x")
-  .validate_scalar_num(location, "location")
-  .validate_scalar_num(scale, "scale", 0, Inf, open_lower = TRUE)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+dlogis_opencl <- function(
+    x,
+    location = 0,
+    scale = 1,
+    log = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.")
+  }
+  if (!is.numeric(location)) {
+    stop("`location` must be numeric.")
+  }
+  if (!is.numeric(scale)) {
+    stop("`scale` must be numeric.")
+  }
+  .validate_d_stage1_log(log)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(x) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(x), length(location), length(scale), length(log))
+  len <- .p_stage1_recycle_len(lens, "?dlogis")
+
+  xv <- rep_len(as.double(x), len)
+  locv <- rep_len(as.double(location), len)
+  scv <- rep_len(as.double(scale), len)
+  logv <- rep_len(log, len)
+
+  fallback_full <- function() {
+    stats::dlogis(x, location = location, scale = scale, log = log)
+  }
+
+  if (any(!is.finite(xv) | !is.finite(locv) | !is.finite(scv))) {
+    return(fallback_full())
+  }
+
+  if (any(scv <= 0)) {
+    stop("`scale` must be strictly positive (after recycling).", call. = FALSE)
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  log_int <- as.integer(logv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .dlogis_opencl(n, x, location, scale, verbose = verbose),
-    fallback_expr = function() rep(stats::dlogis(x, location = location, scale = scale), n),
-    fallback = fallback, verbose = verbose, fn_name = "dlogis_opencl"
+    opencl_expr = function() {
+      .dlogis_opencl(xv, locv, scv, log_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "dlogis_opencl"
   )
 }
 

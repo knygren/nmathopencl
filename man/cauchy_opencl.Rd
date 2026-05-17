@@ -7,7 +7,15 @@
 \alias{rcauchy_opencl}
 \title{The Cauchy Distribution (OpenCL)}
 \usage{
-dcauchy_opencl(n, x, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
+dcauchy_opencl(
+  x,
+  location = 0,
+  scale = 1,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 pcauchy_opencl(
   q,
@@ -25,13 +33,15 @@ qcauchy_opencl(n, p, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
 rcauchy_opencl(n, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile.}
 
 \item{location}{Location parameter.}
 
 \item{scale}{Scale parameter (must be > 0).}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{dcauchy_opencl} (like \code{\link[stats]{dcauchy}}).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{pcauchy_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -41,7 +51,7 @@ rcauchy_opencl(n, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
 
 \item{lower.tail, log.p}{As in \code{stats::pcauchy} for \code{pcauchy_opencl} (vector inputs recycled).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{pcauchy_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{n}{Number of observations. Non-negative integer scalar.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -56,7 +66,7 @@ for the Cauchy distribution.
 if (has_opencl()) {
   n <- 5L
 
-  dcauchy_opencl(n, x = 0.2, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
+  dcauchy_opencl(rep(0.2, n), location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
   pcauchy_opencl(q = 0.2, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
   qcauchy_opencl(n, p = 0.8, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
   rcauchy_opencl(n, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)

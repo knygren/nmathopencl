@@ -53,47 +53,63 @@ dnorm_opencl <- function(
     mean = 0,
     sd = 1,
     log = FALSE,
+    opencl_parallel = NA,
     fallback = TRUE,
     verbose = FALSE
 ) {
-  if (!is.numeric(x)) stop("`x` must be numeric.")
-  if (!is.numeric(mean) || length(mean) != 1L || is.na(mean)) {
-    stop("`mean` must be a single non-missing numeric value.")
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.")
   }
-  if (!is.numeric(sd) || length(sd) != 1L || is.na(sd) || sd < 0) {
-    stop("`sd` must be a single non-missing numeric value >= 0.")
+  if (!is.numeric(mean)) {
+    stop("`mean` must be numeric.")
   }
-  if (!is.logical(log) || length(log) != 1L || is.na(log)) {
-    stop("`log` must be TRUE or FALSE.")
+  if (!is.numeric(sd)) {
+    stop("`sd` must be numeric.")
   }
-  if (!is.logical(fallback) || length(fallback) != 1L || is.na(fallback)) {
-    stop("`fallback` must be TRUE or FALSE.")
-  }
-  if (!is.logical(verbose) || length(verbose) != 1L || is.na(verbose)) {
-    stop("`verbose` must be TRUE or FALSE.")
+  .validate_d_stage1_log(log)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(x) == 0L) {
+    return(numeric(0))
   }
 
-  if (!has_opencl()) {
-    if (fallback) {
-      if (verbose) message("[dnorm_opencl] OpenCL unavailable; using stats::dnorm fallback.")
-      return(stats::dnorm(x, mean = mean, sd = sd, log = log))
-    }
-    stop("OpenCL is not available in this nmathopencl build.")
+  lens <- c(length(x), length(mean), length(sd), length(log))
+  len <- .p_stage1_recycle_len(lens, "?dnorm")
+
+  xv <- rep_len(as.double(x), len)
+  mv <- rep_len(as.double(mean), len)
+  sv <- rep_len(as.double(sd), len)
+  logv <- rep_len(log, len)
+
+  fallback_full <- function() {
+    stats::dnorm(x, mean = mean, sd = sd, log = log)
   }
 
-  out <- tryCatch(.dnorm_opencl(x, mean = mean, sd = sd, log = log, verbose = verbose), error = function(e) e)
-  if (inherits(out, "error")) {
-    if (fallback) {
-      if (verbose) {
-        message("[dnorm_opencl] OpenCL call failed; using stats::dnorm fallback.")
-        message(out$message)
-      }
-      return(stats::dnorm(x, mean = mean, sd = sd, log = log))
-    }
-    stop(out$message, call. = FALSE)
+  if (any(!is.finite(xv) | !is.finite(mv) | !is.finite(sv))) {
+    return(fallback_full())
   }
 
-  out
+  if (any(sv < 0)) {
+    stop("`sd` must be non-negative (after recycling to common length).", call. = FALSE)
+  }
+
+  if (any(sv == 0)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  log_int <- as.integer(logv)
+
+  .opencl_try_or_fallback(
+    opencl_expr = function() {
+      .dnorm_opencl(xv, mv, sv, log_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "dnorm_opencl"
+  )
 }
 
 #' @rdname normal_opencl

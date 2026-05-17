@@ -12,6 +12,7 @@
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p As in \code{stats::psignrank} for \code{psignrank_opencl} (vector inputs recycled).
 #' @param opencl_parallel OpenCL dispatch hint for \code{psignrank_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.
+#' @param log Logical; if \code{TRUE}, return log-density for \code{dsignrank_opencl} (like \code{\link[stats]{dsignrank}}).
 #'
 #' @section Known OpenCL limitations:
 #' Signed-rank kernels can fail to build on some GPU toolchains due to unresolved
@@ -23,15 +24,58 @@
 #' @example inst/examples/Ex_signrank_opencl.R
 #' @rdname signrank_opencl
 #' @export
-dsignrank_opencl <- function(n, x, nsize, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x", 0, Inf)
-  .validate_scalar_num(nsize, "nsize", 0, Inf, open_lower = TRUE)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+dsignrank_opencl <- function(
+    x,
+    nsize,
+    log = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.")
+  }
+  if (!is.numeric(nsize)) {
+    stop("`nsize` must be numeric.")
+  }
+  .validate_d_stage1_log(log)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(x) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(x), length(nsize), length(log))
+  len <- .p_stage1_recycle_len(lens, "?dsignrank")
+
+  xv <- rep_len(as.double(x), len)
+  nv <- rep_len(as.double(nsize), len)
+  logv <- rep_len(log, len)
+
+  fallback_full <- function() {
+    stats::dsignrank(x, n = nsize, log = log)
+  }
+
+  if (any(!is.finite(xv) | !is.finite(nv))) {
+    return(fallback_full())
+  }
+
+  if (any(xv < 0 | nv <= 0)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  log_int <- as.integer(logv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .dsignrank_opencl(n, x, nsize, verbose = verbose),
-    fallback_expr = function() rep(stats::dsignrank(x, n = nsize), n),
-    fallback = fallback, verbose = verbose, fn_name = "dsignrank_opencl"
+    opencl_expr = function() {
+      .dsignrank_opencl(xv, nv, log_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "dsignrank_opencl"
   )
 }
 

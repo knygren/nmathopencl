@@ -3,8 +3,9 @@
 #' OpenCL-backed density, distribution, quantile, and random generation wrappers
 #' for the Student t distribution.
 #'
-#' @param n Number of observations. Non-negative integer scalar (\code{dt_opencl}, \code{qt_opencl}, \code{rt_opencl}).
-#' @param x Numeric scalar quantile (\code{dt_opencl}).
+#' @param n Number of observations (non-negative integer scalar). Used by \code{qt_opencl} and \code{rt_opencl};
+#'   \code{dt_opencl} takes vector \code{x} first (like \code{stats::dt}).
+#' @param x Numeric vector of quantiles (\code{dt_opencl}).
 #' @param q Numeric vector of quantiles (\code{pt_opencl}); recycled like \code{stats::pt}.
 #' @param p Numeric scalar probability in \code{[0, 1]} (\code{qt_opencl}).
 #' @param df Degrees of freedom (must be > 0).
@@ -13,28 +14,70 @@
 #' @param opencl_parallel Reserved for future parallel dispatch (\code{pt_opencl}; unused).
 #' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
 #' @param verbose Logical; print fallback/error diagnostics.
+#' @param log Logical; if \code{TRUE}, return log-density for \code{dt_opencl} (like \code{\link[stats]{dt}}).
 #'
 #' @return For \code{dt_opencl}, \code{qt_opencl}, \code{rt_opencl}: numeric vector of length \code{n}.
 #'   For \code{pt_opencl}: numeric vector of recycled length (see \code{stats::pt}).
 #' @example inst/examples/Ex_t_opencl.R
 #' @rdname t_opencl
 #' @export
-dt_opencl <- function(n, x, df, ncp = 0, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x")
-  .validate_scalar_num(df, "df", 0, Inf, open_lower = TRUE)
-  .validate_scalar_num(ncp, "ncp")
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+dt_opencl <- function(
+    x,
+    df,
+    ncp = 0,
+    log = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.")
+  }
+  if (!is.numeric(df)) {
+    stop("`df` must be numeric.")
+  }
+  if (!is.numeric(ncp)) {
+    stop("`ncp` must be numeric.")
+  }
+  .validate_d_stage1_log(log)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(x) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(x), length(df), length(ncp), length(log))
+  len <- .p_stage1_recycle_len(lens, "?dt")
+
+  xv <- rep_len(as.double(x), len)
+  dfv <- rep_len(as.double(df), len)
+  nv <- rep_len(as.double(ncp), len)
+  logv <- rep_len(log, len)
+
+  fallback_full <- function() {
+    stats::dt(x, df = df, ncp = ncp, log = log)
+  }
+
+  if (any(!is.finite(xv) | !is.finite(dfv) | !is.finite(nv))) {
+    return(fallback_full())
+  }
+
+  if (any(dfv <= 0)) {
+    stop("`df` must be positive (after recycling).", call. = FALSE)
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  log_int <- as.integer(logv)
+
   .opencl_try_or_fallback(
     opencl_expr = function() {
-      if (ncp == 0) {
-        .dt_opencl(n, x, df, verbose = verbose)
-      } else {
-        .dnt_opencl(n, x, df, ncp, verbose = verbose)
-      }
+      .dt_opencl(xv, dfv, nv, log_int, opc, verbose)
     },
-    fallback_expr = function() rep(stats::dt(x, df = df, ncp = ncp), n),
-    fallback = fallback, verbose = verbose, fn_name = "dt_opencl"
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "dt_opencl"
   )
 }
 

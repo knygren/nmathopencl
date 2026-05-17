@@ -7,7 +7,15 @@
 \alias{rchisq_opencl}
 \title{The Chi-squared Distribution (OpenCL)}
 \usage{
-dchisq_opencl(n, x, df, ncp = 0, fallback = TRUE, verbose = FALSE)
+dchisq_opencl(
+  x,
+  df,
+  ncp = 0,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 pchisq_opencl(
   q,
@@ -25,13 +33,15 @@ qchisq_opencl(n, p, df, ncp = 0, fallback = TRUE, verbose = FALSE)
 rchisq_opencl(n, df, ncp = 0, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
-\item{x}{Numeric scalar quantile.}
+\item{x}{Numeric vector of quantiles for \code{dchisq_opencl}.}
 
 \item{df}{Degrees of freedom (must be > 0).}
 
 \item{ncp}{Non-centrality parameter (must be >= 0).}
+
+\item{log}{Logical; if \code{TRUE}, return log-density for \code{dchisq_opencl} (like \code{\link[stats]{dchisq}}).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{pchisq_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -41,7 +51,8 @@ rchisq_opencl(n, df, ncp = 0, fallback = TRUE, verbose = FALSE)
 
 \item{lower.tail, log.p}{As in \code{stats::pchisq} for \code{pchisq_opencl} (vector inputs recycled).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{pchisq_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{n}{Number of observations (non-negative integer scalar). Used by \code{qchisq_opencl} and \code{rchisq_opencl};
+\code{dchisq_opencl} takes vector \code{x} first (like \code{stats::dchisq}).}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -56,7 +67,7 @@ for the chi-squared distribution, including non-central paths via \code{ncp}.
 if (has_opencl()) {
   n <- 5L
 
-  dchisq_opencl(n, x = 4.5, df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)
+  dchisq_opencl(rep(4.5, n), df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)
   pchisq_opencl(q = 4.5, df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)
   qchisq_opencl(n, p = 0.8, df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)
   rchisq_opencl(n, df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)
