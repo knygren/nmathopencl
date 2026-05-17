@@ -9,26 +9,51 @@
 \title{The Binomial Distribution (OpenCL)}
 \usage{
 dbinom_raw_opencl(
-  n,
   x,
   size,
   prob,
   qprob = NULL,
+  log = FALSE,
+  opencl_parallel = NA,
   fallback = TRUE,
   verbose = FALSE
 )
 
-dbinom_opencl(n, x, size, prob, fallback = TRUE, verbose = FALSE)
+dbinom_opencl(
+  x,
+  size,
+  prob,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-pbinom_opencl(n, q, size, prob, fallback = TRUE, verbose = FALSE)
+pbinom_opencl(
+  q,
+  size,
+  prob,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-qbinom_opencl(n, p, size, prob, fallback = TRUE, verbose = FALSE)
+qbinom_opencl(
+  p,
+  size,
+  prob,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rbinom_opencl(n, size, prob, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile.}
 
 \item{size}{Number of trials (must be >= 0).}
@@ -37,16 +62,25 @@ rbinom_opencl(n, size, prob, fallback = TRUE, verbose = FALSE)
 
 \item{qprob}{Complementary probability. If \code{NULL}, uses \code{1 - prob}.}
 
+\item{log}{\code{log} density switch for \code{dbinom*} wrappers (\code{stats} semantics).}
+
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
+
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric scalar quantile.}
+\item{q}{Numeric vector of quantiles for \code{pbinom_opencl}; recycled like \code{stats::pbinom}.}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
+
+\item{p}{Probabilities for \code{qbinom_opencl}; ordering matches \code{stats::qbinom}.}
+
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rbinom_opencl}.}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector result from the corresponding binomial-family operation.
 }
 \description{
 OpenCL-backed density, distribution, quantile, and random generation wrappers
@@ -56,10 +90,10 @@ for the binomial distribution.
 if (has_opencl()) {
   n <- 5L
 
-  dbinom_raw_opencl(n, x = 6, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
-  dbinom_opencl(n, x = 6, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
-  pbinom_opencl(n, q = 6, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
-  qbinom_opencl(n, p = 0.8, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
+  dbinom_raw_opencl(rep(6, n), size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
+  dbinom_opencl(rep(6, n), size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
+  pbinom_opencl(q = 6, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
+  qbinom_opencl(rep(0.8, n), size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
   rbinom_opencl(n, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

@@ -13,13 +13,11 @@ write_kernel_dependency_index(
 )
 }
 \arguments{
-\item{library_dir}{Directory containing \code{.cl} files with \verb{@depends} tags.
-Required when \code{tags} is \code{NULL}. When \code{tags} is non-NULL, optional; if given,
-it must equal \code{tags$library_dir} after normalization.}
+\item{library_dir}{Library root with annotated \code{.cl} files.\cr
+When \code{tags} is supplied, must agree with \code{tags$library_dir}.}
 
-\item{tags}{Optional result of \code{\link[=attach_kernel_dependency_tags]{attach_kernel_dependency_tags()}}. When
-non-NULL and \code{tags$ok} is \code{TRUE}, reused to avoid recomputing the dependency
-sort.}
+\item{tags}{Optional attachment result from \link{attach_kernel_dependency_tags}.\cr
+Must have \code{ok = TRUE} when reused to skip resorting.}
 
 \item{output_path}{Path for the RDS file. Defaults to
 \verb{file.path(<library_dir>, "kernel_dependency_index.rds")}. The TSV is
@@ -50,14 +48,8 @@ library directory:
 }
 \details{
 \itemize{
-\item \code{kernel_dependency_index.rds} — binary R index for use by R functions
-such as \code{\link[=load_library_for_kernel]{load_library_for_kernel()}} and \code{\link[=extract_library_subset]{extract_library_subset()}}.
-\item \code{kernel_dependency_index.tsv} — tab-separated text lookup table for use
-by C++ code.  Each row is \verb{stem<TAB>all_depends} where \code{all_depends} is a
-comma-separated, load-order-correct list of transitive dependency stems.
-C++ reads this file once into an
-\verb{unordered_map<string, vector<string>>} and looks up only the stems
-required for a given kernel — no topological sort needed at runtime.
+\item RDS helper shard for loaders such as \link{load_library_for_kernel}.\cr
+\item TSV stem map for C++ (rows \verb{stem<TAB>deps}, pre-sorted).\cr
 }
 
 Both files encode the same information and are always written together so

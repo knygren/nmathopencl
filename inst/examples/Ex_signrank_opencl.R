@@ -4,8 +4,8 @@ if (has_opencl()) {
   # Keeping these commented avoids flaky check failures:
   # n <- 5L
   # dsignrank_opencl(n, x = 6, nsize = 8, fallback = FALSE, verbose = TRUE)
-  # psignrank_opencl(n, q = 6, nsize = 8, fallback = FALSE, verbose = TRUE)
-  # qsignrank_opencl(n, p = 0.8, nsize = 8, fallback = FALSE, verbose = TRUE)
+  # psignrank_opencl(q = 6, nsize = 8, fallback = FALSE, verbose = TRUE)
+  # qsignrank_opencl(rep(0.8, n), nsize = 8, fallback = FALSE, verbose = TRUE)
   # rsignrank_opencl(n, nsize = 8, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

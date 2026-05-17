@@ -9,12 +9,13 @@ __kernel void dnt_kernel(
     const double x,
     const double df,
     const double ncp,
-    const double unused_df2,
+    const double give_log_d,
     const double unused_p,
     __global double* out,
     const int n
 ) {
-    (void)unused_df2; (void)unused_p;
+    (void)unused_p;
     if (get_global_id(0) != 0) return;
-    for (int i = 0; i < n; ++i) out[i] = dnt(x, df, ncp, 0);
+    const int give_log = (give_log_d != 0.0) ? 1 : 0;
+    for (int i = 0; i < n; ++i) out[i] = dnt(x, df, ncp, give_log);
 }

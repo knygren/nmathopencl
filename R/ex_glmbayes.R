@@ -34,24 +34,17 @@ NULL
 #'   present for every supported \code{family} and \code{link}. The names \code{f1}--\code{f4}
 #'   are stable: they mean the same roles across families (only the internal formulas change).
 #'   \describe{
-#'   \item{\code{f1}}{Negative log-likelihood as a function of coefficients \code{b}
-#'     (arguments typically \code{b}, \code{y}, \code{x}, optional \code{alpha}, \code{wt}).}
-#'   \item{\code{f2}}{Negative log-posterior (likelihood plus Normal prior quadratic form in
-#'     \code{b} with precision \code{P} and mean \code{mu}).}
-#'   \item{\code{f3}}{Gradient of \code{f2} with respect to \code{b} (same argument pattern as \code{f2}).}
-#'   \item{\code{f4}}{Deviance-related quantity (twice negative log-likelihood contrast vs.\
-#'     saturated model, with a \code{dispersion} argument for quasi-families); used in DIC-style summaries.}
-#'   \item{\code{f7}}{Family-specific matrix: weighted sum of outer products of predictor rows,
-#'     i.e.\ a curvature / expected negative Hessian of the log-likelihood w.r.t.\ \code{b}
-#'     at the supplied \code{b} (used e.g.\ for post-processing of \code{glmb} fits).}
+#'   \item{\code{f1}}{Neg log-likelihood in coefficients \code{b} (usual data args).}
+#'   \item{\code{f2}}{Neg log-posterior: likelihood plus Normal(\code{mu}, \code{P}) quadratic penalty.}
+#'   \item{\code{f3}}{Gradient of \code{f2} w.r.t.\ \code{b} (argument pattern mirrors \code{f2}).}
+#'   \item{\code{f4}}{Deviance gap vs saturation; honours \code{dispersion};\cr quasi / DIC helper.}
+#'   \item{\code{f7}}{Weighted curvature / Hessian proxy at \code{b}.\cr}
 #'   }
 #'   Slots \code{f5} and \code{f6} are **not** returned: they were reserved for alternate or
 #'   C++-aligned likelihood/posterior routines and remain commented out in the implementation
 #'   (only \code{f1}, \code{f2}, \code{f3}, \code{f4}, and \code{f7} are assigned in the returned list).
 #' @details
-#'   For simulation, many code paths now pass closed-form objectives into C++ directly; \code{Ex_glmbfamfunc}
-#'   remains the canonical R closure bundle for the same likelihood/prior/deviance quantities and for
-#'   post-processing of model results.
+#'   Compiled paths dominate;\cr retain \code{Ex_glmbfamfunc} closures for scripted workflows.
 #' @export
 #' @rdname Ex_glmbfamfunc
 #' @order 1
@@ -439,7 +432,7 @@ print.Ex_glmbfamfunc<-function(x,...)
 #' Standardizes a Non-Gaussian Model prior to Envelope Creation
 #' @param y a vector of observations of length m
 #' @param x a design matrix of dimension m*p
-#' @param P a positive-definite symmetric matrix specifying the prior precision matrix of the variables.
+#' @param P Positive-definite prior precision (\eqn{m \\times m}).
 #' @param bstar a matrix containing the posterior mode from an optimization step
 #' @param A1 a matrix containing the posterior precision matrix at the posterior mode
 #' @return A list with the following components
@@ -450,29 +443,12 @@ print.Ex_glmbfamfunc<-function(x,...)
 #' \item{P2}{Standardized Precision Matrix Added to log-likelihood}
 #' \item{L2Inv}{A matrix used when undoing the first step in standardization described below}
 #' \item{L3Inv}{A matrix used when undoing the second step in standardization described below}
-#' @details This functions starts with basic information about the model in the argument list and then
-#' uses the following steps to further standardize the model (the model is already assumed to have a 0 prior mean vector
-#' when this step is applied).
-#' 
-#' 1) An eigenvalue composition is applied to the posterior precision matrix, and the model is (as an interim step)
-#' standardized to have a posterior precision matrix equal to the identity matrix. Please note that this means
-#' that the prior precision matrix after this step is \code{"smaller"} than the identity matrix.
-#' 
-#' 
-#' 2) A diagonal matrix epsilon is pulled out from the standardized prior precision matrix so that the remaining
-#' part of the prior precision matrix still is positive definite. That part is then treated as part of the likelihood
-#' for the rest of the standardization and simulation and only the part connected to epsilon is treated as part of the prior. 
-#' Note that the exact epsilon chosen seems not to matter. Hence there are many possible ways of doing this 
-#' standardization and future versions of this package may tweak the current approach 
-#' if it helps improve numerical accuracy or acceptance rates.
-#' 
-#' 
-#' 3) The model is next standardized (using a second eigenvalue decomposition) so that the prior (i.e., the portion connected to epsilon) is the identity 
-#' matrix. The standardized model then simutaneously has the feature that the prior precision matrix is the 
-#' identity matrix and that the data precision A (at the posterior mode) is a diagonal matrix. Hence the variables
-#' in the standardized model are approximately independent at the posterior mode.
-#' 
-#' The steps here are based on the procedure described in \insertCite{Nygren2006}{nmathopencl}.
+#' @details Starts from the posterior mode quantities and proceeds in three transformations.\cr
+#' Step 1: posterior-precision eigendecomp.\cr Interim model gets identity posterior precision.\cr
+#' Step 2: isolate diagonal \code{epsilon}; remainder behaves like likelihood information.\cr
+#' Step 3: another eigendecomp diagonalizes data precision \code{A}.\cr The
+#' prior tied to \code{epsilon} becomes identity.\cr
+#' \insertCite{Nygren2006}{nmathopencl}
 #'
 #' @references
 #' \insertAllCited{}
@@ -513,9 +489,6 @@ Ex_glmb_Standardize_Model<-function(y, x, P, bstar, A1){
 #'   Defaults to -1, which means "use n".
 #' @param use_opencl Logical; if \code{TRUE}, attempt GPU acceleration.
 #' @param verbose Logical; if \code{TRUE}, print progress messages.
-#'
-#'   (default 1). When >1, envelope build cost is scaled down to reflect
-#'   parallel construction.
 #'
 #' @section Gridtype Logic and Candidates per Draw:
 #'
@@ -581,7 +554,8 @@ Ex_glmb_Standardize_Model<-function(y, x, P, bstar, A1){
 #' }
 #'
 #' @seealso \code{\link{Ex_EnvelopeEval}} for evaluating these grids.
-#' Vignettes: \insertCite{glmbayesSimmethods,glmbayesChapterA08}{nmathopencl}.
+#' \insertCite{glmbayesSimmethods}{nmathopencl}
+#' \insertCite{glmbayesChapterA08}{nmathopencl}
 #'
 #' @references
 #' \insertAllCited{}
@@ -629,124 +603,27 @@ NULL
 #' @param link Character string; link function (e.g. \code{"identity"}).
 #' @param use_opencl Logical; if \code{TRUE}, attempt OpenCL acceleration.
 #' @param verbose Logical; if \code{TRUE}, print diagnostic output.
-#' @details
-#' The evaluation workflow has several layers:
-#' **1. High-level dispatch (`Ex_EnvelopeEval`)**
+#' @details Compact overview.\cr
+#' Derivations:\\cr vignettes/equations (\insertCite{Nygren2006}{nmathopencl}).\cr
+#' * Dispatcher fans out to CPU and OpenCL kernel runners.\cr
+#' * \verb{NegLL} vectors plus \verb{cbars} matrices feed envelopes in
+#'   \code{rNormal_reg} internals.\cr
+#' * Acceptance inequalities mirror the vignette ``Simulation execution'' chapter.
 #'
-#' * `Ex_EnvelopeEval()` is the user-facing entry point. It accepts a grid of
-#'   parameter values (`G4`) and the data (`y`, `x`, `mu`, `P`, `alpha`, `wt`).
-#' * If the grid is large (>= 14 columns), it first calls
-#'   `run_opencl_pilot` to benchmark OpenCL performance and optionally
-#'      report estimated runtime.
-#' * It then dispatches to either the CPU or GPU backend:
-#'   - If `use_opencl = TRUE` and the family is not `"gaussian"`, it calls
-#'     `f2_f3_opencl` (an internal C++ kernel).
-#'   - Otherwise, it calls `f2_f3_non_opencl` (the CPU kernel).
-#'   
-#' **2. CPU backend (`f2_f3_non_opencl`)**
-#'
-#' * This function evaluates the negative log-likelihood and gradients using
-#'   standard CPU routines.
-#' * It inspects the `family` and `link` arguments and routes to the correct
-#'   pair of kernels (`f2_*` for the likelihood, `f3_*` for the gradient).
-#' * For example:
-#'   - `"binomial"` with `"logit"` calls `f2_binomial_logit()` and
-#'     `f3_binomial_logit()`.
-#'   - `"poisson"` calls `f2_poisson()` and `f3_poisson()`.
-#'   - `"gaussian"` calls `f2_gaussian()` and `f3_gaussian()`.
-#' * These kernels ultimately rely on the same C math routines that R itself
-#'   uses (from the `nmath`/`rmath` libraries), ensuring numerical consistency
-#'   with base R functions like `dnorm`, `dpois`, etc.
-#'
-#' **3. GPU backend (`f2_f3_opencl`)**
-#'
-#' * This function mirrors the CPU backend but executes the likelihood and
-#'   gradient calculations on an OpenCL device (GPU or CPU).
-#' * It flattens the input matrices/vectors and allocates output buffers.
-#' * It then constructs a full OpenCL program by concatenating:
-#'   - a generic OpenCL support header (`OPENCL.CL`),
-#'   - OpenCL ports of R's `rmath`, `nmath`, and `dpq` libraries,
-#'   - and the family/link-specific kernel source (e.g.
-#'     `f2_f3_binomial_logit.cl`).
-#' * The resulting program is compiled and passed to a kernel runner
-#'   (`f2_f3_kernel_runner`) which executes the likelihood and gradient
-#'   calculations in parallel on the device.
-#' * This ensures that the GPU backend produces results consistent with the
-#'   CPU backend, but can scale to much larger grids efficiently.
-#'
-#' **4. Pilot timing (`run_opencl_pilot`)**
-#'
-#' * This helper runs a small subset of the grid through the OpenCL backend
-#'   to estimate runtime.
-#' * It is used by `Ex_EnvelopeEval()` to inform users (when `verbose = TRUE`)
-#'   whether OpenCL acceleration is likely to be beneficial.
-#'
-#' **5. Returned values**
-#'
-#' * All backends return a list with:
-#'   - `NegLL`: numeric vector of negative log-likelihood values.
-#'   - `cbars`: numeric matrix of gradients (parameters * grid points).
-#'   
-#' **6. Role of likelihood and gradients in sampling**
-#'
-#' * The outputs of `Ex_EnvelopeEval()` - the negative log-likelihood values
-#'   (`NegLL`) and the gradient matrix (`cbars`) - are not endpoints in
-#'   themselves. They form the *envelope* used in the rejection sampler
-#'   implemented by internal functions such as
-#'   `.rNormalGLM_std_cpp()`.
-#' * This routine is called by `.rNormalGLM_cpp()`, which underlies the
-#'   user-facing function `rNormal_reg()`. Together they implement
-#'   envelope-based posterior sampling for GLMs with log-concave likelihoods
-#'   and multivariate normal priors.
-#'
-#' **7. Simulation execution (accept/reject procedure)**
-#'
-#' The acceptance test is performed using
-#' \deqn{
-#'   \log(U_2) \leq
-#'   \log f(y \mid \theta_i) -
-#'   \Big(\log f(y \mid \bar{\theta}_{J(i)}) -
-#'        c(\bar{\theta}_{J(i)})^T(\theta_i - \bar{\theta}_{J(i)})\Big) \leq 0
-#' }
-#'
-#' **Connections between code and notation:**
-#' * The arguments `G4` (in `Ex_EnvelopeEval`) and `b` (in `f2_f3_*`) both
-#'   represent the grid of tangency points \eqn{\bar{\theta}_j}.
-#' * The output `NegLL` corresponds to
-#'   \eqn{-\log f(y \mid \bar{\theta}_{J(i)})}, i.e. the negative
-#'   log-likelihood evaluated at each tangency point.
-#' * The output `cbars` corresponds to the subgradient vectors
-#'   \eqn{c(\bar{\theta}_{J(i)})}, which define the tangent hyperplanes
-#'   used in the envelope construction.
-#'
-#' **Precomputation for efficiency:**
-#' * Both `NegLL` and `cbars` are computed once during envelope construction,
-#'   prior to the simulation stage.
-#' * This means the sampler does not need to recompute likelihoods or
-#'   gradients at every candidate draw - it simply reuses the stored values
-#'   (`NegLL`, `cbars`, and `LLconst`) in the acceptance inequality.
-#'
-#' This design ensures that the envelope is tangent to the log-likelihood at
-#' each \eqn{\bar{\theta}_j}, lies above it elsewhere, and that the
-#' accept-reject procedure can run efficiently while still producing samples
-#' from the true posterior \eqn{\pi(\theta \mid y)}.
-#'
-#' @seealso \code{\link{Ex_EnvelopeSize}};
-#' Vignettes:
-#' \insertCite{glmbayesSimmethods,glmbayesChapterA08,glmbayesChapterA10,glmbayesChapter12}{nmathopencl}.
+#' @seealso \code{\link{Ex_EnvelopeSize}}
+#' \insertCite{glmbayesSimmethods}{nmathopencl}
+#' \insertCite{glmbayesChapterA08}{nmathopencl}
+#' \insertCite{glmbayesChapterA10}{nmathopencl}
+#' \insertCite{glmbayesChapter12}{nmathopencl}
 #'
 #' @references
 #' \insertAllCited{}
 #' @return
 #' \describe{
-#'   \item{Ex_EnvelopeEval}{List with components \code{NegLL} (numeric vector of
-#'   negative log-likelihood values) and \code{cbars} (numeric matrix of gradients).}
-#'   \item{f2_f3_non_opencl}{List with components \code{qf} (negative log-likelihood)
-#'   and \code{grad} (gradients) from the CPU kernel.}
-#'   \item{f2_f3_opencl}{List with components \code{qf} and \code{grad} from the
-#'   OpenCL kernel.}
-#'   \item{run_opencl_pilot}{Numeric scalar giving estimated runtime (seconds)
-#'   for OpenCL evaluation on a pilot subset of the grid.}
+#'   \item{Ex_EnvelopeEval}{\code{NegLL}: negatives logLik; \code{cbars}: tangent gradients.}
+#'   \item{f2_f3_non_opencl}{\code{qf}/\code{grad} from CPU kernels.}
+#'   \item{f2_f3_opencl}{\code{qf}/\code{grad} from OpenCL.}
+#'   \item{run_opencl_pilot}{Pilot runtime estimate (seconds).}
 #' }
 #'
 #' @example inst/examples/Ex_EnvelopeEval.R

@@ -7,45 +7,89 @@
 \alias{rlogis_opencl}
 \title{The Logistic Distribution (OpenCL)}
 \usage{
-dlogis_opencl(n, x, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
+dlogis_opencl(
+  x,
+  location = 0,
+  scale = 1,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-plogis_opencl(n, q, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
+plogis_opencl(
+  q,
+  location = 0,
+  scale = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-qlogis_opencl(n, p, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
+qlogis_opencl(
+  p,
+  location = 0,
+  scale = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rlogis_opencl(n, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile.}
 
 \item{location}{Location parameter.}
 
 \item{scale}{Scale parameter (must be > 0).}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
+\item{log}{\code{log} density switch for \code{dlogis_opencl} (\code{stats} semantics).}
+
+\item{opencl_parallel}{Dispatch hint (\code{TRUE}, \code{FALSE}, \code{NA}) for \code{plogis_opencl}
+and \code{qlogis_opencl}; parallel kernels reserved.}
+
+\item{fallback}{CPU on OpenCL/dispatch failures; see tracker before relying on masking.\cr
+See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric scalar quantile.}
+\item{q}{Numeric vector of quantiles for \code{plogis_opencl}; recycled like \code{stats::plogis}.}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
+
+\item{p}{Numeric vector of probabilities for \code{qlogis_opencl} (like \code{stats::qlogis}).}
+
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rlogis_opencl}.}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector result from the corresponding logistic-family operation.
 }
 \description{
 OpenCL-backed density, distribution, quantile, and random generation wrappers
 for the logistic distribution.
 }
+\section{Known OpenCL limitations}{
+
+Some platforms fail to link \code{qlogis_kernel} (\code{ptxas} unresolved \code{Rf_qlogis}).
+Runnable examples omit GPU \code{qlogis_opencl} until resolved.
+See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
+}
+
 \examples{
 if (has_opencl()) {
   n <- 5L
 
-  dlogis_opencl(n, x = 0.2, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
-  plogis_opencl(n, q = 0.2, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
-  qlogis_opencl(n, p = 0.8, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
+  dlogis_opencl(rep(0.2, n), location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
+  plogis_opencl(q = 0.2, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
+  ## qlogis_opencl: disabled — OpenCL device link can fail (NVPTX/ptxas unresolved Rf_qlogis;
+  ##               Rmath qlogis->Rf_qlogis naming vs ported qlogis.cl symbol). Do not mask; see
+  ##               inst/OPENCL_KERNEL_KNOWN_FAILURES.md until fixed.
+  # qlogis_opencl(rep(0.8, n), location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
   rlogis_opencl(n, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

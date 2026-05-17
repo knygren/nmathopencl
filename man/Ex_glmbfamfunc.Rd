@@ -21,16 +21,11 @@ A list (class \code{"Ex_glmbfamfunc"}) whose first four components are \strong{a
 present for every supported \code{family} and \code{link}. The names \code{f1}--\code{f4}
 are stable: they mean the same roles across families (only the internal formulas change).
 \describe{
-\item{\code{f1}}{Negative log-likelihood as a function of coefficients \code{b}
-(arguments typically \code{b}, \code{y}, \code{x}, optional \code{alpha}, \code{wt}).}
-\item{\code{f2}}{Negative log-posterior (likelihood plus Normal prior quadratic form in
-\code{b} with precision \code{P} and mean \code{mu}).}
-\item{\code{f3}}{Gradient of \code{f2} with respect to \code{b} (same argument pattern as \code{f2}).}
-\item{\code{f4}}{Deviance-related quantity (twice negative log-likelihood contrast vs.\
-saturated model, with a \code{dispersion} argument for quasi-families); used in DIC-style summaries.}
-\item{\code{f7}}{Family-specific matrix: weighted sum of outer products of predictor rows,
-i.e.\ a curvature / expected negative Hessian of the log-likelihood w.r.t.\ \code{b}
-at the supplied \code{b} (used e.g.\ for post-processing of \code{glmb} fits).}
+\item{\code{f1}}{Neg log-likelihood in coefficients \code{b} (usual data args).}
+\item{\code{f2}}{Neg log-posterior: likelihood plus Normal(\code{mu}, \code{P}) quadratic penalty.}
+\item{\code{f3}}{Gradient of \code{f2} w.r.t.\ \code{b} (argument pattern mirrors \code{f2}).}
+\item{\code{f4}}{Deviance gap vs saturation; honours \code{dispersion};\cr quasi / DIC helper.}
+\item{\code{f7}}{Weighted curvature / Hessian proxy at \code{b}.\cr}
 }
 Slots \code{f5} and \code{f6} are \strong{not} returned: they were reserved for alternate or
 C++-aligned likelihood/posterior routines and remain commented out in the implementation
@@ -42,7 +37,5 @@ set of functions that are used during simulation and summarization of models
 using the simulation functions in this package.
 }
 \details{
-For simulation, many code paths now pass closed-form objectives into C++ directly; \code{Ex_glmbfamfunc}
-remains the canonical R closure bundle for the same likelihood/prior/deviance quantities and for
-post-processing of model results.
+Compiled paths dominate;\cr retain \code{Ex_glmbfamfunc} closures for scripted workflows.
 }

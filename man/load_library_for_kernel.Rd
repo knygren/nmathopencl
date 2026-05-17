@@ -16,18 +16,14 @@ load_library_for_kernel(
 for the annotation tag given by \code{depends_tag}.}
 
 \item{library_dir}{Path to the library directory containing the \code{.cl} source
-files (e.g. \code{system.file("cl", "nmath", package = "nmathopencl")}).}
+files (e.g. \code{system.file("cl/nmath", package = "nmathopencl")}).}
 
 \item{depends_tag}{Name of the annotation tag in the kernel file that lists
 the required library file stems.  Defaults to \code{"all_depends"}.  For
 kernels annotated with \verb{@all_depends_nmath}, pass
 \code{depends_tag = "all_depends_nmath"}.}
 
-\item{index}{Pre-loaded dependency index (\code{list}) produced by
-\code{\link[=write_kernel_dependency_index]{write_kernel_dependency_index()}} and read with \code{\link[=readRDS]{readRDS()}}.  If \code{NULL},
-the index is read from
-\code{file.path(library_dir, "kernel_dependency_index.rds")} and a \code{message()}
-is emitted to encourage the recommended pattern.}
+\item{index}{Optional RDS list; \code{NULL} triggers lazy reads.}
 }
 \value{
 A single character string: the concatenated source of all required
@@ -43,14 +39,18 @@ and returns their source code concatenated in the correct dependency order.
 }
 \details{
 It is strongly recommended to supply a pre-loaded \code{index} rather than
-letting the function read it from disk on every call.  Load the index once
+letting the function read from disk on every call.  Load the index once
 and reuse it across all kernel calls:
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{idx <- readRDS(system.file("cl", "nmath", "kernel_dependency_index.rds",
-                           package = "nmathopencl"))
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{idx <- readRDS(
+  system.file(
+    "cl/nmath/kernel_dependency_index.rds",
+    package = "nmathopencl"))
 src <- load_library_for_kernel(kernel_path, nmath_dir, index = idx)
 }\if{html}{\out{</div>}}
 }
 \seealso{
-\code{\link[=extract_library_subset]{extract_library_subset()}}, \code{\link[=write_kernel_dependency_index]{write_kernel_dependency_index()}}
+\link{extract_library_subset}
+
+\link{write_kernel_dependency_index}
 }

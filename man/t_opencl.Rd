@@ -7,46 +7,94 @@
 \alias{rt_opencl}
 \title{The Student t Distribution (OpenCL)}
 \usage{
-dt_opencl(n, x, df, ncp = 0, fallback = TRUE, verbose = FALSE)
+dt_opencl(
+  x,
+  df,
+  ncp = 0,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-pt_opencl(n, x, df, ncp = 0, fallback = TRUE, verbose = FALSE)
+pt_opencl(
+  q,
+  df,
+  ncp = 0,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-qt_opencl(n, p, df, ncp = 0, fallback = TRUE, verbose = FALSE)
+qt_opencl(
+  p,
+  df,
+  ncp = 0,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rt_opencl(n, df, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
-\item{x}{Numeric scalar quantile.}
+\item{x}{Numeric vector of quantiles (\code{dt_opencl}).}
 
 \item{df}{Degrees of freedom (must be > 0).}
 
 \item{ncp}{Non-centrality parameter.}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
+\item{log}{\code{log} flag for densities (\code{stats} \emph{d}-family semantics).}
+
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
+
+\item{fallback}{CPU on OpenCL/dispatch failures; see tracker before relying on masking.\cr
+See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{q}{Numeric vector of quantiles (\code{pt_opencl}); recycled like \code{stats::pt}.}
+
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
+
+\item{p}{Numeric vector of probabilities for \code{qt_opencl} (like \code{stats::qt}).}
+
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rt_opencl};
+\code{dt_opencl} takes vector \code{x} first (like \code{stats::dt}).}
 }
 \value{
-Numeric vector of length \code{n}.
+For \code{dt_opencl}, \code{qt_opencl}, \code{rt_opencl}: numeric vector result.
+For \code{pt_opencl}: numeric vector of recycled length (see \code{stats::pt}).
 }
 \description{
 OpenCL-backed density, distribution, quantile, and random generation wrappers
 for the Student t distribution.
 }
+\section{Known OpenCL limitations}{
+
+Some platforms fail to link \code{qnt_kernel} (\code{ptxas} unresolved \code{Rf_qnt}).
+Runnable examples omit GPU \code{qt_opencl} until resolved.
+See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
+}
+
 \examples{
 if (has_opencl()) {
   n <- 5L
 
-  dt_opencl(n, x = 1.5, df = 8, ncp = 0, fallback = FALSE, verbose = TRUE)
-  dt_opencl(n, x = 1.5, df = 8, ncp = 1.2, fallback = FALSE, verbose = TRUE)
-  pt_opencl(n, x = 1.5, df = 8, ncp = 0, fallback = FALSE, verbose = TRUE)
-  pt_opencl(n, x = 1.5, df = 8, ncp = 1.2, fallback = FALSE, verbose = TRUE)
-  qt_opencl(n, p = 0.8, df = 8, ncp = 0, fallback = FALSE, verbose = TRUE)
-  qt_opencl(n, p = 0.8, df = 8, ncp = 1.2, fallback = FALSE, verbose = TRUE)
+  dt_opencl(rep(1.5, n), df = 8, ncp = 0, fallback = FALSE, verbose = TRUE)
+  dt_opencl(rep(1.5, n), df = 8, ncp = 1.2, fallback = FALSE, verbose = TRUE)
+  pt_opencl(q = 1.5, df = 8, ncp = 0, fallback = FALSE, verbose = TRUE)
+  pt_opencl(q = 1.5, df = 8, ncp = 1.2, fallback = FALSE, verbose = TRUE)
+  ## qt_opencl: disabled — OpenCL device link can fail on NVPTX (ptxas unresolved Rf_qnt;
+  ##            Rmath qnt -> Rf_qnt naming vs device translation). Do not mask; see
+  ##            inst/OPENCL_KERNEL_KNOWN_FAILURES.md until fixed.
+  # qt_opencl(rep(0.8, n), df = 8, ncp = 0, fallback = FALSE, verbose = TRUE)
+  # qt_opencl(rep(0.8, n), df = 8, ncp = 1.2, fallback = FALSE, verbose = TRUE)
   rt_opencl(n, df = 8, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

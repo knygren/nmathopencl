@@ -73,16 +73,13 @@ Subdirectories such as \code{"rmath"}, \code{"dpq"}, and \code{"nmath"}
 contain collections of \code{.cl} files implementing mathematical functions
 used throughout the GLM likelihood and gradient computations.
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{Each file may declare \code{@provides} and \code{@depends} tags.
+Each file may declare \code{@provides} and \code{@depends} tags.
 \code{load_kernel_library()} reads all files in a subdirectory,
 parses these annotations, performs a dependency-aware topological sort,
-and concatenates the files in an order that guarantees that upstream
-functions appear before downstream callers.  
+and concatenates the files so upstream functions appear before downstream callers.
 
-This mechanism is conceptually similar to a sequence of
-\code{#include} statements in C/C++, but with automatic dependency
-resolution.
-}\if{html}{\out{</div>}}
+This mechanism parallels a sequence of \code{#include} statements in C/C++,
+but resolves dependencies automatically.
 
 \item \strong{Model-specific helper functions}
 Some kernels require additional device-side utilities that are not part
@@ -90,15 +87,8 @@ of the shared libraries. These are typically loaded using
 \code{load_kernel_source()} and appended after the library modules.
 
 \item \strong{Final kernel entry function}
-The last component is the model-specific kernel that OpenCL will
-execute on the device. For example, in the function
-\code{f2_f3_opencl()}, the final kernel is selected based on the GLM
-family and link function (e.g., \code{"f2_f3_binomial_logit"}).
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{This kernel must appear last in the combined program, after all helper
-functions and libraries have been defined, because OpenCL requires that
-all functions be defined before they are referenced.
-}\if{html}{\out{</div>}}
+Device kernels compile last.\cr Helper sources follow bundled \verb{f2_f3_*} kernels.\cr
+Dispatch wrappers (like \code{f2_f3_opencl()}) stitch layers safely.
 
 }
 
@@ -109,11 +99,8 @@ that is passed directly to the OpenCL compiler (e.g., via
 ensures that the GPU kernels used by \pkg{glmbayes} are reproducible,
 modular, and maintainable.
 
-The function \code{f2_f3_opencl()} provides a concrete example of this
-assembly process: it loads the global configuration header, then the
-mathematical libraries, then the model-specific kernel file, and finally
-concatenates these components into a complete OpenCL program that is sent
-to the GPU for evaluation of the log-likelihood and gradient.
+Mirrors assembly order:\\cr shards, sorted dependency libs,\cr then kernels
+for GPU submits.
 }
 
 \section{Preparing a Global Configuration Header}{
@@ -127,9 +114,8 @@ examples illustrates one such header, but users are free to design their own.
 A configuration header typically includes:
 
 \itemize{
-\item \strong{Extension declarations} such as
-\code{#pragma OPENCL EXTENSION cl_khr_fp64 : enable} to activate
-double-precision arithmetic.
+\item \strong{Extension declarations} (e.g. enable \code{cl_khr_fp64} with a
+short \code{#pragma OPENCL EXTENSION} line).
 
 \item \strong{IEEE constants} (e.g., \code{ML_NAN}, \code{ML_POSINF}),
 which many statistical kernels rely on.
@@ -236,30 +222,19 @@ A typical library file begins with three comment lines:
 \describe{
 
 \item{\code{@provides}}{
-A comma-separated list of function names defined in this file.
-These names are used by the dependency resolver to determine which
-files satisfy which requirements.
+Comma-separated symbols defined here (resolver matches them to other files).\cr
+Helps map requirements to supplying stems.
 }
 
 \item{\code{@depends}}{
-A comma-separated list of \emph{file names} (excluding the \code{.cl}
-extension) that this file depends on. Only \emph{direct} dependencies
-should be listed. For example, if functions in file A call functions in
-file B, and functions in file B call functions in file C, then file A
-should list only \code{B} in its \code{@depends} tag—not \code{C}.
-Every file in a library must list the library’s header file (the file
-whose name matches the library directory) in its \code{@depends} tag,
-along with any additional files it directly relies on. This ensures that
-the header is always loaded first and that all dependencies are resolved
-in the correct order.
+Comma-separated stems (omit \code{.cl}) listing \emph{direct} prerequisites.\cr
+If file A calls B and B calls C, A lists only B (not transitive C).\cr
+Include the shared library header stem so macros load before bodies.
 }
 
 \item{\code{@includes}}{
-The name of the library to which this file belongs (e.g.,
-\code{"nmath"}). This tag does \emph{not} affect dependency ordering.
-Instead, it serves as metadata that groups related files into a
-coherent library. The \code{load_kernel_library()} function uses this
-information for diagnostics and consistency checks.
+Library name metadata (e.g., \code{"nmath"}); does \emph{not} drive sort order.\cr
+\code{load_kernel_library()} prints diagnostics using this grouping.
 }
 
 }

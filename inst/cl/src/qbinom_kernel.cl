@@ -9,11 +9,13 @@ __kernel void qbinom_kernel(
     const double size,
     const double prob,
     const double p,
-    const double unused_mu,
+    const double lower_tail_d,
+    const double log_p_d,
     __global double* out,
     const int n
 ) {
-    (void)unused_mu;
+    const int lt_i = (lower_tail_d != 0.0) ? 1 : 0;
+    const int lp_i = (log_p_d != 0.0) ? 1 : 0;
     if (get_global_id(0) != 0) return;
-    for (int i = 0; i < n; ++i) out[i] = qbinom(p, size, prob, 1, 0);
+    for (int i = 0; i < n; ++i) out[i] = qbinom(p, size, prob, lt_i, lp_i);
 }

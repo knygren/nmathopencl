@@ -23,10 +23,9 @@ the direct library entry-point stems (e.g. \code{"depends_nmath"}).
 The function reads \verb{@\{depends_tag\}} and writes \verb{@all_\{depends_tag\}} and
 \verb{@all_\{depends_tag\}_count}.}
 
-\item{index}{Pre-loaded dependency index produced by
-\code{\link[=write_kernel_dependency_index]{write_kernel_dependency_index()}} and read with \code{\link[=readRDS]{readRDS()}}.  If \code{NULL},
-the index is read from \code{file.path(library_dir, "kernel_dependency_index.rds")}
-and a \code{message()} is emitted.}
+\item{index}{Optional dependency index (\link{write_kernel_dependency_index}, load via
+\code{readRDS}). If \code{NULL}, reads
+\code{file.path(library_dir, "kernel_dependency_index.rds")} with \code{message()}.}
 
 \item{dry_run}{Logical; if \code{TRUE}, compute tags but do not write any files.}
 }
@@ -52,22 +51,21 @@ library's pre-built dependency index) and writes the results back into the
 kernel files as annotation tags.
 }
 \details{
-This is the cross-library equivalent of \code{\link[=attach_kernel_dependency_tags]{attach_kernel_dependency_tags()}}:
-where that function operates on a library directory and expands internal
-\verb{@depends} references, this function operates on kernel files that depend
-\emph{on} a library via a \verb{@\{depends_tag\}} annotation listing direct entry-point
-stems.
+Cross-library analogue of \link{attach_kernel_dependency_tags}: it targets
+kernels that depend on a library through a \verb{@\{depends_tag\}} tag (entry-point stems),
+instead of expanding \verb{@depends} purely inside one library tree.
 
 Typical usage for kernels that call nmath functions:
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{nmath_dir <- system.file("cl", "nmath", package = "nmathopencl")
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{nmath_dir <- system.file(
+  "cl", "nmath", package = "nmathopencl")
 idx <- readRDS(file.path(nmath_dir, "kernel_dependency_index.rds"))
 
 attach_cross_library_tags(
-    kernel_paths = list.files("inst/cl/src", "\\\\.cl$", full.names = TRUE),
-    library_dir  = nmath_dir,
-    depends_tag  = "depends_nmath",
-    index        = idx
+  kernel_paths = list.files("inst/cl/src", "\\\\\\\\.cl$", full.names = TRUE),
+  library_dir  = nmath_dir,
+  depends_tag  = "depends_nmath",
+  index        = idx
 )
 }\if{html}{\out{</div>}}
 
@@ -75,6 +73,7 @@ This writes \verb{@all_depends_nmath_count} and \verb{@all_depends_nmath} into e
 kernel file that carries a \verb{@depends_nmath} annotation.
 }
 \seealso{
-\code{\link[=attach_kernel_dependency_tags]{attach_kernel_dependency_tags()}}, \code{\link[=write_kernel_dependency_index]{write_kernel_dependency_index()}},
-\code{\link[=load_library_for_kernel]{load_library_for_kernel()}}
+\link{attach_kernel_dependency_tags}
+\link{write_kernel_dependency_index}
+\link{load_library_for_kernel}
 }

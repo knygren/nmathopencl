@@ -3,24 +3,16 @@
 #' Writes two companion index files next to the `.cl` files in the kernel
 #' library directory:
 #'
-#' - `kernel_dependency_index.rds` — binary R index for use by R functions
-#'   such as [load_library_for_kernel()] and [extract_library_subset()].
-#' - `kernel_dependency_index.tsv` — tab-separated text lookup table for use
-#'   by C++ code.  Each row is `stem<TAB>all_depends` where `all_depends` is a
-#'   comma-separated, load-order-correct list of transitive dependency stems.
-#'   C++ reads this file once into an
-#'   `unordered_map<string, vector<string>>` and looks up only the stems
-#'   required for a given kernel — no topological sort needed at runtime.
+#' - RDS helper shard for loaders such as \link{load_library_for_kernel}.\cr
+#' - TSV stem map for C++ (rows \verb{stem<TAB>deps}, pre-sorted).\cr
 #'
 #' Both files encode the same information and are always written together so
 #' they remain in sync.
 #'
-#' @param library_dir Directory containing `.cl` files with `@depends` tags.
-#'   Required when `tags` is `NULL`. When `tags` is non-NULL, optional; if given,
-#'   it must equal `tags$library_dir` after normalization.
-#' @param tags Optional result of [attach_kernel_dependency_tags()]. When
-#'   non-NULL and `tags$ok` is `TRUE`, reused to avoid recomputing the dependency
-#'   sort.
+#' @param library_dir Library root with annotated \code{.cl} files.\cr
+#' When \code{tags} is supplied, must agree with \code{tags$library_dir}.
+#' @param tags Optional attachment result from \link{attach_kernel_dependency_tags}.\cr
+#'   Must have \code{ok = TRUE} when reused to skip resorting.
 #' @param output_path Path for the RDS file. Defaults to
 #'   `file.path(<library_dir>, "kernel_dependency_index.rds")`. The TSV is
 #'   always written to the same directory with the `.tsv` extension.

@@ -28,10 +28,7 @@ Defaults to -1, which means "use n".}
 
 \item{use_opencl}{Logical; if \code{TRUE}, attempt GPU acceleration.}
 
-\item{verbose}{Logical; if \code{TRUE}, print progress messages.
-
-(default 1). When >1, envelope build cost is scaled down to reflect
-parallel construction.}
+\item{verbose}{Logical; if \code{TRUE}, print progress messages.}
 }
 \value{
 \describe{
@@ -113,5 +110,6 @@ Expected candidates per draw:
 }
 \seealso{
 \code{\link{Ex_EnvelopeEval}} for evaluating these grids.
-Vignettes: \insertCite{glmbayesSimmethods,glmbayesChapterA08}{nmathopencl}.
+\insertCite{glmbayesSimmethods}{nmathopencl}
+\insertCite{glmbayesChapterA08}{nmathopencl}
 }

@@ -69,3 +69,37 @@
   }
   stop("`opencl_parallel` must be TRUE, FALSE, or NA.")
 }
+
+.validate_p_stage1_tails <- function(lower.tail, log.p) {
+  if (!is.logical(lower.tail) || any(is.na(lower.tail))) {
+    stop("`lower.tail` must be logical with no missing values.", call. = FALSE)
+  }
+  if (!is.logical(log.p) || any(is.na(log.p))) {
+    stop("`log.p` must be logical with no missing values.", call. = FALSE)
+  }
+}
+
+.validate_d_stage1_log <- function(log) {
+  if (!is.logical(log) || any(is.na(log))) {
+    stop("`log` must be logical with no missing values.", call. = FALSE)
+  }
+}
+
+.p_stage1_recycle_len <- function(lens, stats_help_topic) {
+  len <- max(lens)
+  if (len == 0L) {
+    return(0L)
+  }
+  if (len > 0L && any(lens == 0L)) {
+    stop(
+      "arguments of length zero cannot be recycled when the output length is positive (see ",
+      stats_help_topic,
+      ").",
+      call. = FALSE
+    )
+  }
+  if (len > .Machine$integer.max) {
+    stop("arguments are too long for the OpenCL interface.", call. = FALSE)
+  }
+  len
+}

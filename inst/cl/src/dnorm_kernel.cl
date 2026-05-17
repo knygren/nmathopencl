@@ -1,7 +1,5 @@
-// dnorm_kernel.cl
-// Vectorized wrapper kernel for the public Mathlib dnorm interface.
 // @library_deps: nmath
-// @calls_nmath: dnorm4
+// @calls_nmath: dnorm
 // @depends_nmath: dnorm
 // @all_depends_nmath_count: 4
 // @all_depends_nmath: dpq, Rmath, nmath, dnorm
@@ -9,15 +7,16 @@
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void dnorm_kernel(
-    __global const double* x,
+    const double x,
     const double mu,
     const double sigma,
-    const int give_log,
+    const double give_log_d,
+    const double unused_e,
     __global double* out,
     const int n
 ) {
-    int i = get_global_id(0);
-    if (i >= n) return;
-
-    out[i] = dnorm(x[i], mu, sigma, give_log);
+    (void)unused_e;
+    if (get_global_id(0) != 0) return;
+    const int give_log = (give_log_d != 0.0) ? 1 : 0;
+    for (int i = 0; i < n; ++i) out[i] = dnorm(x, mu, sigma, give_log);
 }

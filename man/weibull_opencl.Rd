@@ -7,33 +7,66 @@
 \alias{rweibull_opencl}
 \title{The Weibull Distribution (OpenCL)}
 \usage{
-dweibull_opencl(n, x, shape, scale = 1, fallback = TRUE, verbose = FALSE)
+dweibull_opencl(
+  x,
+  shape,
+  scale = 1,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-pweibull_opencl(n, q, shape, scale = 1, fallback = TRUE, verbose = FALSE)
+pweibull_opencl(
+  q,
+  shape,
+  scale = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-qweibull_opencl(n, p, shape, scale = 1, fallback = TRUE, verbose = FALSE)
+qweibull_opencl(
+  p,
+  shape,
+  scale = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rweibull_opencl(n, shape, scale = 1, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile (must be >= 0).}
 
 \item{shape}{Shape parameter (must be > 0).}
 
 \item{scale}{Scale parameter (must be > 0).}
 
+\item{log}{\code{log} flag for densities (\code{stats} \emph{d}-family semantics).}
+
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
+
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric scalar quantile (must be >= 0).}
+\item{q}{\code{p*}-wrapper quantiles (\code{stats::pweibull} semantics).}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
+
+\item{p}{Numeric vector of probabilities for \code{qweibull_opencl} (like \code{stats::qweibull}).}
+
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rweibull_opencl}.}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector result from the corresponding Weibull-family operation.
 }
 \description{
 OpenCL-backed density, distribution, quantile, and random generation wrappers
@@ -43,9 +76,9 @@ for the Weibull distribution.
 if (has_opencl()) {
   n <- 5L
 
-  dweibull_opencl(n, x = 1.2, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
-  pweibull_opencl(n, q = 1.2, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
-  qweibull_opencl(n, p = 0.8, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
+  dweibull_opencl(rep(1.2, n), shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
+  pweibull_opencl(q = 1.2, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
+  qweibull_opencl(rep(0.8, n), shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
   rweibull_opencl(n, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

@@ -5,14 +5,32 @@
 \alias{qtukey_opencl}
 \title{The Studentized Range Distribution (OpenCL)}
 \usage{
-ptukey_opencl(n, q, nmeans, df, nranges = 1, fallback = TRUE, verbose = FALSE)
+ptukey_opencl(
+  q,
+  nmeans,
+  df,
+  nranges = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-qtukey_opencl(n, p, nmeans, df, nranges = 1, fallback = TRUE, verbose = FALSE)
+qtukey_opencl(
+  p,
+  nmeans,
+  df,
+  nranges = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
-\item{q}{Numeric scalar quantile (must be >= 0).}
+\item{q}{Numeric vector of quantiles for \code{ptukey_opencl}; recycled like \code{stats::ptukey}.}
 
 \item{nmeans}{Number of means in each range (must be >= 2).}
 
@@ -20,14 +38,19 @@ qtukey_opencl(n, p, nmeans, df, nranges = 1, fallback = TRUE, verbose = FALSE)
 
 \item{nranges}{Number of groups whose maxima/minima define the range (must be >= 1).}
 
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
+
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
+
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{p}{Numeric vector of probabilities for \code{qtukey_opencl} (like \code{stats::qtukey}).}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector result from \code{ptukey_opencl} or \code{qtukey_opencl}.
 }
 \description{
 OpenCL-backed distribution and quantile wrappers for the studentized range
@@ -37,8 +60,8 @@ OpenCL-backed distribution and quantile wrappers for the studentized range
 if (has_opencl()) {
   n <- 1L
 
-  ptukey_opencl(n, q = 3.4, nmeans = 5, df = 10, nranges = 1, fallback = FALSE, verbose = TRUE)
-  qtukey_opencl(n, p = 0.8, nmeans = 5, df = 10, nranges = 1, fallback = FALSE, verbose = TRUE)
+  ptukey_opencl(q = 3.4, nmeans = 5, df = 10, nranges = 1, fallback = FALSE, verbose = TRUE)
+  qtukey_opencl(rep(0.8, n), nmeans = 5, df = 10, nranges = 1, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")
 }

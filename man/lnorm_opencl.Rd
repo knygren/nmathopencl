@@ -7,30 +7,63 @@
 \alias{rlnorm_opencl}
 \title{The Lognormal Distribution (OpenCL)}
 \usage{
-dlnorm_opencl(n, x, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE)
+dlnorm_opencl(
+  x,
+  meanlog = 0,
+  sdlog = 1,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-plnorm_opencl(n, q, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE)
+plnorm_opencl(
+  q,
+  meanlog = 0,
+  sdlog = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-qlnorm_opencl(n, p, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE)
+qlnorm_opencl(
+  p,
+  meanlog = 0,
+  sdlog = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rlnorm_opencl(n, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile (must be >= 0).}
 
 \item{meanlog}{Mean of the distribution on the log scale.}
 
 \item{sdlog}{Standard deviation on the log scale (must be > 0).}
 
+\item{log}{\code{log} flag for densities (\code{stats} \emph{d}-family semantics).}
+
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
+
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric scalar quantile (must be >= 0).}
+\item{q}{Numeric vector of quantiles for \code{plnorm_opencl}; recycled like \code{stats::plnorm}.}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
+
+\item{p}{Numeric vector of probabilities for \code{qlnorm_opencl} (like \code{stats::qlnorm}).}
+
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rlnorm_opencl}.}
 }
 \value{
 Numeric vector of length \code{n}.
@@ -43,9 +76,9 @@ for the lognormal distribution.
 if (has_opencl()) {
   n <- 5L
 
-  dlnorm_opencl(n, x = 1.2, meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
-  plnorm_opencl(n, q = 1.2, meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
-  qlnorm_opencl(n, p = 0.8, meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
+  dlnorm_opencl(rep(1.2, n), meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
+  plnorm_opencl(q = 1.2, meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
+  qlnorm_opencl(rep(0.8, n), meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
   rlnorm_opencl(n, meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

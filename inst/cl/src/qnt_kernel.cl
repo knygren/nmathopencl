@@ -1,20 +1,21 @@
 // @library_deps: nmath
 // @depends_nmath: qnt
-// @all_depends_nmath_count: 38
-// @all_depends_nmath: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, fmin2, gammalims, i1mach, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, dt, pgamma, toms708, dgamma, pbeta, pt, qt, df, pnt, qnt
+// @all_depends_nmath_count: 43
+// @all_depends_nmath: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, fmin2, gammalims, i1mach, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dbinom, dpois, dt, nt, pgamma, toms708, dt, pt, qt, qt, dnt
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 __kernel void qnt_kernel(
-    const double unused_x,
+    const double p,
     const double df,
     const double ncp,
-    const double unused_df2,
-    const double p,
+    const double lower_tail_d,
+    const double log_p_d,
     __global double* out,
     const int n
 ) {
-    (void)unused_x; (void)unused_df2;
+    const int lt_i = (lower_tail_d != 0.0) ? 1 : 0;
+    const int lp_i = (log_p_d != 0.0) ? 1 : 0;
     if (get_global_id(0) != 0) return;
-    for (int i = 0; i < n; ++i) out[i] = qnt(p, df, ncp, 1, 0);
+    for (int i = 0; i < n; ++i) out[i] = qnt(p, df, ncp, lt_i, lp_i);
 }

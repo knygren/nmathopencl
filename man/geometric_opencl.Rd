@@ -7,31 +7,61 @@
 \alias{rgeom_opencl}
 \title{The Geometric Distribution (OpenCL)}
 \usage{
-dgeom_opencl(n, x, prob, fallback = TRUE, verbose = FALSE)
+dgeom_opencl(
+  x,
+  prob,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-pgeom_opencl(n, q, prob, fallback = TRUE, verbose = FALSE)
+pgeom_opencl(
+  q,
+  prob,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-qgeom_opencl(n, p, prob, fallback = TRUE, verbose = FALSE)
+qgeom_opencl(
+  p,
+  prob,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rgeom_opencl(n, prob, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile.}
 
 \item{prob}{Probability of success in \code{[0, 1]}.}
+
+\item{log}{\code{log} flag for densities (\code{stats} \emph{d}-family semantics).}
+
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric scalar quantile.}
+\item{q}{Numeric vector of quantiles for \code{pgeom_opencl}; recycled like \code{stats::pgeom}.}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
+
+\item{p}{Numeric vector of probabilities for \code{qgeom_opencl} (like \code{stats::qgeom}).}
+
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rgeom_opencl}.}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector result from the corresponding geometric-family operation.
 }
 \description{
 OpenCL-backed density, distribution, quantile, and random generation wrappers
@@ -41,9 +71,9 @@ for the geometric distribution.
 if (has_opencl()) {
   n <- 5L
 
-  dgeom_opencl(n, x = 4, prob = 0.3, fallback = FALSE, verbose = TRUE)
-  pgeom_opencl(n, q = 4, prob = 0.3, fallback = FALSE, verbose = TRUE)
-  qgeom_opencl(n, p = 0.8, prob = 0.3, fallback = FALSE, verbose = TRUE)
+  dgeom_opencl(rep(4, n), prob = 0.3, fallback = FALSE, verbose = TRUE)
+  pgeom_opencl(q = 4, prob = 0.3, fallback = FALSE, verbose = TRUE)
+  qgeom_opencl(rep(0.8, n), prob = 0.3, fallback = FALSE, verbose = TRUE)
   rgeom_opencl(n, prob = 0.3, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

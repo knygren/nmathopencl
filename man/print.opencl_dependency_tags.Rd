@@ -7,15 +7,15 @@
 \method{print}{opencl_dependency_tags}(x, max_rows = 50, ...)
 }
 \arguments{
-\item{x}{An object returned by \code{\link[=attach_kernel_dependency_tags]{attach_kernel_dependency_tags()}}.}
+\item{x}{Result of \link{attach_kernel_dependency_tags}.}
 
-\item{max_rows}{Maximum rows to print from tabular sections.}
+\item{max_rows}{Maximum printed rows per table section.}
 
-\item{...}{Additional arguments passed to \code{\link[=print.data.frame]{print.data.frame()}}.}
+\item{...}{Forwarded to \code{print.data.frame}.}
 }
 \value{
 Invisibly returns \code{x}.
 }
 \description{
-Print a compact summary of \code{\link[=attach_kernel_dependency_tags]{attach_kernel_dependency_tags()}} output.
+Print output from \link{attach_kernel_dependency_tags}.
 }

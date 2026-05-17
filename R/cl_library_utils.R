@@ -5,28 +5,26 @@
 #' and returns their source code concatenated in the correct dependency order.
 #'
 #' It is strongly recommended to supply a pre-loaded `index` rather than
-#' letting the function read it from disk on every call.  Load the index once
+#' letting the function read from disk on every call.  Load the index once
 #' and reuse it across all kernel calls:
 #'
 #' ```r
-#' idx <- readRDS(system.file("cl", "nmath", "kernel_dependency_index.rds",
-#'                            package = "nmathopencl"))
+#' idx <- readRDS(
+#'   system.file(
+#'     "cl/nmath/kernel_dependency_index.rds",
+#'     package = "nmathopencl"))
 #' src <- load_library_for_kernel(kernel_path, nmath_dir, index = idx)
 #' ```
 #'
 #' @param kernel_path Path to a single `.cl` kernel file.  The file is scanned
 #'   for the annotation tag given by `depends_tag`.
 #' @param library_dir Path to the library directory containing the `.cl` source
-#'   files (e.g. `system.file("cl", "nmath", package = "nmathopencl")`).
+#'   files (e.g. `system.file("cl/nmath", package = "nmathopencl")`).
 #' @param depends_tag Name of the annotation tag in the kernel file that lists
 #'   the required library file stems.  Defaults to `"all_depends"`.  For
 #'   kernels annotated with `@all_depends_nmath`, pass
 #'   `depends_tag = "all_depends_nmath"`.
-#' @param index Pre-loaded dependency index (`list`) produced by
-#'   [write_kernel_dependency_index()] and read with [readRDS()].  If `NULL`,
-#'   the index is read from
-#'   `file.path(library_dir, "kernel_dependency_index.rds")` and a `message()`
-#'   is emitted to encourage the recommended pattern.
+#' @param index Optional RDS list; \code{NULL} triggers lazy reads.
 #'
 #' @return A single character string: the concatenated source of all required
 #'   library files in dependency order, separated by a blank line.  Returns
@@ -34,7 +32,8 @@
 #'   annotation, so it can be safely passed to `paste()` or included in a
 #'   larger program assembly without special-casing.
 #'
-#' @seealso [extract_library_subset()], [write_kernel_dependency_index()]
+#' @seealso \link{extract_library_subset}
+#' @seealso \link{write_kernel_dependency_index}
 #' @export
 load_library_for_kernel <- function(kernel_path,
                                     library_dir,
@@ -91,10 +90,12 @@ load_library_for_kernel <- function(kernel_path,
 #' It is strongly recommended to supply a pre-loaded `index`:
 #'
 #' ```r
-#' idx <- readRDS(system.file("cl", "nmath", "kernel_dependency_index.rds",
-#'                            package = "nmathopencl"))
-#' result <- extract_library_subset(kernel_paths, nmath_dir, dest_dir,
-#'                                  index = idx)
+#' idx <- readRDS(
+#'   system.file(
+#'     "cl/nmath/kernel_dependency_index.rds",
+#'     package = "nmathopencl"))
+#' result <- extract_library_subset(
+#'   kernel_paths, nmath_dir, dest_dir, index = idx)
 #' ```
 #'
 #' @param kernel_paths Character vector of paths to kernel `.cl` files.  Each
@@ -127,7 +128,8 @@ load_library_for_kernel <- function(kernel_path,
 #'       existed and `overwrite = FALSE`.}
 #'   }
 #'
-#' @seealso [load_library_for_kernel()], [write_kernel_dependency_index()]
+#' @seealso \link{load_library_for_kernel}
+#' @seealso \link{write_kernel_dependency_index}
 #' @export
 extract_library_subset <- function(kernel_paths,
                                    library_dir,
@@ -197,8 +199,6 @@ extract_library_subset <- function(kernel_paths,
                copied = do_copy, stringsAsFactors = FALSE)
   })
 
-  # Always copy both index files (.rds for R, .tsv for C++) alongside the .cl
-  # files so the extracted subset is immediately usable.
   index_files <- c("kernel_dependency_index.rds", "kernel_dependency_index.tsv")
   index_rows <- lapply(index_files, function(idx_name) {
     src <- file.path(library_dir, idx_name)
@@ -221,10 +221,6 @@ extract_library_subset <- function(kernel_paths,
   invisible(result)
 }
 
-
-# ---------------------------------------------------------------------------
-# Internal helpers
-# ---------------------------------------------------------------------------
 
 .cl_load_index <- function(index, library_dir) {
   if (!is.null(index)) {

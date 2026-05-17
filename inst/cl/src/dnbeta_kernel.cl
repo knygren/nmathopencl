@@ -10,11 +10,11 @@ __kernel void dnbeta_kernel(
     const double a,
     const double ncp,
     const double b,
-    const double unused_e,
+    const double give_log_d,
     __global double* out,
     const int n
 ) {
-    (void)unused_e;
     if (get_global_id(0) != 0) return;
-    for (int i = 0; i < n; ++i) out[i] = dnbeta(x, a, b, ncp, 0);
+    const int give_log = (give_log_d != 0.0) ? 1 : 0;
+    for (int i = 0; i < n; ++i) out[i] = dnbeta(x, a, b, ncp, give_log);
 }

@@ -81,18 +81,18 @@ On GPU (when used), each output element runs `pnorm_kernel` once in sequence (hi
 ### Gamma
 
 ```{r, eval = FALSE}
-dgamma_opencl(x, shape = 2, rate = 1)
-pgamma_opencl(n, q, shape = 2, rate = 1)
-qgamma_opencl(n, p, shape = 2, rate = 1)
-rgamma_opencl(n, shape = 2, rate = 1)
+dgamma_opencl(n, x, shape = 2, scale = 1)
+pgamma_opencl(q, shape = 2, rate = 1)
+qgamma_opencl(p, shape = 2, scale = 1)
+rgamma_opencl(n, shape = 2, scale = 1)
 ```
 
 ### Binomial
 
 ```{r, eval = FALSE}
 dbinom_opencl(x, size = 10, prob = 0.3)
-pbinom_opencl(n, q, size = 10, prob = 0.3)
-qbinom_opencl(n, p, size = 10, prob = 0.3)
+pbinom_opencl(q, size = 10, prob = 0.3)
+qbinom_opencl(p, size = 10, prob = 0.3)
 rbinom_opencl(n, size = 10, prob = 0.3)
 ```
 
@@ -100,8 +100,8 @@ rbinom_opencl(n, size = 10, prob = 0.3)
 
 ```{r, eval = FALSE}
 dpois_opencl(x, lambda = 3)
-ppois_opencl(n, q, lambda = 3)
-qpois_opencl(n, p, lambda = 3)
+ppois_opencl(q, lambda = 3)
+qpois_opencl(p, lambda = 3)
 rpois_opencl(n, lambda = 3)
 ```
 
@@ -109,8 +109,8 @@ rpois_opencl(n, lambda = 3)
 
 ```{r, eval = FALSE}
 dbeta_opencl(x, shape1 = 2, shape2 = 5)
-pbeta_opencl(n, q, shape1 = 2, shape2 = 5)
-qbeta_opencl(n, p, shape1 = 2, shape2 = 5)
+pbeta_opencl(q, shape1 = 2, shape2 = 5)
+qbeta_opencl(p, shape1 = 2, shape2 = 5)
 rbeta_opencl(n, shape1 = 2, shape2 = 5)
 ```
 

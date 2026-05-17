@@ -8,33 +8,81 @@
 \alias{rbeta_opencl}
 \title{The Beta Distribution (OpenCL)}
 \usage{
-dbeta_opencl(n, x, shape1, shape2, fallback = TRUE, verbose = FALSE)
+dbeta_opencl(
+  x,
+  shape1,
+  shape2,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-dnbeta_opencl(n, x, shape1, shape2, ncp, fallback = TRUE, verbose = FALSE)
+dnbeta_opencl(
+  x,
+  shape1,
+  shape2,
+  ncp,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-pbeta_opencl(n, x, shape1, shape2, ncp = 0, fallback = TRUE, verbose = FALSE)
+pbeta_opencl(
+  q,
+  shape1,
+  shape2,
+  ncp = 0,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-qbeta_opencl(n, p, shape1, shape2, ncp = 0, fallback = TRUE, verbose = FALSE)
+qbeta_opencl(
+  p,
+  shape1,
+  shape2,
+  ncp = 0,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rbeta_opencl(n, shape1, shape2, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
-\item{x}{Numeric scalar quantile in \code{[0, 1]}.}
+\item{x}{\code{(0,1)} quantiles for central/non-central densities on this page.}
 
 \item{shape1}{First shape parameter (must be > 0).}
 
 \item{shape2}{Second shape parameter (must be > 0).}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
+\item{log}{\code{log} density flags for density wrappers (\code{stats} semantics).}
+
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
+
+\item{fallback}{CPU when missing OpenCL/generic dispatch mismatches (\link{has_opencl}).\cr
+Do not swallow tracked kernel-program build defects ---
+\file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
 \item{ncp}{Non-centrality parameter (must be >= 0). Used by
 \code{dnbeta_opencl()}, \code{pbeta_opencl()}, and \code{qbeta_opencl()}.}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{q}{Numeric vector of quantiles for \code{pbeta_opencl}; recycled like \code{stats::pbeta}.}
+
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
+
+\item{p}{Numeric vector of probabilities for \code{qbeta_opencl} (like \code{stats::qbeta}).}
+
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rbeta_opencl}.}
 }
 \value{
 Numeric vector of length \code{n}.
@@ -46,19 +94,24 @@ while adding OpenCL dispatch and optional CPU fallback behavior.
 }
 \section{Known OpenCL limitations}{
 
-\code{qbeta_opencl()} in the non-central path (\code{ncp > 0}, via
-\code{qnbeta}) may be slow or hit device/runtime resource limits for difficult
-parameter regions on some GPUs.
+\describe{
+\item{Non-central tails}{\code{qbeta_opencl} with \code{ncp > 0} may stress devices.}
+\item{Build quirks}{\code{Rf_lbeta} linkage breaks on GPUs; skip GPU demos.\cr
+Tracker: \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}}
+}
 }
 
 \examples{
 if (has_opencl()) {
   n <- 5L
 
-  dbeta_opencl(n, x = 0.6, shape1 = 2.5, shape2 = 4, fallback = FALSE, verbose = TRUE)
-  dnbeta_opencl(n, x = 0.6, shape1 = 2.5, shape2 = 4, ncp = 0.8, fallback = FALSE, verbose = TRUE)
-  pbeta_opencl(n, x = 0.6, shape1 = 2.5, shape2 = 4, ncp = 0, fallback = FALSE, verbose = TRUE)
-  qbeta_opencl(n, p = 0.8, shape1 = 2.5, shape2 = 4, ncp = 0, fallback = FALSE, verbose = TRUE)
+  dbeta_opencl(rep(0.6, n), shape1 = 2.5, shape2 = 4, fallback = FALSE, verbose = TRUE)
+  dnbeta_opencl(rep(0.6, n), shape1 = 2.5, shape2 = 4, ncp = 0.8, fallback = FALSE, verbose = TRUE)
+  pbeta_opencl(q = 0.6, shape1 = 2.5, shape2 = 4, ncp = 0, fallback = FALSE, verbose = TRUE)
+  ## qbeta_opencl: disabled — OpenCL build can fail with unresolved host symbol Rf_lbeta
+  ##               (NVPTX/ptxas). Do not mask with fallback=TRUE; see
+  ##               inst/OPENCL_KERNEL_KNOWN_FAILURES.md until the kernel/program is fixed.
+  # qbeta_opencl(rep(0.8, n), shape1 = 2.5, shape2 = 4, ncp = 0, fallback = FALSE, verbose = TRUE)
   rbeta_opencl(n, shape1 = 2.5, shape2 = 4, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

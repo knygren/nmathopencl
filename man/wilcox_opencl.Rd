@@ -7,33 +7,66 @@
 \alias{rwilcox_opencl}
 \title{The Wilcoxon Rank Sum Distribution (OpenCL)}
 \usage{
-dwilcox_opencl(n, x, m, nn, fallback = TRUE, verbose = FALSE)
+dwilcox_opencl(
+  x,
+  m,
+  nn,
+  log = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-pwilcox_opencl(n, q, m, nn, fallback = TRUE, verbose = FALSE)
+pwilcox_opencl(
+  q,
+  m,
+  nn,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
-qwilcox_opencl(n, p, m, nn, fallback = TRUE, verbose = FALSE)
+qwilcox_opencl(
+  p,
+  m,
+  nn,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rwilcox_opencl(n, m, nn, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
 \item{x}{Numeric scalar quantile (must be >= 0).}
 
 \item{m}{Number of observations in one sample (must be > 0).}
 
 \item{nn}{Number of observations in the other sample (must be > 0).}
 
+\item{log}{\code{log} flag for densities (\code{stats} \emph{d}-family semantics).}
+
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
+
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric scalar quantile (must be >= 0).}
+\item{q}{\code{p*}-wrapper quantiles (\code{stats::pwilcox} semantics).}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
+
+\item{p}{\code{q*}-wrapper probabilities (\code{stats::qwilcox} semantics).}
+
+\item{n}{Draw-count scalar (\code{r*} path only).}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector result from the corresponding Wilcoxon-family operation.
 }
 \description{
 OpenCL-backed density, distribution, quantile, and random generation wrappers
@@ -52,8 +85,8 @@ if (has_opencl()) {
   # to unresolved runtime symbols. Keeping these commented avoids flaky checks:
   # n <- 1L
   # dwilcox_opencl(n, x = 5, m = 5, nn = 7, fallback = FALSE, verbose = TRUE)
-  # pwilcox_opencl(n, q = 5, m = 5, nn = 7, fallback = FALSE, verbose = TRUE)
-  # qwilcox_opencl(n, p = 0.8, m = 5, nn = 7, fallback = FALSE, verbose = TRUE)
+  # pwilcox_opencl(q = 5, m = 5, nn = 7, fallback = FALSE, verbose = TRUE)
+  # qwilcox_opencl(rep(0.8, n), m = 5, nn = 7, fallback = FALSE, verbose = TRUE)
   #
   # Known allocator/runtime fragility on some stacks:
   # rwilcox_opencl(n, m = 5, nn = 7, fallback = FALSE, verbose = TRUE)

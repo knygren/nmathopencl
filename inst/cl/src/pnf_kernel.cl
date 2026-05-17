@@ -8,13 +8,15 @@
 __kernel void pnf_kernel(
     const double x,
     const double df1,
-    const double ncp,
     const double df2,
-    const double unused_p,
+    const double ncp,
+    const double lower_tail_d,
+    const double log_p_d,
     __global double* out,
     const int n
 ) {
-    (void)unused_p;
+    int lt = (lower_tail_d != 0.0) ? 1 : 0;
+    int lp = (log_p_d != 0.0) ? 1 : 0;
     if (get_global_id(0) != 0) return;
-    for (int i = 0; i < n; ++i) out[i] = pnf(x, df1, df2, ncp, 1, 0);
+    for (int i = 0; i < n; ++i) out[i] = pnf(x, df1, df2, ncp, lt, lp);
 }
