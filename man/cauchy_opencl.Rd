@@ -28,7 +28,16 @@ pcauchy_opencl(
   verbose = FALSE
 )
 
-qcauchy_opencl(n, p, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
+qcauchy_opencl(
+  p,
+  location = 0,
+  scale = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rcauchy_opencl(n, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
 }
@@ -39,24 +48,25 @@ rcauchy_opencl(n, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
 
 \item{scale}{Scale parameter (must be > 0).}
 
-\item{log}{Logical; if \code{TRUE}, return log-density for \code{dcauchy_opencl} (like \code{\link[stats]{dcauchy}}).}
+\item{log}{\code{log} flag for densities (\code{stats} \emph{d}-family semantics).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{pcauchy_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric vector of quantiles for \code{pcauchy_opencl}; recycled like \code{stats::pcauchy}.}
+\item{q}{Quantiles (\code{pcauchy_opencl}; aligns with \code{stats::pcauchy} recycling).}
 
-\item{lower.tail, log.p}{As in \code{stats::pcauchy} for \code{pcauchy_opencl} (vector inputs recycled).}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
 
-\item{n}{Number of observations. Non-negative integer scalar.}
+\item{p}{Numeric vector of probabilities for \code{qcauchy_opencl} (like \code{stats::qcauchy}).}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rcauchy_opencl}.}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector result from the corresponding Cauchy-family operation.
 }
 \description{
 OpenCL-backed density, distribution, quantile, and random generation wrappers
@@ -68,7 +78,7 @@ if (has_opencl()) {
 
   dcauchy_opencl(rep(0.2, n), location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
   pcauchy_opencl(q = 0.2, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
-  qcauchy_opencl(n, p = 0.8, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
+  qcauchy_opencl(rep(0.8, n), location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
   rcauchy_opencl(n, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

@@ -28,7 +28,16 @@ pchisq_opencl(
   verbose = FALSE
 )
 
-qchisq_opencl(n, p, df, ncp = 0, fallback = TRUE, verbose = FALSE)
+qchisq_opencl(
+  p,
+  df,
+  ncp = 0,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rchisq_opencl(n, df, ncp = 0, fallback = TRUE, verbose = FALSE)
 }
@@ -39,9 +48,10 @@ rchisq_opencl(n, df, ncp = 0, fallback = TRUE, verbose = FALSE)
 
 \item{ncp}{Non-centrality parameter (must be >= 0).}
 
-\item{log}{Logical; if \code{TRUE}, return log-density for \code{dchisq_opencl} (like \code{\link[stats]{dchisq}}).}
+\item{log}{\code{log} flag for densities (\code{stats} \emph{d}-family semantics).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{pchisq_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -49,12 +59,12 @@ rchisq_opencl(n, df, ncp = 0, fallback = TRUE, verbose = FALSE)
 
 \item{q}{Numeric vector of quantiles for \code{pchisq_opencl}; recycled like \code{stats::pchisq}.}
 
-\item{lower.tail, log.p}{As in \code{stats::pchisq} for \code{pchisq_opencl} (vector inputs recycled).}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
 
-\item{n}{Number of observations (non-negative integer scalar). Used by \code{qchisq_opencl} and \code{rchisq_opencl};
+\item{p}{Numeric vector of probabilities for \code{qchisq_opencl} (like \code{stats::qchisq}).}
+
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rchisq_opencl};
 \code{dchisq_opencl} takes vector \code{x} first (like \code{stats::dchisq}).}
-
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
 \value{
 Numeric vector of length \code{n}.
@@ -69,7 +79,7 @@ if (has_opencl()) {
 
   dchisq_opencl(rep(4.5, n), df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)
   pchisq_opencl(q = 4.5, df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)
-  qchisq_opencl(n, p = 0.8, df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)
+  qchisq_opencl(rep(0.8, n), df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)
   rchisq_opencl(n, df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

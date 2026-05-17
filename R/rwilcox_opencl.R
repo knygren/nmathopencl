@@ -3,24 +3,25 @@
 #' OpenCL-backed density, distribution, quantile, and random generation wrappers
 #' for the Wilcoxon rank sum distribution.
 #'
-#' @param n Number of observations. Non-negative integer scalar.
+#' @param n Draw-count scalar (\code{r*} path only).
 #' @param x Numeric scalar quantile (must be >= 0).
-#' @param q Numeric vector of quantiles for \code{pwilcox_opencl}; recycled like \code{stats::pwilcox}.
-#' @param p Numeric scalar probability in \code{[0, 1]}.
+#' @param q \code{p*}-wrapper quantiles (\code{stats::pwilcox} semantics).
+#' @param p \code{q*}-wrapper probabilities (\code{stats::qwilcox} semantics).
 #' @param m Number of observations in one sample (must be > 0).
 #' @param nn Number of observations in the other sample (must be > 0).
 #' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
 #' @param verbose Logical; print fallback/error diagnostics.
-#' @param lower.tail,log.p As in \code{stats::pwilcox} for \code{pwilcox_opencl} (vector inputs recycled).
-#' @param opencl_parallel OpenCL dispatch hint for \code{pwilcox_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.
-#' @param log Logical; if \code{TRUE}, return log-density for \code{dwilcox_opencl} (like \code{\link[stats]{dwilcox}}).
+#' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
+#' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+#'   wrappers on this page; parallel kernels reserved.
+#' @param log \code{log} flag for densities (\code{stats} \emph{d}-family semantics).
 #'
 #' @section Known OpenCL limitations:
 #' Wilcoxon kernels can still hit runtime-shim gaps depending on device and
 #' driver stack (for example unresolved runtime symbols in some builds).
 #' Prefer \code{fallback = TRUE} for production paths.
 #'
-#' @return Numeric vector of length \code{n}.
+#' @return Numeric vector result from the corresponding Wilcoxon-family operation.
 #' @example inst/examples/Ex_wilcox_opencl.R
 #' @rdname wilcox_opencl
 #' @export
@@ -159,16 +160,68 @@ pwilcox_opencl <- function(
 
 #' @rdname wilcox_opencl
 #' @export
-qwilcox_opencl <- function(n, p, m, nn, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(p, "p", 0, 1)
-  .validate_scalar_num(m, "m", 0, Inf, open_lower = TRUE)
-  .validate_scalar_num(nn, "nn", 0, Inf, open_lower = TRUE)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+qwilcox_opencl <- function(
+    p,
+    m,
+    nn,
+    lower.tail = TRUE,
+    log.p = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(p)) {
+    stop("`p` must be numeric.")
+  }
+  if (!is.numeric(m)) {
+    stop("`m` must be numeric.")
+  }
+  if (!is.numeric(nn)) {
+    stop("`nn` must be numeric.")
+  }
+  .validate_p_stage1_tails(lower.tail, log.p)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(p) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(p), length(m), length(nn), length(lower.tail), length(log.p))
+  len <- .p_stage1_recycle_len(lens, "?qwilcox")
+
+  pv <- rep_len(as.double(p), len)
+  mv <- rep_len(as.double(m), len)
+  nv <- rep_len(as.double(nn), len)
+  ltv <- rep_len(lower.tail, len)
+  lpv <- rep_len(log.p, len)
+
+  fallback_full <- function() {
+    vapply(seq_len(len), function(i) {
+      stats::qwilcox(pv[i], m = mv[i], n = nv[i], lower.tail = ltv[i], log.p = lpv[i])
+    }, numeric(1L))
+  }
+
+  if (any(!is.finite(pv) | !is.finite(mv) | !is.finite(nv))) {
+    return(fallback_full())
+  }
+
+  if (any(mv <= 0 | nv <= 0)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  lt_int <- as.integer(ltv)
+  lp_int <- as.integer(lpv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .qwilcox_opencl(n, p, m, nn, verbose = verbose),
-    fallback_expr = function() rep(stats::qwilcox(p, m = m, n = nn), n),
-    fallback = fallback, verbose = verbose, fn_name = "qwilcox_opencl"
+    opencl_expr = function() {
+      .qwilcox_opencl(pv, mv, nv, lt_int, lp_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "qwilcox_opencl"
   )
 }
 

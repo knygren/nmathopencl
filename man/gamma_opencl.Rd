@@ -29,7 +29,16 @@ pgamma_opencl(
   verbose = FALSE
 )
 
-qgamma_opencl(n, p, shape, scale = 1, fallback = TRUE, verbose = FALSE)
+qgamma_opencl(
+  p,
+  shape,
+  scale = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rgamma_opencl(n, shape, scale = 1, fallback = TRUE, verbose = FALSE)
 }
@@ -41,12 +50,14 @@ rgamma_opencl(n, shape, scale = 1, fallback = TRUE, verbose = FALSE)
 \item{scale}{Scale parameter (must be > 0). For \code{pgamma_opencl}, combined with \code{rate}
 like \code{stats::pgamma}.}
 
-\item{log}{Logical; if \code{TRUE}, return log-density for \code{dgamma_opencl} (like \code{\link[stats]{dgamma}}).}
+\item{log}{\code{log} flag for densities (\code{stats} \emph{d}-family semantics).}
 
-\item{opencl_parallel}{Single logical passed through for future parallel dispatch (\code{pgamma_opencl}; unused).}
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for
+\code{pgamma_opencl}/\code{qgamma_opencl}; parallel dispatch reserved.}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU \code{stats} function
-when OpenCL is unavailable or the OpenCL call fails.}
+\item{fallback}{CPU when GPU dispatch/OpenCL lacks (\link{has_opencl}).\cr
+Prefer fixing kernel builds over masking ---
+\file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.}
 
 \item{verbose}{Logical; print informational fallback messages.}
 
@@ -54,12 +65,12 @@ when OpenCL is unavailable or the OpenCL call fails.}
 
 \item{rate}{Optional rate for \code{pgamma_opencl}; see \code{\link[stats]{pgamma}}.}
 
-\item{lower.tail, log.p}{As in \code{stats::pgamma} for \code{pgamma_opencl} (recycled).}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
 
-\item{n}{Number of observations (non-negative integer scalar). Used by \code{qgamma_opencl}
-and \code{rgamma_opencl}; \code{dgamma_opencl} takes vector \code{x} first (like \code{stats::dgamma}).}
+\item{p}{Numeric vector of probabilities for \code{qgamma_opencl} (like \code{stats::qgamma}).}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]} for \code{qgamma_opencl}.}
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rgamma_opencl};
+\code{dgamma_opencl} takes vector \code{x} first (like \code{stats::dgamma}).}
 }
 \value{
 Numeric vector result from the corresponding gamma-family operation.
@@ -81,13 +92,23 @@ On the GPU path each recycled row runs \code{pgamma_kernel}
 once with \code{n_out = 1}. Missing or non-finite values after recycling, or non-positive
 \code{shape}/\code{scale}, use row-wise \code{stats::pgamma}.
 }
+\section{Known OpenCL limitations}{
+
+Compilation of \code{qgamma_kernel} can fail (\code{ptxas}: unresolved \code{stirlerr_cycle_free}).
+Runnable examples omit GPU \code{qgamma_opencl} until resolved.
+See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
+}
+
 \examples{
 if (has_opencl()) {
   n <- 5L
 
   dgamma_opencl(rep(1.2, n), shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
   pgamma_opencl(q = 1.2, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
-  qgamma_opencl(n, p = 0.8, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
+  ## qgamma_opencl: disabled — OpenCL build can fail with unresolved host symbol stirlerr_cycle_free
+  ##               (NVPTX/ptxas; nmath Stirling tails in qgamma). Do not mask; see
+  ##               inst/OPENCL_KERNEL_KNOWN_FAILURES.md until fixed.
+  # qgamma_opencl(rep(0.8, n), shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
   rgamma_opencl(n, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

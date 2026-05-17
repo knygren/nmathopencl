@@ -40,7 +40,16 @@ pbinom_opencl(
   verbose = FALSE
 )
 
-qbinom_opencl(n, p, size, prob, fallback = TRUE, verbose = FALSE)
+qbinom_opencl(
+  p,
+  size,
+  prob,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rbinom_opencl(n, size, prob, fallback = TRUE, verbose = FALSE)
 }
@@ -53,10 +62,10 @@ rbinom_opencl(n, size, prob, fallback = TRUE, verbose = FALSE)
 
 \item{qprob}{Complementary probability. If \code{NULL}, uses \code{1 - prob}.}
 
-\item{log}{Logical; if \code{TRUE}, return log-density for \code{dbinom_raw_opencl} / \code{dbinom_opencl}
-(like \code{\link[stats]{dbinom}}'s \code{log} argument).}
+\item{log}{\code{log} density switch for \code{dbinom*} wrappers (\code{stats} semantics).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{pbinom_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -64,14 +73,14 @@ rbinom_opencl(n, size, prob, fallback = TRUE, verbose = FALSE)
 
 \item{q}{Numeric vector of quantiles for \code{pbinom_opencl}; recycled like \code{stats::pbinom}.}
 
-\item{lower.tail, log.p}{As in \code{stats::pbinom} for \code{pbinom_opencl} (vector inputs recycled).}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
 
-\item{n}{Number of observations. Non-negative integer scalar.}
+\item{p}{Probabilities for \code{qbinom_opencl}; ordering matches \code{stats::qbinom}.}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rbinom_opencl}.}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector result from the corresponding binomial-family operation.
 }
 \description{
 OpenCL-backed density, distribution, quantile, and random generation wrappers
@@ -84,7 +93,7 @@ if (has_opencl()) {
   dbinom_raw_opencl(rep(6, n), size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
   dbinom_opencl(rep(6, n), size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
   pbinom_opencl(q = 6, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
-  qbinom_opencl(n, p = 0.8, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
+  qbinom_opencl(rep(0.8, n), size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
   rbinom_opencl(n, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

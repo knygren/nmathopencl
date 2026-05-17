@@ -30,7 +30,17 @@ pf_opencl(
   verbose = FALSE
 )
 
-qf_opencl(n, p, df1, df2, ncp = 0, fallback = TRUE, verbose = FALSE)
+qf_opencl(
+  p,
+  df1,
+  df2,
+  ncp = 0,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rf_opencl(n, df1, df2, fallback = TRUE, verbose = FALSE)
 }
@@ -44,9 +54,10 @@ rf_opencl(n, df1, df2, fallback = TRUE, verbose = FALSE)
 \item{ncp}{Non-centrality parameter (must be >= 0). Used by
 \code{df_opencl()}, \code{pf_opencl()}, and \code{qf_opencl()}.}
 
-\item{log}{Logical; if \code{TRUE}, return log-density for \code{df_opencl} (like \code{\link[stats]{df}}).}
+\item{log}{\code{log} flag for densities (\code{stats} \emph{d}-family semantics).}
 
-\item{opencl_parallel}{Reserved for future parallel dispatch (\code{pf_opencl}; unused).}
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -54,15 +65,15 @@ rf_opencl(n, df1, df2, fallback = TRUE, verbose = FALSE)
 
 \item{q}{Numeric vector of quantiles (\code{pf_opencl}); recycled like \code{stats::pf}.}
 
-\item{lower.tail, log.p}{As in \code{stats::pf} for \code{pf_opencl} (vector inputs recycled).}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
 
-\item{n}{Number of observations (non-negative integer scalar). Used by \code{qf_opencl} and \code{rf_opencl};
+\item{p}{Numeric vector of probabilities for \code{qf_opencl} (like \code{stats::qf}).}
+
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rf_opencl};
 \code{df_opencl} takes vector \code{x} first (like \code{stats::df}).}
-
-\item{p}{Numeric scalar probability in \code{[0, 1]} (\code{qf_opencl}).}
 }
 \value{
-For \code{df_opencl}, \code{qf_opencl}, \code{rf_opencl}: numeric vector of length \code{n}.
+For \code{df_opencl}, \code{qf_opencl}, \code{rf_opencl}: numeric vector result.
 For \code{pf_opencl}: numeric vector of recycled length (see \code{stats::pf}).
 }
 \description{
@@ -87,10 +98,10 @@ if (has_opencl()) {
   rf_opencl(n, df1 = 5, df2 = 9, fallback = FALSE, verbose = TRUE)
 
   # Known unstable on some GPU/driver stacks (can hit CL_OUT_OF_RESOURCES):
-  # qf_opencl(n, p = 0.8, df1 = 5, df2 = 9, ncp = 0, fallback = FALSE, verbose = TRUE)
+  # qf_opencl(rep(0.8, n), df1 = 5, df2 = 9, ncp = 0, fallback = FALSE, verbose = TRUE)
   #
   # Known especially unstable non-central path:
-  # qf_opencl(n, p = 0.8, df1 = 5, df2 = 9, ncp = 1.1, fallback = FALSE, verbose = TRUE)
+  # qf_opencl(rep(0.8, n), df1 = 5, df2 = 9, ncp = 1.1, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")
 }

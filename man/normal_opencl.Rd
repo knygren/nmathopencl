@@ -28,25 +28,35 @@ pnorm_opencl(
   verbose = FALSE
 )
 
-qnorm_opencl(n, p, mean = 0, sd = 1, fallback = TRUE, verbose = FALSE)
+qnorm_opencl(
+  p,
+  mean = 0,
+  sd = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rnorm_opencl(n, mean = 0, sd = 1, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{x}{Numeric vector of quantiles.}
 
-\item{mean}{Location parameter. Scalar for \code{dnorm_opencl} and \code{rnorm_opencl}.
-For \code{pnorm_opencl}, recycled like \code{stats::pnorm}.}
+\item{mean}{Location parameter (\code{rnorm}: scalar).
+For \code{pnorm_opencl} and \code{qnorm_opencl}, recycled like the corresponding \code{stats}
+function.}
 
-\item{sd}{Scale parameter. Scalar (\code{sd >= 0}) for \code{dnorm_opencl} and
-\code{rnorm_opencl}. For \code{pnorm_opencl}, recycled like \code{stats::pnorm}.
-The GPU path runs only when every recycled value is strictly positive (\code{sd > 0});
+\item{sd}{Scale parameter (\code{rnorm}: scalar, \code{sd >= 0}).
+For \code{pnorm_opencl} and \code{qnorm_opencl}, recycled like the corresponding \code{stats}
+function. The GPU path runs only when every recycled value is strictly positive (\code{sd > 0});
 \code{sd == 0} is evaluated with \code{stats::pnorm}.}
 
-\item{log}{Logical; if \code{TRUE}, return log densities.}
+\item{log}{\code{log} flag for \code{dnorm_opencl} (\code{stats} semantics).}
 
-\item{opencl_parallel}{Single logical: \code{TRUE} forces parallel dispatch when implemented,
-\code{FALSE} serial, \code{NA} automatic (reserved; not yet used by \code{pnorm_opencl} GPU dispatch).}
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU \code{stats} function
 when OpenCL is unavailable or the OpenCL call fails.}
@@ -55,14 +65,13 @@ when OpenCL is unavailable or the OpenCL call fails.}
 
 \item{q}{Numeric vector of quantiles for \code{pnorm_opencl} (same role as \code{stats::pnorm}).}
 
-\item{lower.tail, log.p}{As in \code{stats::pnorm} (recycled). Row-wise semantics follow
-full recycling; for some combinations of arguments, plain \code{stats::pnorm} with vector
-arguments may replicate only scalar \code{lower.tail}/\code{log.p}.}
+\item{lower.tail, log.p}{Recycling for \code{pnorm_opencl}; see Details for contrasts with
+some vector \code{stats::pnorm} calls.}
 
-\item{n}{Number of observations (non-negative integer scalar). Used by \code{qnorm_opencl}
-and \code{rnorm_opencl}; not an argument to \code{pnorm_opencl}.}
+\item{p}{Numeric vector of probabilities for \code{qnorm_opencl} (like \code{stats::qnorm}).}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rnorm_opencl};
+not an argument to \code{pnorm_opencl} / \code{qnorm_opencl}.}
 }
 \value{
 Numeric vector result from the corresponding normal-family operation.
@@ -73,23 +82,17 @@ for the normal distribution. These mirror the base \code{stats} normal family
 while adding OpenCL dispatch and optional CPU fallback behavior.
 }
 \details{
-\code{\link{pnorm_opencl}} uses the same first five statistical arguments as
-\code{\link[stats]{pnorm}}, in the same order: \code{q}, \code{mean}, \code{sd},
-\code{lower.tail}, and \code{log.p}, with identical defaults (\code{mean = 0}, \code{sd = 1},
-\code{lower.tail = TRUE}, \code{log.p = FALSE}). It adds \code{opencl_parallel},
-\code{fallback}, and \code{verbose}. There is no leading \code{n} argument (that convention
-applies to \code{\link{qnorm_opencl}} / \code{\link{rnorm_opencl}}).
-Recycling for \code{pnorm_opencl} follows \code{\link[stats]{pnorm}} once those arguments are aligned.
-On the GPU path, each
-recycled parameter row is evaluated with the existing scalar \code{pnorm_kernel} one after
-another (\code{len} submissions; useful before a batched kernel).
-Combining vector \code{q}, \code{mean}, \code{sd}, \code{lower.tail}, and \code{log.p} yields
-one OpenCL scalar evaluation per output index (full recycling to common length).
-If \code{q} has length zero, \code{numeric(0)} is returned immediately (matching
-\code{\link[stats]{pnorm}}). Missing or non-finite
-values (after recycling), or any \code{sd == 0}, are evaluated with CPU
-\code{\link[stats]{pnorm}}. Undefined zero-length recycling stops with an error; negative
-\code{sd} stops with an error.
+\code{pnorm_opencl} matches \code{\link[stats]{pnorm}} on the first five statistical
+arguments (\code{q}, \code{mean}, \code{sd}, \code{lower.tail}, \code{log.p}) and the
+usual defaults. It also accepts \code{opencl_parallel}, \code{fallback}, and
+\code{verbose}. Only \code{\link{rnorm_opencl}} uses a leading \code{n}. \cr
+Recycling follows \code{\link[stats]{pnorm}} once arguments are aligned. On the GPU path,
+each recycled row calls the scalar \code{pnorm_kernel} once (\code{len} submissions). \cr
+Vector \code{q}, \code{mean}, \code{sd}, \code{lower.tail}, and \code{log.p} yield one
+OpenCL evaluation per output index. \cr
+Length-zero \code{q} returns \code{numeric(0)} as in \code{\link[stats]{pnorm}}. \cr
+Missing or non-finite values (after recycling), or any \code{sd == 0}, use CPU
+\code{\link[stats]{pnorm}}. Zero-length recycling errors and negative \code{sd} still error.
 }
 \examples{
 if (has_opencl()) {
@@ -98,7 +101,7 @@ if (has_opencl()) {
 
   dnorm_opencl(x, mean = 0, sd = 1, fallback = FALSE, verbose = TRUE)
   pnorm_opencl(q = 0.2, mean = 0, sd = 1, fallback = FALSE, verbose = TRUE)
-  qnorm_opencl(n, p = 0.8, mean = 0, sd = 1, fallback = FALSE, verbose = TRUE)
+  qnorm_opencl(rep(0.8, n), mean = 0, sd = 1, fallback = FALSE, verbose = TRUE)
   rnorm_opencl(n, mean = 0, sd = 1, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

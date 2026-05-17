@@ -34,14 +34,10 @@ shifted into the likelihood.}
 }
 \value{
 \describe{
-\item{Ex_EnvelopeEval}{List with components \code{NegLL} (numeric vector of
-negative log-likelihood values) and \code{cbars} (numeric matrix of gradients).}
-\item{f2_f3_non_opencl}{List with components \code{qf} (negative log-likelihood)
-and \code{grad} (gradients) from the CPU kernel.}
-\item{f2_f3_opencl}{List with components \code{qf} and \code{grad} from the
-OpenCL kernel.}
-\item{run_opencl_pilot}{Numeric scalar giving estimated runtime (seconds)
-for OpenCL evaluation on a pilot subset of the grid.}
+\item{Ex_EnvelopeEval}{\code{NegLL}: negatives logLik; \code{cbars}: tangent gradients.}
+\item{f2_f3_non_opencl}{\code{qf}/\code{grad} from CPU kernels.}
+\item{f2_f3_opencl}{\code{qf}/\code{grad} from OpenCL.}
+\item{run_opencl_pilot}{Pilot runtime estimate (seconds).}
 }
 }
 \description{
@@ -51,124 +47,14 @@ in \insertCite{Nygren2006}{nmathopencl} and the general implementation outlined
 in \insertCite{glmbayesSimmethods}{nmathopencl}.
 }
 \details{
-The evaluation workflow has several layers:
-\strong{1. High-level dispatch (\code{Ex_EnvelopeEval})}
+Compact overview.\cr
+Derivations:\\cr vignettes/equations (\insertCite{Nygren2006}{nmathopencl}).\cr
 \itemize{
-\item \code{Ex_EnvelopeEval()} is the user-facing entry point. It accepts a grid of
-parameter values (\code{G4}) and the data (\code{y}, \code{x}, \code{mu}, \code{P}, \code{alpha}, \code{wt}).
-\item If the grid is large (>= 14 columns), it first calls
-\code{run_opencl_pilot} to benchmark OpenCL performance and optionally
-report estimated runtime.
-\item It then dispatches to either the CPU or GPU backend:
-\itemize{
-\item If \code{use_opencl = TRUE} and the family is not \code{"gaussian"}, it calls
-\code{f2_f3_opencl} (an internal C++ kernel).
-\item Otherwise, it calls \code{f2_f3_non_opencl} (the CPU kernel).
+\item Dispatcher fans out to CPU and OpenCL kernel runners.\cr
+\item \verb{NegLL} vectors plus \verb{cbars} matrices feed envelopes in
+\code{rNormal_reg} internals.\cr
+\item Acceptance inequalities mirror the vignette ``Simulation execution'' chapter.
 }
-}
-
-\strong{2. CPU backend (\code{f2_f3_non_opencl})}
-\itemize{
-\item This function evaluates the negative log-likelihood and gradients using
-standard CPU routines.
-\item It inspects the \code{family} and \code{link} arguments and routes to the correct
-pair of kernels (\verb{f2_*} for the likelihood, \verb{f3_*} for the gradient).
-\item For example:
-\itemize{
-\item \code{"binomial"} with \code{"logit"} calls \code{f2_binomial_logit()} and
-\code{f3_binomial_logit()}.
-\item \code{"poisson"} calls \code{f2_poisson()} and \code{f3_poisson()}.
-\item \code{"gaussian"} calls \code{f2_gaussian()} and \code{f3_gaussian()}.
-}
-\item These kernels ultimately rely on the same C math routines that R itself
-uses (from the \code{nmath}/\code{rmath} libraries), ensuring numerical consistency
-with base R functions like \code{dnorm}, \code{dpois}, etc.
-}
-
-\strong{3. GPU backend (\code{f2_f3_opencl})}
-\itemize{
-\item This function mirrors the CPU backend but executes the likelihood and
-gradient calculations on an OpenCL device (GPU or CPU).
-\item It flattens the input matrices/vectors and allocates output buffers.
-\item It then constructs a full OpenCL program by concatenating:
-\itemize{
-\item a generic OpenCL support header (\code{OPENCL.CL}),
-\item OpenCL ports of R's \code{rmath}, \code{nmath}, and \code{dpq} libraries,
-\item and the family/link-specific kernel source (e.g.
-\code{f2_f3_binomial_logit.cl}).
-}
-\item The resulting program is compiled and passed to a kernel runner
-(\code{f2_f3_kernel_runner}) which executes the likelihood and gradient
-calculations in parallel on the device.
-\item This ensures that the GPU backend produces results consistent with the
-CPU backend, but can scale to much larger grids efficiently.
-}
-
-\strong{4. Pilot timing (\code{run_opencl_pilot})}
-\itemize{
-\item This helper runs a small subset of the grid through the OpenCL backend
-to estimate runtime.
-\item It is used by \code{Ex_EnvelopeEval()} to inform users (when \code{verbose = TRUE})
-whether OpenCL acceleration is likely to be beneficial.
-}
-
-\strong{5. Returned values}
-\itemize{
-\item All backends return a list with:
-\itemize{
-\item \code{NegLL}: numeric vector of negative log-likelihood values.
-\item \code{cbars}: numeric matrix of gradients (parameters * grid points).
-}
-}
-
-\strong{6. Role of likelihood and gradients in sampling}
-\itemize{
-\item The outputs of \code{Ex_EnvelopeEval()} - the negative log-likelihood values
-(\code{NegLL}) and the gradient matrix (\code{cbars}) - are not endpoints in
-themselves. They form the \emph{envelope} used in the rejection sampler
-implemented by internal functions such as
-\code{.rNormalGLM_std_cpp()}.
-\item This routine is called by \code{.rNormalGLM_cpp()}, which underlies the
-user-facing function \code{rNormal_reg()}. Together they implement
-envelope-based posterior sampling for GLMs with log-concave likelihoods
-and multivariate normal priors.
-}
-
-\strong{7. Simulation execution (accept/reject procedure)}
-
-The acceptance test is performed using
-\deqn{
-  \log(U_2) \leq
-  \log f(y \mid \theta_i) -
-  \Big(\log f(y \mid \bar{\theta}_{J(i)}) -
-       c(\bar{\theta}_{J(i)})^T(\theta_i - \bar{\theta}_{J(i)})\Big) \leq 0
-}
-
-\strong{Connections between code and notation:}
-\itemize{
-\item The arguments \code{G4} (in \code{Ex_EnvelopeEval}) and \code{b} (in \verb{f2_f3_*}) both
-represent the grid of tangency points \eqn{\bar{\theta}_j}.
-\item The output \code{NegLL} corresponds to
-\eqn{-\log f(y \mid \bar{\theta}_{J(i)})}, i.e. the negative
-log-likelihood evaluated at each tangency point.
-\item The output \code{cbars} corresponds to the subgradient vectors
-\eqn{c(\bar{\theta}_{J(i)})}, which define the tangent hyperplanes
-used in the envelope construction.
-}
-
-\strong{Precomputation for efficiency:}
-\itemize{
-\item Both \code{NegLL} and \code{cbars} are computed once during envelope construction,
-prior to the simulation stage.
-\item This means the sampler does not need to recompute likelihoods or
-gradients at every candidate draw - it simply reuses the stored values
-(\code{NegLL}, \code{cbars}, and \code{LLconst}) in the acceptance inequality.
-}
-
-This design ensures that the envelope is tangent to the log-likelihood at
-each \eqn{\bar{\theta}_j}, lies above it elsewhere, and that the
-accept-reject procedure can run efficiently while still producing samples
-from the true posterior \eqn{\pi(\theta \mid y)}.
 }
 \examples{
 ############################### Start of Ex_EnvelopeEval example ####################
@@ -275,7 +161,9 @@ eval_out$cbars
 \insertAllCited{}
 }
 \seealso{
-\code{\link{Ex_EnvelopeSize}};
-Vignettes:
-\insertCite{glmbayesSimmethods,glmbayesChapterA08,glmbayesChapterA10,glmbayesChapter12}{nmathopencl}.
+\code{\link{Ex_EnvelopeSize}}
+\insertCite{glmbayesSimmethods}{nmathopencl}
+\insertCite{glmbayesChapterA08}{nmathopencl}
+\insertCite{glmbayesChapterA10}{nmathopencl}
+\insertCite{glmbayesChapter12}{nmathopencl}
 }

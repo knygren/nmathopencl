@@ -5,23 +5,22 @@
 #' library's pre-built dependency index) and writes the results back into the
 #' kernel files as annotation tags.
 #'
-#' This is the cross-library equivalent of [attach_kernel_dependency_tags()]:
-#' where that function operates on a library directory and expands internal
-#' `@depends` references, this function operates on kernel files that depend
-#' *on* a library via a `@{depends_tag}` annotation listing direct entry-point
-#' stems.
+#' Cross-library analogue of \link{attach_kernel_dependency_tags}: it targets
+#' kernels that depend on a library through a `@{depends_tag}` tag (entry-point stems),
+#' instead of expanding `@depends` purely inside one library tree.
 #'
 #' Typical usage for kernels that call nmath functions:
 #'
 #' ```r
-#' nmath_dir <- system.file("cl", "nmath", package = "nmathopencl")
+#' nmath_dir <- system.file(
+#'   "cl", "nmath", package = "nmathopencl")
 #' idx <- readRDS(file.path(nmath_dir, "kernel_dependency_index.rds"))
 #'
 #' attach_cross_library_tags(
-#'     kernel_paths = list.files("inst/cl/src", "\\.cl$", full.names = TRUE),
-#'     library_dir  = nmath_dir,
-#'     depends_tag  = "depends_nmath",
-#'     index        = idx
+#'   kernel_paths = list.files("inst/cl/src", "\\\\.cl$", full.names = TRUE),
+#'   library_dir  = nmath_dir,
+#'   depends_tag  = "depends_nmath",
+#'   index        = idx
 #' )
 #' ```
 #'
@@ -35,10 +34,9 @@
 #'   the direct library entry-point stems (e.g. `"depends_nmath"`).
 #'   The function reads `@{depends_tag}` and writes `@all_{depends_tag}` and
 #'   `@all_{depends_tag}_count`.
-#' @param index Pre-loaded dependency index produced by
-#'   [write_kernel_dependency_index()] and read with [readRDS()].  If `NULL`,
-#'   the index is read from `file.path(library_dir, "kernel_dependency_index.rds")`
-#'   and a `message()` is emitted.
+#' @param index Optional dependency index (\link{write_kernel_dependency_index}, load via
+#'   \code{readRDS}). If \code{NULL}, reads
+#'   \code{file.path(library_dir, "kernel_dependency_index.rds")} with \code{message()}.
 #' @param dry_run Logical; if `TRUE`, compute tags but do not write any files.
 #'
 #' @return A data frame (returned invisibly) with one row per kernel file and
@@ -55,8 +53,9 @@
 #'       modified.}
 #'   }
 #'
-#' @seealso [attach_kernel_dependency_tags()], [write_kernel_dependency_index()],
-#'   [load_library_for_kernel()]
+#' @seealso \link{attach_kernel_dependency_tags}
+#' \link{write_kernel_dependency_index}
+#' \link{load_library_for_kernel}
 #' @export
 attach_cross_library_tags <- function(kernel_paths,
                                       library_dir,

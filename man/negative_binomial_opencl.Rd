@@ -32,7 +32,16 @@ pnbinom_opencl(
   verbose = FALSE
 )
 
-qnbinom_opencl(n, p, size, prob, fallback = TRUE, verbose = FALSE)
+qnbinom_opencl(
+  p,
+  size,
+  prob,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rnbinom_opencl(n, size, prob, fallback = TRUE, verbose = FALSE)
 
@@ -57,7 +66,16 @@ pnbinom_mu_opencl(
   verbose = FALSE
 )
 
-qnbinom_mu_opencl(n, p, size, mu, fallback = TRUE, verbose = FALSE)
+qnbinom_mu_opencl(
+  p,
+  size,
+  mu,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rnbinom_mu_opencl(n, size, mu, fallback = TRUE, verbose = FALSE)
 }
@@ -68,27 +86,27 @@ rnbinom_mu_opencl(n, size, mu, fallback = TRUE, verbose = FALSE)
 
 \item{prob}{Probability of success in \code{[0, 1]}.}
 
-\item{log}{Logical; if \code{TRUE}, return log-density for \code{dnbinom_opencl} / \code{dnbinom_mu_opencl}
-(like \code{\link[stats]{dnbinom}}).}
+\item{log}{\code{log} density switch for density wrappers (\code{stats} semantics).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{pnbinom_opencl} / \code{pnbinom_mu_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric vector of quantiles for \code{pnbinom_opencl} / \code{pnbinom_mu_opencl}; recycled like \code{stats::pnbinom}.}
+\item{q}{Quantiles for \code{pnbinom*} wrappers (\code{stats::pnbinom} recycling).}
 
-\item{lower.tail, log.p}{As in \code{stats::pnbinom} for \code{pnbinom_opencl} / \code{pnbinom_mu_opencl} (vector inputs recycled).}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
 
-\item{n}{Number of observations. Non-negative integer scalar.}
+\item{p}{Probabilities for \code{qnbinom*} wrappers (\code{stats::qnbinom} semantics).}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{n}{Observations scalar; used by negative-binomial \code{r*} wrappers only.}
 
 \item{mu}{Mean parameter (must be >= 0).}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector result from the corresponding negative-binomial operation.
 }
 \description{
 OpenCL-backed density, distribution, quantile, and random generation wrappers
@@ -101,12 +119,12 @@ if (has_opencl()) {
 
   dnbinom_opencl(rep(4, n), size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
   pnbinom_opencl(q = 4, size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
-  qnbinom_opencl(n, p = 0.8, size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
+  qnbinom_opencl(rep(0.8, n), size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
   rnbinom_opencl(n, size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
 
   dnbinom_mu_opencl(rep(4, n), size = 7, mu = 5, fallback = FALSE, verbose = TRUE)
   pnbinom_mu_opencl(q = 4, size = 7, mu = 5, fallback = FALSE, verbose = TRUE)
-  qnbinom_mu_opencl(n, p = 0.8, size = 7, mu = 5, fallback = FALSE, verbose = TRUE)
+  qnbinom_mu_opencl(rep(0.8, n), size = 7, mu = 5, fallback = FALSE, verbose = TRUE)
   rnbinom_mu_opencl(n, size = 7, mu = 5, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

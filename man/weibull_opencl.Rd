@@ -28,7 +28,16 @@ pweibull_opencl(
   verbose = FALSE
 )
 
-qweibull_opencl(n, p, shape, scale = 1, fallback = TRUE, verbose = FALSE)
+qweibull_opencl(
+  p,
+  shape,
+  scale = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rweibull_opencl(n, shape, scale = 1, fallback = TRUE, verbose = FALSE)
 }
@@ -39,24 +48,25 @@ rweibull_opencl(n, shape, scale = 1, fallback = TRUE, verbose = FALSE)
 
 \item{scale}{Scale parameter (must be > 0).}
 
-\item{log}{Logical; if \code{TRUE}, return log-density for \code{dweibull_opencl} (like \code{\link[stats]{dweibull}}).}
+\item{log}{\code{log} flag for densities (\code{stats} \emph{d}-family semantics).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{pweibull_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric vector of quantiles for \code{pweibull_opencl}; recycled like \code{stats::pweibull}.}
+\item{q}{\code{p*}-wrapper quantiles (\code{stats::pweibull} semantics).}
 
-\item{lower.tail, log.p}{As in \code{stats::pweibull} for \code{pweibull_opencl} (vector inputs recycled).}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
 
-\item{n}{Number of observations. Non-negative integer scalar.}
+\item{p}{Numeric vector of probabilities for \code{qweibull_opencl} (like \code{stats::qweibull}).}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rweibull_opencl}.}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector result from the corresponding Weibull-family operation.
 }
 \description{
 OpenCL-backed density, distribution, quantile, and random generation wrappers
@@ -68,7 +78,7 @@ if (has_opencl()) {
 
   dweibull_opencl(rep(1.2, n), shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
   pweibull_opencl(q = 1.2, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
-  qweibull_opencl(n, p = 0.8, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
+  qweibull_opencl(rep(0.8, n), shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
   rweibull_opencl(n, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

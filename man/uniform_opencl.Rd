@@ -28,7 +28,16 @@ punif_opencl(
   verbose = FALSE
 )
 
-qunif_opencl(n, p, min = 0, max = 1, fallback = TRUE, verbose = FALSE)
+qunif_opencl(
+  p,
+  min = 0,
+  max = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 runif_opencl(n, min = 0, max = 1, fallback = TRUE, verbose = FALSE)
 }
@@ -39,23 +48,23 @@ runif_opencl(n, min = 0, max = 1, fallback = TRUE, verbose = FALSE)
 
 \item{max}{Upper limit of the distribution.}
 
-\item{log}{Logical; if \code{TRUE}, return log-density for \code{dunif_opencl} (like \code{\link[stats]{dunif}}).}
+\item{log}{\code{log} flag for densities (\code{stats} \emph{d}-family semantics).}
 
-\item{opencl_parallel}{Reserved for future parallel dispatch (\code{punif_opencl}; unused).}
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU \code{stats} function
 when OpenCL is unavailable or the OpenCL call fails.}
 
 \item{verbose}{Logical; print informational fallback messages.}
 
-\item{q}{Numeric vector of quantiles (\code{punif_opencl}); same role as \code{stats::punif}.}
+\item{q}{Numeric quantiles (\code{punif_opencl}; like \code{stats::punif}).}
 
-\item{lower.tail, log.p}{As in \code{stats::punif} for \code{punif_opencl} (recycled).}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
 
-\item{n}{Number of observations (non-negative integer scalar). Used by \code{qunif_opencl} and \code{runif_opencl};
-\code{dunif_opencl} takes vector \code{x} first (like \code{stats::dunif}). Not used by \code{punif_opencl}.}
+\item{p}{Probabilities for \code{qunif_opencl} (\code{stats::qunif} semantics).}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{n}{Draw count (\code{r*}); density wrappers still lead with \code{x}.}
 }
 \value{
 Numeric vector result from the corresponding uniform-family operation.
@@ -71,7 +80,7 @@ if (has_opencl()) {
 
   dunif_opencl(rep(0.4, n), min = 0, max = 1, fallback = FALSE, verbose = TRUE)
   punif_opencl(q = 0.4, min = 0, max = 1, fallback = FALSE, verbose = TRUE)
-  qunif_opencl(n, p = 0.8, min = 0, max = 1, fallback = FALSE, verbose = TRUE)
+  qunif_opencl(rep(0.8, n), min = 0, max = 1, fallback = FALSE, verbose = TRUE)
   runif_opencl(n, min = 0, max = 1, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

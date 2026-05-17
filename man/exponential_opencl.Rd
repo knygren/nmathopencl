@@ -26,7 +26,15 @@ pexp_opencl(
   verbose = FALSE
 )
 
-qexp_opencl(n, p, rate = 1, fallback = TRUE, verbose = FALSE)
+qexp_opencl(
+  p,
+  rate = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rexp_opencl(n, rate = 1, fallback = TRUE, verbose = FALSE)
 }
@@ -35,9 +43,10 @@ rexp_opencl(n, rate = 1, fallback = TRUE, verbose = FALSE)
 
 \item{rate}{Rate parameter (must be > 0).}
 
-\item{log}{Logical; if \code{TRUE}, return log-density for \code{dexp_opencl} (like \code{\link[stats]{dexp}}).}
+\item{log}{\code{log} flag for densities (\code{stats} \emph{d}-family semantics).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{pexp_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -45,14 +54,14 @@ rexp_opencl(n, rate = 1, fallback = TRUE, verbose = FALSE)
 
 \item{q}{Numeric vector of quantiles for \code{pexp_opencl}; recycled like \code{stats::pexp}.}
 
-\item{lower.tail, log.p}{As in \code{stats::pexp} for \code{pexp_opencl} (vector inputs recycled).}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
 
-\item{n}{Number of observations. Non-negative integer scalar.}
+\item{p}{Numeric vector of probabilities for \code{qexp_opencl} (like \code{stats::qexp}).}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rexp_opencl}.}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector result from the corresponding exponential-family operation.
 }
 \description{
 OpenCL-backed density, distribution, quantile, and random generation wrappers
@@ -64,7 +73,7 @@ if (has_opencl()) {
 
   dexp_opencl(rep(1.2, n), rate = 1, fallback = FALSE, verbose = TRUE)
   pexp_opencl(q = 1.2, rate = 1, fallback = FALSE, verbose = TRUE)
-  qexp_opencl(n, p = 0.8, rate = 1, fallback = FALSE, verbose = TRUE)
+  qexp_opencl(rep(0.8, n), rate = 1, fallback = FALSE, verbose = TRUE)
   rexp_opencl(n, rate = 1, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

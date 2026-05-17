@@ -4,7 +4,7 @@ if (has_opencl()) {
   dpois_raw_opencl(rep(4, n), lambda = 4, fallback = FALSE, verbose = TRUE)
   dpois_opencl(rep(4, n), lambda = 4, fallback = FALSE, verbose = TRUE)
   ppois_opencl(q = 4, lambda = 4, fallback = FALSE, verbose = TRUE)
-  qpois_opencl(n, p = 0.8, lambda = 4, fallback = FALSE, verbose = TRUE)
+  qpois_opencl(rep(0.8, n), lambda = 4, fallback = FALSE, verbose = TRUE)
   rpois_opencl(n, lambda = 4, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

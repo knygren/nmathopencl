@@ -3,18 +3,19 @@
 #' OpenCL-backed density, distribution, quantile, and random generation wrappers
 #' for the geometric distribution.
 #'
-#' @param n Number of observations. Non-negative integer scalar.
+#' @param n Number of observations (non-negative integer scalar). Used only by \code{rgeom_opencl}.
 #' @param x Numeric scalar quantile.
 #' @param q Numeric vector of quantiles for \code{pgeom_opencl}; recycled like \code{stats::pgeom}.
-#' @param p Numeric scalar probability in \code{[0, 1]}.
+#' @param p Numeric vector of probabilities for \code{qgeom_opencl} (like \code{stats::qgeom}).
 #' @param prob Probability of success in \code{[0, 1]}.
 #' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
 #' @param verbose Logical; print fallback/error diagnostics.
-#' @param lower.tail,log.p As in \code{stats::pgeom} for \code{pgeom_opencl} (vector inputs recycled).
-#' @param opencl_parallel OpenCL dispatch hint for \code{pgeom_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.
-#' @param log Logical; if \code{TRUE}, return log-density for \code{dgeom_opencl} (like \code{\link[stats]{dgeom}}).
+#' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
+#' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+#'   wrappers on this page; parallel kernels reserved.
+#' @param log \code{log} flag for densities (\code{stats} \emph{d}-family semantics).
 #'
-#' @return Numeric vector of length \code{n}.
+#' @return Numeric vector result from the corresponding geometric-family operation.
 #' @example inst/examples/Ex_geometric_opencl.R
 #' @rdname geometric_opencl
 #' @export
@@ -135,15 +136,63 @@ pgeom_opencl <- function(
 
 #' @rdname geometric_opencl
 #' @export
-qgeom_opencl <- function(n, p, prob, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(p, "p", 0, 1)
-  .validate_scalar_num(prob, "prob", 0, 1)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+qgeom_opencl <- function(
+    p,
+    prob,
+    lower.tail = TRUE,
+    log.p = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(p)) {
+    stop("`p` must be numeric.")
+  }
+  if (!is.numeric(prob)) {
+    stop("`prob` must be numeric.")
+  }
+  .validate_p_stage1_tails(lower.tail, log.p)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(p) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(p), length(prob), length(lower.tail), length(log.p))
+  len <- .p_stage1_recycle_len(lens, "?qgeom")
+
+  pv <- rep_len(as.double(p), len)
+  pb <- rep_len(as.double(prob), len)
+  ltv <- rep_len(lower.tail, len)
+  lpv <- rep_len(log.p, len)
+
+  fallback_full <- function() {
+    vapply(seq_len(len), function(i) {
+      stats::qgeom(pv[i], prob = pb[i], lower.tail = ltv[i], log.p = lpv[i])
+    }, numeric(1L))
+  }
+
+  if (any(!is.finite(pv) | !is.finite(pb))) {
+    return(fallback_full())
+  }
+
+  if (any(pb < 0 | pb > 1)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  lt_int <- as.integer(ltv)
+  lp_int <- as.integer(lpv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .qgeom_opencl(n, p, prob, verbose = verbose),
-    fallback_expr = function() rep(stats::qgeom(p, prob = prob), n),
-    fallback = fallback, verbose = verbose, fn_name = "qgeom_opencl"
+    opencl_expr = function() {
+      .qgeom_opencl(pv, pb, lt_int, lp_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "qgeom_opencl"
   )
 }
 

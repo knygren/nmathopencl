@@ -4,19 +4,19 @@
 #' for the uniform distribution. These mirror the base \code{stats} uniform
 #' family while adding OpenCL dispatch and optional CPU fallback behavior.
 #'
-#' @param q Numeric vector of quantiles (\code{punif_opencl}); same role as \code{stats::punif}.
+#' @param n Draw count (\code{r*}); density wrappers still lead with \code{x}.
+#' @param q Numeric quantiles (\code{punif_opencl}; like \code{stats::punif}).
 #' @param x Numeric scalar quantile for \code{dunif_opencl}.
-#' @param lower.tail,log.p As in \code{stats::punif} for \code{punif_opencl} (recycled).
-#' @param opencl_parallel Reserved for future parallel dispatch (\code{punif_opencl}; unused).
-#' @param p Numeric scalar probability in \code{[0, 1]}.
-#' @param n Number of observations (non-negative integer scalar). Used by \code{qunif_opencl} and \code{runif_opencl};
-#'   \code{dunif_opencl} takes vector \code{x} first (like \code{stats::dunif}). Not used by \code{punif_opencl}.
+#' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
+#' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+#'   wrappers on this page; parallel kernels reserved.
+#' @param p Probabilities for \code{qunif_opencl} (\code{stats::qunif} semantics).
 #' @param min Lower limit of the distribution.
 #' @param max Upper limit of the distribution.
 #' @param fallback Logical; if \code{TRUE}, fall back to CPU \code{stats} function
 #'   when OpenCL is unavailable or the OpenCL call fails.
 #' @param verbose Logical; print informational fallback messages.
-#' @param log Logical; if \code{TRUE}, return log-density for \code{dunif_opencl} (like \code{\link[stats]{dunif}}).
+#' @param log \code{log} flag for densities (\code{stats} \emph{d}-family semantics).
 #'
 #' @return Numeric vector result from the corresponding uniform-family operation.
 #' @example inst/examples/Ex_uniform_opencl.R
@@ -158,17 +158,68 @@ punif_opencl <- function(
 
 #' @rdname uniform_opencl
 #' @export
-qunif_opencl <- function(n, p, min = 0, max = 1, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(p, "p", 0, 1)
-  .validate_scalar_num(min, "min")
-  .validate_scalar_num(max, "max")
-  if (max < min) stop("`max` must be >= `min`.")
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+qunif_opencl <- function(
+    p,
+    min = 0,
+    max = 1,
+    lower.tail = TRUE,
+    log.p = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(p)) {
+    stop("`p` must be numeric.")
+  }
+  if (!is.numeric(min)) {
+    stop("`min` must be numeric.")
+  }
+  if (!is.numeric(max)) {
+    stop("`max` must be numeric.")
+  }
+  .validate_p_stage1_tails(lower.tail, log.p)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(p) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(p), length(min), length(max), length(lower.tail), length(log.p))
+  len <- .p_stage1_recycle_len(lens, "?qunif")
+
+  pv <- rep_len(as.double(p), len)
+  minv <- rep_len(as.double(min), len)
+  maxv <- rep_len(as.double(max), len)
+  ltv <- rep_len(lower.tail, len)
+  lpv <- rep_len(log.p, len)
+
+  fallback_full <- function() {
+    vapply(seq_len(len), function(i) {
+      stats::qunif(pv[i], min = minv[i], max = maxv[i], lower.tail = ltv[i], log.p = lpv[i])
+    }, numeric(1L))
+  }
+
+  if (any(!is.finite(pv) | !is.finite(minv) | !is.finite(maxv))) {
+    return(fallback_full())
+  }
+
+  if (any(maxv < minv)) {
+    stop("`max` must be >= `min` (after recycling to common length).", call. = FALSE)
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  lt_int <- as.integer(ltv)
+  lp_int <- as.integer(lpv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .qunif_opencl(n, p, min, max, verbose = verbose),
-    fallback_expr = function() rep(stats::qunif(p, min = min, max = max), n),
-    fallback = fallback, verbose = verbose, fn_name = "qunif_opencl"
+    opencl_expr = function() {
+      .qunif_opencl(pv, minv, maxv, lt_int, lp_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "qunif_opencl"
   )
 }
 

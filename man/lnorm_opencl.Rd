@@ -28,7 +28,16 @@ plnorm_opencl(
   verbose = FALSE
 )
 
-qlnorm_opencl(n, p, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE)
+qlnorm_opencl(
+  p,
+  meanlog = 0,
+  sdlog = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rlnorm_opencl(n, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE)
 }
@@ -39,9 +48,10 @@ rlnorm_opencl(n, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE)
 
 \item{sdlog}{Standard deviation on the log scale (must be > 0).}
 
-\item{log}{Logical; if \code{TRUE}, return log-density for \code{dlnorm_opencl} (like \code{\link[stats]{dlnorm}}).}
+\item{log}{\code{log} flag for densities (\code{stats} \emph{d}-family semantics).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{plnorm_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -49,11 +59,11 @@ rlnorm_opencl(n, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE)
 
 \item{q}{Numeric vector of quantiles for \code{plnorm_opencl}; recycled like \code{stats::plnorm}.}
 
-\item{lower.tail, log.p}{As in \code{stats::plnorm} for \code{plnorm_opencl} (vector inputs recycled).}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
 
-\item{n}{Number of observations. Non-negative integer scalar.}
+\item{p}{Numeric vector of probabilities for \code{qlnorm_opencl} (like \code{stats::qlnorm}).}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rlnorm_opencl}.}
 }
 \value{
 Numeric vector of length \code{n}.
@@ -68,7 +78,7 @@ if (has_opencl()) {
 
   dlnorm_opencl(rep(1.2, n), meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
   plnorm_opencl(q = 1.2, meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
-  qlnorm_opencl(n, p = 0.8, meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
+  qlnorm_opencl(rep(0.8, n), meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
   rlnorm_opencl(n, meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

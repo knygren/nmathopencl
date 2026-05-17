@@ -6,18 +6,20 @@
 #'
 #' @param x Numeric vector of quantiles for \code{dgamma_opencl}.
 #' @param q Numeric vector of quantiles for \code{pgamma_opencl} (same role as \code{stats::pgamma}).
-#' @param p Numeric scalar probability in \code{[0, 1]} for \code{qgamma_opencl}.
-#' @param n Number of observations (non-negative integer scalar). Used by \code{qgamma_opencl}
-#'   and \code{rgamma_opencl}; \code{dgamma_opencl} takes vector \code{x} first (like \code{stats::dgamma}).
+#' @param p Numeric vector of probabilities for \code{qgamma_opencl} (like \code{stats::qgamma}).
+#' @param n Number of observations (non-negative integer scalar). Used only by \code{rgamma_opencl};
+#'   \code{dgamma_opencl} takes vector \code{x} first (like \code{stats::dgamma}).
 #' @param shape Shape parameter (must be > 0).
 #' @param scale Scale parameter (must be > 0). For \code{pgamma_opencl}, combined with \code{rate}
 #'   like \code{stats::pgamma}.
 #' @param rate Optional rate for \code{pgamma_opencl}; see \code{\link[stats]{pgamma}}.
-#' @param log Logical; if \code{TRUE}, return log-density for \code{dgamma_opencl} (like \code{\link[stats]{dgamma}}).
-#' @param lower.tail,log.p As in \code{stats::pgamma} for \code{pgamma_opencl} (recycled).
-#' @param opencl_parallel Single logical passed through for future parallel dispatch (\code{pgamma_opencl}; unused).
-#' @param fallback Logical; if \code{TRUE}, fall back to CPU \code{stats} function
-#'   when OpenCL is unavailable or the OpenCL call fails.
+#' @param log \code{log} flag for densities (\code{stats} \emph{d}-family semantics).
+#' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
+#' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for
+#'   \code{pgamma_opencl}/\code{qgamma_opencl}; parallel dispatch reserved.
+#' @param fallback CPU when GPU dispatch/OpenCL lacks (\link{has_opencl}).\cr
+#' Prefer fixing kernel builds over masking ---
+#' \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 #' @param verbose Logical; print informational fallback messages.
 #'
 #' @details
@@ -31,6 +33,11 @@
 #' On the GPU path each recycled row runs \code{pgamma_kernel}
 #' once with \code{n_out = 1}. Missing or non-finite values after recycling, or non-positive
 #' \code{shape}/\code{scale}, use row-wise \code{stats::pgamma}.
+#'
+#' @section Known OpenCL limitations:
+#' Compilation of \code{qgamma_kernel} can fail (\code{ptxas}: unresolved \code{stirlerr_cycle_free}).
+#' Runnable examples omit GPU \code{qgamma_opencl} until resolved.
+#' See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 #'
 #' @return Numeric vector result from the corresponding gamma-family operation.
 #' @example inst/examples/Ex_gamma_opencl.R
@@ -217,16 +224,68 @@ pgamma_opencl <- function(
 
 #' @rdname gamma_opencl
 #' @export
-qgamma_opencl <- function(n, p, shape, scale = 1, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(p, "p", 0, 1)
-  .validate_scalar_num(shape, "shape", 0, Inf, open_lower = TRUE)
-  .validate_scalar_num(scale, "scale", 0, Inf, open_lower = TRUE)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+qgamma_opencl <- function(
+    p,
+    shape,
+    scale = 1,
+    lower.tail = TRUE,
+    log.p = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(p)) {
+    stop("`p` must be numeric.")
+  }
+  if (!is.numeric(shape)) {
+    stop("`shape` must be numeric.")
+  }
+  if (!is.numeric(scale)) {
+    stop("`scale` must be numeric.")
+  }
+  .validate_p_stage1_tails(lower.tail, log.p)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(p) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(p), length(shape), length(scale), length(lower.tail), length(log.p))
+  len <- .p_stage1_recycle_len(lens, "?qgamma")
+
+  pv <- rep_len(as.double(p), len)
+  sh <- rep_len(as.double(shape), len)
+  sc <- rep_len(as.double(scale), len)
+  ltv <- rep_len(lower.tail, len)
+  lpv <- rep_len(log.p, len)
+
+  fallback_full <- function() {
+    vapply(seq_len(len), function(i) {
+      stats::qgamma(pv[i], shape = sh[i], scale = sc[i], lower.tail = ltv[i], log.p = lpv[i])
+    }, numeric(1L))
+  }
+
+  if (any(!is.finite(pv) | !is.finite(sh) | !is.finite(sc))) {
+    return(fallback_full())
+  }
+
+  if (any(sh <= 0 | sc <= 0)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  lt_int <- as.integer(ltv)
+  lp_int <- as.integer(lpv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .qgamma_opencl(n, p, shape, scale, verbose = verbose),
-    fallback_expr = function() rep(stats::qgamma(p, shape = shape, scale = scale), n),
-    fallback = fallback, verbose = verbose, fn_name = "qgamma_opencl"
+    opencl_expr = function() {
+      .qgamma_opencl(pv, sh, sc, lt_int, lp_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "qgamma_opencl"
   )
 }
 

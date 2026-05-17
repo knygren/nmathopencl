@@ -26,7 +26,15 @@ psignrank_opencl(
   verbose = FALSE
 )
 
-qsignrank_opencl(n, p, nsize, fallback = TRUE, verbose = FALSE)
+qsignrank_opencl(
+  p,
+  nsize,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rsignrank_opencl(n, nsize, fallback = TRUE, verbose = FALSE)
 }
@@ -35,24 +43,25 @@ rsignrank_opencl(n, nsize, fallback = TRUE, verbose = FALSE)
 
 \item{nsize}{Number of observations used by signed-rank routines (must be > 0).}
 
-\item{log}{Logical; if \code{TRUE}, return log-density for \code{dsignrank_opencl} (like \code{\link[stats]{dsignrank}}).}
+\item{log}{\code{log} flag for densities (\code{stats} \emph{d}-family semantics).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{psignrank_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric vector of quantiles for \code{psignrank_opencl}; recycled like \code{stats::psignrank}.}
+\item{q}{\code{p*}-wrapper quantiles (\code{stats::psignrank} semantics).}
 
-\item{lower.tail, log.p}{As in \code{stats::psignrank} for \code{psignrank_opencl} (vector inputs recycled).}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
 
-\item{n}{Number of observations. Non-negative integer scalar.}
+\item{p}{\code{q*}-wrapper probabilities (\code{stats::qsignrank} semantics).}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{n}{Draw-count scalar (\code{r*} path only).}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector result from the corresponding signed-rank operation.
 }
 \description{
 OpenCL-backed density, distribution, quantile, and random generation wrappers
@@ -74,7 +83,7 @@ if (has_opencl()) {
   # n <- 5L
   # dsignrank_opencl(n, x = 6, nsize = 8, fallback = FALSE, verbose = TRUE)
   # psignrank_opencl(q = 6, nsize = 8, fallback = FALSE, verbose = TRUE)
-  # qsignrank_opencl(n, p = 0.8, nsize = 8, fallback = FALSE, verbose = TRUE)
+  # qsignrank_opencl(rep(0.8, n), nsize = 8, fallback = FALSE, verbose = TRUE)
   # rsignrank_opencl(n, nsize = 8, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

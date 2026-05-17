@@ -36,7 +36,15 @@ ppois_opencl(
   verbose = FALSE
 )
 
-qpois_opencl(n, p, lambda, fallback = TRUE, verbose = FALSE)
+qpois_opencl(
+  p,
+  lambda,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rpois_opencl(n, lambda, fallback = TRUE, verbose = FALSE)
 }
@@ -45,9 +53,10 @@ rpois_opencl(n, lambda, fallback = TRUE, verbose = FALSE)
 
 \item{lambda}{Mean/rate parameter (must be >= 0).}
 
-\item{log}{Logical; if \code{TRUE}, return log-density for \code{dpois_raw_opencl} / \code{dpois_opencl} (like \code{\link[stats]{dpois}}).}
+\item{log}{\code{log} flag for densities (\code{stats} \emph{d}-family semantics).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{ppois_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -55,14 +64,14 @@ rpois_opencl(n, lambda, fallback = TRUE, verbose = FALSE)
 
 \item{q}{Numeric vector of quantiles for \code{ppois_opencl}; recycled like \code{stats::ppois}.}
 
-\item{lower.tail, log.p}{As in \code{stats::ppois} for \code{ppois_opencl} (vector inputs recycled).}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
 
-\item{n}{Number of observations. Non-negative integer scalar.}
+\item{p}{Numeric vector of probabilities for \code{qpois_opencl} (like \code{stats::qpois}).}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rpois_opencl}.}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector result from the corresponding Poisson-family operation.
 }
 \description{
 OpenCL-backed density, distribution, quantile, and random generation wrappers
@@ -75,7 +84,7 @@ if (has_opencl()) {
   dpois_raw_opencl(rep(4, n), lambda = 4, fallback = FALSE, verbose = TRUE)
   dpois_opencl(rep(4, n), lambda = 4, fallback = FALSE, verbose = TRUE)
   ppois_opencl(q = 4, lambda = 4, fallback = FALSE, verbose = TRUE)
-  qpois_opencl(n, p = 0.8, lambda = 4, fallback = FALSE, verbose = TRUE)
+  qpois_opencl(rep(0.8, n), lambda = 4, fallback = FALSE, verbose = TRUE)
   rpois_opencl(n, lambda = 4, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

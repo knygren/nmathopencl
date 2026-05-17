@@ -30,7 +30,17 @@ phyper_opencl(
   verbose = FALSE
 )
 
-qhyper_opencl(n, p, m, n_black, k, fallback = TRUE, verbose = FALSE)
+qhyper_opencl(
+  p,
+  m,
+  n_black,
+  k,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 rhyper_opencl(n, m, n_black, k, fallback = TRUE, verbose = FALSE)
 }
@@ -43,9 +53,10 @@ rhyper_opencl(n, m, n_black, k, fallback = TRUE, verbose = FALSE)
 
 \item{k}{Number of draws (must be >= 0).}
 
-\item{log}{Logical; if \code{TRUE}, return log-density for \code{dhyper_opencl} (like \code{\link[stats]{dhyper}}).}
+\item{log}{\code{log} flag for densities (\code{stats} \emph{d}-family semantics).}
 
-\item{opencl_parallel}{OpenCL dispatch hint for \code{phyper_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+\item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+wrappers on this page; parallel kernels reserved.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
@@ -53,14 +64,14 @@ rhyper_opencl(n, m, n_black, k, fallback = TRUE, verbose = FALSE)
 
 \item{q}{Numeric vector of quantiles for \code{phyper_opencl}; recycled like \code{stats::phyper}.}
 
-\item{lower.tail, log.p}{As in \code{stats::phyper} for \code{phyper_opencl} (vector inputs recycled).}
+\item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
 
-\item{n}{Number of observations. Non-negative integer scalar.}
+\item{p}{Numeric vector of probabilities for \code{qhyper_opencl} (like \code{stats::qhyper}).}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{n}{Number of observations (non-negative integer scalar). Used only by \code{rhyper_opencl}.}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector result from the corresponding hypergeometric-family operation.
 }
 \description{
 OpenCL-backed density, distribution, quantile, and random generation wrappers
@@ -72,7 +83,7 @@ if (has_opencl()) {
 
   dhyper_opencl(rep(3, n), m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
   phyper_opencl(q = 3, m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
-  qhyper_opencl(n, p = 0.8, m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
+  qhyper_opencl(rep(0.8, n), m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
   rhyper_opencl(n, m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

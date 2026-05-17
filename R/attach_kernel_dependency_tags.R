@@ -141,11 +141,11 @@ attach_kernel_dependency_tags <- function(library_dir, dry_run = FALSE) {
 
 #' Print Dependency Tag Attachment Results
 #'
-#' Print a compact summary of [attach_kernel_dependency_tags()] output.
+#' Print output from \link{attach_kernel_dependency_tags}.
 #'
-#' @param x An object returned by [attach_kernel_dependency_tags()].
-#' @param max_rows Maximum rows to print from tabular sections.
-#' @param ... Additional arguments passed to [print.data.frame()].
+#' @param x Result of \link{attach_kernel_dependency_tags}.
+#' @param max_rows Maximum printed rows per table section.
+#' @param ... Forwarded to \code{print.data.frame}.
 #'
 #' @return Invisibly returns `x`.
 #'

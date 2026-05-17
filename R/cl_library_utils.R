@@ -9,8 +9,10 @@
 #' and reuse it across all kernel calls:
 #'
 #' ```r
-#' idx <- readRDS(system.file("cl/nmath/kernel_dependency_index.rds",
-#'                            package = "nmathopencl"))
+#' idx <- readRDS(
+#'   system.file(
+#'     "cl/nmath/kernel_dependency_index.rds",
+#'     package = "nmathopencl"))
 #' src <- load_library_for_kernel(kernel_path, nmath_dir, index = idx)
 #' ```
 #'
@@ -22,11 +24,7 @@
 #'   the required library file stems.  Defaults to `"all_depends"`.  For
 #'   kernels annotated with `@all_depends_nmath`, pass
 #'   `depends_tag = "all_depends_nmath"`.
-#' @param index Pre-loaded dependency index (`list`) produced by
-#'   [write_kernel_dependency_index()] and read with [readRDS()].  If `NULL`,
-#'   the index is read from
-#'   `file.path(library_dir, "kernel_dependency_index.rds")` and a `message()`
-#'   is emitted to encourage the recommended pattern.
+#' @param index Optional RDS list; \code{NULL} triggers lazy reads.
 #'
 #' @return A single character string: the concatenated source of all required
 #'   library files in dependency order, separated by a blank line.  Returns
@@ -34,7 +32,8 @@
 #'   annotation, so it can be safely passed to `paste()` or included in a
 #'   larger program assembly without special-casing.
 #'
-#' @seealso [extract_library_subset()], [write_kernel_dependency_index()]
+#' @seealso \link{extract_library_subset}
+#' @seealso \link{write_kernel_dependency_index}
 #' @export
 load_library_for_kernel <- function(kernel_path,
                                     library_dir,
@@ -91,10 +90,12 @@ load_library_for_kernel <- function(kernel_path,
 #' It is strongly recommended to supply a pre-loaded `index`:
 #'
 #' ```r
-#' idx <- readRDS(system.file("cl/nmath/kernel_dependency_index.rds",
-#'                            package = "nmathopencl"))
-#' result <- extract_library_subset(kernel_paths, nmath_dir, dest_dir,
-#'                                  index = idx)
+#' idx <- readRDS(
+#'   system.file(
+#'     "cl/nmath/kernel_dependency_index.rds",
+#'     package = "nmathopencl"))
+#' result <- extract_library_subset(
+#'   kernel_paths, nmath_dir, dest_dir, index = idx)
 #' ```
 #'
 #' @param kernel_paths Character vector of paths to kernel `.cl` files.  Each
@@ -127,7 +128,8 @@ load_library_for_kernel <- function(kernel_path,
 #'       existed and `overwrite = FALSE`.}
 #'   }
 #'
-#' @seealso [load_library_for_kernel()], [write_kernel_dependency_index()]
+#' @seealso \link{load_library_for_kernel}
+#' @seealso \link{write_kernel_dependency_index}
 #' @export
 extract_library_subset <- function(kernel_paths,
                                    library_dir,

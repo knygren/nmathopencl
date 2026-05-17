@@ -97,8 +97,8 @@ pnorm_opencl_cpp_export <- function(q, mean, sd, lower_tail, log_p, opencl_paral
     .Call(`_nmathopencl_pnorm_opencl_cpp_export`, q, mean, sd, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qnorm_opencl_cpp_export <- function(n, p, mu, sigma, verbose = FALSE) {
-    .Call(`_nmathopencl_qnorm_opencl_cpp_export`, n, p, mu, sigma, verbose)
+qnorm_opencl_cpp_export <- function(p, mean, sd, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qnorm_opencl_cpp_export`, p, mean, sd, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 dunif_opencl_cpp_export <- function(x, min, max, give_log, opencl_parallel_code, verbose = FALSE) {
@@ -109,8 +109,8 @@ punif_opencl_cpp_export <- function(q, min, max, lower_tail, log_p, opencl_paral
     .Call(`_nmathopencl_punif_opencl_cpp_export`, q, min, max, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qunif_opencl_cpp_export <- function(n, p, min, max, verbose = FALSE) {
-    .Call(`_nmathopencl_qunif_opencl_cpp_export`, n, p, min, max, verbose)
+qunif_opencl_cpp_export <- function(p, min, max, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qunif_opencl_cpp_export`, p, min, max, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 dgamma_opencl_cpp_export <- function(x, shape, scale, give_log, opencl_parallel_code, verbose = FALSE) {
@@ -121,8 +121,8 @@ pgamma_opencl_cpp_export <- function(q, shape, scale, lower_tail, log_p, opencl_
     .Call(`_nmathopencl_pgamma_opencl_cpp_export`, q, shape, scale, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qgamma_opencl_cpp_export <- function(n, p, shape, scale, verbose = FALSE) {
-    .Call(`_nmathopencl_qgamma_opencl_cpp_export`, n, p, shape, scale, verbose)
+qgamma_opencl_cpp_export <- function(p, shape, scale, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qgamma_opencl_cpp_export`, p, shape, scale, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 rgamma_opencl_cpp_export <- function(n, shape, scale, verbose = FALSE) {
@@ -137,8 +137,8 @@ pbeta_opencl_cpp_export <- function(q, shape1, shape2, ncp, lower_tail, log_p, o
     .Call(`_nmathopencl_pbeta_opencl_cpp_export`, q, shape1, shape2, ncp, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qbeta_opencl_cpp_export <- function(n, p, a, b, verbose = FALSE) {
-    .Call(`_nmathopencl_qbeta_opencl_cpp_export`, n, p, a, b, verbose)
+qbeta_opencl_cpp_export <- function(p, shape1, shape2, ncp, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qbeta_opencl_cpp_export`, p, shape1, shape2, ncp, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 rbeta_opencl_cpp_export <- function(n, a, b, verbose = FALSE) {
@@ -153,8 +153,8 @@ plnorm_opencl_cpp_export <- function(q, meanlog, sdlog, lower_tail, log_p, openc
     .Call(`_nmathopencl_plnorm_opencl_cpp_export`, q, meanlog, sdlog, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qlnorm_opencl_cpp_export <- function(n, p, meanlog, sdlog, verbose = FALSE) {
-    .Call(`_nmathopencl_qlnorm_opencl_cpp_export`, n, p, meanlog, sdlog, verbose)
+qlnorm_opencl_cpp_export <- function(p, meanlog, sdlog, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qlnorm_opencl_cpp_export`, p, meanlog, sdlog, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 rlnorm_opencl_cpp_export <- function(n, meanlog, sdlog, verbose = FALSE) {
@@ -169,8 +169,8 @@ pchisq_opencl_cpp_export <- function(q, df, ncp, lower_tail, log_p, opencl_paral
     .Call(`_nmathopencl_pchisq_opencl_cpp_export`, q, df, ncp, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qchisq_opencl_cpp_export <- function(n, p, df, verbose = FALSE) {
-    .Call(`_nmathopencl_qchisq_opencl_cpp_export`, n, p, df, verbose)
+qchisq_opencl_cpp_export <- function(p, df, ncp, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qchisq_opencl_cpp_export`, p, df, ncp, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 rchisq_opencl_cpp_export <- function(n, df, verbose = FALSE) {
@@ -189,8 +189,8 @@ pf_opencl_cpp_export <- function(q, df1, df2, ncp, lower_tail, log_p, opencl_par
     .Call(`_nmathopencl_pf_opencl_cpp_export`, q, df1, df2, ncp, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qf_opencl_cpp_export <- function(n, p, df1, df2, verbose = FALSE) {
-    .Call(`_nmathopencl_qf_opencl_cpp_export`, n, p, df1, df2, verbose)
+qf_opencl_cpp_export <- function(p, df1, df2, ncp, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qf_opencl_cpp_export`, p, df1, df2, ncp, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 rf_opencl_cpp_export <- function(n, df1, df2, verbose = FALSE) {
@@ -205,8 +205,8 @@ pt_opencl_cpp_export <- function(q, df, ncp, lower_tail, log_p, opencl_parallel_
     .Call(`_nmathopencl_pt_opencl_cpp_export`, q, df, ncp, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qt_opencl_cpp_export <- function(n, p, df, verbose = FALSE) {
-    .Call(`_nmathopencl_qt_opencl_cpp_export`, n, p, df, verbose)
+qt_opencl_cpp_export <- function(p, df, ncp, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qt_opencl_cpp_export`, p, df, ncp, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 rt_opencl_cpp_export <- function(n, df, verbose = FALSE) {
@@ -233,8 +233,8 @@ pnbinom_opencl_cpp_export <- function(q, size, prob, lower_tail, log_p, opencl_p
     .Call(`_nmathopencl_pnbinom_opencl_cpp_export`, q, size, prob, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qnbinom_opencl_cpp_export <- function(n, p, size, prob, verbose = FALSE) {
-    .Call(`_nmathopencl_qnbinom_opencl_cpp_export`, n, p, size, prob, verbose)
+qnbinom_opencl_cpp_export <- function(p, size, prob, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qnbinom_opencl_cpp_export`, p, size, prob, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 rnbinom_opencl_cpp_export <- function(n, size, prob, verbose = FALSE) {
@@ -261,8 +261,8 @@ pcauchy_opencl_cpp_export <- function(q, location, scale, lower_tail, log_p, ope
     .Call(`_nmathopencl_pcauchy_opencl_cpp_export`, q, location, scale, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qcauchy_opencl_cpp_export <- function(n, p, location, scale, verbose = FALSE) {
-    .Call(`_nmathopencl_qcauchy_opencl_cpp_export`, n, p, location, scale, verbose)
+qcauchy_opencl_cpp_export <- function(p, location, scale, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qcauchy_opencl_cpp_export`, p, location, scale, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 rcauchy_opencl_cpp_export <- function(n, location, scale, verbose = FALSE) {
@@ -277,8 +277,8 @@ pexp_opencl_cpp_export <- function(q, rate, lower_tail, log_p, opencl_parallel_c
     .Call(`_nmathopencl_pexp_opencl_cpp_export`, q, rate, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qexp_opencl_cpp_export <- function(n, p, rate, verbose = FALSE) {
-    .Call(`_nmathopencl_qexp_opencl_cpp_export`, n, p, rate, verbose)
+qexp_opencl_cpp_export <- function(p, rate, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qexp_opencl_cpp_export`, p, rate, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 dgeom_opencl_cpp_export <- function(x, prob, give_log, opencl_parallel_code, verbose = FALSE) {
@@ -289,8 +289,8 @@ pgeom_opencl_cpp_export <- function(q, prob, lower_tail, log_p, opencl_parallel_
     .Call(`_nmathopencl_pgeom_opencl_cpp_export`, q, prob, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qgeom_opencl_cpp_export <- function(n, p, prob, verbose = FALSE) {
-    .Call(`_nmathopencl_qgeom_opencl_cpp_export`, n, p, prob, verbose)
+qgeom_opencl_cpp_export <- function(p, prob, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qgeom_opencl_cpp_export`, p, prob, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 rgeom_opencl_cpp_export <- function(n, prob, verbose = FALSE) {
@@ -305,20 +305,20 @@ phyper_opencl_cpp_export <- function(q, m, n_black, k, lower_tail, log_p, opencl
     .Call(`_nmathopencl_phyper_opencl_cpp_export`, q, m, n_black, k, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qhyper_opencl_cpp_export <- function(n, p, r, b, n1, verbose = FALSE) {
-    .Call(`_nmathopencl_qhyper_opencl_cpp_export`, n, p, r, b, n1, verbose)
+qhyper_opencl_cpp_export <- function(p, r, b, n1, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qhyper_opencl_cpp_export`, p, r, b, n1, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 rhyper_opencl_cpp_export <- function(n, r, b, n1, verbose = FALSE) {
     .Call(`_nmathopencl_rhyper_opencl_cpp_export`, n, r, b, n1, verbose)
 }
 
-qbinom_opencl_cpp_export <- function(n, p, size, prob, verbose = FALSE) {
-    .Call(`_nmathopencl_qbinom_opencl_cpp_export`, n, p, size, prob, verbose)
+qbinom_opencl_cpp_export <- function(p, size, prob, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qbinom_opencl_cpp_export`, p, size, prob, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qpois_opencl_cpp_export <- function(n, p, lambda, verbose = FALSE) {
-    .Call(`_nmathopencl_qpois_opencl_cpp_export`, n, p, lambda, verbose)
+qpois_opencl_cpp_export <- function(p, lambda, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qpois_opencl_cpp_export`, p, lambda, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 dpois_raw_opencl_cpp_export <- function(x, lambda, give_log, opencl_parallel_code, verbose = FALSE) {
@@ -333,8 +333,8 @@ ppois_opencl_cpp_export <- function(q, lambda, lower_tail, log_p, opencl_paralle
     .Call(`_nmathopencl_ppois_opencl_cpp_export`, q, lambda, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qnbinom_mu_opencl_cpp_export <- function(n, p, size, mu, verbose = FALSE) {
-    .Call(`_nmathopencl_qnbinom_mu_opencl_cpp_export`, n, p, size, mu, verbose)
+qnbinom_mu_opencl_cpp_export <- function(p, size, mu, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qnbinom_mu_opencl_cpp_export`, p, size, mu, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 rpois_opencl_cpp_export <- function(n, lambda, verbose = FALSE) {
@@ -353,8 +353,8 @@ pweibull_opencl_cpp_export <- function(q, shape, scale, lower_tail, log_p, openc
     .Call(`_nmathopencl_pweibull_opencl_cpp_export`, q, shape, scale, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qweibull_opencl_cpp_export <- function(n, p, shape, scale, verbose = FALSE) {
-    .Call(`_nmathopencl_qweibull_opencl_cpp_export`, n, p, shape, scale, verbose)
+qweibull_opencl_cpp_export <- function(p, shape, scale, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qweibull_opencl_cpp_export`, p, shape, scale, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 rweibull_opencl_cpp_export <- function(n, shape, scale, verbose = FALSE) {
@@ -369,40 +369,24 @@ plogis_opencl_cpp_export <- function(q, location, scale, lower_tail, log_p, open
     .Call(`_nmathopencl_plogis_opencl_cpp_export`, q, location, scale, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qlogis_opencl_cpp_export <- function(n, p, location, scale, verbose = FALSE) {
-    .Call(`_nmathopencl_qlogis_opencl_cpp_export`, n, p, location, scale, verbose)
+qlogis_opencl_cpp_export <- function(p, location, scale, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qlogis_opencl_cpp_export`, p, location, scale, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 rlogis_opencl_cpp_export <- function(n, location, scale, verbose = FALSE) {
     .Call(`_nmathopencl_rlogis_opencl_cpp_export`, n, location, scale, verbose)
 }
 
-qnchisq_opencl_cpp_export <- function(n, p, df, ncp, verbose = FALSE) {
-    .Call(`_nmathopencl_qnchisq_opencl_cpp_export`, n, p, df, ncp, verbose)
-}
-
-qnf_opencl_cpp_export <- function(n, p, df1, df2, ncp, verbose = FALSE) {
-    .Call(`_nmathopencl_qnf_opencl_cpp_export`, n, p, df1, df2, ncp, verbose)
-}
-
-qnbeta_opencl_cpp_export <- function(n, p, a, b, ncp, verbose = FALSE) {
-    .Call(`_nmathopencl_qnbeta_opencl_cpp_export`, n, p, a, b, ncp, verbose)
-}
-
 dnbeta_opencl_cpp_export <- function(x, shape1, shape2, ncp, give_log, opencl_parallel_code, verbose = FALSE) {
     .Call(`_nmathopencl_dnbeta_opencl_cpp_export`, x, shape1, shape2, ncp, give_log, opencl_parallel_code, verbose)
-}
-
-qnt_opencl_cpp_export <- function(n, p, df, ncp, verbose = FALSE) {
-    .Call(`_nmathopencl_qnt_opencl_cpp_export`, n, p, df, ncp, verbose)
 }
 
 ptukey_opencl_cpp_export <- function(q, nmeans, df, nranges, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
     .Call(`_nmathopencl_ptukey_opencl_cpp_export`, q, nmeans, df, nranges, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qtukey_opencl_cpp_export <- function(n, p, nmeans, df, nranges, verbose = FALSE) {
-    .Call(`_nmathopencl_qtukey_opencl_cpp_export`, n, p, nmeans, df, nranges, verbose)
+qtukey_opencl_cpp_export <- function(p, nmeans, df, nranges, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qtukey_opencl_cpp_export`, p, nmeans, df, nranges, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 dwilcox_opencl_cpp_export <- function(x, m, n2, give_log, opencl_parallel_code, verbose = FALSE) {
@@ -413,8 +397,8 @@ pwilcox_opencl_cpp_export <- function(q, m, n2, lower_tail, log_p, opencl_parall
     .Call(`_nmathopencl_pwilcox_opencl_cpp_export`, q, m, n2, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qwilcox_opencl_cpp_export <- function(n, p, m, n2, verbose = FALSE) {
-    .Call(`_nmathopencl_qwilcox_opencl_cpp_export`, n, p, m, n2, verbose)
+qwilcox_opencl_cpp_export <- function(p, m, n2, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qwilcox_opencl_cpp_export`, p, m, n2, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 dsignrank_opencl_cpp_export <- function(x, nsize, give_log, opencl_parallel_code, verbose = FALSE) {
@@ -425,8 +409,8 @@ psignrank_opencl_cpp_export <- function(q, nsize, lower_tail, log_p, opencl_para
     .Call(`_nmathopencl_psignrank_opencl_cpp_export`, q, nsize, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
-qsignrank_opencl_cpp_export <- function(n, p, nsize, verbose = FALSE) {
-    .Call(`_nmathopencl_qsignrank_opencl_cpp_export`, n, p, nsize, verbose)
+qsignrank_opencl_cpp_export <- function(p, nsize, lower_tail, log_p, opencl_parallel_code, verbose = FALSE) {
+    .Call(`_nmathopencl_qsignrank_opencl_cpp_export`, p, nsize, lower_tail, log_p, opencl_parallel_code, verbose)
 }
 
 rsignrank_opencl_cpp_export <- function(n, nsize, verbose = FALSE) {

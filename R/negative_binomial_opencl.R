@@ -4,21 +4,21 @@
 #' for the negative binomial distribution, with variants parameterized by
 #' \code{prob} and by \code{mu}.
 #'
-#' @param n Number of observations. Non-negative integer scalar.
+#' @param n Observations scalar; used by negative-binomial \code{r*} wrappers only.
 #' @param x Numeric scalar quantile (must be >= 0).
-#' @param q Numeric vector of quantiles for \code{pnbinom_opencl} / \code{pnbinom_mu_opencl}; recycled like \code{stats::pnbinom}.
-#' @param p Numeric scalar probability in \code{[0, 1]}.
+#' @param q Quantiles for \code{pnbinom*} wrappers (\code{stats::pnbinom} recycling).
+#' @param p Probabilities for \code{qnbinom*} wrappers (\code{stats::qnbinom} semantics).
 #' @param size Dispersion/size parameter (must be >= 0).
 #' @param prob Probability of success in \code{[0, 1]}.
 #' @param mu Mean parameter (must be >= 0).
 #' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
 #' @param verbose Logical; print fallback/error diagnostics.
-#' @param lower.tail,log.p As in \code{stats::pnbinom} for \code{pnbinom_opencl} / \code{pnbinom_mu_opencl} (vector inputs recycled).
-#' @param opencl_parallel OpenCL dispatch hint for \code{pnbinom_opencl} / \code{pnbinom_mu_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.
-#' @param log Logical; if \code{TRUE}, return log-density for \code{dnbinom_opencl} / \code{dnbinom_mu_opencl}
-#'   (like \code{\link[stats]{dnbinom}}).
+#' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
+#' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
+#'   wrappers on this page; parallel kernels reserved.
+#' @param log \code{log} density switch for density wrappers (\code{stats} semantics).
 #'
-#' @return Numeric vector of length \code{n}.
+#' @return Numeric vector result from the corresponding negative-binomial operation.
 #' @example inst/examples/Ex_negative_binomial_opencl.R
 #' @rdname negative_binomial_opencl
 #' @export
@@ -157,16 +157,68 @@ pnbinom_opencl <- function(
 
 #' @rdname negative_binomial_opencl
 #' @export
-qnbinom_opencl <- function(n, p, size, prob, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(p, "p", 0, 1)
-  .validate_scalar_num(size, "size", 0, Inf)
-  .validate_scalar_num(prob, "prob", 0, 1)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+qnbinom_opencl <- function(
+    p,
+    size,
+    prob,
+    lower.tail = TRUE,
+    log.p = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(p)) {
+    stop("`p` must be numeric.")
+  }
+  if (!is.numeric(size)) {
+    stop("`size` must be numeric.")
+  }
+  if (!is.numeric(prob)) {
+    stop("`prob` must be numeric.")
+  }
+  .validate_p_stage1_tails(lower.tail, log.p)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(p) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(p), length(size), length(prob), length(lower.tail), length(log.p))
+  len <- .p_stage1_recycle_len(lens, "?qnbinom")
+
+  pv <- rep_len(as.double(p), len)
+  sv <- rep_len(as.double(size), len)
+  pb <- rep_len(as.double(prob), len)
+  ltv <- rep_len(lower.tail, len)
+  lpv <- rep_len(log.p, len)
+
+  fallback_full <- function() {
+    vapply(seq_len(len), function(i) {
+      stats::qnbinom(pv[i], size = sv[i], prob = pb[i], lower.tail = ltv[i], log.p = lpv[i])
+    }, numeric(1L))
+  }
+
+  if (any(!is.finite(pv) | !is.finite(sv) | !is.finite(pb))) {
+    return(fallback_full())
+  }
+
+  if (any(sv < 0 | pb < 0 | pb > 1)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  lt_int <- as.integer(ltv)
+  lp_int <- as.integer(lpv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .qnbinom_opencl(n, p, size, prob, verbose = verbose),
-    fallback_expr = function() rep(stats::qnbinom(p, size = size, prob = prob), n),
-    fallback = fallback, verbose = verbose, fn_name = "qnbinom_opencl"
+    opencl_expr = function() {
+      .qnbinom_opencl(pv, sv, pb, lt_int, lp_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "qnbinom_opencl"
   )
 }
 
@@ -321,16 +373,68 @@ pnbinom_mu_opencl <- function(
 
 #' @rdname negative_binomial_opencl
 #' @export
-qnbinom_mu_opencl <- function(n, p, size, mu, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(p, "p", 0, 1)
-  .validate_scalar_num(size, "size", 0, Inf)
-  .validate_scalar_num(mu, "mu", 0, Inf)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+qnbinom_mu_opencl <- function(
+    p,
+    size,
+    mu,
+    lower.tail = TRUE,
+    log.p = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(p)) {
+    stop("`p` must be numeric.")
+  }
+  if (!is.numeric(size)) {
+    stop("`size` must be numeric.")
+  }
+  if (!is.numeric(mu)) {
+    stop("`mu` must be numeric.")
+  }
+  .validate_p_stage1_tails(lower.tail, log.p)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(p) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(p), length(size), length(mu), length(lower.tail), length(log.p))
+  len <- .p_stage1_recycle_len(lens, "?qnbinom")
+
+  pv <- rep_len(as.double(p), len)
+  sv <- rep_len(as.double(size), len)
+  mv <- rep_len(as.double(mu), len)
+  ltv <- rep_len(lower.tail, len)
+  lpv <- rep_len(log.p, len)
+
+  fallback_full <- function() {
+    vapply(seq_len(len), function(i) {
+      stats::qnbinom(pv[i], size = sv[i], mu = mv[i], lower.tail = ltv[i], log.p = lpv[i])
+    }, numeric(1L))
+  }
+
+  if (any(!is.finite(pv) | !is.finite(sv) | !is.finite(mv))) {
+    return(fallback_full())
+  }
+
+  if (any(sv < 0 | mv < 0)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  lt_int <- as.integer(ltv)
+  lp_int <- as.integer(lpv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .qnbinom_mu_opencl(n, p, size, mu, verbose = verbose),
-    fallback_expr = function() rep(stats::qnbinom(p, size = size, mu = mu), n),
-    fallback = fallback, verbose = verbose, fn_name = "qnbinom_mu_opencl"
+    opencl_expr = function() {
+      .qnbinom_mu_opencl(pv, sv, mv, lt_int, lp_int, opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "qnbinom_mu_opencl"
   )
 }
 
