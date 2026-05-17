@@ -9,7 +9,15 @@
 \usage{
 dgeom_opencl(n, x, prob, fallback = TRUE, verbose = FALSE)
 
-pgeom_opencl(n, q, prob, fallback = TRUE, verbose = FALSE)
+pgeom_opencl(
+  q,
+  prob,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 qgeom_opencl(n, p, prob, fallback = TRUE, verbose = FALSE)
 
@@ -26,7 +34,11 @@ rgeom_opencl(n, prob, fallback = TRUE, verbose = FALSE)
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric scalar quantile.}
+\item{q}{Numeric vector of quantiles for \code{pgeom_opencl}; recycled like \code{stats::pgeom}.}
+
+\item{lower.tail, log.p}{As in \code{stats::pgeom} for \code{pgeom_opencl} (vector inputs recycled).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{pgeom_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -42,7 +54,7 @@ if (has_opencl()) {
   n <- 5L
 
   dgeom_opencl(n, x = 4, prob = 0.3, fallback = FALSE, verbose = TRUE)
-  pgeom_opencl(n, q = 4, prob = 0.3, fallback = FALSE, verbose = TRUE)
+  pgeom_opencl(q = 4, prob = 0.3, fallback = FALSE, verbose = TRUE)
   qgeom_opencl(n, p = 0.8, prob = 0.3, fallback = FALSE, verbose = TRUE)
   rgeom_opencl(n, prob = 0.3, fallback = FALSE, verbose = TRUE)
 } else {

@@ -13,7 +13,16 @@
 \usage{
 dnbinom_opencl(n, x, size, prob, fallback = TRUE, verbose = FALSE)
 
-pnbinom_opencl(n, q, size, prob, fallback = TRUE, verbose = FALSE)
+pnbinom_opencl(
+  q,
+  size,
+  prob,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 qnbinom_opencl(n, p, size, prob, fallback = TRUE, verbose = FALSE)
 
@@ -21,7 +30,16 @@ rnbinom_opencl(n, size, prob, fallback = TRUE, verbose = FALSE)
 
 dnbinom_mu_opencl(n, x, size, mu, fallback = TRUE, verbose = FALSE)
 
-pnbinom_mu_opencl(n, q, size, mu, fallback = TRUE, verbose = FALSE)
+pnbinom_mu_opencl(
+  q,
+  size,
+  mu,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 qnbinom_mu_opencl(n, p, size, mu, fallback = TRUE, verbose = FALSE)
 
@@ -40,7 +58,11 @@ rnbinom_mu_opencl(n, size, mu, fallback = TRUE, verbose = FALSE)
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric scalar quantile (must be >= 0).}
+\item{q}{Numeric vector of quantiles for \code{pnbinom_opencl} / \code{pnbinom_mu_opencl}; recycled like \code{stats::pnbinom}.}
+
+\item{lower.tail, log.p}{As in \code{stats::pnbinom} for \code{pnbinom_opencl} / \code{pnbinom_mu_opencl} (vector inputs recycled).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{pnbinom_opencl} / \code{pnbinom_mu_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 
@@ -59,12 +81,12 @@ if (has_opencl()) {
   n <- 5L
 
   dnbinom_opencl(n, x = 4, size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
-  pnbinom_opencl(n, q = 4, size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
+  pnbinom_opencl(q = 4, size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
   qnbinom_opencl(n, p = 0.8, size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
   rnbinom_opencl(n, size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
 
   dnbinom_mu_opencl(n, x = 4, size = 7, mu = 5, fallback = FALSE, verbose = TRUE)
-  pnbinom_mu_opencl(n, q = 4, size = 7, mu = 5, fallback = FALSE, verbose = TRUE)
+  pnbinom_mu_opencl(q = 4, size = 7, mu = 5, fallback = FALSE, verbose = TRUE)
   qnbinom_mu_opencl(n, p = 0.8, size = 7, mu = 5, fallback = FALSE, verbose = TRUE)
   rnbinom_mu_opencl(n, size = 7, mu = 5, fallback = FALSE, verbose = TRUE)
 } else {

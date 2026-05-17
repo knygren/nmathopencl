@@ -12,7 +12,17 @@ dbeta_opencl(n, x, shape1, shape2, fallback = TRUE, verbose = FALSE)
 
 dnbeta_opencl(n, x, shape1, shape2, ncp, fallback = TRUE, verbose = FALSE)
 
-pbeta_opencl(n, x, shape1, shape2, ncp = 0, fallback = TRUE, verbose = FALSE)
+pbeta_opencl(
+  q,
+  shape1,
+  shape2,
+  ncp = 0,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 qbeta_opencl(n, p, shape1, shape2, ncp = 0, fallback = TRUE, verbose = FALSE)
 
@@ -33,6 +43,12 @@ rbeta_opencl(n, shape1, shape2, fallback = TRUE, verbose = FALSE)
 
 \item{ncp}{Non-centrality parameter (must be >= 0). Used by
 \code{dnbeta_opencl()}, \code{pbeta_opencl()}, and \code{qbeta_opencl()}.}
+
+\item{q}{Numeric vector of quantiles for \code{pbeta_opencl}; recycled like \code{stats::pbeta}.}
+
+\item{lower.tail, log.p}{As in \code{stats::pbeta} for \code{pbeta_opencl} (vector inputs recycled).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{pbeta_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -57,7 +73,7 @@ if (has_opencl()) {
 
   dbeta_opencl(n, x = 0.6, shape1 = 2.5, shape2 = 4, fallback = FALSE, verbose = TRUE)
   dnbeta_opencl(n, x = 0.6, shape1 = 2.5, shape2 = 4, ncp = 0.8, fallback = FALSE, verbose = TRUE)
-  pbeta_opencl(n, x = 0.6, shape1 = 2.5, shape2 = 4, ncp = 0, fallback = FALSE, verbose = TRUE)
+  pbeta_opencl(q = 0.6, shape1 = 2.5, shape2 = 4, ncp = 0, fallback = FALSE, verbose = TRUE)
   qbeta_opencl(n, p = 0.8, shape1 = 2.5, shape2 = 4, ncp = 0, fallback = FALSE, verbose = TRUE)
   rbeta_opencl(n, shape1 = 2.5, shape2 = 4, fallback = FALSE, verbose = TRUE)
 } else {

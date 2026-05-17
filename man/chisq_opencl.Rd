@@ -9,7 +9,16 @@
 \usage{
 dchisq_opencl(n, x, df, ncp = 0, fallback = TRUE, verbose = FALSE)
 
-pchisq_opencl(n, x, df, ncp = 0, fallback = TRUE, verbose = FALSE)
+pchisq_opencl(
+  q,
+  df,
+  ncp = 0,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 qchisq_opencl(n, p, df, ncp = 0, fallback = TRUE, verbose = FALSE)
 
@@ -28,6 +37,12 @@ rchisq_opencl(n, df, ncp = 0, fallback = TRUE, verbose = FALSE)
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
+\item{q}{Numeric vector of quantiles for \code{pchisq_opencl}; recycled like \code{stats::pchisq}.}
+
+\item{lower.tail, log.p}{As in \code{stats::pchisq} for \code{pchisq_opencl} (vector inputs recycled).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{pchisq_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
+
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
 \value{
@@ -42,7 +57,7 @@ if (has_opencl()) {
   n <- 5L
 
   dchisq_opencl(n, x = 4.5, df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)
-  pchisq_opencl(n, x = 4.5, df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)
+  pchisq_opencl(q = 4.5, df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)
   qchisq_opencl(n, p = 0.8, df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)
   rchisq_opencl(n, df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)
 } else {

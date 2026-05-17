@@ -9,12 +9,13 @@ __kernel void pnchisq_kernel(
     const double x,
     const double df,
     const double ncp,
-    const double unused_df2,
-    const double unused_p,
+    const double lower_tail_d,
+    const double log_p_d,
     __global double* out,
     const int n
 ) {
-    (void)unused_df2; (void)unused_p;
+    int lt = (lower_tail_d != 0.0) ? 1 : 0;
+    int lp = (log_p_d != 0.0) ? 1 : 0;
     if (get_global_id(0) != 0) return;
-    for (int i = 0; i < n; ++i) out[i] = pnchisq(x, df, ncp, 1, 0);
+    for (int i = 0; i < n; ++i) out[i] = pnchisq(x, df, ncp, lt, lp);
 }

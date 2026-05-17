@@ -13,6 +13,9 @@
 #'   \code{dnbeta_opencl()}, \code{pbeta_opencl()}, and \code{qbeta_opencl()}.
 #' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
 #' @param verbose Logical; print fallback/error diagnostics.
+#' @param q Numeric vector of quantiles for \code{pbeta_opencl}; recycled like \code{stats::pbeta}.
+#' @param lower.tail,log.p As in \code{stats::pbeta} for \code{pbeta_opencl} (vector inputs recycled).
+#' @param opencl_parallel OpenCL dispatch hint for \code{pbeta_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.
 #'
 #' @section Known OpenCL limitations:
 #' \code{qbeta_opencl()} in the non-central path (\code{ncp > 0}, via
@@ -54,23 +57,94 @@ dnbeta_opencl <- function(n, x, shape1, shape2, ncp, fallback = TRUE, verbose = 
 
 #' @rdname beta_opencl
 #' @export
-pbeta_opencl <- function(n, x, shape1, shape2, ncp = 0, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x", 0, 1)
-  .validate_scalar_num(shape1, "shape1", 0, Inf, open_lower = TRUE)
-  .validate_scalar_num(shape2, "shape2", 0, Inf, open_lower = TRUE)
-  .validate_scalar_num(ncp, "ncp", 0, Inf)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+pbeta_opencl <- function(
+    q,
+    shape1,
+    shape2,
+    ncp = 0,
+    lower.tail = TRUE,
+    log.p = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(q)) {
+    stop("`q` must be numeric.")
+  }
+  if (!is.numeric(shape1)) {
+    stop("`shape1` must be numeric.")
+  }
+  if (!is.numeric(shape2)) {
+    stop("`shape2` must be numeric.")
+  }
+  if (!is.numeric(ncp)) {
+    stop("`ncp` must be numeric.")
+  }
+  .validate_p_stage1_tails(lower.tail, log.p)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(q) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(
+    length(q),
+    length(shape1),
+    length(shape2),
+    length(ncp),
+    length(lower.tail),
+    length(log.p)
+  )
+  len <- .p_stage1_recycle_len(lens, "?pbeta")
+
+  qv <- rep_len(q, len)
+  av <- rep_len(shape1, len)
+  bv <- rep_len(shape2, len)
+  nv <- rep_len(ncp, len)
+  ltv <- rep_len(lower.tail, len)
+  lpv <- rep_len(log.p, len)
+
+  fallback_full <- function() {
+    vapply(seq_len(len), function(i) {
+      stats::pbeta(
+        qv[i],
+        shape1 = av[i],
+        shape2 = bv[i],
+        ncp = nv[i],
+        lower.tail = ltv[i],
+        log.p = lpv[i]
+      )
+    }, numeric(1L))
+  }
+
+  if (any(!is.finite(qv) | !is.finite(av) | !is.finite(bv) | !is.finite(nv))) {
+    return(fallback_full())
+  }
+
+  if (any(av <= 0 | bv <= 0 | nv < 0)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+
   .opencl_try_or_fallback(
     opencl_expr = function() {
-      if (ncp == 0) {
-        .pbeta_opencl(n, x, shape1, shape2, verbose = verbose)
-      } else {
-        .pnbeta_opencl(n, x, shape1, shape2, ncp, verbose = verbose)
-      }
+      .pbeta_opencl(
+        as.double(qv),
+        as.double(av),
+        as.double(bv),
+        as.double(nv),
+        as.integer(ltv),
+        as.integer(lpv),
+        opc,
+        verbose
+      )
     },
-    fallback_expr = function() rep(stats::pbeta(x, shape1 = shape1, shape2 = shape2, ncp = ncp), n),
-    fallback = fallback, verbose = verbose, fn_name = "pbeta_opencl"
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "pbeta_opencl"
   )
 }
 

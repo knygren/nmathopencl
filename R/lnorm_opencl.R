@@ -5,12 +5,14 @@
 #'
 #' @param n Number of observations. Non-negative integer scalar.
 #' @param x Numeric scalar quantile (must be >= 0).
-#' @param q Numeric scalar quantile (must be >= 0).
+#' @param q Numeric vector of quantiles for \code{plnorm_opencl}; recycled like \code{stats::plnorm}.
 #' @param p Numeric scalar probability in \code{[0, 1]}.
 #' @param meanlog Mean of the distribution on the log scale.
 #' @param sdlog Standard deviation on the log scale (must be > 0).
 #' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
 #' @param verbose Logical; print fallback/error diagnostics.
+#' @param lower.tail,log.p As in \code{stats::plnorm} for \code{plnorm_opencl} (vector inputs recycled).
+#' @param opencl_parallel OpenCL dispatch hint for \code{plnorm_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.
 #'
 #' @return Numeric vector of length \code{n}.
 #' @example inst/examples/Ex_lnorm_opencl.R
@@ -31,16 +33,74 @@ dlnorm_opencl <- function(n, x, meanlog = 0, sdlog = 1, fallback = TRUE, verbose
 
 #' @rdname lnorm_opencl
 #' @export
-plnorm_opencl <- function(n, q, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(q, "q", 0, Inf)
-  .validate_scalar_num(meanlog, "meanlog")
-  .validate_scalar_num(sdlog, "sdlog", 0, Inf, open_lower = TRUE)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+plnorm_opencl <- function(
+    q,
+    meanlog = 0,
+    sdlog = 1,
+    lower.tail = TRUE,
+    log.p = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(q)) {
+    stop("`q` must be numeric.")
+  }
+  if (!is.numeric(meanlog)) {
+    stop("`meanlog` must be numeric.")
+  }
+  if (!is.numeric(sdlog)) {
+    stop("`sdlog` must be numeric.")
+  }
+  .validate_p_stage1_tails(lower.tail, log.p)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(q) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(q), length(meanlog), length(sdlog), length(lower.tail), length(log.p))
+  len <- .p_stage1_recycle_len(lens, "?plnorm")
+
+  qv <- rep_len(q, len)
+  mv <- rep_len(meanlog, len)
+  sv <- rep_len(sdlog, len)
+  ltv <- rep_len(lower.tail, len)
+  lpv <- rep_len(log.p, len)
+
+  fallback_full <- function() {
+    vapply(seq_len(len), function(i) {
+      stats::plnorm(qv[i], meanlog = mv[i], sdlog = sv[i], lower.tail = ltv[i], log.p = lpv[i])
+    }, numeric(1L))
+  }
+
+  if (any(!is.finite(qv) | !is.finite(mv) | !is.finite(sv))) {
+    return(fallback_full())
+  }
+
+  if (any(sv <= 0)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .plnorm_opencl(n, q, meanlog, sdlog, verbose = verbose),
-    fallback_expr = function() rep(stats::plnorm(q, meanlog = meanlog, sdlog = sdlog), n),
-    fallback = fallback, verbose = verbose, fn_name = "plnorm_opencl"
+    opencl_expr = function() {
+      .plnorm_opencl(
+        as.double(qv),
+        as.double(mv),
+        as.double(sv),
+        as.integer(ltv),
+        as.integer(lpv),
+        opc,
+        verbose
+      )
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "plnorm_opencl"
   )
 }
 

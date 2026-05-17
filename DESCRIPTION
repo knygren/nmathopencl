@@ -36,8 +36,7 @@ Imports:
     stats,
     Rcpp (>= 1.1.1),
     RcppParallel,
-    Rdpack (>= 0.11-0),
-    openclport
+    Rdpack (>= 0.11-0)
 RdMacros: Rdpack
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel
 Depends: MASS, R (>= 3.5.0)

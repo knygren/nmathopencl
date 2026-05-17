@@ -261,13 +261,22 @@ Rcpp::NumericVector dunif_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector punif_opencl_cpp_export(
-    int n,
-    double x,
-    double min,
-    double max,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& min,
+    const Rcpp::NumericVector& max,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::punif_opencl(n, x, min, max, verbose);
+  return nmathopencl::punif_opencl(
+      q,
+      min,
+      max,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -294,13 +303,22 @@ Rcpp::NumericVector dgamma_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector pgamma_opencl_cpp_export(
-    int n,
-    double x,
-    double shape,
-    double scale,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& shape,
+    const Rcpp::NumericVector& scale,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::pgamma_opencl(n, x, shape, scale, verbose);
+  return nmathopencl::pgamma_opencl(
+      q,
+      shape,
+      scale,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -337,13 +355,24 @@ Rcpp::NumericVector dbeta_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector pbeta_opencl_cpp_export(
-    int n,
-    double x,
-    double a,
-    double b,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& shape1,
+    const Rcpp::NumericVector& shape2,
+    const Rcpp::NumericVector& ncp,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::pbeta_opencl(n, x, a, b, verbose);
+  return nmathopencl::pbeta_opencl(
+      q,
+      shape1,
+      shape2,
+      ncp,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -380,13 +409,22 @@ Rcpp::NumericVector dlnorm_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector plnorm_opencl_cpp_export(
-    int n,
-    double q,
-    double meanlog,
-    double sdlog,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& meanlog,
+    const Rcpp::NumericVector& sdlog,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::plnorm_opencl(n, q, meanlog, sdlog, verbose);
+  return nmathopencl::plnorm_opencl(
+      q,
+      meanlog,
+      sdlog,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -422,12 +460,22 @@ Rcpp::NumericVector dchisq_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector pchisq_opencl_cpp_export(
-    int n,
-    double x,
-    double df,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& df,
+    const Rcpp::NumericVector& ncp,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::pchisq_opencl(n, x, df, verbose);
+  return nmathopencl::pchisq_opencl(
+      q,
+      df,
+      ncp,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -483,13 +531,24 @@ Rcpp::NumericVector df_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector pf_opencl_cpp_export(
-    int n,
-    double x,
-    double df1,
-    double df2,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& df1,
+    const Rcpp::NumericVector& df2,
+    const Rcpp::NumericVector& ncp,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::pf_opencl(n, x, df1, df2, verbose);
+  return nmathopencl::pf_opencl(
+      q,
+      df1,
+      df2,
+      ncp,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -525,12 +584,22 @@ Rcpp::NumericVector dt_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector pt_opencl_cpp_export(
-    int n,
-    double x,
-    double df,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& df,
+    const Rcpp::NumericVector& ncp,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::pt_opencl(n, x, df, verbose);
+  return nmathopencl::pt_opencl(
+      q,
+      df,
+      ncp,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -577,13 +646,22 @@ Rcpp::NumericVector dbinom_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector pbinom_opencl_cpp_export(
-    int n,
-    double q,
-    double size,
-    double prob,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& size,
+    const Rcpp::NumericVector& prob,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::pbinom_opencl(n, q, size, prob, verbose);
+  return nmathopencl::pbinom_opencl(
+      q,
+      size,
+      prob,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -599,13 +677,22 @@ Rcpp::NumericVector dnbinom_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector pnbinom_opencl_cpp_export(
-    int n,
-    double q,
-    double size,
-    double prob,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& size,
+    const Rcpp::NumericVector& prob,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::pnbinom_opencl(n, q, size, prob, verbose);
+  return nmathopencl::pnbinom_opencl(
+      q,
+      size,
+      prob,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -642,13 +729,22 @@ Rcpp::NumericVector dnbinom_mu_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector pnbinom_mu_opencl_cpp_export(
-    int n,
-    double q,
-    double size,
-    double mu,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& size,
+    const Rcpp::NumericVector& mu,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::pnbinom_mu_opencl(n, q, size, mu, verbose);
+  return nmathopencl::pnbinom_mu_opencl(
+      q,
+      size,
+      mu,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -674,13 +770,22 @@ Rcpp::NumericVector dcauchy_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector pcauchy_opencl_cpp_export(
-    int n,
-    double q,
-    double location,
-    double scale,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& location,
+    const Rcpp::NumericVector& scale,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::pcauchy_opencl(n, q, location, scale, verbose);
+  return nmathopencl::pcauchy_opencl(
+      q,
+      location,
+      scale,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -716,12 +821,20 @@ Rcpp::NumericVector dexp_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector pexp_opencl_cpp_export(
-    int n,
-    double q,
-    double rate,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& rate,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::pexp_opencl(n, q, rate, verbose);
+  return nmathopencl::pexp_opencl(
+      q,
+      rate,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -746,12 +859,20 @@ Rcpp::NumericVector dgeom_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector pgeom_opencl_cpp_export(
-    int n,
-    double q,
-    double prob,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& prob,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::pgeom_opencl(n, q, prob, verbose);
+  return nmathopencl::pgeom_opencl(
+      q,
+      prob,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -787,14 +908,24 @@ Rcpp::NumericVector dhyper_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector phyper_opencl_cpp_export(
-    int n,
-    double q,
-    double r,
-    double b,
-    double n1,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& m,
+    const Rcpp::NumericVector& n_black,
+    const Rcpp::NumericVector& k,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::phyper_opencl(n, q, r, b, n1, verbose);
+  return nmathopencl::phyper_opencl(
+      q,
+      m,
+      n_black,
+      k,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -863,12 +994,20 @@ Rcpp::NumericVector dpois_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector ppois_opencl_cpp_export(
-    int n,
-    double q,
-    double lambda,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& lambda,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::ppois_opencl(n, q, lambda, verbose);
+  return nmathopencl::ppois_opencl(
+      q,
+      lambda,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -914,13 +1053,22 @@ Rcpp::NumericVector dweibull_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector pweibull_opencl_cpp_export(
-    int n,
-    double q,
-    double shape,
-    double scale,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& shape,
+    const Rcpp::NumericVector& scale,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::pweibull_opencl(n, q, shape, scale, verbose);
+  return nmathopencl::pweibull_opencl(
+      q,
+      shape,
+      scale,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -957,13 +1105,22 @@ Rcpp::NumericVector dlogis_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector plogis_opencl_cpp_export(
-    int n,
-    double q,
-    double location,
-    double scale,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& location,
+    const Rcpp::NumericVector& scale,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::plogis_opencl(n, q, location, scale, verbose);
+  return nmathopencl::plogis_opencl(
+      q,
+      location,
+      scale,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -988,17 +1145,6 @@ Rcpp::NumericVector rlogis_opencl_cpp_export(
 }
 
 // [[Rcpp::export]]
-Rcpp::NumericVector pnchisq_opencl_cpp_export(
-    int n,
-    double x,
-    double df,
-    double ncp,
-    bool verbose = false
-) {
-  return nmathopencl::pnchisq_opencl(n, x, df, ncp, verbose);
-}
-
-// [[Rcpp::export]]
 Rcpp::NumericVector qnchisq_opencl_cpp_export(
     int n,
     double p,
@@ -1007,18 +1153,6 @@ Rcpp::NumericVector qnchisq_opencl_cpp_export(
     bool verbose = false
 ) {
   return nmathopencl::qnchisq_opencl(n, p, df, ncp, verbose);
-}
-
-// [[Rcpp::export]]
-Rcpp::NumericVector pnf_opencl_cpp_export(
-    int n,
-    double x,
-    double df1,
-    double df2,
-    double ncp,
-    bool verbose = false
-) {
-  return nmathopencl::pnf_opencl(n, x, df1, df2, ncp, verbose);
 }
 
 // [[Rcpp::export]]
@@ -1043,18 +1177,6 @@ Rcpp::NumericVector qnf_opencl_cpp_export(
     bool verbose = false
 ) {
   return nmathopencl::qnf_opencl(n, p, df1, df2, ncp, verbose);
-}
-
-// [[Rcpp::export]]
-Rcpp::NumericVector pnbeta_opencl_cpp_export(
-    int n,
-    double x,
-    double a,
-    double b,
-    double ncp,
-    bool verbose = false
-) {
-  return nmathopencl::pnbeta_opencl(n, x, a, b, ncp, verbose);
 }
 
 // [[Rcpp::export]]
@@ -1093,17 +1215,6 @@ Rcpp::NumericVector dnt_opencl_cpp_export(
 }
 
 // [[Rcpp::export]]
-Rcpp::NumericVector pnt_opencl_cpp_export(
-    int n,
-    double x,
-    double df,
-    double ncp,
-    bool verbose = false
-) {
-  return nmathopencl::pnt_opencl(n, x, df, ncp, verbose);
-}
-
-// [[Rcpp::export]]
 Rcpp::NumericVector qnt_opencl_cpp_export(
     int n,
     double p,
@@ -1116,14 +1227,24 @@ Rcpp::NumericVector qnt_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector ptukey_opencl_cpp_export(
-    int n,
-    double q,
-    double nmeans,
-    double df,
-    double nranges,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& nmeans,
+    const Rcpp::NumericVector& df,
+    const Rcpp::NumericVector& nranges,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::ptukey_opencl(n, q, nmeans, df, nranges, verbose);
+  return nmathopencl::ptukey_opencl(
+      q,
+      nmeans,
+      df,
+      nranges,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -1151,13 +1272,22 @@ Rcpp::NumericVector dwilcox_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector pwilcox_opencl_cpp_export(
-    int n,
-    double q,
-    double m,
-    double n2,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& m,
+    const Rcpp::NumericVector& n2,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::pwilcox_opencl(n, q, m, n2, verbose);
+  return nmathopencl::pwilcox_opencl(
+      q,
+      m,
+      n2,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]
@@ -1183,12 +1313,20 @@ Rcpp::NumericVector dsignrank_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector psignrank_opencl_cpp_export(
-    int n,
-    double q,
-    double nsize,
-    bool verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& nsize,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 ) {
-  return nmathopencl::psignrank_opencl(n, q, nsize, verbose);
+  return nmathopencl::psignrank_opencl(
+      q,
+      nsize,
+      lower_tail,
+      log_p,
+      opencl_parallel_code,
+      verbose);
 }
 
 // [[Rcpp::export]]

@@ -5,11 +5,13 @@
 #'
 #' @param n Number of observations. Non-negative integer scalar.
 #' @param x Numeric scalar quantile (must be >= 0).
-#' @param q Numeric scalar quantile (must be >= 0).
+#' @param q Numeric vector of quantiles for \code{psignrank_opencl}; recycled like \code{stats::psignrank}.
 #' @param p Numeric scalar probability in \code{[0, 1]}.
 #' @param nsize Number of observations used by signed-rank routines (must be > 0).
 #' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
 #' @param verbose Logical; print fallback/error diagnostics.
+#' @param lower.tail,log.p As in \code{stats::psignrank} for \code{psignrank_opencl} (vector inputs recycled).
+#' @param opencl_parallel OpenCL dispatch hint for \code{psignrank_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.
 #'
 #' @section Known OpenCL limitations:
 #' Signed-rank kernels can fail to build on some GPU toolchains due to unresolved
@@ -35,15 +37,61 @@ dsignrank_opencl <- function(n, x, nsize, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname signrank_opencl
 #' @export
-psignrank_opencl <- function(n, q, nsize, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(q, "q", 0, Inf)
-  .validate_scalar_num(nsize, "nsize", 0, Inf, open_lower = TRUE)
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+psignrank_opencl <- function(
+    q,
+    nsize,
+    lower.tail = TRUE,
+    log.p = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(q)) {
+    stop("`q` must be numeric.")
+  }
+  if (!is.numeric(nsize)) {
+    stop("`nsize` must be numeric.")
+  }
+  .validate_p_stage1_tails(lower.tail, log.p)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(q) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(q), length(nsize), length(lower.tail), length(log.p))
+  len <- .p_stage1_recycle_len(lens, "?psignrank")
+
+  qv <- rep_len(q, len)
+  nv <- rep_len(nsize, len)
+  ltv <- rep_len(lower.tail, len)
+  lpv <- rep_len(log.p, len)
+
+  fallback_full <- function() {
+    vapply(seq_len(len), function(i) {
+      stats::psignrank(qv[i], n = nv[i], lower.tail = ltv[i], log.p = lpv[i])
+    }, numeric(1L))
+  }
+
+  if (any(!is.finite(qv) | !is.finite(nv))) {
+    return(fallback_full())
+  }
+
+  if (any(nv <= 0)) {
+    return(fallback_full())
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .psignrank_opencl(n, q, nsize, verbose = verbose),
-    fallback_expr = function() rep(stats::psignrank(q, n = nsize), n),
-    fallback = fallback, verbose = verbose, fn_name = "psignrank_opencl"
+    opencl_expr = function() {
+      .psignrank_opencl(as.double(qv), as.double(nv), as.integer(ltv), as.integer(lpv), opc, verbose)
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "psignrank_opencl"
   )
 }
 

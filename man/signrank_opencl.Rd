@@ -9,7 +9,15 @@
 \usage{
 dsignrank_opencl(n, x, nsize, fallback = TRUE, verbose = FALSE)
 
-psignrank_opencl(n, q, nsize, fallback = TRUE, verbose = FALSE)
+psignrank_opencl(
+  q,
+  nsize,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 qsignrank_opencl(n, p, nsize, fallback = TRUE, verbose = FALSE)
 
@@ -26,7 +34,11 @@ rsignrank_opencl(n, nsize, fallback = TRUE, verbose = FALSE)
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric scalar quantile (must be >= 0).}
+\item{q}{Numeric vector of quantiles for \code{psignrank_opencl}; recycled like \code{stats::psignrank}.}
+
+\item{lower.tail, log.p}{As in \code{stats::psignrank} for \code{psignrank_opencl} (vector inputs recycled).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{psignrank_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -52,7 +64,7 @@ if (has_opencl()) {
   # Keeping these commented avoids flaky check failures:
   # n <- 5L
   # dsignrank_opencl(n, x = 6, nsize = 8, fallback = FALSE, verbose = TRUE)
-  # psignrank_opencl(n, q = 6, nsize = 8, fallback = FALSE, verbose = TRUE)
+  # psignrank_opencl(q = 6, nsize = 8, fallback = FALSE, verbose = TRUE)
   # qsignrank_opencl(n, p = 0.8, nsize = 8, fallback = FALSE, verbose = TRUE)
   # rsignrank_opencl(n, nsize = 8, fallback = FALSE, verbose = TRUE)
 } else {

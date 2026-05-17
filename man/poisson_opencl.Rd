@@ -12,7 +12,15 @@ dpois_raw_opencl(n, x, lambda, fallback = TRUE, verbose = FALSE)
 
 dpois_opencl(n, x, lambda, fallback = TRUE, verbose = FALSE)
 
-ppois_opencl(n, q, lambda, fallback = TRUE, verbose = FALSE)
+ppois_opencl(
+  q,
+  lambda,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 qpois_opencl(n, p, lambda, fallback = TRUE, verbose = FALSE)
 
@@ -29,7 +37,11 @@ rpois_opencl(n, lambda, fallback = TRUE, verbose = FALSE)
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric scalar quantile (must be >= 0).}
+\item{q}{Numeric vector of quantiles for \code{ppois_opencl}; recycled like \code{stats::ppois}.}
+
+\item{lower.tail, log.p}{As in \code{stats::ppois} for \code{ppois_opencl} (vector inputs recycled).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{ppois_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -46,7 +58,7 @@ if (has_opencl()) {
 
   dpois_raw_opencl(n, x = 4, lambda = 4, fallback = FALSE, verbose = TRUE)
   dpois_opencl(n, x = 4, lambda = 4, fallback = FALSE, verbose = TRUE)
-  ppois_opencl(n, q = 4, lambda = 4, fallback = FALSE, verbose = TRUE)
+  ppois_opencl(q = 4, lambda = 4, fallback = FALSE, verbose = TRUE)
   qpois_opencl(n, p = 0.8, lambda = 4, fallback = FALSE, verbose = TRUE)
   rpois_opencl(n, lambda = 4, fallback = FALSE, verbose = TRUE)
 } else {

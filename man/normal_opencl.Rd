@@ -34,13 +34,6 @@ rnorm_opencl(n, mean = 0, sd = 1, fallback = TRUE, verbose = FALSE)
 \arguments{
 \item{x}{Numeric vector of quantiles.}
 
-\item{q}{Numeric vector of quantiles for \code{pnorm_opencl} (same role as \code{stats::pnorm}).}
-
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
-
-\item{n}{Number of observations (non-negative integer scalar). Used by \code{qnorm_opencl}
-and \code{rnorm_opencl}; not an argument to \code{pnorm_opencl}.}
-
 \item{mean}{Location parameter. Scalar for \code{dnorm_opencl} and \code{rnorm_opencl}.
 For \code{pnorm_opencl}, recycled like \code{stats::pnorm}.}
 
@@ -49,6 +42,15 @@ For \code{pnorm_opencl}, recycled like \code{stats::pnorm}.}
 The GPU path runs only when every recycled value is strictly positive (\code{sd > 0});
 \code{sd == 0} is evaluated with \code{stats::pnorm}.}
 
+\item{log}{Logical; if \code{TRUE}, return log densities.}
+
+\item{fallback}{Logical; if \code{TRUE}, fall back to CPU \code{stats} function
+when OpenCL is unavailable or the OpenCL call fails.}
+
+\item{verbose}{Logical; print informational fallback messages.}
+
+\item{q}{Numeric vector of quantiles for \code{pnorm_opencl} (same role as \code{stats::pnorm}).}
+
 \item{lower.tail, log.p}{As in \code{stats::pnorm} (recycled). Row-wise semantics follow
 full recycling; for some combinations of arguments, plain \code{stats::pnorm} with vector
 arguments may replicate only scalar \code{lower.tail}/\code{log.p}.}
@@ -56,12 +58,10 @@ arguments may replicate only scalar \code{lower.tail}/\code{log.p}.}
 \item{opencl_parallel}{Single logical: \code{TRUE} forces parallel dispatch when implemented,
 \code{FALSE} serial, \code{NA} automatic (reserved; not yet used by \code{pnorm_opencl} GPU dispatch).}
 
-\item{log}{Logical; if \code{TRUE}, return log densities.}
+\item{n}{Number of observations (non-negative integer scalar). Used by \code{qnorm_opencl}
+and \code{rnorm_opencl}; not an argument to \code{pnorm_opencl}.}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU \code{stats} function
-when OpenCL is unavailable or the OpenCL call fails.}
-
-\item{verbose}{Logical; print informational fallback messages.}
+\item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
 \value{
 Numeric vector result from the corresponding normal-family operation.

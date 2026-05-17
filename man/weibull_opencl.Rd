@@ -9,7 +9,16 @@
 \usage{
 dweibull_opencl(n, x, shape, scale = 1, fallback = TRUE, verbose = FALSE)
 
-pweibull_opencl(n, q, shape, scale = 1, fallback = TRUE, verbose = FALSE)
+pweibull_opencl(
+  q,
+  shape,
+  scale = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 qweibull_opencl(n, p, shape, scale = 1, fallback = TRUE, verbose = FALSE)
 
@@ -28,7 +37,11 @@ rweibull_opencl(n, shape, scale = 1, fallback = TRUE, verbose = FALSE)
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric scalar quantile (must be >= 0).}
+\item{q}{Numeric vector of quantiles for \code{pweibull_opencl}; recycled like \code{stats::pweibull}.}
+
+\item{lower.tail, log.p}{As in \code{stats::pweibull} for \code{pweibull_opencl} (vector inputs recycled).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{pweibull_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -44,7 +57,7 @@ if (has_opencl()) {
   n <- 5L
 
   dweibull_opencl(n, x = 1.2, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
-  pweibull_opencl(n, q = 1.2, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
+  pweibull_opencl(q = 1.2, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
   qweibull_opencl(n, p = 0.8, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
   rweibull_opencl(n, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
 } else {

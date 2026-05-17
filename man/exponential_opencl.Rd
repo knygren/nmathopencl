@@ -9,7 +9,15 @@
 \usage{
 dexp_opencl(n, x, rate = 1, fallback = TRUE, verbose = FALSE)
 
-pexp_opencl(n, q, rate = 1, fallback = TRUE, verbose = FALSE)
+pexp_opencl(
+  q,
+  rate = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 qexp_opencl(n, p, rate = 1, fallback = TRUE, verbose = FALSE)
 
@@ -26,7 +34,11 @@ rexp_opencl(n, rate = 1, fallback = TRUE, verbose = FALSE)
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric scalar quantile.}
+\item{q}{Numeric vector of quantiles for \code{pexp_opencl}; recycled like \code{stats::pexp}.}
+
+\item{lower.tail, log.p}{As in \code{stats::pexp} for \code{pexp_opencl} (vector inputs recycled).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{pexp_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -42,7 +54,7 @@ if (has_opencl()) {
   n <- 5L
 
   dexp_opencl(n, x = 1.2, rate = 1, fallback = FALSE, verbose = TRUE)
-  pexp_opencl(n, q = 1.2, rate = 1, fallback = FALSE, verbose = TRUE)
+  pexp_opencl(q = 1.2, rate = 1, fallback = FALSE, verbose = TRUE)
   qexp_opencl(n, p = 0.8, rate = 1, fallback = FALSE, verbose = TRUE)
   rexp_opencl(n, rate = 1, fallback = FALSE, verbose = TRUE)
 } else {

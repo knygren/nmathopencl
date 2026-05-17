@@ -9,7 +9,17 @@
 \usage{
 dhyper_opencl(n, x, m, n_black, k, fallback = TRUE, verbose = FALSE)
 
-phyper_opencl(n, q, m, n_black, k, fallback = TRUE, verbose = FALSE)
+phyper_opencl(
+  q,
+  m,
+  n_black,
+  k,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 qhyper_opencl(n, p, m, n_black, k, fallback = TRUE, verbose = FALSE)
 
@@ -30,7 +40,11 @@ rhyper_opencl(n, m, n_black, k, fallback = TRUE, verbose = FALSE)
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric scalar quantile.}
+\item{q}{Numeric vector of quantiles for \code{phyper_opencl}; recycled like \code{stats::phyper}.}
+
+\item{lower.tail, log.p}{As in \code{stats::phyper} for \code{phyper_opencl} (vector inputs recycled).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{phyper_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -46,7 +60,7 @@ if (has_opencl()) {
   n <- 5L
 
   dhyper_opencl(n, x = 3, m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
-  phyper_opencl(n, q = 3, m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
+  phyper_opencl(q = 3, m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
   qhyper_opencl(n, p = 0.8, m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
   rhyper_opencl(n, m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
 } else {

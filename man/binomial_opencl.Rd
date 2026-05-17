@@ -20,7 +20,16 @@ dbinom_raw_opencl(
 
 dbinom_opencl(n, x, size, prob, fallback = TRUE, verbose = FALSE)
 
-pbinom_opencl(n, q, size, prob, fallback = TRUE, verbose = FALSE)
+pbinom_opencl(
+  q,
+  size,
+  prob,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 qbinom_opencl(n, p, size, prob, fallback = TRUE, verbose = FALSE)
 
@@ -41,7 +50,11 @@ rbinom_opencl(n, size, prob, fallback = TRUE, verbose = FALSE)
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric scalar quantile.}
+\item{q}{Numeric vector of quantiles for \code{pbinom_opencl}; recycled like \code{stats::pbinom}.}
+
+\item{lower.tail, log.p}{As in \code{stats::pbinom} for \code{pbinom_opencl} (vector inputs recycled).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{pbinom_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -58,7 +71,7 @@ if (has_opencl()) {
 
   dbinom_raw_opencl(n, x = 6, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
   dbinom_opencl(n, x = 6, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
-  pbinom_opencl(n, q = 6, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
+  pbinom_opencl(q = 6, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
   qbinom_opencl(n, p = 0.8, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
   rbinom_opencl(n, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
 } else {

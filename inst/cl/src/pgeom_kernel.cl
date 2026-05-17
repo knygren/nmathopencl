@@ -8,13 +8,13 @@
 __kernel void pgeom_kernel(
     const double q,
     const double prob,
-    const double unused_c,
-    const double unused_d,
-    const double unused_e,
+    const double lower_tail_d,
+    const double log_p_d,
     __global double* out,
     const int n
 ) {
-    (void)unused_c; (void)unused_d; (void)unused_e;
+    int lt = (lower_tail_d != 0.0) ? 1 : 0;
+    int lp = (log_p_d != 0.0) ? 1 : 0;
     if (get_global_id(0) != 0) return;
-    for (int i = 0; i < n; ++i) out[i] = pgeom(q, prob, 1, 0);
+    for (int i = 0; i < n; ++i) out[i] = pgeom(q, prob, lt, lp);
 }

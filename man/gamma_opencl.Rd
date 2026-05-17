@@ -9,27 +9,46 @@
 \usage{
 dgamma_opencl(n, x, shape, scale = 1, fallback = TRUE, verbose = FALSE)
 
-pgamma_opencl(n, x, shape, scale = 1, fallback = TRUE, verbose = FALSE)
+pgamma_opencl(
+  q,
+  shape,
+  rate = 1,
+  scale = 1/rate,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 qgamma_opencl(n, p, shape, scale = 1, fallback = TRUE, verbose = FALSE)
 
 rgamma_opencl(n, shape, scale = 1, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
+\item{n}{Number of observations. Non-negative integer scalar (\code{dgamma_opencl}, \code{qgamma_opencl}, \code{rgamma_opencl}).}
 
-\item{x}{Numeric scalar quantile used by linkage wrappers.}
+\item{x}{Numeric scalar quantile for \code{dgamma_opencl}.}
 
 \item{shape}{Shape parameter (must be > 0).}
 
-\item{scale}{Scale parameter (must be > 0).}
+\item{scale}{Scale parameter (must be > 0). For \code{pgamma_opencl}, combined with \code{rate}
+like \code{stats::pgamma}.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU \code{stats} function
 when OpenCL is unavailable or the OpenCL call fails.}
 
 \item{verbose}{Logical; print informational fallback messages.}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{q}{Numeric vector of quantiles for \code{pgamma_opencl} (same role as \code{stats::pgamma}).}
+
+\item{rate}{Optional rate for \code{pgamma_opencl}; see \code{\link[stats]{pgamma}}.}
+
+\item{lower.tail, log.p}{As in \code{stats::pgamma} for \code{pgamma_opencl} (recycled).}
+
+\item{opencl_parallel}{Single logical passed through for future parallel dispatch (\code{pgamma_opencl}; unused).}
+
+\item{p}{Numeric scalar probability in \code{[0, 1]} for \code{qgamma_opencl}.}
 }
 \value{
 Numeric vector result from the corresponding gamma-family operation.
@@ -39,14 +58,24 @@ OpenCL-backed density, distribution, quantile, and random generation wrappers
 for the gamma distribution. These mirror the base \code{stats} gamma family
 while adding OpenCL dispatch and optional CPU fallback behavior.
 }
+\details{
+\code{\link{pgamma_opencl}} follows \code{\link[stats]{pgamma}} argument names and
+\code{rate}/\code{scale} handling (including the error when both are supplied
+inconsistently). Recycling of \code{q}, \code{shape}, and \code{scale} follows
+\code{stats::pgamma}. Vector \code{lower.tail} and \code{log.p} are recycled
+row-wise with those arguments (like \code{\link{pnorm_opencl}}); a single-vector
+\code{stats::pgamma()} call does not apply tail flags element-wise.
+There is no leading \code{n} argument for \code{pgamma_opencl}.
+On the GPU path each recycled row runs \code{pgamma_kernel}
+once with \code{n_out = 1}. Missing or non-finite values after recycling, or non-positive
+\code{shape}/\code{scale}, use row-wise \code{stats::pgamma}.
+}
 \examples{
 if (has_opencl()) {
-  n <- 5L
-
-  dgamma_opencl(n, x = 1.2, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
-  pgamma_opencl(n, x = 1.2, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
-  qgamma_opencl(n, p = 0.8, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
-  rgamma_opencl(n, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
+  dgamma_opencl(n = 5L, x = 1.2, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
+  pgamma_opencl(q = 1.2, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
+  qgamma_opencl(n = 5L, p = 0.8, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
+  rgamma_opencl(n = 5L, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")
 }

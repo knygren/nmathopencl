@@ -63,7 +63,7 @@ your kernel files, removing a runtime dependency on the full library.
 
 It is strongly recommended to supply a pre-loaded \code{index}:
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{idx <- readRDS(system.file("cl", "nmath", "kernel_dependency_index.rds",
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{idx <- readRDS(system.file("cl/nmath/kernel_dependency_index.rds",
                            package = "nmathopencl"))
 result <- extract_library_subset(kernel_paths, nmath_dir, dest_dir,
                                  index = idx)

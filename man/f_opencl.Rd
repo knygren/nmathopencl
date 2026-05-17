@@ -9,16 +9,26 @@
 \usage{
 df_opencl(n, x, df1, df2, ncp = 0, fallback = TRUE, verbose = FALSE)
 
-pf_opencl(n, x, df1, df2, ncp = 0, fallback = TRUE, verbose = FALSE)
+pf_opencl(
+  q,
+  df1,
+  df2,
+  ncp = 0,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 qf_opencl(n, p, df1, df2, ncp = 0, fallback = TRUE, verbose = FALSE)
 
 rf_opencl(n, df1, df2, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
+\item{n}{Number of observations. Non-negative integer scalar (\code{df_opencl}, \code{qf_opencl}, \code{rf_opencl}).}
 
-\item{x}{Numeric scalar quantile.}
+\item{x}{Numeric scalar quantile (\code{df_opencl}).}
 
 \item{df1}{Numerator degrees of freedom (must be > 0).}
 
@@ -31,10 +41,17 @@ rf_opencl(n, df1, df2, fallback = TRUE, verbose = FALSE)
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{p}{Numeric scalar probability in \code{[0, 1]}.}
+\item{q}{Numeric vector of quantiles (\code{pf_opencl}); recycled like \code{stats::pf}.}
+
+\item{lower.tail, log.p}{As in \code{stats::pf} for \code{pf_opencl} (vector inputs recycled).}
+
+\item{opencl_parallel}{Reserved for future parallel dispatch (\code{pf_opencl}; unused).}
+
+\item{p}{Numeric scalar probability in \code{[0, 1]} (\code{qf_opencl}).}
 }
 \value{
-Numeric vector of length \code{n}.
+For \code{df_opencl}, \code{qf_opencl}, \code{rf_opencl}: numeric vector of length \code{n}.
+For \code{pf_opencl}: numeric vector of recycled length (see \code{stats::pf}).
 }
 \description{
 OpenCL-backed density, distribution, quantile, and random generation wrappers
@@ -53,8 +70,8 @@ if (has_opencl()) {
 
   df_opencl(n, x = 2, df1 = 5, df2 = 9, ncp = 0, fallback = FALSE, verbose = TRUE)
   df_opencl(n, x = 2, df1 = 5, df2 = 9, ncp = 1.1, fallback = FALSE, verbose = TRUE)
-  pf_opencl(n, x = 2, df1 = 5, df2 = 9, ncp = 0, fallback = FALSE, verbose = TRUE)
-  pf_opencl(n, x = 2, df1 = 5, df2 = 9, ncp = 1.1, fallback = FALSE, verbose = TRUE)
+  pf_opencl(q = 2, df1 = 5, df2 = 9, ncp = 0, fallback = FALSE, verbose = TRUE)
+  pf_opencl(q = 2, df1 = 5, df2 = 9, ncp = 1.1, fallback = FALSE, verbose = TRUE)
   rf_opencl(n, df1 = 5, df2 = 9, fallback = FALSE, verbose = TRUE)
 
   # Known unstable on some GPU/driver stacks (can hit CL_OUT_OF_RESOURCES):

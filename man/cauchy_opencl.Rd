@@ -9,7 +9,16 @@
 \usage{
 dcauchy_opencl(n, x, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
 
-pcauchy_opencl(n, q, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
+pcauchy_opencl(
+  q,
+  location = 0,
+  scale = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 qcauchy_opencl(n, p, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
 
@@ -28,7 +37,11 @@ rcauchy_opencl(n, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric scalar quantile.}
+\item{q}{Numeric vector of quantiles for \code{pcauchy_opencl}; recycled like \code{stats::pcauchy}.}
+
+\item{lower.tail, log.p}{As in \code{stats::pcauchy} for \code{pcauchy_opencl} (vector inputs recycled).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{pcauchy_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -44,7 +57,7 @@ if (has_opencl()) {
   n <- 5L
 
   dcauchy_opencl(n, x = 0.2, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
-  pcauchy_opencl(n, q = 0.2, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
+  pcauchy_opencl(q = 0.2, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
   qcauchy_opencl(n, p = 0.8, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
   rcauchy_opencl(n, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
 } else {

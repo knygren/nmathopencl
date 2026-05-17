@@ -16,7 +16,7 @@ load_library_for_kernel(
 for the annotation tag given by \code{depends_tag}.}
 
 \item{library_dir}{Path to the library directory containing the \code{.cl} source
-files (e.g. \code{system.file("cl", "nmath", package = "nmathopencl")}).}
+files (e.g. \code{system.file("cl/nmath", package = "nmathopencl")}).}
 
 \item{depends_tag}{Name of the annotation tag in the kernel file that lists
 the required library file stems.  Defaults to \code{"all_depends"}.  For
@@ -43,10 +43,10 @@ and returns their source code concatenated in the correct dependency order.
 }
 \details{
 It is strongly recommended to supply a pre-loaded \code{index} rather than
-letting the function read it from disk on every call.  Load the index once
+letting the function read from disk on every call.  Load the index once
 and reuse it across all kernel calls:
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{idx <- readRDS(system.file("cl", "nmath", "kernel_dependency_index.rds",
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{idx <- readRDS(system.file("cl/nmath/kernel_dependency_index.rds",
                            package = "nmathopencl"))
 src <- load_library_for_kernel(kernel_path, nmath_dir, index = idx)
 }\if{html}{\out{</div>}}

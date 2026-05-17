@@ -9,7 +9,16 @@
 \usage{
 dlnorm_opencl(n, x, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE)
 
-plnorm_opencl(n, q, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE)
+plnorm_opencl(
+  q,
+  meanlog = 0,
+  sdlog = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 qlnorm_opencl(n, p, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE)
 
@@ -28,7 +37,11 @@ rlnorm_opencl(n, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE)
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{q}{Numeric scalar quantile (must be >= 0).}
+\item{q}{Numeric vector of quantiles for \code{plnorm_opencl}; recycled like \code{stats::plnorm}.}
+
+\item{lower.tail, log.p}{As in \code{stats::plnorm} for \code{plnorm_opencl} (vector inputs recycled).}
+
+\item{opencl_parallel}{OpenCL dispatch hint for \code{plnorm_opencl} (\code{TRUE}, \code{FALSE}, or \code{NA}); reserved for future parallel kernels.}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -44,7 +57,7 @@ if (has_opencl()) {
   n <- 5L
 
   dlnorm_opencl(n, x = 1.2, meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
-  plnorm_opencl(n, q = 1.2, meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
+  plnorm_opencl(q = 1.2, meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
   qlnorm_opencl(n, p = 0.8, meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
   rlnorm_opencl(n, meanlog = 0.1, sdlog = 0.8, fallback = FALSE, verbose = TRUE)
 } else {

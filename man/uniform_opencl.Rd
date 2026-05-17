@@ -9,16 +9,25 @@
 \usage{
 dunif_opencl(n, x, min = 0, max = 1, fallback = TRUE, verbose = FALSE)
 
-punif_opencl(n, x, min = 0, max = 1, fallback = TRUE, verbose = FALSE)
+punif_opencl(
+  q,
+  min = 0,
+  max = 1,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  opencl_parallel = NA,
+  fallback = TRUE,
+  verbose = FALSE
+)
 
 qunif_opencl(n, p, min = 0, max = 1, fallback = TRUE, verbose = FALSE)
 
 runif_opencl(n, min = 0, max = 1, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
+\item{n}{Number of observations. Non-negative integer scalar (\code{dunif_opencl}, \code{qunif_opencl}, \code{runif_opencl}); not used by \code{punif_opencl}.}
 
-\item{x}{Numeric scalar quantile used by linkage wrappers.}
+\item{x}{Numeric scalar quantile for \code{dunif_opencl}.}
 
 \item{min}{Lower limit of the distribution.}
 
@@ -28,6 +37,12 @@ runif_opencl(n, min = 0, max = 1, fallback = TRUE, verbose = FALSE)
 when OpenCL is unavailable or the OpenCL call fails.}
 
 \item{verbose}{Logical; print informational fallback messages.}
+
+\item{q}{Numeric vector of quantiles (\code{punif_opencl}); same role as \code{stats::punif}.}
+
+\item{lower.tail, log.p}{As in \code{stats::punif} for \code{punif_opencl} (recycled).}
+
+\item{opencl_parallel}{Reserved for future parallel dispatch (\code{punif_opencl}; unused).}
 
 \item{p}{Numeric scalar probability in \code{[0, 1]}.}
 }
@@ -44,7 +59,7 @@ if (has_opencl()) {
   n <- 5L
 
   dunif_opencl(n, x = 0.4, min = 0, max = 1, fallback = FALSE, verbose = TRUE)
-  punif_opencl(n, x = 0.4, min = 0, max = 1, fallback = FALSE, verbose = TRUE)
+  punif_opencl(q = 0.4, min = 0, max = 1, fallback = FALSE, verbose = TRUE)
   qunif_opencl(n, p = 0.8, min = 0, max = 1, fallback = FALSE, verbose = TRUE)
   runif_opencl(n, min = 0, max = 1, fallback = FALSE, verbose = TRUE)
 } else {

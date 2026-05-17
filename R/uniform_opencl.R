@@ -4,9 +4,12 @@
 #' for the uniform distribution. These mirror the base \code{stats} uniform
 #' family while adding OpenCL dispatch and optional CPU fallback behavior.
 #'
-#' @param x Numeric scalar quantile used by linkage wrappers.
+#' @param q Numeric vector of quantiles (\code{punif_opencl}); same role as \code{stats::punif}.
+#' @param x Numeric scalar quantile for \code{dunif_opencl}.
+#' @param lower.tail,log.p As in \code{stats::punif} for \code{punif_opencl} (recycled).
+#' @param opencl_parallel Reserved for future parallel dispatch (\code{punif_opencl}; unused).
 #' @param p Numeric scalar probability in \code{[0, 1]}.
-#' @param n Number of observations. Non-negative integer scalar.
+#' @param n Number of observations. Non-negative integer scalar (\code{dunif_opencl}, \code{qunif_opencl}, \code{runif_opencl}); not used by \code{punif_opencl}.
 #' @param min Lower limit of the distribution.
 #' @param max Upper limit of the distribution.
 #' @param fallback Logical; if \code{TRUE}, fall back to CPU \code{stats} function
@@ -33,17 +36,75 @@ dunif_opencl <- function(n, x, min = 0, max = 1, fallback = TRUE, verbose = FALS
 
 #' @rdname uniform_opencl
 #' @export
-punif_opencl <- function(n, x, min = 0, max = 1, fallback = TRUE, verbose = FALSE) {
-  n <- .validate_n_scalar(n)
-  .validate_scalar_num(x, "x")
-  .validate_scalar_num(min, "min")
-  .validate_scalar_num(max, "max")
-  if (max < min) stop("`max` must be >= `min`.")
-  .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
+punif_opencl <- function(
+    q,
+    min = 0,
+    max = 1,
+    lower.tail = TRUE,
+    log.p = FALSE,
+    opencl_parallel = NA,
+    fallback = TRUE,
+    verbose = FALSE
+) {
+  if (!is.numeric(q)) {
+    stop("`q` must be numeric.")
+  }
+  if (!is.numeric(min)) {
+    stop("`min` must be numeric.")
+  }
+  if (!is.numeric(max)) {
+    stop("`max` must be numeric.")
+  }
+  .validate_p_stage1_tails(lower.tail, log.p)
+  .validate_flag(fallback, "fallback")
+  .validate_flag(verbose, "verbose")
+
+  if (length(q) == 0L) {
+    return(numeric(0))
+  }
+
+  lens <- c(length(q), length(min), length(max), length(lower.tail), length(log.p))
+  len <- .p_stage1_recycle_len(lens, "?punif")
+
+  qv <- rep_len(q, len)
+  minv <- rep_len(min, len)
+  maxv <- rep_len(max, len)
+  ltv <- rep_len(lower.tail, len)
+  lpv <- rep_len(log.p, len)
+
+  fallback_full <- function() {
+    vapply(seq_len(len), function(i) {
+      stats::punif(qv[i], min = minv[i], max = maxv[i], lower.tail = ltv[i], log.p = lpv[i])
+    }, numeric(1L))
+  }
+
+  if (any(!is.finite(qv) | !is.finite(minv) | !is.finite(maxv))) {
+    return(fallback_full())
+  }
+  if (any(maxv < minv)) {
+    stop("`max` must be >= `min` (after recycling to common length).", call. = FALSE)
+  }
+
+  opc <- .encode_opencl_parallel(opencl_parallel)
+  lt_int <- as.integer(ltv)
+  lp_int <- as.integer(lpv)
+
   .opencl_try_or_fallback(
-    opencl_expr = function() .punif_opencl(n, x, min, max, verbose = verbose),
-    fallback_expr = function() rep(stats::punif(x, min = min, max = max), n),
-    fallback = fallback, verbose = verbose, fn_name = "punif_opencl"
+    opencl_expr = function() {
+      .punif_opencl(
+        as.double(qv),
+        as.double(minv),
+        as.double(maxv),
+        lt_int,
+        lp_int,
+        opc,
+        verbose
+      )
+    },
+    fallback_expr = fallback_full,
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "punif_opencl"
   )
 }
 

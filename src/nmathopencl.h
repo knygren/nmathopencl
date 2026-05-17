@@ -236,11 +236,13 @@ Rcpp::NumericVector dunif_opencl(
 );
 
 Rcpp::NumericVector punif_opencl(
-    int    n_out,
-    double x,
-    double min,
-    double max,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& min,
+    const Rcpp::NumericVector& max,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qunif_opencl(
@@ -260,11 +262,13 @@ Rcpp::NumericVector dgamma_opencl(
 );
 
 Rcpp::NumericVector pgamma_opencl(
-    int    n_out,
-    double x,
-    double shape,
-    double scale,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& shape,
+    const Rcpp::NumericVector& scale,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qgamma_opencl(
@@ -291,11 +295,14 @@ Rcpp::NumericVector dbeta_opencl(
 );
 
 Rcpp::NumericVector pbeta_opencl(
-    int    n_out,
-    double x,
-    double a,
-    double b,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& shape1,
+    const Rcpp::NumericVector& shape2,
+    const Rcpp::NumericVector& ncp,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qbeta_opencl(
@@ -322,11 +329,13 @@ Rcpp::NumericVector dlnorm_opencl(
 );
 
 Rcpp::NumericVector plnorm_opencl(
-    int    n_out,
-    double q,
-    double meanlog,
-    double sdlog,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& meanlog,
+    const Rcpp::NumericVector& sdlog,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qlnorm_opencl(
@@ -352,10 +361,13 @@ Rcpp::NumericVector dchisq_opencl(
 );
 
 Rcpp::NumericVector pchisq_opencl(
-    int    n_out,
-    double x,
-    double df,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& df,
+    const Rcpp::NumericVector& ncp,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qchisq_opencl(
@@ -395,11 +407,14 @@ Rcpp::NumericVector df_opencl(
 );
 
 Rcpp::NumericVector pf_opencl(
-    int    n_out,
-    double x,
-    double df1,
-    double df2,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& df1,
+    const Rcpp::NumericVector& df2,
+    const Rcpp::NumericVector& ncp,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qf_opencl(
@@ -425,10 +440,13 @@ Rcpp::NumericVector dt_opencl(
 );
 
 Rcpp::NumericVector pt_opencl(
-    int    n_out,
-    double x,
-    double df,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& df,
+    const Rcpp::NumericVector& ncp,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qt_opencl(
@@ -470,11 +488,13 @@ Rcpp::NumericVector dbinom_opencl(
 );
 
 Rcpp::NumericVector pbinom_opencl(
-    int    n_out,
-    double q,
-    double size,
-    double prob,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& size,
+    const Rcpp::NumericVector& prob,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector dnbinom_opencl(
@@ -486,11 +506,13 @@ Rcpp::NumericVector dnbinom_opencl(
 );
 
 Rcpp::NumericVector pnbinom_opencl(
-    int    n_out,
-    double q,
-    double size,
-    double prob,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& size,
+    const Rcpp::NumericVector& prob,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qnbinom_opencl(
@@ -517,11 +539,13 @@ Rcpp::NumericVector dnbinom_mu_opencl(
 );
 
 Rcpp::NumericVector pnbinom_mu_opencl(
-    int    n_out,
-    double q,
-    double size,
-    double mu,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& size,
+    const Rcpp::NumericVector& mu,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qpois_opencl(
@@ -546,10 +570,12 @@ Rcpp::NumericVector dpois_opencl(
 );
 
 Rcpp::NumericVector ppois_opencl(
-    int    n_out,
-    double q,
-    double lambda,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& lambda,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qnbinom_mu_opencl(
@@ -589,11 +615,13 @@ Rcpp::NumericVector dcauchy_opencl(
 );
 
 Rcpp::NumericVector pcauchy_opencl(
-    int    n_out,
-    double q,
-    double location,
-    double scale,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& location,
+    const Rcpp::NumericVector& scale,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qcauchy_opencl(
@@ -619,10 +647,12 @@ Rcpp::NumericVector dexp_opencl(
 );
 
 Rcpp::NumericVector pexp_opencl(
-    int    n_out,
-    double q,
-    double rate,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& rate,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qexp_opencl(
@@ -640,10 +670,12 @@ Rcpp::NumericVector dgeom_opencl(
 );
 
 Rcpp::NumericVector pgeom_opencl(
-    int    n_out,
-    double q,
-    double prob,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& prob,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qgeom_opencl(
@@ -669,12 +701,14 @@ Rcpp::NumericVector dhyper_opencl(
 );
 
 Rcpp::NumericVector phyper_opencl(
-    int    n_out,
-    double q,
-    double r,
-    double b,
-    double n,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& m,
+    const Rcpp::NumericVector& n_black,
+    const Rcpp::NumericVector& k,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qhyper_opencl(
@@ -703,11 +737,13 @@ Rcpp::NumericVector dweibull_opencl(
 );
 
 Rcpp::NumericVector pweibull_opencl(
-    int    n_out,
-    double q,
-    double shape,
-    double scale,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& shape,
+    const Rcpp::NumericVector& scale,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qweibull_opencl(
@@ -734,11 +770,13 @@ Rcpp::NumericVector dlogis_opencl(
 );
 
 Rcpp::NumericVector plogis_opencl(
-    int    n_out,
-    double q,
-    double location,
-    double scale,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& location,
+    const Rcpp::NumericVector& scale,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qlogis_opencl(
@@ -781,15 +819,6 @@ Rcpp::NumericVector qnchisq_opencl(
     bool   verbose = false
 );
 
-Rcpp::NumericVector pnf_opencl(
-    int    n_out,
-    double x,
-    double df1,
-    double df2,
-    double ncp,
-    bool   verbose = false
-);
-
 Rcpp::NumericVector dnf_opencl(
     int    n_out,
     double x,
@@ -804,15 +833,6 @@ Rcpp::NumericVector qnf_opencl(
     double p,
     double df1,
     double df2,
-    double ncp,
-    bool   verbose = false
-);
-
-Rcpp::NumericVector pnbeta_opencl(
-    int    n_out,
-    double x,
-    double a,
-    double b,
     double ncp,
     bool   verbose = false
 );
@@ -834,21 +854,15 @@ Rcpp::NumericVector dnt_opencl(
     bool   verbose = false
 );
 
-Rcpp::NumericVector pnt_opencl(
-    int    n_out,
-    double x,
-    double df,
-    double ncp,
-    bool   verbose = false
-);
-
 Rcpp::NumericVector ptukey_opencl(
-    int    n_out,
-    double q,
-    double nmeans,
-    double df,
-    double nranges,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& nmeans,
+    const Rcpp::NumericVector& df,
+    const Rcpp::NumericVector& nranges,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qtukey_opencl(
@@ -869,11 +883,13 @@ Rcpp::NumericVector dwilcox_opencl(
 );
 
 Rcpp::NumericVector pwilcox_opencl(
-    int    n_out,
-    double q,
-    double m,
-    double n2,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& m,
+    const Rcpp::NumericVector& n2,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qwilcox_opencl(
@@ -892,10 +908,12 @@ Rcpp::NumericVector dsignrank_opencl(
 );
 
 Rcpp::NumericVector psignrank_opencl(
-    int    n_out,
-    double q,
-    double nsize,
-    bool   verbose = false
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& nsize,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int                          opencl_parallel_code,
+    bool                         verbose = false
 );
 
 Rcpp::NumericVector qsignrank_opencl(
