@@ -17,6 +17,7 @@ Add new rows when `R CMD check` or manual runs surface reproducible failures.
 | `qgamma_opencl`   | `qgamma_kernel`                 | `ptxas fatal : Unresolved extern function 'stirlerr_cycle_free'` | Device link sees nmath Stirling/Stirlerr helpers not defined for this target |
 | `qlogis_opencl`   | `qlogis_kernel`                 | `ptxas fatal : Unresolved extern function 'Rf_qlogis'` | `Rmath` maps `qlogis`→`Rf_qlogis` at some call sites while `qlogis.cl` emits `qlogis`; NVPTX linker has no matching `Rf_qlogis` |
 | `qt_opencl`       | `qnt_kernel`                    | `ptxas fatal : Unresolved extern function 'Rf_qnt'` | `Rmath` maps `qnt`→`Rf_qnt`; NVPTX has no device `Rf_qnt` (host nmath symbol in device link) |
+| `qunif_opencl`    | `qunif_kernel`                  | `ptxas fatal : Unresolved extern function 'Rf_qunif'` | `Rmath` maps `qunif`→`Rf_qunif`; NVPTX has no device `Rf_qunif` |
 
 ## Notes
 

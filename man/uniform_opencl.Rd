@@ -53,8 +53,8 @@ runif_opencl(n, min = 0, max = 1, fallback = TRUE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU \code{stats} function
-when OpenCL is unavailable or the OpenCL call fails.}
+\item{fallback}{CPU on OpenCL/dispatch failures; see tracker before relying on masking.\cr
+See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.}
 
 \item{verbose}{Logical; print informational fallback messages.}
 
@@ -74,13 +74,22 @@ OpenCL-backed density, distribution, quantile, and random generation wrappers
 for the uniform distribution. These mirror the base \code{stats} uniform
 family while adding OpenCL dispatch and optional CPU fallback behavior.
 }
+\section{Known OpenCL limitations}{
+
+Some platforms fail to link \code{qunif_kernel} (\code{ptxas} unresolved \code{Rf_qunif}).
+Runnable examples omit GPU \code{qunif_opencl} until resolved.
+See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
+}
+
 \examples{
 if (has_opencl()) {
   n <- 5L
 
   dunif_opencl(rep(0.4, n), min = 0, max = 1, fallback = FALSE, verbose = TRUE)
   punif_opencl(q = 0.4, min = 0, max = 1, fallback = FALSE, verbose = TRUE)
-  qunif_opencl(rep(0.8, n), min = 0, max = 1, fallback = FALSE, verbose = TRUE)
+  ## qunif_opencl: disabled — NVPTX/ptxas can fail (unresolved Rf_qunif; Rmath qunif -> Rf_qunif).
+  ##                See inst/OPENCL_KERNEL_KNOWN_FAILURES.md until fixed.
+  # qunif_opencl(rep(0.8, n), min = 0, max = 1, fallback = FALSE, verbose = TRUE)
   runif_opencl(n, min = 0, max = 1, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")

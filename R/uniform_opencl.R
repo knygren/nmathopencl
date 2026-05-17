@@ -13,10 +13,15 @@
 #' @param p Probabilities for \code{qunif_opencl} (\code{stats::qunif} semantics).
 #' @param min Lower limit of the distribution.
 #' @param max Upper limit of the distribution.
-#' @param fallback Logical; if \code{TRUE}, fall back to CPU \code{stats} function
-#'   when OpenCL is unavailable or the OpenCL call fails.
+#' @param fallback CPU on OpenCL/dispatch failures; see tracker before relying on masking.\cr
+#'   See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 #' @param verbose Logical; print informational fallback messages.
 #' @param log \code{log} flag for densities (\code{stats} \emph{d}-family semantics).
+#'
+#' @section Known OpenCL limitations:
+#' Some platforms fail to link \code{qunif_kernel} (\code{ptxas} unresolved \code{Rf_qunif}).
+#' Runnable examples omit GPU \code{qunif_opencl} until resolved.
+#' See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 #'
 #' @return Numeric vector result from the corresponding uniform-family operation.
 #' @example inst/examples/Ex_uniform_opencl.R
