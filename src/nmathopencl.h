@@ -197,6 +197,17 @@ Rcpp::NumericVector pnorm_opencl(
     bool   verbose = false
 );
 
+/** Experimental vectored NDRange path for pnorm (pnorm_opencl_temp); not wired from R yet. */
+Rcpp::NumericVector pnorm_opencl_temp(
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& mean,
+    const Rcpp::NumericVector& sd,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int    opencl_parallel_code,
+    bool   verbose = false
+);
+
 Rcpp::NumericVector qnorm_opencl(
     const Rcpp::NumericVector& p,
     const Rcpp::NumericVector& mean,

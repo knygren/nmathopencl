@@ -176,6 +176,19 @@ void opencl_dbl_scalar_kernel_runner(
     std::vector<double>&       out_flat
 );
 
+// Temp OpenCL runner for __kernel pnorm_kernel_temp (src/pnorm_kernel.cl): one NDRange dim, global=len.
+void opencl_pnorm_kernel_runner_temp(
+    const std::string&         kernel_source,
+    const char*                kernel_name,
+    int                        len,
+    const std::vector<double>& q,
+    const std::vector<double>& mean,
+    const std::vector<double>& sd,
+    const std::vector<int>&    lower_tail,
+    const std::vector<int>&    log_p,
+    std::vector<double>&       out_flat
+);
+
 // -------------------------------------------------------------------------
 // OpenCL error-handling utilities
 // (inline so downstream packages get them via #include "openclPort.h")

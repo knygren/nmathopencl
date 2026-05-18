@@ -631,6 +631,51 @@ Rcpp::NumericVector pnorm_opencl(
   return out;
 }
 
+// NDRange-over-len pnorm prototype (pnorm_kernel_temp); not called from exports yet.
+Rcpp::NumericVector pnorm_opencl_temp(
+    const Rcpp::NumericVector& q,
+    const Rcpp::NumericVector& mean,
+    const Rcpp::NumericVector& sd,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    int opencl_parallel_code,
+    bool verbose
+) {
+  (void)opencl_parallel_code;
+  const int len = q.size();
+  Rcpp::NumericVector out(len);
+#ifdef USE_OPENCL
+  if (!has_opencl() || len == 0) return out;
+
+  try {
+    std::vector<double> qv(q.begin(), q.end());
+    std::vector<double> mv(mean.begin(), mean.end());
+    std::vector<double> sv(sd.begin(), sd.end());
+    std::vector<int> lt(lower_tail.begin(), lower_tail.end());
+    std::vector<int> lp(log_p.begin(), log_p.end());
+
+    std::vector<double> out_flat;
+    opencl_pnorm_kernel_runner_temp(
+        build_rmath_program_indexed("src/pnorm_kernel.cl"),
+        "pnorm_kernel_temp",
+        len,
+        qv,
+        mv,
+        sv,
+        lt,
+        lp,
+        out_flat);
+    for (int i = 0; i < len; ++i) {
+      out[i] = out_flat[static_cast<size_t>(i)];
+    }
+  } catch (const std::exception& e) {
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
+  }
+#endif
+  return out;
+}
+
 Rcpp::NumericVector qnorm_opencl(
     const Rcpp::NumericVector& p,
     const Rcpp::NumericVector& mean,
