@@ -608,20 +608,44 @@ Rcpp::NumericVector pnorm_opencl(
   const int len = q.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    // -------------------------------------------------------------------------
+    // Serial path (opencl_dbl_scalar_kernel_runner + pnorm_kernel), retained for revert:
+    //
+    // for (int i = 0; i < len; ++i) {
+    //   const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
+    //   const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
+    //   std::vector<double> out_flat;
+    //   opencl_dbl_scalar_kernel_runner(
+    //       build_rmath_program_indexed("src/pnorm_kernel.cl"),
+    //       "pnorm_kernel",
+    //       {q[i], mean[i], sd[i], lt_d, lp_d},
+    //       1,
+    //       out_flat);
+    //   out[i] = out_flat[0];
+    // }
+    // -------------------------------------------------------------------------
+    std::vector<double> qv(q.begin(), q.end());
+    std::vector<double> mv(mean.begin(), mean.end());
+    std::vector<double> sv(sd.begin(), sd.end());
+    std::vector<int> lt(lower_tail.begin(), lower_tail.end());
+    std::vector<int> lp(log_p.begin(), log_p.end());
+
+    std::vector<double> out_flat;
+    opencl_pnorm_kernel_runner_temp(
+        build_rmath_program_indexed("src/pnorm_kernel.cl"),
+        "pnorm_kernel_temp",
+        len,
+        qv,
+        mv,
+        sv,
+        lt,
+        lp,
+        out_flat);
     for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/pnorm_kernel.cl"),
-          "pnorm_kernel",
-          {q[i], mean[i], sd[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
+      out[i] = out_flat[static_cast<size_t>(i)];
     }
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
@@ -631,7 +655,7 @@ Rcpp::NumericVector pnorm_opencl(
   return out;
 }
 
-// NDRange-over-len pnorm prototype (pnorm_kernel_temp); not called from exports yet.
+// Same OpenCL path as pnorm_opencl (NDRange + pnorm_kernel_temp); kept for experiments / diff tools.
 Rcpp::NumericVector pnorm_opencl_temp(
     const Rcpp::NumericVector& q,
     const Rcpp::NumericVector& mean,
