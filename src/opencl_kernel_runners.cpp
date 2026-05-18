@@ -165,24 +165,30 @@ void opencl_dbl_scalar_kernel_runner(
   }
 }
 
-void opencl_pnorm_kernel_runner_temp(
-    const std::string&         kernel_source,
-    const char*                kernel_name,
-    int                        len,
-    const std::vector<double>& q,
-    const std::vector<double>& mean,
-    const std::vector<double>& sd,
-    const std::vector<int>&    lower_tail,
-    const std::vector<int>&    log_p,
-    std::vector<double>&       out_flat
+void opencl_pq_tail_kernel_runner_temp(
+    const std::string&                     kernel_source,
+    const char*                            kernel_name,
+    int                                    len,
+    const std::vector<std::vector<double>>& arg_cols,
+    const std::vector<int>&                lower_tail,
+    const std::vector<int>&                log_p,
+    std::vector<double>&                   out_flat
 ) {
   out_flat.assign(static_cast<size_t>(len), 0.0);
   if (len <= 0) return;
 
-  if ((int)q.size() != len || (int)mean.size() != len || (int)sd.size() != len ||
-      (int)lower_tail.size() != len || (int)log_p.size() != len) {
+  const int k = static_cast<int>(arg_cols.size());
+  if (k < 1) {
+    throw std::runtime_error("opencl_pq_tail_kernel_runner_temp: arg_cols must be non-empty.");
+  }
+  for (int j = 0; j < k; ++j) {
+    if ((int)arg_cols[static_cast<size_t>(j)].size() != len) {
+      throw std::runtime_error("opencl_pq_tail_kernel_runner_temp: argument column size mismatch.");
+    }
+  }
+  if ((int)lower_tail.size() != len || (int)log_p.size() != len) {
     throw std::runtime_error(
-        "opencl_pnorm_kernel_runner_temp: argument size mismatch.");
+        "opencl_pq_tail_kernel_runner_temp: lower_tail / log_p size mismatch.");
   }
 
   cl_int status = 0;
@@ -191,9 +197,7 @@ void opencl_pnorm_kernel_runner_temp(
   cl_command_queue queue = nullptr;
   cl_program program = nullptr;
   cl_kernel kernel = nullptr;
-  cl_mem buf_q = nullptr;
-  cl_mem buf_m = nullptr;
-  cl_mem buf_s = nullptr;
+  std::vector<cl_mem> buf_cols(static_cast<size_t>(k), nullptr);
   cl_mem buf_lt = nullptr;
   cl_mem buf_lp = nullptr;
   cl_mem buf_out = nullptr;
@@ -209,16 +213,40 @@ void opencl_pnorm_kernel_runner_temp(
   };
 
   auto cleanup = [&]() {
-    if (buf_out) { clReleaseMemObject(buf_out); buf_out = nullptr; }
-    if (buf_lp) { clReleaseMemObject(buf_lp); buf_lp = nullptr; }
-    if (buf_lt) { clReleaseMemObject(buf_lt); buf_lt = nullptr; }
-    if (buf_s) { clReleaseMemObject(buf_s); buf_s = nullptr; }
-    if (buf_m) { clReleaseMemObject(buf_m); buf_m = nullptr; }
-    if (buf_q) { clReleaseMemObject(buf_q); buf_q = nullptr; }
-    if (kernel) { clReleaseKernel(kernel); kernel = nullptr; }
-    if (program) { clReleaseProgram(program); program = nullptr; }
-    if (queue) { clReleaseCommandQueue(queue); queue = nullptr; }
-    if (context) { clReleaseContext(context); context = nullptr; }
+    if (buf_out) {
+      clReleaseMemObject(buf_out);
+      buf_out = nullptr;
+    }
+    if (buf_lp) {
+      clReleaseMemObject(buf_lp);
+      buf_lp = nullptr;
+    }
+    if (buf_lt) {
+      clReleaseMemObject(buf_lt);
+      buf_lt = nullptr;
+    }
+    for (auto& b : buf_cols) {
+      if (b) {
+        clReleaseMemObject(b);
+        b = nullptr;
+      }
+    }
+    if (kernel) {
+      clReleaseKernel(kernel);
+      kernel = nullptr;
+    }
+    if (program) {
+      clReleaseProgram(program);
+      program = nullptr;
+    }
+    if (queue) {
+      clReleaseCommandQueue(queue);
+      queue = nullptr;
+    }
+    if (context) {
+      clReleaseContext(context);
+      context = nullptr;
+    }
   };
 
   cl_platform_id platform = nullptr;
@@ -288,15 +316,15 @@ void opencl_pnorm_kernel_runner_temp(
     kernel = clCreateKernel(program, kernel_name, &status);
     require_success(status, "clCreateKernel");
 
-    buf_q = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                           sizeof(double) * static_cast<size_t>(len), (void*)q.data(), &status);
-    require_success(status, "clCreateBuffer(q)");
-    buf_m = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                           sizeof(double) * static_cast<size_t>(len), (void*)mean.data(), &status);
-    require_success(status, "clCreateBuffer(mean)");
-    buf_s = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                           sizeof(double) * static_cast<size_t>(len), (void*)sd.data(), &status);
-    require_success(status, "clCreateBuffer(sd)");
+    for (int j = 0; j < k; ++j) {
+      const auto& col = arg_cols[static_cast<size_t>(j)];
+      buf_cols[static_cast<size_t>(j)] =
+          clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                         sizeof(double) * static_cast<size_t>(len),
+                         (void*)col.data(), &status);
+      require_success(status, "clCreateBuffer(arg_col)");
+    }
+
     buf_lt =
         clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                        sizeof(int) * static_cast<size_t>(len), (void*)lower_tail.data(), &status);
@@ -311,12 +339,10 @@ void opencl_pnorm_kernel_runner_temp(
     require_success(status, "clCreateBuffer(out)");
 
     int arg = 0;
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), &buf_q);
-    require_success(status, "clSetKernelArg(q)");
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), &buf_m);
-    require_success(status, "clSetKernelArg(mean)");
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), &buf_s);
-    require_success(status, "clSetKernelArg(sd)");
+    for (int j = 0; j < k; ++j) {
+      status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), &buf_cols[static_cast<size_t>(j)]);
+      require_success(status, "clSetKernelArg(arg_col)");
+    }
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), &buf_lt);
     require_success(status, "clSetKernelArg(lower_tail)");
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), &buf_lp);
@@ -344,6 +370,27 @@ void opencl_pnorm_kernel_runner_temp(
     cleanup();
     throw;
   }
+}
+
+void opencl_pnorm_kernel_runner_temp(
+    const std::string&         kernel_source,
+    const char*                kernel_name,
+    int                        len,
+    const std::vector<double>& q,
+    const std::vector<double>& mean,
+    const std::vector<double>& sd,
+    const std::vector<int>&    lower_tail,
+    const std::vector<int>&    log_p,
+    std::vector<double>&       out_flat
+) {
+  opencl_pq_tail_kernel_runner_temp(
+      kernel_source,
+      kernel_name,
+      len,
+      std::vector<std::vector<double>>{q, mean, sd},
+      lower_tail,
+      log_p,
+      out_flat);
 }
 
 } // namespace openclPort

@@ -19,3 +19,19 @@ __kernel void pbeta_kernel(
     if (get_global_id(0) != 0) return;
     for (int i = 0; i < n; ++i) out[i] = pbeta(x, a, b, lt, lp);
 }
+
+__kernel void pbeta_kernel_temp(
+    __global const double* q,
+    __global const double* shape1,
+    __global const double* shape2,
+    __global const int* lower_tail,
+    __global const int* log_p,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    int lt = (lower_tail[i] != 0) ? 1 : 0;
+    int lp = (log_p[i] != 0) ? 1 : 0;
+    out[i] = pbeta(q[i], shape1[i], shape2[i], lt, lp);
+}

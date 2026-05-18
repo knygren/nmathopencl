@@ -19,3 +19,19 @@ __kernel void plnorm_kernel(
     if (get_global_id(0) != 0) return;
     for (int i = 0; i < n; ++i) out[i] = plnorm(q, meanlog, sdlog, lt, lp);
 }
+
+__kernel void plnorm_kernel_temp(
+    __global const double* q,
+    __global const double* meanlog,
+    __global const double* sdlog,
+    __global const int* lower_tail,
+    __global const int* log_p,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    int lt = (lower_tail[i] != 0) ? 1 : 0;
+    int lp = (log_p[i] != 0) ? 1 : 0;
+    out[i] = plnorm(q[i], meanlog[i], sdlog[i], lt, lp);
+}
