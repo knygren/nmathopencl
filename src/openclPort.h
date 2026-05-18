@@ -187,6 +187,16 @@ void opencl_pq_tail_kernel_runner_temp(
     const std::vector<int>&          log_p,
     std::vector<double>&             out_flat);
 
+// NDRange-over-len for d* kernels using give_log as int buffer:
+// OpenCL entry points *_kernel_temp take arg_cols[] (__global double each), give_log, out, len.
+void opencl_d_givelog_kernel_runner_temp(
+    const std::string&                     kernel_source,
+    const char*                            kernel_name,
+    int                                    len,
+    const std::vector<std::vector<double>>& arg_cols,
+    const std::vector<int>&                give_log,
+    std::vector<double>&                   out_flat);
+
 // Convenience wrapper for pnorm-shaped arguments (delegates to opencl_pq_tail_kernel_runner_temp).
 void opencl_pnorm_kernel_runner_temp(
     const std::string&         kernel_source,

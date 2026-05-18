@@ -19,3 +19,16 @@ __kernel void dt_kernel(
     const int give_log = (give_log_d != 0.0) ? 1 : 0;
     for (int i = 0; i < n; ++i) out[i] = dt(x, df, give_log);
 }
+
+__kernel void dt_kernel_temp(
+    __global const double* x,
+    __global const double* df,
+    __global const int* give_log,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    int gl = (give_log[i] != 0) ? 1 : 0;
+    out[i] = dt(x[i], df[i], gl);
+}

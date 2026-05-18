@@ -21,6 +21,14 @@ static void opencl_serial_scalar_draws(
     int n_out,
     Rcpp::NumericVector& out,
     bool verbose);
+static void d_givelog_ndrange_kernel_temp_fill(
+    const char* kernel_rel_path,
+    const char* kernel_temp_name,
+    int len,
+    const std::vector<const Rcpp::NumericVector*>& numeric_args,
+    const Rcpp::IntegerVector& give_log,
+    Rcpp::NumericVector& out,
+    bool verbose);
 #endif
 
 Rcpp::NumericVector dnorm_opencl(
@@ -35,9 +43,10 @@ Rcpp::NumericVector dnorm_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -49,6 +58,15 @@ Rcpp::NumericVector dnorm_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dnorm_kernel.cl",
+        "dnorm_kernel_temp",
+        len,
+        {&x, &mean, &sd},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -349,6 +367,32 @@ static void pq_tail_ndrange_kernel_temp_fill(
       arg_cols,
       lt,
       lp,
+      out_flat);
+  for (int i = 0; i < len; ++i) {
+    out[i] = out_flat[static_cast<size_t>(i)];
+  }
+}
+
+static void d_givelog_ndrange_kernel_temp_fill(
+    const char*                                            kernel_rel_path,
+    const char*                                            kernel_temp_name,
+    int                                                    len,
+    const std::vector<const Rcpp::NumericVector*>&          numeric_args,
+    const Rcpp::IntegerVector&                             give_log,
+    Rcpp::NumericVector&                                   out,
+    bool                                                   verbose
+) {
+  (void)verbose;
+  std::vector<std::vector<double>> arg_cols =
+      pq_pack_numeric_cols_for_tail_temp(numeric_args);
+  std::vector<int> gl(give_log.begin(), give_log.end());
+  std::vector<double> out_flat;
+  opencl_d_givelog_kernel_runner_temp(
+      build_rmath_program_indexed(kernel_rel_path),
+      kernel_temp_name,
+      len,
+      arg_cols,
+      gl,
       out_flat);
   for (int i = 0; i < len; ++i) {
     out[i] = out_flat[static_cast<size_t>(i)];
@@ -768,9 +812,10 @@ Rcpp::NumericVector dunif_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -782,6 +827,15 @@ Rcpp::NumericVector dunif_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dunif_kernel.cl",
+        "dunif_kernel_temp",
+        len,
+        {&x, &min, &max},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -885,9 +939,10 @@ Rcpp::NumericVector dgamma_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -899,6 +954,15 @@ Rcpp::NumericVector dgamma_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dgamma_kernel.cl",
+        "dgamma_kernel_temp",
+        len,
+        {&x, &shape, &scale},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -1017,9 +1081,10 @@ Rcpp::NumericVector dbeta_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -1031,6 +1096,15 @@ Rcpp::NumericVector dbeta_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dbeta_kernel.cl",
+        "dbeta_kernel_temp",
+        len,
+        {&x, &shape1, &shape2},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -1214,9 +1288,10 @@ Rcpp::NumericVector dlnorm_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -1228,6 +1303,15 @@ Rcpp::NumericVector dlnorm_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dlnorm_kernel.cl",
+        "dlnorm_kernel_temp",
+        len,
+        {&x, &meanlog, &sdlog},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -1346,9 +1430,20 @@ Rcpp::NumericVector dchisq_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
+
+  bool all_ncp_zero = true;
+  bool any_ncp_zero = false;
+  for (int i = 0; i < len; ++i) {
+    if (ncp[i] == 0.0) {
+      any_ncp_zero = true;
+    } else {
+      all_ncp_zero = false;
+    }
+  }
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -1368,6 +1463,47 @@ Rcpp::NumericVector dchisq_opencl(
             out_flat);
       }
       out[i] = out_flat[0];
+    }
+    */
+    if (all_ncp_zero) {
+      d_givelog_ndrange_kernel_temp_fill(
+          "src/dchisq_kernel.cl",
+          "dchisq_kernel_temp",
+          len,
+          {&x, &df},
+          give_log,
+          out,
+          verbose);
+    } else if (!any_ncp_zero) {
+      d_givelog_ndrange_kernel_temp_fill(
+          "src/dnchisq_kernel.cl",
+          "dnchisq_kernel_temp",
+          len,
+          {&x, &df, &ncp},
+          give_log,
+          out,
+          verbose);
+    } else {
+      for (int i = 0; i < len; ++i) {
+        const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
+        std::vector<double> out_flat;
+        if (ncp[i] == 0.0) {
+          opencl_dbl_scalar_kernel_runner(
+              build_rmath_program_indexed("src/dchisq_kernel.cl"),
+              "dchisq_kernel",
+              {x[i], df[i], gl_d, 0.0, 0.0},
+              1,
+              out_flat);
+        } else {
+          opencl_dbl_scalar_kernel_runner(
+              build_rmath_program_indexed("src/dnchisq_kernel.cl"),
+              "dnchisq_kernel",
+              {x[i], df[i], ncp[i], gl_d, 0.0},
+              1,
+              out_flat);
+        }
+        out[i] = out_flat[0];
+      }
     }
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
@@ -1565,9 +1701,20 @@ Rcpp::NumericVector df_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
+
+  bool all_ncp_zero = true;
+  bool any_ncp_zero = false;
+  for (int i = 0; i < len; ++i) {
+    if (ncp[i] == 0.0) {
+      any_ncp_zero = true;
+    } else {
+      all_ncp_zero = false;
+    }
+  }
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -1587,6 +1734,47 @@ Rcpp::NumericVector df_opencl(
             out_flat);
       }
       out[i] = out_flat[0];
+    }
+    */
+    if (all_ncp_zero) {
+      d_givelog_ndrange_kernel_temp_fill(
+          "src/df_kernel.cl",
+          "df_kernel_temp",
+          len,
+          {&x, &df1, &df2},
+          give_log,
+          out,
+          verbose);
+    } else if (!any_ncp_zero) {
+      d_givelog_ndrange_kernel_temp_fill(
+          "src/dnf_kernel.cl",
+          "dnf_kernel_temp",
+          len,
+          {&x, &df1, &ncp, &df2},
+          give_log,
+          out,
+          verbose);
+    } else {
+      for (int i = 0; i < len; ++i) {
+        const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
+        std::vector<double> out_flat;
+        if (ncp[i] == 0.0) {
+          opencl_dbl_scalar_kernel_runner(
+              build_rmath_program_indexed("src/df_kernel.cl"),
+              "df_kernel",
+              {x[i], df1[i], df2[i], gl_d, 0.0},
+              1,
+              out_flat);
+        } else {
+          opencl_dbl_scalar_kernel_runner(
+              build_rmath_program_indexed("src/dnf_kernel.cl"),
+              "dnf_kernel",
+              {x[i], df1[i], ncp[i], df2[i], gl_d},
+              1,
+              out_flat);
+        }
+        out[i] = out_flat[0];
+      }
     }
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
@@ -1770,9 +1958,20 @@ Rcpp::NumericVector dt_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
+
+  bool all_ncp_zero = true;
+  bool any_ncp_zero = false;
+  for (int i = 0; i < len; ++i) {
+    if (ncp[i] == 0.0) {
+      any_ncp_zero = true;
+    } else {
+      all_ncp_zero = false;
+    }
+  }
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -1792,6 +1991,47 @@ Rcpp::NumericVector dt_opencl(
             out_flat);
       }
       out[i] = out_flat[0];
+    }
+    */
+    if (all_ncp_zero) {
+      d_givelog_ndrange_kernel_temp_fill(
+          "src/dt_kernel.cl",
+          "dt_kernel_temp",
+          len,
+          {&x, &df},
+          give_log,
+          out,
+          verbose);
+    } else if (!any_ncp_zero) {
+      d_givelog_ndrange_kernel_temp_fill(
+          "src/dnt_kernel.cl",
+          "dnt_kernel_temp",
+          len,
+          {&x, &df, &ncp},
+          give_log,
+          out,
+          verbose);
+    } else {
+      for (int i = 0; i < len; ++i) {
+        const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
+        std::vector<double> out_flat;
+        if (ncp[i] == 0.0) {
+          opencl_dbl_scalar_kernel_runner(
+              build_rmath_program_indexed("src/dt_kernel.cl"),
+              "dt_kernel",
+              {x[i], df[i], gl_d, 0.0, 0.0},
+              1,
+              out_flat);
+        } else {
+          opencl_dbl_scalar_kernel_runner(
+              build_rmath_program_indexed("src/dnt_kernel.cl"),
+              "dnt_kernel",
+              {x[i], df[i], ncp[i], gl_d, 0.0},
+              1,
+              out_flat);
+        }
+        out[i] = out_flat[0];
+      }
     }
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
@@ -1974,9 +2214,10 @@ Rcpp::NumericVector dbinom_raw_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -1988,6 +2229,15 @@ Rcpp::NumericVector dbinom_raw_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dbinom_raw_kernel.cl",
+        "dbinom_raw_kernel_temp",
+        len,
+        {&x, &n_size, &prob, &qprob},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -2008,9 +2258,10 @@ Rcpp::NumericVector dbinom_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -2022,6 +2273,15 @@ Rcpp::NumericVector dbinom_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dbinom_kernel.cl",
+        "dbinom_kernel_temp",
+        len,
+        {&x, &size, &prob},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -2089,9 +2349,10 @@ Rcpp::NumericVector dnbinom_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -2103,6 +2364,15 @@ Rcpp::NumericVector dnbinom_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dnbinom_kernel.cl",
+        "dnbinom_kernel_temp",
+        len,
+        {&x, &size, &prob},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -2221,9 +2491,10 @@ Rcpp::NumericVector dnbinom_mu_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -2235,6 +2506,15 @@ Rcpp::NumericVector dnbinom_mu_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dnbinom_mu_kernel.cl",
+        "dnbinom_mu_kernel_temp",
+        len,
+        {&x, &size, &mu},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -2317,9 +2597,10 @@ Rcpp::NumericVector dcauchy_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -2331,6 +2612,15 @@ Rcpp::NumericVector dcauchy_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dcauchy_kernel.cl",
+        "dcauchy_kernel_temp",
+        len,
+        {&x, &location, &scale},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -2448,9 +2738,10 @@ Rcpp::NumericVector dexp_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -2462,6 +2753,15 @@ Rcpp::NumericVector dexp_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dexp_kernel.cl",
+        "dexp_kernel_temp",
+        len,
+        {&x, &rate},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -2562,9 +2862,10 @@ Rcpp::NumericVector dgeom_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -2576,6 +2877,15 @@ Rcpp::NumericVector dgeom_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dgeom_kernel.cl",
+        "dgeom_kernel_temp",
+        len,
+        {&x, &prob},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -2693,9 +3003,10 @@ Rcpp::NumericVector dhyper_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -2707,6 +3018,15 @@ Rcpp::NumericVector dhyper_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dhyper_kernel.cl",
+        "dhyper_kernel_temp",
+        len,
+        {&x, &r, &b, &n1},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -2897,9 +3217,10 @@ Rcpp::NumericVector dpois_raw_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -2911,6 +3232,15 @@ Rcpp::NumericVector dpois_raw_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dpois_raw_kernel.cl",
+        "dpois_raw_kernel_temp",
+        len,
+        {&x, &lambda},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -2930,9 +3260,10 @@ Rcpp::NumericVector dpois_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -2944,6 +3275,15 @@ Rcpp::NumericVector dpois_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dpois_kernel.cl",
+        "dpois_kernel_temp",
+        len,
+        {&x, &lambda},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -3076,9 +3416,10 @@ Rcpp::NumericVector dweibull_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -3090,6 +3431,15 @@ Rcpp::NumericVector dweibull_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dweibull_kernel.cl",
+        "dweibull_kernel_temp",
+        len,
+        {&x, &shape, &scale},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -3208,9 +3558,10 @@ Rcpp::NumericVector dlogis_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -3222,6 +3573,15 @@ Rcpp::NumericVector dlogis_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dlogis_kernel.cl",
+        "dlogis_kernel_temp",
+        len,
+        {&x, &location, &scale},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -3341,9 +3701,10 @@ Rcpp::NumericVector dnbeta_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -3355,6 +3716,15 @@ Rcpp::NumericVector dnbeta_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dnbeta_kernel.cl",
+        "dnbeta_kernel_temp",
+        len,
+        {&x, &shape1, &ncp, &shape2},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -3460,9 +3830,10 @@ Rcpp::NumericVector dwilcox_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -3474,6 +3845,15 @@ Rcpp::NumericVector dwilcox_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dwilcox_kernel.cl",
+        "dwilcox_kernel_temp",
+        len,
+        {&x, &m, &n2},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -3576,9 +3956,10 @@ Rcpp::NumericVector dsignrank_opencl(
   const int len = x.size();
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+  if (!has_opencl() || len == 0) return out;
 
   try {
+    /*
     for (int i = 0; i < len; ++i) {
       const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
       std::vector<double> out_flat;
@@ -3590,6 +3971,15 @@ Rcpp::NumericVector dsignrank_opencl(
           out_flat);
       out[i] = out_flat[0];
     }
+    */
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dsignrank_kernel.cl",
+        "dsignrank_kernel_temp",
+        len,
+        {&x, &nsize},
+        give_log,
+        out,
+        verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
