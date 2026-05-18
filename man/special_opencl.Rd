@@ -14,67 +14,63 @@
 \alias{lchoose_opencl}
 \title{Special Functions (OpenCL)}
 \usage{
-gammafn_opencl(n, x, fallback = TRUE, verbose = FALSE)
+gammafn_opencl(x, fallback = TRUE, verbose = FALSE)
 
-lgammafn_opencl(n, x, fallback = TRUE, verbose = FALSE)
+lgammafn_opencl(x, fallback = TRUE, verbose = FALSE)
 
-digamma_opencl(n, x, fallback = TRUE, verbose = FALSE)
+digamma_opencl(x, fallback = TRUE, verbose = FALSE)
 
-trigamma_opencl(n, x, fallback = TRUE, verbose = FALSE)
+trigamma_opencl(x, fallback = TRUE, verbose = FALSE)
 
-tetragamma_opencl(n, x, fallback = TRUE, verbose = FALSE)
+tetragamma_opencl(x, fallback = TRUE, verbose = FALSE)
 
-pentagamma_opencl(n, x, fallback = TRUE, verbose = FALSE)
+pentagamma_opencl(x, fallback = TRUE, verbose = FALSE)
 
-psigamma_opencl(n, x, deriv, fallback = TRUE, verbose = FALSE)
+psigamma_opencl(x, deriv, fallback = TRUE, verbose = FALSE)
 
-beta_opencl(n, a, b, fallback = TRUE, verbose = FALSE)
+beta_opencl(a, b, fallback = TRUE, verbose = FALSE)
 
-lbeta_opencl(n, a, b, fallback = TRUE, verbose = FALSE)
+lbeta_opencl(a, b, fallback = TRUE, verbose = FALSE)
 
-choose_opencl(n, x, k, fallback = TRUE, verbose = FALSE)
+choose_opencl(n, k, fallback = TRUE, verbose = FALSE)
 
-lchoose_opencl(n, x, k, fallback = TRUE, verbose = FALSE)
+lchoose_opencl(n, k, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
-\item{x}{Numeric scalar input.}
+\item{x}{Numeric vector (and additional vectors where listed); arguments are
+recycled to a common length like the corresponding base functions.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{deriv}{Derivative order for \code{psigamma}.}
+\item{deriv}{Derivative order for \code{psigamma_opencl} (recycled with \code{x}).}
 
-\item{a}{First scalar parameter.}
+\item{a, b}{Parameters for \code{beta_opencl} / \code{lbeta_opencl} (recycled together).}
 
-\item{b}{Second scalar parameter.}
-
-\item{k}{Second argument for choose-style functions.}
+\item{n, k}{Arguments for \code{choose_opencl} / \code{lchoose_opencl}, like
+\code{base::choose(n, k)} (recycled together).}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector of recycled common length.
 }
 \description{
 OpenCL-backed wrappers for selected special functions from R Mathlib.
 }
 \examples{
 if (has_opencl()) {
-  n <- 5L
+  gammafn_opencl(x = 2.5, fallback = FALSE, verbose = TRUE)
+  lgammafn_opencl(x = 2.5, fallback = FALSE, verbose = TRUE)
+  digamma_opencl(x = 2.5, fallback = FALSE, verbose = TRUE)
+  trigamma_opencl(x = 2.5, fallback = FALSE, verbose = TRUE)
+  tetragamma_opencl(x = 2.5, fallback = FALSE, verbose = TRUE)
+  pentagamma_opencl(x = 2.5, fallback = FALSE, verbose = TRUE)
+  psigamma_opencl(x = 2.5, deriv = 1, fallback = FALSE, verbose = TRUE)
 
-  gammafn_opencl(n, x = 2.5, fallback = FALSE, verbose = TRUE)
-  lgammafn_opencl(n, x = 2.5, fallback = FALSE, verbose = TRUE)
-  digamma_opencl(n, x = 2.5, fallback = FALSE, verbose = TRUE)
-  trigamma_opencl(n, x = 2.5, fallback = FALSE, verbose = TRUE)
-  tetragamma_opencl(n, x = 2.5, fallback = FALSE, verbose = TRUE)
-  pentagamma_opencl(n, x = 2.5, fallback = FALSE, verbose = TRUE)
-  psigamma_opencl(n, x = 2.5, deriv = 1, fallback = FALSE, verbose = TRUE)
-
-  beta_opencl(n, a = 2.5, b = 3.0, fallback = FALSE, verbose = TRUE)
-  lbeta_opencl(n, a = 2.5, b = 3.0, fallback = FALSE, verbose = TRUE)
-  choose_opencl(n, x = 10, k = 4, fallback = FALSE, verbose = TRUE)
-  lchoose_opencl(n, x = 10, k = 4, fallback = FALSE, verbose = TRUE)
+  beta_opencl(a = 2.5, b = 3.0, fallback = FALSE, verbose = TRUE)
+  lbeta_opencl(a = 2.5, b = 3.0, fallback = FALSE, verbose = TRUE)
+  choose_opencl(n = 10, k = 4, fallback = FALSE, verbose = TRUE)
+  lchoose_opencl(n = 10, k = 4, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")
 }

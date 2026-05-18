@@ -13,63 +13,64 @@
 \alias{logspace_sum_opencl}
 \title{OpenCL-backed R Math runtime linkage checks}
 \usage{
-r_pow_opencl(n, x, y, fallback = TRUE, verbose = FALSE)
+r_pow_opencl(x, y, fallback = TRUE, verbose = FALSE)
 
-r_pow_di_opencl(n, x, n_exp, fallback = TRUE, verbose = FALSE)
+r_pow_di_opencl(x, n_exp, fallback = TRUE, verbose = FALSE)
 
-log1pmx_opencl(n, x, fallback = TRUE, verbose = FALSE)
+log1pmx_opencl(x, fallback = TRUE, verbose = FALSE)
 
-log1pexp_opencl(n, x, fallback = TRUE, verbose = FALSE)
+log1pexp_opencl(x, fallback = TRUE, verbose = FALSE)
 
-log1mexp_opencl(n, x, fallback = TRUE, verbose = FALSE)
+log1mexp_opencl(x, fallback = TRUE, verbose = FALSE)
 
-lgamma1p_opencl(n, x, fallback = TRUE, verbose = FALSE)
+lgamma1p_opencl(x, fallback = TRUE, verbose = FALSE)
 
-pow1p_opencl(n, x, y, fallback = TRUE, verbose = FALSE)
+pow1p_opencl(x, y, fallback = TRUE, verbose = FALSE)
 
-logspace_add_opencl(n, logx, logy, fallback = TRUE, verbose = FALSE)
+logspace_add_opencl(logx, logy, fallback = TRUE, verbose = FALSE)
 
-logspace_sub_opencl(n, logx, logy, fallback = TRUE, verbose = FALSE)
+logspace_sub_opencl(logx, logy, fallback = TRUE, verbose = FALSE)
 
-logspace_sum_opencl(n, logx, logy, fallback = TRUE, verbose = FALSE)
+logspace_sum_opencl(logx, logy, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
+\item{x}{Numeric vector(s): primary input, recycled together like \code{stats}
+family functions. Length-zero returns \code{numeric(0)}.}
 
-\item{x}{Numeric scalar input/base value.}
-
-\item{y}{Numeric scalar exponent for \code{r_pow_opencl} and \code{pow1p_opencl}.}
+\item{y}{Numeric vector for \code{r_pow_opencl} and \code{pow1p_opencl}
+(recycled against \code{x}).}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{n_exp}{Integer exponent for \code{r_pow_di_opencl}.}
+\item{n_exp}{Integer vector for \code{r_pow_di_opencl}, recycled against \code{x}.}
 
-\item{logx}{Numeric scalar log-value for log-space combination helpers.}
-
-\item{logy}{Numeric scalar log-value for log-space combination helpers.}
+\item{logx, logy}{Numeric vectors for log-space combination helpers (recycled together).}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector of the recycled common length (see Details).
 }
 \description{
 Wrappers for low-level Mathlib runtime helpers used by translated kernels.
 }
+\details{
+On the GPU path, arguments are recycled to a common length \code{len} (maximum
+argument length, R recycling rules). Each output index runs one scalar kernel launch.
+}
 \examples{
 if (has_opencl()) {
-  n <- 5L
-
-  r_pow_opencl(n, x = 1.2, y = 2, fallback = FALSE, verbose = TRUE)
-  r_pow_di_opencl(n, x = 1.2, n_exp = 3L, fallback = FALSE, verbose = TRUE)
-  log1pmx_opencl(n, x = 0.2, fallback = FALSE, verbose = TRUE)
-  log1pexp_opencl(n, x = 0.2, fallback = FALSE, verbose = TRUE)
-  log1mexp_opencl(n, x = 0.5, fallback = FALSE, verbose = TRUE)
-  lgamma1p_opencl(n, x = 0.2, fallback = FALSE, verbose = TRUE)
-  pow1p_opencl(n, x = 0.2, y = 3, fallback = FALSE, verbose = TRUE)
-  logspace_add_opencl(n, logx = -2, logy = -3, fallback = FALSE, verbose = TRUE)
-  logspace_sub_opencl(n, logx = -2, logy = -3, fallback = FALSE, verbose = TRUE)
-  logspace_sum_opencl(n, logx = -2, logy = -3, fallback = FALSE, verbose = TRUE)
+  r_pow_opencl(x = 1.2, y = 2, fallback = FALSE, verbose = TRUE)
+  r_pow_di_opencl(x = 1.2, n_exp = 3L, fallback = FALSE, verbose = TRUE)
+  log1pmx_opencl(x = 0.2, fallback = FALSE, verbose = TRUE)
+  log1pexp_opencl(x = 0.2, fallback = FALSE, verbose = TRUE)
+  log1mexp_opencl(x = 0.5, fallback = FALSE, verbose = TRUE)
+  lgamma1p_opencl(x = 0.2, fallback = FALSE, verbose = TRUE)
+  pow1p_opencl(x = 0.2, y = 3, fallback = FALSE, verbose = TRUE)
+  logspace_add_opencl(logx = -2, logy = -3, fallback = FALSE, verbose = TRUE)
+  logspace_sub_opencl(logx = -2, logy = -3, fallback = FALSE, verbose = TRUE)
+  logspace_sum_opencl(logx = -2, logy = -3, fallback = FALSE, verbose = TRUE)
+  log1pmx_opencl(x = seq(-0.5, 0.5, by = 0.25), fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")
 }

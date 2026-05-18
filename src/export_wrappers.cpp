@@ -96,98 +96,106 @@ Rcpp::NumericVector rbinom_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector r_pow_opencl_cpp_export(
-    int n,
-    double x,
-    double y,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
     bool verbose = false
 ) {
-  return nmathopencl::r_pow_opencl(n, x, y, verbose);
+  if (static_cast<int>(y.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x and y must have identical length.");
+  }
+  return nmathopencl::r_pow_opencl(x, y, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector r_pow_di_opencl_cpp_export(
-    int n,
-    double x,
-    int n_exp,
+    const Rcpp::NumericVector& x,
+    const Rcpp::IntegerVector& n_exp,
     bool verbose = false
 ) {
-  return nmathopencl::r_pow_di_opencl(n, x, n_exp, verbose);
+  if (static_cast<int>(n_exp.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x and n_exp must have identical length.");
+  }
+  return nmathopencl::r_pow_di_opencl(x, n_exp, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector log1pmx_opencl_cpp_export(
-    int n,
-    double x,
+    const Rcpp::NumericVector& x,
     bool verbose = false
 ) {
-  return nmathopencl::log1pmx_opencl(n, x, verbose);
+  return nmathopencl::log1pmx_opencl(x, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector log1pexp_opencl_cpp_export(
-    int n,
-    double x,
+    const Rcpp::NumericVector& x,
     bool verbose = false
 ) {
-  return nmathopencl::log1pexp_opencl(n, x, verbose);
+  return nmathopencl::log1pexp_opencl(x, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector log1mexp_opencl_cpp_export(
-    int n,
-    double x,
+    const Rcpp::NumericVector& x,
     bool verbose = false
 ) {
-  return nmathopencl::log1mexp_opencl(n, x, verbose);
+  return nmathopencl::log1mexp_opencl(x, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector lgamma1p_opencl_cpp_export(
-    int n,
-    double x,
+    const Rcpp::NumericVector& x,
     bool verbose = false
 ) {
-  return nmathopencl::lgamma1p_opencl(n, x, verbose);
+  return nmathopencl::lgamma1p_opencl(x, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector pow1p_opencl_cpp_export(
-    int n,
-    double x,
-    double y,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
     bool verbose = false
 ) {
-  return nmathopencl::pow1p_opencl(n, x, y, verbose);
+  if (static_cast<int>(y.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x and y must have identical length.");
+  }
+  return nmathopencl::pow1p_opencl(x, y, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector logspace_add_opencl_cpp_export(
-    int n,
-    double logx,
-    double logy,
+    const Rcpp::NumericVector& logx,
+    const Rcpp::NumericVector& logy,
     bool verbose = false
 ) {
-  return nmathopencl::logspace_add_opencl(n, logx, logy, verbose);
+  if (static_cast<int>(logy.size()) != logx.size()) {
+    Rcpp::stop("INTERNAL: logx and logy must have identical length.");
+  }
+  return nmathopencl::logspace_add_opencl(logx, logy, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector logspace_sub_opencl_cpp_export(
-    int n,
-    double logx,
-    double logy,
+    const Rcpp::NumericVector& logx,
+    const Rcpp::NumericVector& logy,
     bool verbose = false
 ) {
-  return nmathopencl::logspace_sub_opencl(n, logx, logy, verbose);
+  if (static_cast<int>(logy.size()) != logx.size()) {
+    Rcpp::stop("INTERNAL: logx and logy must have identical length.");
+  }
+  return nmathopencl::logspace_sub_opencl(logx, logy, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector logspace_sum_opencl_cpp_export(
-    int n,
-    double logx,
-    double logy,
+    const Rcpp::NumericVector& logx,
+    const Rcpp::NumericVector& logy,
     bool verbose = false
 ) {
-  return nmathopencl::logspace_sum_opencl(n, logx, logy, verbose);
+  if (static_cast<int>(logy.size()) != logx.size()) {
+    Rcpp::stop("INTERNAL: logx and logy must have identical length.");
+  }
+  return nmathopencl::logspace_sum_opencl(logx, logy, verbose);
 }
 
 // [[Rcpp::export]]
@@ -1867,299 +1875,338 @@ Rcpp::NumericVector rsignrank_opencl_cpp_export(
 
 // [[Rcpp::export]]
 Rcpp::NumericVector gammafn_opencl_cpp_export(
-    int n,
-    double x,
+    const Rcpp::NumericVector& x,
     bool verbose = false
 ) {
-  return nmathopencl::gammafn_opencl(n, x, verbose);
+  return nmathopencl::gammafn_opencl(x, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector lgammafn_opencl_cpp_export(
-    int n,
-    double x,
+    const Rcpp::NumericVector& x,
     bool verbose = false
 ) {
-  return nmathopencl::lgammafn_opencl(n, x, verbose);
+  return nmathopencl::lgammafn_opencl(x, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector lgammafn_sign_opencl_cpp_export(
-    int n,
-    double x,
+    const Rcpp::NumericVector& x,
     bool verbose = false
 ) {
-  return nmathopencl::lgammafn_sign_opencl(n, x, verbose);
+  return nmathopencl::lgammafn_sign_opencl(x, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dpsifn_opencl_cpp_export(
-    int n,
-    double x,
-    double n_deriv,
-    double kode,
-    double m,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& n_deriv,
+    const Rcpp::NumericVector& kode,
+    const Rcpp::NumericVector& m,
     bool verbose = false
 ) {
-  return nmathopencl::dpsifn_opencl(n, x, n_deriv, kode, m, verbose);
+  const int len = x.size();
+  if (static_cast<int>(n_deriv.size()) != len || static_cast<int>(kode.size()) != len ||
+      static_cast<int>(m.size()) != len) {
+    Rcpp::stop("INTERNAL: x, n_deriv, kode, m must have identical length.");
+  }
+  return nmathopencl::dpsifn_opencl(x, n_deriv, kode, m, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector psigamma_opencl_cpp_export(
-    int n,
-    double x,
-    double deriv,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& deriv,
     bool verbose = false
 ) {
-  return nmathopencl::psigamma_opencl(n, x, deriv, verbose);
+  if (static_cast<int>(deriv.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x and deriv must have identical length.");
+  }
+  return nmathopencl::psigamma_opencl(x, deriv, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector digamma_opencl_cpp_export(
-    int n,
-    double x,
+    const Rcpp::NumericVector& x,
     bool verbose = false
 ) {
-  return nmathopencl::digamma_opencl(n, x, verbose);
+  return nmathopencl::digamma_opencl(x, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector trigamma_opencl_cpp_export(
-    int n,
-    double x,
+    const Rcpp::NumericVector& x,
     bool verbose = false
 ) {
-  return nmathopencl::trigamma_opencl(n, x, verbose);
+  return nmathopencl::trigamma_opencl(x, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector tetragamma_opencl_cpp_export(
-    int n,
-    double x,
+    const Rcpp::NumericVector& x,
     bool verbose = false
 ) {
-  return nmathopencl::tetragamma_opencl(n, x, verbose);
+  return nmathopencl::tetragamma_opencl(x, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector pentagamma_opencl_cpp_export(
-    int n,
-    double x,
+    const Rcpp::NumericVector& x,
     bool verbose = false
 ) {
-  return nmathopencl::pentagamma_opencl(n, x, verbose);
+  return nmathopencl::pentagamma_opencl(x, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector beta_opencl_cpp_export(
-    int n,
-    double a,
-    double b,
+    const Rcpp::NumericVector& a,
+    const Rcpp::NumericVector& b,
     bool verbose = false
 ) {
-  return nmathopencl::beta_opencl(n, a, b, verbose);
+  if (static_cast<int>(b.size()) != a.size()) {
+    Rcpp::stop("INTERNAL: a and b must have identical length.");
+  }
+  return nmathopencl::beta_opencl(a, b, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector lbeta_opencl_cpp_export(
-    int n,
-    double a,
-    double b,
+    const Rcpp::NumericVector& a,
+    const Rcpp::NumericVector& b,
     bool verbose = false
 ) {
-  return nmathopencl::lbeta_opencl(n, a, b, verbose);
+  if (static_cast<int>(b.size()) != a.size()) {
+    Rcpp::stop("INTERNAL: a and b must have identical length.");
+  }
+  return nmathopencl::lbeta_opencl(a, b, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector choose_opencl_cpp_export(
-    int n,
-    double n_val,
-    double k,
+    const Rcpp::NumericVector& n_val,
+    const Rcpp::NumericVector& k,
     bool verbose = false
 ) {
-  return nmathopencl::choose_opencl(n, n_val, k, verbose);
+  if (static_cast<int>(k.size()) != n_val.size()) {
+    Rcpp::stop("INTERNAL: n_val and k must have identical length.");
+  }
+  return nmathopencl::choose_opencl(n_val, k, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector lchoose_opencl_cpp_export(
-    int n,
-    double n_val,
-    double k,
+    const Rcpp::NumericVector& n_val,
+    const Rcpp::NumericVector& k,
     bool verbose = false
 ) {
-  return nmathopencl::lchoose_opencl(n, n_val, k, verbose);
+  if (static_cast<int>(k.size()) != n_val.size()) {
+    Rcpp::stop("INTERNAL: n_val and k must have identical length.");
+  }
+  return nmathopencl::lchoose_opencl(n_val, k, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector bessel_i_opencl_cpp_export(
-    int n,
-    double x,
-    double nu,
-    double expo_scaled,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
+    const Rcpp::NumericVector& expo_scaled,
     bool verbose = false
 ) {
-  return nmathopencl::bessel_i_opencl(n, x, nu, expo_scaled, verbose);
+  const int len = x.size();
+  if (static_cast<int>(nu.size()) != len || static_cast<int>(expo_scaled.size()) != len) {
+    Rcpp::stop("INTERNAL: x, nu, expo_scaled must have identical length.");
+  }
+  return nmathopencl::bessel_i_opencl(x, nu, expo_scaled, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector bessel_j_opencl_cpp_export(
-    int n,
-    double x,
-    double nu,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
     bool verbose = false
 ) {
-  return nmathopencl::bessel_j_opencl(n, x, nu, verbose);
+  if (static_cast<int>(nu.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x and nu must have identical length.");
+  }
+  return nmathopencl::bessel_j_opencl(x, nu, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector bessel_k_opencl_cpp_export(
-    int n,
-    double x,
-    double nu,
-    double expo_scaled,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
+    const Rcpp::NumericVector& expo_scaled,
     bool verbose = false
 ) {
-  return nmathopencl::bessel_k_opencl(n, x, nu, expo_scaled, verbose);
+  const int len = x.size();
+  if (static_cast<int>(nu.size()) != len || static_cast<int>(expo_scaled.size()) != len) {
+    Rcpp::stop("INTERNAL: x, nu, expo_scaled must have identical length.");
+  }
+  return nmathopencl::bessel_k_opencl(x, nu, expo_scaled, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector bessel_y_opencl_cpp_export(
-    int n,
-    double x,
-    double nu,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
     bool verbose = false
 ) {
-  return nmathopencl::bessel_y_opencl(n, x, nu, verbose);
+  if (static_cast<int>(nu.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x and nu must have identical length.");
+  }
+  return nmathopencl::bessel_y_opencl(x, nu, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector bessel_i_ex_opencl_cpp_export(
-    int n,
-    double x,
-    double nu,
-    double expo,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
+    const Rcpp::NumericVector& expo,
     bool verbose = false
 ) {
-  return nmathopencl::bessel_i_ex_opencl(n, x, nu, expo, verbose);
+  const int len = x.size();
+  if (static_cast<int>(nu.size()) != len || static_cast<int>(expo.size()) != len) {
+    Rcpp::stop("INTERNAL: x, nu, expo must have identical length.");
+  }
+  return nmathopencl::bessel_i_ex_opencl(x, nu, expo, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector bessel_j_ex_opencl_cpp_export(
-    int n,
-    double x,
-    double nu,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
     bool verbose = false
 ) {
-  return nmathopencl::bessel_j_ex_opencl(n, x, nu, verbose);
+  if (static_cast<int>(nu.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x and nu must have identical length.");
+  }
+  return nmathopencl::bessel_j_ex_opencl(x, nu, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector bessel_k_ex_opencl_cpp_export(
-    int n,
-    double x,
-    double nu,
-    double expo,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
+    const Rcpp::NumericVector& expo,
     bool verbose = false
 ) {
-  return nmathopencl::bessel_k_ex_opencl(n, x, nu, expo, verbose);
+  const int len = x.size();
+  if (static_cast<int>(nu.size()) != len || static_cast<int>(expo.size()) != len) {
+    Rcpp::stop("INTERNAL: x, nu, expo must have identical length.");
+  }
+  return nmathopencl::bessel_k_ex_opencl(x, nu, expo, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector bessel_y_ex_opencl_cpp_export(
-    int n,
-    double x,
-    double nu,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
     bool verbose = false
 ) {
-  return nmathopencl::bessel_y_ex_opencl(n, x, nu, verbose);
+  if (static_cast<int>(nu.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x and nu must have identical length.");
+  }
+  return nmathopencl::bessel_y_ex_opencl(x, nu, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector imax2_opencl_cpp_export(
-    int n,
-    double x,
-    double y,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
     bool verbose = false
 ) {
-  return nmathopencl::imax2_opencl(n, x, y, verbose);
+  if (static_cast<int>(y.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x and y must have identical length.");
+  }
+  return nmathopencl::imax2_opencl(x, y, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector imin2_opencl_cpp_export(
-    int n,
-    double x,
-    double y,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
     bool verbose = false
 ) {
-  return nmathopencl::imin2_opencl(n, x, y, verbose);
+  if (static_cast<int>(y.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x and y must have identical length.");
+  }
+  return nmathopencl::imin2_opencl(x, y, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector fmax2_opencl_cpp_export(
-    int n,
-    double x,
-    double y,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
     bool verbose = false
 ) {
-  return nmathopencl::fmax2_opencl(n, x, y, verbose);
+  if (static_cast<int>(y.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x and y must have identical length.");
+  }
+  return nmathopencl::fmax2_opencl(x, y, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector fmin2_opencl_cpp_export(
-    int n,
-    double x,
-    double y,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
     bool verbose = false
 ) {
-  return nmathopencl::fmin2_opencl(n, x, y, verbose);
+  if (static_cast<int>(y.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x and y must have identical length.");
+  }
+  return nmathopencl::fmin2_opencl(x, y, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector sign_opencl_cpp_export(
-    int n,
-    double x,
+    const Rcpp::NumericVector& x,
     bool verbose = false
 ) {
-  return nmathopencl::sign_opencl(n, x, verbose);
+  return nmathopencl::sign_opencl(x, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector fprec_opencl_cpp_export(
-    int n,
-    double x,
-    double digits,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& digits,
     bool verbose = false
 ) {
-  return nmathopencl::fprec_opencl(n, x, digits, verbose);
+  if (static_cast<int>(digits.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x and digits must have identical length.");
+  }
+  return nmathopencl::fprec_opencl(x, digits, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector fround_opencl_cpp_export(
-    int n,
-    double x,
-    double digits,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& digits,
     bool verbose = false
 ) {
-  return nmathopencl::fround_opencl(n, x, digits, verbose);
+  if (static_cast<int>(digits.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x and digits must have identical length.");
+  }
+  return nmathopencl::fround_opencl(x, digits, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector fsign_opencl_cpp_export(
-    int n,
-    double x,
-    double y,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
     bool verbose = false
 ) {
-  return nmathopencl::fsign_opencl(n, x, y, verbose);
+  if (static_cast<int>(y.size()) != x.size()) {
+    Rcpp::stop("INTERNAL: x and y must have identical length.");
+  }
+  return nmathopencl::fsign_opencl(x, y, verbose);
 }
 
 // [[Rcpp::export]]
 Rcpp::NumericVector ftrunc_opencl_cpp_export(
-    int n,
-    double x,
+    const Rcpp::NumericVector& x,
     bool verbose = false
 ) {
-  return nmathopencl::ftrunc_opencl(n, x, verbose);
+  return nmathopencl::ftrunc_opencl(x, verbose);
 }
 
 // [[Rcpp::export]]

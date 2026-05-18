@@ -1,4 +1,5 @@
 //#include <Rcpp.h>
+#include <functional>
 #include <vector>
 #include <string>
 #include "openclPort.h"
@@ -290,161 +291,246 @@ static void opencl_serial_scalar_draws(
     throw;
   }
 }
-#endif
 
-Rcpp::NumericVector r_pow_opencl(int n_out, double x, double y, bool verbose) {
-  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
-  Rcpp::NumericVector out(n_out);
-#ifdef USE_OPENCL
-  if (!has_opencl()) return out;
-  opencl_serial_scalar_draws("src/r_pow_kernel.cl", "r_pow_kernel", {x, y, 0.0}, n_out, out, verbose);
-#endif
-  return out;
-}
-
-Rcpp::NumericVector r_pow_di_opencl(int n_out, double x, int n_exp, bool verbose) {
-  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
-  Rcpp::NumericVector out(n_out);
-#ifdef USE_OPENCL
-  if (!has_opencl()) return out;
-  opencl_serial_scalar_draws(
-      "src/r_pow_di_kernel.cl", "r_pow_di_kernel", {x, (double)n_exp, 0.0}, n_out, out, verbose);
-#endif
-  return out;
-}
-
-Rcpp::NumericVector log1pmx_opencl(int n_out, double x, bool verbose) {
-  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
-  Rcpp::NumericVector out(n_out);
-#ifdef USE_OPENCL
-  if (!has_opencl()) return out;
+// Vectorized utilities: build program once; one scalar-output kernel launch per row.
+static void opencl_serial_kernel_each_row(
+    const std::string& kernel_rel_path,
+    const char* kernel_name,
+    int len,
+    const std::function<std::vector<double>(int)>& dargs_at,
+    Rcpp::NumericVector& out,
+    bool verbose
+) {
   try {
-    std::vector<double> out_flat;
-    opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/log1pmx_kernel.cl"), "log1pmx_kernel", {x, 0.0, 0.0}, n_out, out_flat);
-    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
+    const std::string all_src = build_rmath_program_indexed(kernel_rel_path);
+    for (int i = 0; i < len; ++i) {
+      std::vector<double> one;
+      opencl_dbl_scalar_kernel_runner(all_src, kernel_name, dargs_at(i), 1, one);
+      out[i] = one[0];
+    }
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
   }
+}
+#endif
+
+Rcpp::NumericVector r_pow_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(y.size()) != len) {
+    Rcpp::stop("INTERNAL: x and y must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  opencl_serial_kernel_each_row(
+      "src/r_pow_kernel.cl",
+      "r_pow_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], y[i], 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector log1pexp_opencl(int n_out, double x, bool verbose) {
-  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector r_pow_di_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::IntegerVector& n_exp,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(n_exp.size()) != len) {
+    Rcpp::stop("INTERNAL: x and n_exp must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try {
-    std::vector<double> out_flat;
-    opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/log1pexp_kernel.cl"), "log1pexp_kernel", {x, 0.0, 0.0}, n_out, out_flat);
-    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
-  } catch (const std::exception& e) {
-    if (verbose) Rcpp::Rcout << e.what() << "\n";
-    throw;
-  }
+  opencl_serial_kernel_each_row(
+      "src/r_pow_di_kernel.cl",
+      "r_pow_di_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], static_cast<double>(n_exp[i]), 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector log1mexp_opencl(int n_out, double x, bool verbose) {
-  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector log1pmx_opencl(const Rcpp::NumericVector& x, bool verbose) {
+  const int len = x.size();
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try {
-    std::vector<double> out_flat;
-    opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/log1mexp_kernel.cl"), "log1mexp_kernel", {x, 0.0, 0.0}, n_out, out_flat);
-    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
-  } catch (const std::exception& e) {
-    if (verbose) Rcpp::Rcout << e.what() << "\n";
-    throw;
-  }
+  opencl_serial_kernel_each_row(
+      "src/log1pmx_kernel.cl",
+      "log1pmx_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector lgamma1p_opencl(int n_out, double x, bool verbose) {
-  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector log1pexp_opencl(const Rcpp::NumericVector& x, bool verbose) {
+  const int len = x.size();
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try {
-    std::vector<double> out_flat;
-    opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/lgamma1p_kernel.cl"), "lgamma1p_kernel", {x, 0.0, 0.0}, n_out, out_flat);
-    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
-  } catch (const std::exception& e) {
-    if (verbose) Rcpp::Rcout << e.what() << "\n";
-    throw;
-  }
+  opencl_serial_kernel_each_row(
+      "src/log1pexp_kernel.cl",
+      "log1pexp_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector pow1p_opencl(int n_out, double x, double y, bool verbose) {
-  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector log1mexp_opencl(const Rcpp::NumericVector& x, bool verbose) {
+  const int len = x.size();
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try {
-    std::vector<double> out_flat;
-    opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/pow1p_kernel.cl"), "pow1p_kernel", {x, y, 0.0}, n_out, out_flat);
-    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
-  } catch (const std::exception& e) {
-    if (verbose) Rcpp::Rcout << e.what() << "\n";
-    throw;
-  }
+  opencl_serial_kernel_each_row(
+      "src/log1mexp_kernel.cl",
+      "log1mexp_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector logspace_add_opencl(int n_out, double logx, double logy, bool verbose) {
-  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector lgamma1p_opencl(const Rcpp::NumericVector& x, bool verbose) {
+  const int len = x.size();
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try {
-    std::vector<double> out_flat;
-    opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/logspace_add_kernel.cl"), "logspace_add_kernel", {logx, logy, 0.0}, n_out, out_flat);
-    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
-  } catch (const std::exception& e) {
-    if (verbose) Rcpp::Rcout << e.what() << "\n";
-    throw;
-  }
+  opencl_serial_kernel_each_row(
+      "src/lgamma1p_kernel.cl",
+      "lgamma1p_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector logspace_sub_opencl(int n_out, double logx, double logy, bool verbose) {
-  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector pow1p_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(y.size()) != len) {
+    Rcpp::stop("INTERNAL: x and y must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try {
-    std::vector<double> out_flat;
-    opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/logspace_sub_kernel.cl"), "logspace_sub_kernel", {logx, logy, 0.0}, n_out, out_flat);
-    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
-  } catch (const std::exception& e) {
-    if (verbose) Rcpp::Rcout << e.what() << "\n";
-    throw;
-  }
+  opencl_serial_kernel_each_row(
+      "src/pow1p_kernel.cl",
+      "pow1p_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], y[i], 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector logspace_sum_opencl(int n_out, double logx, double logy, bool verbose) {
-  if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector logspace_add_opencl(
+    const Rcpp::NumericVector& logx,
+    const Rcpp::NumericVector& logy,
+    bool verbose
+) {
+  const int len = logx.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(logy.size()) != len) {
+    Rcpp::stop("INTERNAL: logx and logy must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try {
-    std::vector<double> out_flat;
-    opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/logspace_sum_kernel.cl"), "logspace_sum_kernel", {logx, logy, 0.0}, n_out, out_flat);
-    for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i];
-  } catch (const std::exception& e) {
-    if (verbose) Rcpp::Rcout << e.what() << "\n";
-    throw;
+  opencl_serial_kernel_each_row(
+      "src/logspace_add_kernel.cl",
+      "logspace_add_kernel",
+      len,
+      [&](int i) { return std::vector<double>{logx[i], logy[i], 0.0}; },
+      out,
+      verbose);
+#endif
+  return out;
+}
+
+Rcpp::NumericVector logspace_sub_opencl(
+    const Rcpp::NumericVector& logx,
+    const Rcpp::NumericVector& logy,
+    bool verbose
+) {
+  const int len = logx.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
   }
+  if (static_cast<int>(logy.size()) != len) {
+    Rcpp::stop("INTERNAL: logx and logy must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  opencl_serial_kernel_each_row(
+      "src/logspace_sub_kernel.cl",
+      "logspace_sub_kernel",
+      len,
+      [&](int i) { return std::vector<double>{logx[i], logy[i], 0.0}; },
+      out,
+      verbose);
+#endif
+  return out;
+}
+
+Rcpp::NumericVector logspace_sum_opencl(
+    const Rcpp::NumericVector& logx,
+    const Rcpp::NumericVector& logy,
+    bool verbose
+) {
+  const int len = logx.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(logy.size()) != len) {
+    Rcpp::stop("INTERNAL: logx and logy must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
+#ifdef USE_OPENCL
+  if (!has_opencl()) return out;
+  opencl_serial_kernel_each_row(
+      "src/logspace_sum_kernel.cl",
+      "logspace_sum_kernel",
+      len,
+      [&](int i) { return std::vector<double>{logx[i], logy[i], 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
@@ -3122,272 +3208,705 @@ Rcpp::NumericVector rsignrank_opencl(int n_out, double nsize, bool verbose) {
   return out;
 }
 
-Rcpp::NumericVector gammafn_opencl(int n_out, double x, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector gammafn_opencl(const Rcpp::NumericVector& x, bool verbose) {
+  const int len = x.size();
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/gammafn_kernel.cl"), "gammafn_kernel", {x, 0.0, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/gammafn_kernel.cl",
+      "gammafn_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], 0.0, 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector lgammafn_opencl(int n_out, double x, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector lgammafn_opencl(const Rcpp::NumericVector& x, bool verbose) {
+  const int len = x.size();
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/lgammafn_kernel.cl"), "lgammafn_kernel", {x, 0.0, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/lgammafn_kernel.cl",
+      "lgammafn_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], 0.0, 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector lgammafn_sign_opencl(int n_out, double x, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector lgammafn_sign_opencl(const Rcpp::NumericVector& x, bool verbose) {
+  const int len = x.size();
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/lgammafn_sign_kernel.cl"), "lgammafn_sign_kernel", {x, 0.0, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/lgammafn_sign_kernel.cl",
+      "lgammafn_sign_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], 0.0, 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector dpsifn_opencl(int n_out, double x, double n_deriv, double kode, double m, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector dpsifn_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& n_deriv,
+    const Rcpp::NumericVector& kode,
+    const Rcpp::NumericVector& m,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(n_deriv.size()) != len || static_cast<int>(kode.size()) != len ||
+      static_cast<int>(m.size()) != len) {
+    Rcpp::stop("INTERNAL: x, n_deriv, kode, m must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/dpsifn_kernel.cl"), "dpsifn_kernel", {x, n_deriv, kode, m, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/dpsifn_kernel.cl",
+      "dpsifn_kernel",
+      len,
+      [&](int i) {
+        return std::vector<double>{x[i], n_deriv[i], kode[i], m[i], 0.0};
+      },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector psigamma_opencl(int n_out, double x, double deriv, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector psigamma_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& deriv,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(deriv.size()) != len) {
+    Rcpp::stop("INTERNAL: x and deriv must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/psigamma_kernel.cl"), "psigamma_kernel", {x, deriv, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/psigamma_kernel.cl",
+      "psigamma_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], deriv[i], 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector digamma_opencl(int n_out, double x, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector digamma_opencl(const Rcpp::NumericVector& x, bool verbose) {
+  const int len = x.size();
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/digamma_kernel.cl"), "digamma_kernel", {x, 0.0, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/digamma_kernel.cl",
+      "digamma_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], 0.0, 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector trigamma_opencl(int n_out, double x, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector trigamma_opencl(const Rcpp::NumericVector& x, bool verbose) {
+  const int len = x.size();
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/trigamma_kernel.cl"), "trigamma_kernel", {x, 0.0, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/trigamma_kernel.cl",
+      "trigamma_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], 0.0, 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector tetragamma_opencl(int n_out, double x, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector tetragamma_opencl(const Rcpp::NumericVector& x, bool verbose) {
+  const int len = x.size();
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/tetragamma_kernel.cl"), "tetragamma_kernel", {x, 0.0, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/tetragamma_kernel.cl",
+      "tetragamma_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], 0.0, 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector pentagamma_opencl(int n_out, double x, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector pentagamma_opencl(const Rcpp::NumericVector& x, bool verbose) {
+  const int len = x.size();
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/pentagamma_kernel.cl"), "pentagamma_kernel", {x, 0.0, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/pentagamma_kernel.cl",
+      "pentagamma_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], 0.0, 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector beta_opencl(int n_out, double a, double b, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector beta_opencl(
+    const Rcpp::NumericVector& a,
+    const Rcpp::NumericVector& b,
+    bool verbose
+) {
+  const int len = a.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(b.size()) != len) {
+    Rcpp::stop("INTERNAL: a and b must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/beta_special_kernel.cl"), "beta_special_kernel", {a, b, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/beta_special_kernel.cl",
+      "beta_special_kernel",
+      len,
+      [&](int i) { return std::vector<double>{a[i], b[i], 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector lbeta_opencl(int n_out, double a, double b, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector lbeta_opencl(
+    const Rcpp::NumericVector& a,
+    const Rcpp::NumericVector& b,
+    bool verbose
+) {
+  const int len = a.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(b.size()) != len) {
+    Rcpp::stop("INTERNAL: a and b must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/lbeta_special_kernel.cl"), "lbeta_special_kernel", {a, b, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/lbeta_special_kernel.cl",
+      "lbeta_special_kernel",
+      len,
+      [&](int i) { return std::vector<double>{a[i], b[i], 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector choose_opencl(int n_out, double n_val, double k, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector choose_opencl(
+    const Rcpp::NumericVector& n_val,
+    const Rcpp::NumericVector& k,
+    bool verbose
+) {
+  const int len = n_val.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(k.size()) != len) {
+    Rcpp::stop("INTERNAL: n_val and k must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/choose_special_kernel.cl"), "choose_special_kernel", {n_val, k, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/choose_special_kernel.cl",
+      "choose_special_kernel",
+      len,
+      [&](int i) { return std::vector<double>{n_val[i], k[i], 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector lchoose_opencl(int n_out, double n_val, double k, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector lchoose_opencl(
+    const Rcpp::NumericVector& n_val,
+    const Rcpp::NumericVector& k,
+    bool verbose
+) {
+  const int len = n_val.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(k.size()) != len) {
+    Rcpp::stop("INTERNAL: n_val and k must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/lchoose_special_kernel.cl"), "lchoose_special_kernel", {n_val, k, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/lchoose_special_kernel.cl",
+      "lchoose_special_kernel",
+      len,
+      [&](int i) { return std::vector<double>{n_val[i], k[i], 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector bessel_i_opencl(int n_out, double x, double nu, double expo_scaled, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector bessel_i_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
+    const Rcpp::NumericVector& expo_scaled,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(nu.size()) != len || static_cast<int>(expo_scaled.size()) != len) {
+    Rcpp::stop("INTERNAL: x, nu, expo_scaled must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/bessel_i_kernel.cl"), "bessel_i_kernel", {x, nu, expo_scaled, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/bessel_i_kernel.cl",
+      "bessel_i_kernel",
+      len,
+      [&](int i) {
+        return std::vector<double>{x[i], nu[i], expo_scaled[i], 0.0, 0.0};
+      },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector bessel_j_opencl(int n_out, double x, double nu, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector bessel_j_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(nu.size()) != len) {
+    Rcpp::stop("INTERNAL: x and nu must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/bessel_j_kernel.cl"), "bessel_j_kernel", {x, nu, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/bessel_j_kernel.cl",
+      "bessel_j_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], nu[i], 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector bessel_k_opencl(int n_out, double x, double nu, double expo_scaled, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector bessel_k_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
+    const Rcpp::NumericVector& expo_scaled,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(nu.size()) != len || static_cast<int>(expo_scaled.size()) != len) {
+    Rcpp::stop("INTERNAL: x, nu, expo_scaled must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/bessel_k_kernel.cl"), "bessel_k_kernel", {x, nu, expo_scaled, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/bessel_k_kernel.cl",
+      "bessel_k_kernel",
+      len,
+      [&](int i) {
+        return std::vector<double>{x[i], nu[i], expo_scaled[i], 0.0, 0.0};
+      },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector bessel_y_opencl(int n_out, double x, double nu, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector bessel_y_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(nu.size()) != len) {
+    Rcpp::stop("INTERNAL: x and nu must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/bessel_y_kernel.cl"), "bessel_y_kernel", {x, nu, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/bessel_y_kernel.cl",
+      "bessel_y_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], nu[i], 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector bessel_i_ex_opencl(int n_out, double x, double nu, double expo, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector bessel_i_ex_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
+    const Rcpp::NumericVector& expo,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(nu.size()) != len || static_cast<int>(expo.size()) != len) {
+    Rcpp::stop("INTERNAL: x, nu, expo must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/bessel_i_ex_kernel.cl"), "bessel_i_ex_kernel", {x, nu, expo, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/bessel_i_ex_kernel.cl",
+      "bessel_i_ex_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], nu[i], expo[i], 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector bessel_j_ex_opencl(int n_out, double x, double nu, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector bessel_j_ex_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(nu.size()) != len) {
+    Rcpp::stop("INTERNAL: x and nu must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/bessel_j_ex_kernel.cl"), "bessel_j_ex_kernel", {x, nu, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/bessel_j_ex_kernel.cl",
+      "bessel_j_ex_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], nu[i], 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector bessel_k_ex_opencl(int n_out, double x, double nu, double expo, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector bessel_k_ex_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
+    const Rcpp::NumericVector& expo,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(nu.size()) != len || static_cast<int>(expo.size()) != len) {
+    Rcpp::stop("INTERNAL: x, nu, expo must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/bessel_k_ex_kernel.cl"), "bessel_k_ex_kernel", {x, nu, expo, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/bessel_k_ex_kernel.cl",
+      "bessel_k_ex_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], nu[i], expo[i], 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector bessel_y_ex_opencl(int n_out, double x, double nu, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector bessel_y_ex_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(nu.size()) != len) {
+    Rcpp::stop("INTERNAL: x and nu must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/bessel_y_ex_kernel.cl"), "bessel_y_ex_kernel", {x, nu, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/bessel_y_ex_kernel.cl",
+      "bessel_y_ex_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], nu[i], 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector imax2_opencl(int n_out, double x, double y, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector imax2_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(y.size()) != len) {
+    Rcpp::stop("INTERNAL: x and y must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/imax2_kernel.cl"), "imax2_kernel", {x, y, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/imax2_kernel.cl",
+      "imax2_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], y[i], 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector imin2_opencl(int n_out, double x, double y, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector imin2_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(y.size()) != len) {
+    Rcpp::stop("INTERNAL: x and y must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/imin2_kernel.cl"), "imin2_kernel", {x, y, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/imin2_kernel.cl",
+      "imin2_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], y[i], 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector fmax2_opencl(int n_out, double x, double y, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector fmax2_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(y.size()) != len) {
+    Rcpp::stop("INTERNAL: x and y must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/fmax2_kernel.cl"), "fmax2_kernel", {x, y, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/fmax2_kernel.cl",
+      "fmax2_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], y[i], 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector fmin2_opencl(int n_out, double x, double y, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector fmin2_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(y.size()) != len) {
+    Rcpp::stop("INTERNAL: x and y must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/fmin2_kernel.cl"), "fmin2_kernel", {x, y, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/fmin2_kernel.cl",
+      "fmin2_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], y[i], 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector sign_opencl(int n_out, double x, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector sign_opencl(const Rcpp::NumericVector& x, bool verbose) {
+  const int len = x.size();
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/sign_kernel.cl"), "sign_kernel", {x, 0.0, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/sign_kernel.cl",
+      "sign_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], 0.0, 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector fprec_opencl(int n_out, double x, double digits, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector fprec_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& digits,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(digits.size()) != len) {
+    Rcpp::stop("INTERNAL: x and digits must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/fprec_kernel.cl"), "fprec_kernel", {x, digits, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/fprec_kernel.cl",
+      "fprec_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], digits[i], 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector fround_opencl(int n_out, double x, double digits, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector fround_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& digits,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(digits.size()) != len) {
+    Rcpp::stop("INTERNAL: x and digits must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/fround_kernel.cl"), "fround_kernel", {x, digits, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/fround_kernel.cl",
+      "fround_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], digits[i], 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector fsign_opencl(int n_out, double x, double y, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector fsign_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
+    bool verbose
+) {
+  const int len = x.size();
+  if (len == 0) {
+    return Rcpp::NumericVector(0);
+  }
+  if (static_cast<int>(y.size()) != len) {
+    Rcpp::stop("INTERNAL: x and y must have identical length.");
+  }
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/fsign_kernel.cl"), "fsign_kernel", {x, y, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/fsign_kernel.cl",
+      "fsign_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], y[i], 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }
 
-Rcpp::NumericVector ftrunc_opencl(int n_out, double x, bool verbose) {
-  Rcpp::NumericVector out(n_out);
+Rcpp::NumericVector ftrunc_opencl(const Rcpp::NumericVector& x, bool verbose) {
+  const int len = x.size();
+  Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  try { std::vector<double> out_flat; opencl_dbl_scalar_kernel_runner(build_rmath_program_indexed("src/ftrunc_kernel.cl"), "ftrunc_kernel", {x, 0.0, 0.0, 0.0, 0.0}, n_out, out_flat); for (int i = 0; i < n_out; ++i) out[i] = out_flat[(size_t)i]; } catch (const std::exception& e) { if (verbose) Rcpp::Rcout << e.what() << "\n"; throw; }
+  opencl_serial_kernel_each_row(
+      "src/ftrunc_kernel.cl",
+      "ftrunc_kernel",
+      len,
+      [&](int i) { return std::vector<double>{x[i], 0.0, 0.0, 0.0, 0.0}; },
+      out,
+      verbose);
 #endif
   return out;
 }

@@ -12,56 +12,50 @@
 \alias{ftrunc_opencl}
 \title{Math Support Functions (OpenCL)}
 \usage{
-imax2_opencl(n, x, y, fallback = TRUE, verbose = FALSE)
+imax2_opencl(x, y, fallback = TRUE, verbose = FALSE)
 
-imin2_opencl(n, x, y, fallback = TRUE, verbose = FALSE)
+imin2_opencl(x, y, fallback = TRUE, verbose = FALSE)
 
-fmax2_opencl(n, x, y, fallback = TRUE, verbose = FALSE)
+fmax2_opencl(x, y, fallback = TRUE, verbose = FALSE)
 
-fmin2_opencl(n, x, y, fallback = TRUE, verbose = FALSE)
+fmin2_opencl(x, y, fallback = TRUE, verbose = FALSE)
 
-sign_opencl(n, x, fallback = TRUE, verbose = FALSE)
+sign_opencl(x, fallback = TRUE, verbose = FALSE)
 
-fprec_opencl(n, x, digits, fallback = TRUE, verbose = FALSE)
+fprec_opencl(x, digits, fallback = TRUE, verbose = FALSE)
 
-fround_opencl(n, x, digits, fallback = TRUE, verbose = FALSE)
+fround_opencl(x, digits, fallback = TRUE, verbose = FALSE)
 
-fsign_opencl(n, x, y, fallback = TRUE, verbose = FALSE)
+fsign_opencl(x, y, fallback = TRUE, verbose = FALSE)
 
-ftrunc_opencl(n, x, fallback = TRUE, verbose = FALSE)
+ftrunc_opencl(x, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
-
-\item{x}{Numeric scalar input.}
-
-\item{y}{Numeric scalar input.}
+\item{x, y}{Numeric vectors recycled together (where both appear).}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
-\item{digits}{Numeric scalar used by precision/rounding helpers.}
+\item{digits}{Numeric vector recycled with \code{x} for precision/rounding helpers.}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector of recycled common length.
 }
 \description{
 OpenCL-backed wrappers for miscellaneous scalar support functions.
 }
 \examples{
 if (has_opencl()) {
-  n <- 5L
-
-  imax2_opencl(n, x = 7, y = 3, fallback = FALSE, verbose = TRUE)
-  imin2_opencl(n, x = 7, y = 3, fallback = FALSE, verbose = TRUE)
-  fmax2_opencl(n, x = 7.2, y = 3.1, fallback = FALSE, verbose = TRUE)
-  fmin2_opencl(n, x = 7.2, y = 3.1, fallback = FALSE, verbose = TRUE)
-  sign_opencl(n, x = -2.5, fallback = FALSE, verbose = TRUE)
-  fprec_opencl(n, x = 123.456, digits = 4, fallback = FALSE, verbose = TRUE)
-  fround_opencl(n, x = 123.456, digits = 2, fallback = FALSE, verbose = TRUE)
-  fsign_opencl(n, x = -2.5, y = 4.0, fallback = FALSE, verbose = TRUE)
-  ftrunc_opencl(n, x = 123.456, fallback = FALSE, verbose = TRUE)
+  imax2_opencl(x = 7, y = 3, fallback = FALSE, verbose = TRUE)
+  imin2_opencl(x = 7, y = 3, fallback = FALSE, verbose = TRUE)
+  fmax2_opencl(x = 7.2, y = 3.1, fallback = FALSE, verbose = TRUE)
+  fmin2_opencl(x = 7.2, y = 3.1, fallback = FALSE, verbose = TRUE)
+  sign_opencl(x = -2.5, fallback = FALSE, verbose = TRUE)
+  fprec_opencl(x = 123.456, digits = 4, fallback = FALSE, verbose = TRUE)
+  fround_opencl(x = 123.456, digits = 2, fallback = FALSE, verbose = TRUE)
+  fsign_opencl(x = -2.5, y = 4.0, fallback = FALSE, verbose = TRUE)
+  ftrunc_opencl(x = 123.456, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")
 }

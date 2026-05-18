@@ -7,43 +7,27 @@
 \alias{besselY_opencl}
 \title{Bessel Functions (OpenCL)}
 \usage{
-besselI_opencl(
-  n,
-  x,
-  nu,
-  expon.scaled = FALSE,
-  fallback = TRUE,
-  verbose = FALSE
-)
+besselI_opencl(x, nu, expon.scaled = FALSE, fallback = TRUE, verbose = FALSE)
 
-besselJ_opencl(n, x, nu, fallback = TRUE, verbose = FALSE)
+besselJ_opencl(x, nu, fallback = TRUE, verbose = FALSE)
 
-besselK_opencl(
-  n,
-  x,
-  nu,
-  expon.scaled = FALSE,
-  fallback = TRUE,
-  verbose = FALSE
-)
+besselK_opencl(x, nu, expon.scaled = FALSE, fallback = TRUE, verbose = FALSE)
 
-besselY_opencl(n, x, nu, fallback = TRUE, verbose = FALSE)
+besselY_opencl(x, nu, fallback = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{n}{Number of observations. Non-negative integer scalar.}
+\item{x, nu}{Numeric vectors recycled together.}
 
-\item{x}{Numeric scalar input.}
-
-\item{nu}{Order of the Bessel function.}
-
-\item{expon.scaled}{Logical; whether to return the exponentially scaled value.}
+\item{expon.scaled}{Logical vector recycled with \code{x} and \code{nu} where applicable;
+maps to the \code{expon.scaled} flag in \code{\link[base]{besselI}} /
+\code{\link[base]{besselK}}.}
 
 \item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 }
 \value{
-Numeric vector of length \code{n}.
+Numeric vector of recycled common length.
 }
 \description{
 OpenCL-backed wrappers for Bessel functions.
@@ -62,10 +46,10 @@ if (has_opencl()) {
   # behavior (R_alloc/vmax* semantics) not yet fully implemented for device
   # execution. Keep these commented to avoid flaky CI/check failures:
   # n <- 1L
-  # besselI_opencl(n, x = 2.0, nu = 1.5, expon.scaled = FALSE, fallback = FALSE, verbose = TRUE)
-  # besselJ_opencl(n, x = 2.0, nu = 1.5, fallback = FALSE, verbose = TRUE)
-  # besselK_opencl(n, x = 2.0, nu = 1.5, expon.scaled = FALSE, fallback = FALSE, verbose = TRUE)
-  # besselY_opencl(n, x = 2.0, nu = 1.5, fallback = FALSE, verbose = TRUE)
+  # besselI_opencl(x = 2.0, nu = 1.5, expon.scaled = FALSE, fallback = FALSE, verbose = TRUE)
+  # besselJ_opencl(x = 2.0, nu = 1.5, fallback = FALSE, verbose = TRUE)
+  # besselK_opencl(x = 2.0, nu = 1.5, expon.scaled = FALSE, fallback = FALSE, verbose = TRUE)
+  # besselY_opencl(x = 2.0, nu = 1.5, fallback = FALSE, verbose = TRUE)
 } else {
   message("OpenCL unavailable; skipping GPU-only example.")
 }

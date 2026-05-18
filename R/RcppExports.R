@@ -37,44 +37,44 @@ rbinom_opencl_cpp_export <- function(n, size, prob, verbose = FALSE) {
     .Call(`_nmathopencl_rbinom_opencl_cpp_export`, n, size, prob, verbose)
 }
 
-r_pow_opencl_cpp_export <- function(n, x, y, verbose = FALSE) {
-    .Call(`_nmathopencl_r_pow_opencl_cpp_export`, n, x, y, verbose)
+r_pow_opencl_cpp_export <- function(x, y, verbose = FALSE) {
+    .Call(`_nmathopencl_r_pow_opencl_cpp_export`, x, y, verbose)
 }
 
-r_pow_di_opencl_cpp_export <- function(n, x, n_exp, verbose = FALSE) {
-    .Call(`_nmathopencl_r_pow_di_opencl_cpp_export`, n, x, n_exp, verbose)
+r_pow_di_opencl_cpp_export <- function(x, n_exp, verbose = FALSE) {
+    .Call(`_nmathopencl_r_pow_di_opencl_cpp_export`, x, n_exp, verbose)
 }
 
-log1pmx_opencl_cpp_export <- function(n, x, verbose = FALSE) {
-    .Call(`_nmathopencl_log1pmx_opencl_cpp_export`, n, x, verbose)
+log1pmx_opencl_cpp_export <- function(x, verbose = FALSE) {
+    .Call(`_nmathopencl_log1pmx_opencl_cpp_export`, x, verbose)
 }
 
-log1pexp_opencl_cpp_export <- function(n, x, verbose = FALSE) {
-    .Call(`_nmathopencl_log1pexp_opencl_cpp_export`, n, x, verbose)
+log1pexp_opencl_cpp_export <- function(x, verbose = FALSE) {
+    .Call(`_nmathopencl_log1pexp_opencl_cpp_export`, x, verbose)
 }
 
-log1mexp_opencl_cpp_export <- function(n, x, verbose = FALSE) {
-    .Call(`_nmathopencl_log1mexp_opencl_cpp_export`, n, x, verbose)
+log1mexp_opencl_cpp_export <- function(x, verbose = FALSE) {
+    .Call(`_nmathopencl_log1mexp_opencl_cpp_export`, x, verbose)
 }
 
-lgamma1p_opencl_cpp_export <- function(n, x, verbose = FALSE) {
-    .Call(`_nmathopencl_lgamma1p_opencl_cpp_export`, n, x, verbose)
+lgamma1p_opencl_cpp_export <- function(x, verbose = FALSE) {
+    .Call(`_nmathopencl_lgamma1p_opencl_cpp_export`, x, verbose)
 }
 
-pow1p_opencl_cpp_export <- function(n, x, y, verbose = FALSE) {
-    .Call(`_nmathopencl_pow1p_opencl_cpp_export`, n, x, y, verbose)
+pow1p_opencl_cpp_export <- function(x, y, verbose = FALSE) {
+    .Call(`_nmathopencl_pow1p_opencl_cpp_export`, x, y, verbose)
 }
 
-logspace_add_opencl_cpp_export <- function(n, logx, logy, verbose = FALSE) {
-    .Call(`_nmathopencl_logspace_add_opencl_cpp_export`, n, logx, logy, verbose)
+logspace_add_opencl_cpp_export <- function(logx, logy, verbose = FALSE) {
+    .Call(`_nmathopencl_logspace_add_opencl_cpp_export`, logx, logy, verbose)
 }
 
-logspace_sub_opencl_cpp_export <- function(n, logx, logy, verbose = FALSE) {
-    .Call(`_nmathopencl_logspace_sub_opencl_cpp_export`, n, logx, logy, verbose)
+logspace_sub_opencl_cpp_export <- function(logx, logy, verbose = FALSE) {
+    .Call(`_nmathopencl_logspace_sub_opencl_cpp_export`, logx, logy, verbose)
 }
 
-logspace_sum_opencl_cpp_export <- function(n, logx, logy, verbose = FALSE) {
-    .Call(`_nmathopencl_logspace_sum_opencl_cpp_export`, n, logx, logy, verbose)
+logspace_sum_opencl_cpp_export <- function(logx, logy, verbose = FALSE) {
+    .Call(`_nmathopencl_logspace_sum_opencl_cpp_export`, logx, logy, verbose)
 }
 
 norm_rand_opencl_cpp_export <- function(n, verbose = FALSE) {
@@ -417,124 +417,124 @@ rsignrank_opencl_cpp_export <- function(n, nsize, verbose = FALSE) {
     .Call(`_nmathopencl_rsignrank_opencl_cpp_export`, n, nsize, verbose)
 }
 
-gammafn_opencl_cpp_export <- function(n, x, verbose = FALSE) {
-    .Call(`_nmathopencl_gammafn_opencl_cpp_export`, n, x, verbose)
+gammafn_opencl_cpp_export <- function(x, verbose = FALSE) {
+    .Call(`_nmathopencl_gammafn_opencl_cpp_export`, x, verbose)
 }
 
-lgammafn_opencl_cpp_export <- function(n, x, verbose = FALSE) {
-    .Call(`_nmathopencl_lgammafn_opencl_cpp_export`, n, x, verbose)
+lgammafn_opencl_cpp_export <- function(x, verbose = FALSE) {
+    .Call(`_nmathopencl_lgammafn_opencl_cpp_export`, x, verbose)
 }
 
-lgammafn_sign_opencl_cpp_export <- function(n, x, verbose = FALSE) {
-    .Call(`_nmathopencl_lgammafn_sign_opencl_cpp_export`, n, x, verbose)
+lgammafn_sign_opencl_cpp_export <- function(x, verbose = FALSE) {
+    .Call(`_nmathopencl_lgammafn_sign_opencl_cpp_export`, x, verbose)
 }
 
-dpsifn_opencl_cpp_export <- function(n, x, n_deriv, kode, m, verbose = FALSE) {
-    .Call(`_nmathopencl_dpsifn_opencl_cpp_export`, n, x, n_deriv, kode, m, verbose)
+dpsifn_opencl_cpp_export <- function(x, n_deriv, kode, m, verbose = FALSE) {
+    .Call(`_nmathopencl_dpsifn_opencl_cpp_export`, x, n_deriv, kode, m, verbose)
 }
 
-psigamma_opencl_cpp_export <- function(n, x, deriv, verbose = FALSE) {
-    .Call(`_nmathopencl_psigamma_opencl_cpp_export`, n, x, deriv, verbose)
+psigamma_opencl_cpp_export <- function(x, deriv, verbose = FALSE) {
+    .Call(`_nmathopencl_psigamma_opencl_cpp_export`, x, deriv, verbose)
 }
 
-digamma_opencl_cpp_export <- function(n, x, verbose = FALSE) {
-    .Call(`_nmathopencl_digamma_opencl_cpp_export`, n, x, verbose)
+digamma_opencl_cpp_export <- function(x, verbose = FALSE) {
+    .Call(`_nmathopencl_digamma_opencl_cpp_export`, x, verbose)
 }
 
-trigamma_opencl_cpp_export <- function(n, x, verbose = FALSE) {
-    .Call(`_nmathopencl_trigamma_opencl_cpp_export`, n, x, verbose)
+trigamma_opencl_cpp_export <- function(x, verbose = FALSE) {
+    .Call(`_nmathopencl_trigamma_opencl_cpp_export`, x, verbose)
 }
 
-tetragamma_opencl_cpp_export <- function(n, x, verbose = FALSE) {
-    .Call(`_nmathopencl_tetragamma_opencl_cpp_export`, n, x, verbose)
+tetragamma_opencl_cpp_export <- function(x, verbose = FALSE) {
+    .Call(`_nmathopencl_tetragamma_opencl_cpp_export`, x, verbose)
 }
 
-pentagamma_opencl_cpp_export <- function(n, x, verbose = FALSE) {
-    .Call(`_nmathopencl_pentagamma_opencl_cpp_export`, n, x, verbose)
+pentagamma_opencl_cpp_export <- function(x, verbose = FALSE) {
+    .Call(`_nmathopencl_pentagamma_opencl_cpp_export`, x, verbose)
 }
 
-beta_opencl_cpp_export <- function(n, a, b, verbose = FALSE) {
-    .Call(`_nmathopencl_beta_opencl_cpp_export`, n, a, b, verbose)
+beta_opencl_cpp_export <- function(a, b, verbose = FALSE) {
+    .Call(`_nmathopencl_beta_opencl_cpp_export`, a, b, verbose)
 }
 
-lbeta_opencl_cpp_export <- function(n, a, b, verbose = FALSE) {
-    .Call(`_nmathopencl_lbeta_opencl_cpp_export`, n, a, b, verbose)
+lbeta_opencl_cpp_export <- function(a, b, verbose = FALSE) {
+    .Call(`_nmathopencl_lbeta_opencl_cpp_export`, a, b, verbose)
 }
 
-choose_opencl_cpp_export <- function(n, n_val, k, verbose = FALSE) {
-    .Call(`_nmathopencl_choose_opencl_cpp_export`, n, n_val, k, verbose)
+choose_opencl_cpp_export <- function(n_val, k, verbose = FALSE) {
+    .Call(`_nmathopencl_choose_opencl_cpp_export`, n_val, k, verbose)
 }
 
-lchoose_opencl_cpp_export <- function(n, n_val, k, verbose = FALSE) {
-    .Call(`_nmathopencl_lchoose_opencl_cpp_export`, n, n_val, k, verbose)
+lchoose_opencl_cpp_export <- function(n_val, k, verbose = FALSE) {
+    .Call(`_nmathopencl_lchoose_opencl_cpp_export`, n_val, k, verbose)
 }
 
-bessel_i_opencl_cpp_export <- function(n, x, nu, expo_scaled, verbose = FALSE) {
-    .Call(`_nmathopencl_bessel_i_opencl_cpp_export`, n, x, nu, expo_scaled, verbose)
+bessel_i_opencl_cpp_export <- function(x, nu, expo_scaled, verbose = FALSE) {
+    .Call(`_nmathopencl_bessel_i_opencl_cpp_export`, x, nu, expo_scaled, verbose)
 }
 
-bessel_j_opencl_cpp_export <- function(n, x, nu, verbose = FALSE) {
-    .Call(`_nmathopencl_bessel_j_opencl_cpp_export`, n, x, nu, verbose)
+bessel_j_opencl_cpp_export <- function(x, nu, verbose = FALSE) {
+    .Call(`_nmathopencl_bessel_j_opencl_cpp_export`, x, nu, verbose)
 }
 
-bessel_k_opencl_cpp_export <- function(n, x, nu, expo_scaled, verbose = FALSE) {
-    .Call(`_nmathopencl_bessel_k_opencl_cpp_export`, n, x, nu, expo_scaled, verbose)
+bessel_k_opencl_cpp_export <- function(x, nu, expo_scaled, verbose = FALSE) {
+    .Call(`_nmathopencl_bessel_k_opencl_cpp_export`, x, nu, expo_scaled, verbose)
 }
 
-bessel_y_opencl_cpp_export <- function(n, x, nu, verbose = FALSE) {
-    .Call(`_nmathopencl_bessel_y_opencl_cpp_export`, n, x, nu, verbose)
+bessel_y_opencl_cpp_export <- function(x, nu, verbose = FALSE) {
+    .Call(`_nmathopencl_bessel_y_opencl_cpp_export`, x, nu, verbose)
 }
 
-bessel_i_ex_opencl_cpp_export <- function(n, x, nu, expo, verbose = FALSE) {
-    .Call(`_nmathopencl_bessel_i_ex_opencl_cpp_export`, n, x, nu, expo, verbose)
+bessel_i_ex_opencl_cpp_export <- function(x, nu, expo, verbose = FALSE) {
+    .Call(`_nmathopencl_bessel_i_ex_opencl_cpp_export`, x, nu, expo, verbose)
 }
 
-bessel_j_ex_opencl_cpp_export <- function(n, x, nu, verbose = FALSE) {
-    .Call(`_nmathopencl_bessel_j_ex_opencl_cpp_export`, n, x, nu, verbose)
+bessel_j_ex_opencl_cpp_export <- function(x, nu, verbose = FALSE) {
+    .Call(`_nmathopencl_bessel_j_ex_opencl_cpp_export`, x, nu, verbose)
 }
 
-bessel_k_ex_opencl_cpp_export <- function(n, x, nu, expo, verbose = FALSE) {
-    .Call(`_nmathopencl_bessel_k_ex_opencl_cpp_export`, n, x, nu, expo, verbose)
+bessel_k_ex_opencl_cpp_export <- function(x, nu, expo, verbose = FALSE) {
+    .Call(`_nmathopencl_bessel_k_ex_opencl_cpp_export`, x, nu, expo, verbose)
 }
 
-bessel_y_ex_opencl_cpp_export <- function(n, x, nu, verbose = FALSE) {
-    .Call(`_nmathopencl_bessel_y_ex_opencl_cpp_export`, n, x, nu, verbose)
+bessel_y_ex_opencl_cpp_export <- function(x, nu, verbose = FALSE) {
+    .Call(`_nmathopencl_bessel_y_ex_opencl_cpp_export`, x, nu, verbose)
 }
 
-imax2_opencl_cpp_export <- function(n, x, y, verbose = FALSE) {
-    .Call(`_nmathopencl_imax2_opencl_cpp_export`, n, x, y, verbose)
+imax2_opencl_cpp_export <- function(x, y, verbose = FALSE) {
+    .Call(`_nmathopencl_imax2_opencl_cpp_export`, x, y, verbose)
 }
 
-imin2_opencl_cpp_export <- function(n, x, y, verbose = FALSE) {
-    .Call(`_nmathopencl_imin2_opencl_cpp_export`, n, x, y, verbose)
+imin2_opencl_cpp_export <- function(x, y, verbose = FALSE) {
+    .Call(`_nmathopencl_imin2_opencl_cpp_export`, x, y, verbose)
 }
 
-fmax2_opencl_cpp_export <- function(n, x, y, verbose = FALSE) {
-    .Call(`_nmathopencl_fmax2_opencl_cpp_export`, n, x, y, verbose)
+fmax2_opencl_cpp_export <- function(x, y, verbose = FALSE) {
+    .Call(`_nmathopencl_fmax2_opencl_cpp_export`, x, y, verbose)
 }
 
-fmin2_opencl_cpp_export <- function(n, x, y, verbose = FALSE) {
-    .Call(`_nmathopencl_fmin2_opencl_cpp_export`, n, x, y, verbose)
+fmin2_opencl_cpp_export <- function(x, y, verbose = FALSE) {
+    .Call(`_nmathopencl_fmin2_opencl_cpp_export`, x, y, verbose)
 }
 
-sign_opencl_cpp_export <- function(n, x, verbose = FALSE) {
-    .Call(`_nmathopencl_sign_opencl_cpp_export`, n, x, verbose)
+sign_opencl_cpp_export <- function(x, verbose = FALSE) {
+    .Call(`_nmathopencl_sign_opencl_cpp_export`, x, verbose)
 }
 
-fprec_opencl_cpp_export <- function(n, x, digits, verbose = FALSE) {
-    .Call(`_nmathopencl_fprec_opencl_cpp_export`, n, x, digits, verbose)
+fprec_opencl_cpp_export <- function(x, digits, verbose = FALSE) {
+    .Call(`_nmathopencl_fprec_opencl_cpp_export`, x, digits, verbose)
 }
 
-fround_opencl_cpp_export <- function(n, x, digits, verbose = FALSE) {
-    .Call(`_nmathopencl_fround_opencl_cpp_export`, n, x, digits, verbose)
+fround_opencl_cpp_export <- function(x, digits, verbose = FALSE) {
+    .Call(`_nmathopencl_fround_opencl_cpp_export`, x, digits, verbose)
 }
 
-fsign_opencl_cpp_export <- function(n, x, y, verbose = FALSE) {
-    .Call(`_nmathopencl_fsign_opencl_cpp_export`, n, x, y, verbose)
+fsign_opencl_cpp_export <- function(x, y, verbose = FALSE) {
+    .Call(`_nmathopencl_fsign_opencl_cpp_export`, x, y, verbose)
 }
 
-ftrunc_opencl_cpp_export <- function(n, x, verbose = FALSE) {
-    .Call(`_nmathopencl_ftrunc_opencl_cpp_export`, n, x, verbose)
+ftrunc_opencl_cpp_export <- function(x, verbose = FALSE) {
+    .Call(`_nmathopencl_ftrunc_opencl_cpp_export`, x, verbose)
 }
 
 r_check_user_interrupt_opencl_cpp_export <- function(n, verbose = FALSE) {

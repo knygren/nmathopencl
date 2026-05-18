@@ -111,68 +111,58 @@ Rcpp::NumericVector rbinom_opencl(
 );
 
 Rcpp::NumericVector r_pow_opencl(
-    int    n_out,
-    double x,
-    double y,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
     bool   verbose = false
 );
 
 Rcpp::NumericVector r_pow_di_opencl(
-    int    n_out,
-    double x,
-    int    n_exp,
+    const Rcpp::NumericVector& x,
+    const Rcpp::IntegerVector& n_exp,
     bool   verbose = false
 );
 
 Rcpp::NumericVector log1pmx_opencl(
-    int    n_out,
-    double x,
+    const Rcpp::NumericVector& x,
     bool   verbose = false
 );
 
 Rcpp::NumericVector log1pexp_opencl(
-    int    n_out,
-    double x,
+    const Rcpp::NumericVector& x,
     bool   verbose = false
 );
 
 Rcpp::NumericVector log1mexp_opencl(
-    int    n_out,
-    double x,
+    const Rcpp::NumericVector& x,
     bool   verbose = false
 );
 
 Rcpp::NumericVector lgamma1p_opencl(
-    int    n_out,
-    double x,
+    const Rcpp::NumericVector& x,
     bool   verbose = false
 );
 
 Rcpp::NumericVector pow1p_opencl(
-    int    n_out,
-    double x,
-    double y,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
     bool   verbose = false
 );
 
 Rcpp::NumericVector logspace_add_opencl(
-    int    n_out,
-    double logx,
-    double logy,
+    const Rcpp::NumericVector& logx,
+    const Rcpp::NumericVector& logy,
     bool   verbose = false
 );
 
 Rcpp::NumericVector logspace_sub_opencl(
-    int    n_out,
-    double logx,
-    double logy,
+    const Rcpp::NumericVector& logx,
+    const Rcpp::NumericVector& logy,
     bool   verbose = false
 );
 
 Rcpp::NumericVector logspace_sum_opencl(
-    int    n_out,
-    double logx,
-    double logy,
+    const Rcpp::NumericVector& logx,
+    const Rcpp::NumericVector& logy,
     bool   verbose = false
 );
 
@@ -938,209 +928,179 @@ Rcpp::NumericVector rsignrank_opencl(
 );
 
 Rcpp::NumericVector gammafn_opencl(
-    int    n_out,
-    double x,
+    const Rcpp::NumericVector& x,
     bool   verbose = false
 );
 
 Rcpp::NumericVector lgammafn_opencl(
-    int    n_out,
-    double x,
+    const Rcpp::NumericVector& x,
     bool   verbose = false
 );
 
 Rcpp::NumericVector lgammafn_sign_opencl(
-    int    n_out,
-    double x,
+    const Rcpp::NumericVector& x,
     bool   verbose = false
 );
 
 Rcpp::NumericVector dpsifn_opencl(
-    int    n_out,
-    double x,
-    double n_deriv,
-    double kode,
-    double m,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& n_deriv,
+    const Rcpp::NumericVector& kode,
+    const Rcpp::NumericVector& m,
     bool   verbose = false
 );
 
 Rcpp::NumericVector psigamma_opencl(
-    int    n_out,
-    double x,
-    double deriv,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& deriv,
     bool   verbose = false
 );
 
 Rcpp::NumericVector digamma_opencl(
-    int    n_out,
-    double x,
+    const Rcpp::NumericVector& x,
     bool   verbose = false
 );
 
 Rcpp::NumericVector trigamma_opencl(
-    int    n_out,
-    double x,
+    const Rcpp::NumericVector& x,
     bool   verbose = false
 );
 
 Rcpp::NumericVector tetragamma_opencl(
-    int    n_out,
-    double x,
+    const Rcpp::NumericVector& x,
     bool   verbose = false
 );
 
 Rcpp::NumericVector pentagamma_opencl(
-    int    n_out,
-    double x,
+    const Rcpp::NumericVector& x,
     bool   verbose = false
 );
 
 Rcpp::NumericVector beta_opencl(
-    int    n_out,
-    double a,
-    double b,
+    const Rcpp::NumericVector& a,
+    const Rcpp::NumericVector& b,
     bool   verbose = false
 );
 
 Rcpp::NumericVector lbeta_opencl(
-    int    n_out,
-    double a,
-    double b,
+    const Rcpp::NumericVector& a,
+    const Rcpp::NumericVector& b,
     bool   verbose = false
 );
 
 Rcpp::NumericVector choose_opencl(
-    int    n_out,
-    double n_val,
-    double k,
+    const Rcpp::NumericVector& n_val,
+    const Rcpp::NumericVector& k,
     bool   verbose = false
 );
 
 Rcpp::NumericVector lchoose_opencl(
-    int    n_out,
-    double n_val,
-    double k,
+    const Rcpp::NumericVector& n_val,
+    const Rcpp::NumericVector& k,
     bool   verbose = false
 );
 
 Rcpp::NumericVector bessel_i_opencl(
-    int    n_out,
-    double x,
-    double nu,
-    double expo_scaled,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
+    const Rcpp::NumericVector& expo_scaled,
     bool   verbose = false
 );
 
 Rcpp::NumericVector bessel_j_opencl(
-    int    n_out,
-    double x,
-    double nu,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
     bool   verbose = false
 );
 
 Rcpp::NumericVector bessel_k_opencl(
-    int    n_out,
-    double x,
-    double nu,
-    double expo_scaled,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
+    const Rcpp::NumericVector& expo_scaled,
     bool   verbose = false
 );
 
 Rcpp::NumericVector bessel_y_opencl(
-    int    n_out,
-    double x,
-    double nu,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
     bool   verbose = false
 );
 
 Rcpp::NumericVector bessel_i_ex_opencl(
-    int    n_out,
-    double x,
-    double nu,
-    double expo,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
+    const Rcpp::NumericVector& expo,
     bool   verbose = false
 );
 
 Rcpp::NumericVector bessel_j_ex_opencl(
-    int    n_out,
-    double x,
-    double nu,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
     bool   verbose = false
 );
 
 Rcpp::NumericVector bessel_k_ex_opencl(
-    int    n_out,
-    double x,
-    double nu,
-    double expo,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
+    const Rcpp::NumericVector& expo,
     bool   verbose = false
 );
 
 Rcpp::NumericVector bessel_y_ex_opencl(
-    int    n_out,
-    double x,
-    double nu,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& nu,
     bool   verbose = false
 );
 
 Rcpp::NumericVector imax2_opencl(
-    int    n_out,
-    double x,
-    double y,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
     bool   verbose = false
 );
 
 Rcpp::NumericVector imin2_opencl(
-    int    n_out,
-    double x,
-    double y,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
     bool   verbose = false
 );
 
 Rcpp::NumericVector fmax2_opencl(
-    int    n_out,
-    double x,
-    double y,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
     bool   verbose = false
 );
 
 Rcpp::NumericVector fmin2_opencl(
-    int    n_out,
-    double x,
-    double y,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
     bool   verbose = false
 );
 
 Rcpp::NumericVector sign_opencl(
-    int    n_out,
-    double x,
+    const Rcpp::NumericVector& x,
     bool   verbose = false
 );
 
 Rcpp::NumericVector fprec_opencl(
-    int    n_out,
-    double x,
-    double digits,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& digits,
     bool   verbose = false
 );
 
 Rcpp::NumericVector fround_opencl(
-    int    n_out,
-    double x,
-    double digits,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& digits,
     bool   verbose = false
 );
 
 Rcpp::NumericVector fsign_opencl(
-    int    n_out,
-    double x,
-    double y,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& y,
     bool   verbose = false
 );
 
 Rcpp::NumericVector ftrunc_opencl(
-    int    n_out,
-    double x,
+    const Rcpp::NumericVector& x,
     bool   verbose = false
 );
 
