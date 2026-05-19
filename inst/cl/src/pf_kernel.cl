@@ -5,21 +5,6 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void pf_kernel(
-    const double x,
-    const double df1,
-    const double df2,
-    const double lower_tail_d,
-    const double log_p_d,
-    __global double* out,
-    const int n
-) {
-    int lt = (lower_tail_d != 0.0) ? 1 : 0;
-    int lp = (log_p_d != 0.0) ? 1 : 0;
-    if (get_global_id(0) != 0) return;
-    for (int i = 0; i < n; ++i) out[i] = pf(x, df1, df2, lt, lp);
-}
-
 __kernel void pf_kernel_temp(
     __global const double* q,
     __global const double* df1,

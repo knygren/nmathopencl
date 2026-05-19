@@ -390,17 +390,17 @@ Rcpp::List opencl_device_info_rcpp(bool, bool details) {
       Rcpp::Named("reason") = std::string("OpenCL not compiled in"),
       Rcpp::Named("platform_index") = -1,
       Rcpp::Named("device_index") = -1,
-      Rcpp::Named("platform_vendor") = R_NA_STRING,
-      Rcpp::Named("platform_name") = R_NA_STRING,
-      Rcpp::Named("device_vendor") = R_NA_STRING,
-      Rcpp::Named("device_name") = R_NA_STRING,
-      Rcpp::Named("device_version") = R_NA_STRING,
-      Rcpp::Named("driver_version") = R_NA_STRING,
-      Rcpp::Named("device_type") = R_NA_STRING,
+      Rcpp::Named("platform_vendor") = NA_STRING,
+      Rcpp::Named("platform_name") = NA_STRING,
+      Rcpp::Named("device_vendor") = NA_STRING,
+      Rcpp::Named("device_name") = NA_STRING,
+      Rcpp::Named("device_version") = NA_STRING,
+      Rcpp::Named("driver_version") = NA_STRING,
+      Rcpp::Named("device_type") = NA_STRING,
       Rcpp::Named("extension_cl_khr_fp64") = false,
       Rcpp::Named("probe_fp64_ok") = false,
       Rcpp::Named("selection_policy") = std::string("none"),
-      Rcpp::Named("probe_failure_log") = R_NA_STRING);
+      Rcpp::Named("probe_failure_log") = NA_STRING);
   if (details)
     L["candidates"] = Rcpp::List();
   return L;
