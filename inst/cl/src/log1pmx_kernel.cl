@@ -19,3 +19,13 @@ __kernel void log1pmx_kernel(
         out[i] = log1pmx(x);
     }
 }
+
+__kernel void log1pmx_kernel_temp(
+    __global const double* x,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    out[i] = log1pmx(x[i]);
+}

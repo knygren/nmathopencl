@@ -18,3 +18,14 @@ __kernel void logspace_sub_kernel(
         out[i] = logspace_sub(logx, logy);
     }
 }
+
+__kernel void logspace_sub_kernel_temp(
+    __global const double* logxv,
+    __global const double* logyv,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    out[i] = logspace_sub(logxv[i], logyv[i]);
+}

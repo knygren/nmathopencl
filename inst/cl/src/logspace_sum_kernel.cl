@@ -21,3 +21,17 @@ __kernel void logspace_sum_kernel(
         out[i] = logspace_sum(vals, 2);
     }
 }
+
+__kernel void logspace_sum_kernel_temp(
+    __global const double* logxv,
+    __global const double* logyv,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    double vals[2];
+    vals[0] = logxv[i];
+    vals[1] = logyv[i];
+    out[i] = logspace_sum(vals, 2);
+}

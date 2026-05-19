@@ -19,3 +19,13 @@ __kernel void log1pexp_kernel(
         out[i] = log1pexp(x);
     }
 }
+
+__kernel void log1pexp_kernel_temp(
+    __global const double* x,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    out[i] = log1pexp(x[i]);
+}

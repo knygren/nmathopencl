@@ -19,3 +19,13 @@ __kernel void lgamma1p_kernel(
         out[i] = lgamma1p(x);
     }
 }
+
+__kernel void lgamma1p_kernel_temp(
+    __global const double* x,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    out[i] = lgamma1p(x[i]);
+}

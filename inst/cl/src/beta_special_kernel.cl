@@ -18,3 +18,14 @@ __kernel void beta_special_kernel(
     if (get_global_id(0) != 0) return;
     for (int i = 0; i < n; ++i) out[i] = beta(a, b);
 }
+
+__kernel void beta_special_kernel_temp(
+    __global const double* av,
+    __global const double* bv,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    out[i] = beta(av[i], bv[i]);
+}

@@ -18,3 +18,14 @@ __kernel void logspace_add_kernel(
         out[i] = logspace_add(logx, logy);
     }
 }
+
+__kernel void logspace_add_kernel_temp(
+    __global const double* logxv,
+    __global const double* logyv,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    out[i] = logspace_add(logxv[i], logyv[i]);
+}

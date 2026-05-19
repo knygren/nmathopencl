@@ -18,3 +18,13 @@ __kernel void trigamma_kernel(
     if (get_global_id(0) != 0) return;
     for (int i = 0; i < n; ++i) out[i] = trigamma(x);
 }
+
+__kernel void trigamma_kernel_temp(
+    __global const double* xv,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    out[i] = trigamma(xv[i]);
+}

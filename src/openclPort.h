@@ -197,6 +197,15 @@ void opencl_d_givelog_kernel_runner_temp(
     const std::vector<int>&                give_log,
     std::vector<double>&                   out_flat);
 
+// NDRange-over-len for numeric-only kernels: *_kernel_temp takes one __global column per
+// numeric argument (__global double* each), then out, len — no tails / give_log integers.
+void opencl_numeric_cols_kernel_runner_temp(
+    const std::string&                     kernel_source,
+    const char*                            kernel_name,
+    int                                    len,
+    const std::vector<std::vector<double>>& arg_cols,
+    std::vector<double>&                   out_flat);
+
 // Convenience wrapper for pnorm-shaped arguments (delegates to opencl_pq_tail_kernel_runner_temp).
 void opencl_pnorm_kernel_runner_temp(
     const std::string&         kernel_source,

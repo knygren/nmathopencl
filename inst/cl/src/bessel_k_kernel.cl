@@ -18,3 +18,15 @@ __kernel void bessel_k_kernel(
     if (get_global_id(0) != 0) return;
     for (int i = 0; i < n; ++i) out[i] = bessel_k(x, nu, expo_scaled);
 }
+
+__kernel void bessel_k_kernel_temp(
+    __global const double* xv,
+    __global const double* nu_col,
+    __global const double* expo_scaled,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    out[i] = bessel_k(xv[i], nu_col[i], expo_scaled[i]);
+}

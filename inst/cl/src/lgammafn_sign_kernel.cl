@@ -22,3 +22,14 @@ __kernel void lgammafn_sign_kernel(
         out[i] = lgammafn_sign(x, &sgn);
     }
 }
+
+__kernel void lgammafn_sign_kernel_temp(
+    __global const double* xv,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    int sgn = 1;
+    out[i] = lgammafn_sign(xv[i], &sgn);
+}

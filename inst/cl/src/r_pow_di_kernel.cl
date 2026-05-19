@@ -17,3 +17,14 @@ __kernel void r_pow_di_kernel(
         out[i] = R_pow_di(x + (double)i * 1e-3, n_exp);
     }
 }
+
+__kernel void r_pow_di_kernel_temp(
+    __global const double* xv,
+    __global const double* n_exp_d_col,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    out[i] = R_pow_di(xv[i], (int)n_exp_d_col[i]);
+}

@@ -18,3 +18,14 @@ __kernel void bessel_j_kernel(
     if (get_global_id(0) != 0) return;
     for (int i = 0; i < n; ++i) out[i] = bessel_j(x, nu);
 }
+
+__kernel void bessel_j_kernel_temp(
+    __global const double* xv,
+    __global const double* nu_col,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    out[i] = bessel_j(xv[i], nu_col[i]);
+}

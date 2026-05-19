@@ -16,3 +16,14 @@ __kernel void r_pow_kernel(
         out[i] = R_pow(x + (double)i * 1e-3, y);
     }
 }
+
+__kernel void r_pow_kernel_temp(
+    __global const double* xv,
+    __global const double* yv,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    out[i] = R_pow(xv[i], yv[i]);
+}

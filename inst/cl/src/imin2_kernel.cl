@@ -18,3 +18,14 @@ __kernel void imin2_kernel(
     if (get_global_id(0) != 0) return;
     for (int i = 0; i < n; ++i) out[i] = (double)imin2((int)x, (int)y);
 }
+
+__kernel void imin2_kernel_temp(
+    __global const double* xv,
+    __global const double* yv,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    out[i] = (double)imin2((int)xv[i], (int)yv[i]);
+}

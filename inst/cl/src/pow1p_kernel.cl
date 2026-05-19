@@ -18,3 +18,14 @@ __kernel void pow1p_kernel(
         out[i] = pow1p(x, y);
     }
 }
+
+__kernel void pow1p_kernel_temp(
+    __global const double* x,
+    __global const double* y,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    out[i] = pow1p(x[i], y[i]);
+}
