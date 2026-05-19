@@ -16,3 +16,17 @@ __kernel void unif_rand_kernel(
     if (get_global_id(0) != 0) return;
     for (int i = 0; i < n; ++i) out[i] = unif_rand();
 }
+
+
+// NDRange-style name for host batch path (serial RNG: single gid==0 work-item).
+__kernel void unif_rand_kernel_temp(
+    const double a,
+    const double b,
+    const double index_upper,
+    __global double* out,
+    const int n
+) {
+    (void)a; (void)b; (void)index_upper;
+    if (get_global_id(0) != 0) return;
+    for (int i = 0; i < n; ++i) out[i] = unif_rand();
+}

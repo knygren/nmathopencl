@@ -13,3 +13,16 @@ __kernel void r_check_stack_kernel(
         out[i] = (double)(i + 1);
     }
 }
+
+
+// NDRange-style name for host batch path (serial RNG: single gid==0 work-item).
+__kernel void r_check_stack_kernel_temp(
+    __global double* out,
+    const int n
+) {
+    if (get_global_id(0) != 0) return;
+    for (int i = 0; i < n; ++i) {
+        R_CheckStack();
+        out[i] = (double)(i + 1);
+    }
+}

@@ -19,3 +19,17 @@ __kernel void rwilcox_kernel(
         out[i] = rwilcox(m, n2);
     }
 }
+
+
+// NDRange-style name for host batch path (serial RNG: single gid==0 work-item).
+__kernel void rwilcox_kernel_temp(
+    const double m,
+    const double n2,
+    __global double* out,
+    const int n_out
+) {
+    if (get_global_id(0) != 0) return;
+    for (int i = 0; i < n_out; ++i) {
+        out[i] = rwilcox(m, n2);
+    }
+}
