@@ -197,17 +197,6 @@ Rcpp::NumericVector pnorm_opencl(
     bool   verbose = false
 );
 
-/** Same vectored NDRange path as `pnorm_opencl`; retained for benchmarks / tooling (not exported). */
-Rcpp::NumericVector pnorm_opencl_temp(
-    const Rcpp::NumericVector& q,
-    const Rcpp::NumericVector& mean,
-    const Rcpp::NumericVector& sd,
-    const Rcpp::IntegerVector& lower_tail,
-    const Rcpp::IntegerVector& log_p,
-    int    opencl_parallel_code,
-    bool   verbose = false
-);
-
 Rcpp::NumericVector qnorm_opencl(
     const Rcpp::NumericVector& p,
     const Rcpp::NumericVector& mean,

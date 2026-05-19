@@ -654,40 +654,6 @@ Rcpp::NumericVector pnorm_opencl(
   return out;
 }
 
-// Same OpenCL path as pnorm_opencl (NDRange + pnorm_kernel_temp); kept for experiments / diff tools.
-Rcpp::NumericVector pnorm_opencl_temp(
-    const Rcpp::NumericVector& q,
-    const Rcpp::NumericVector& mean,
-    const Rcpp::NumericVector& sd,
-    const Rcpp::IntegerVector& lower_tail,
-    const Rcpp::IntegerVector& log_p,
-    int opencl_parallel_code,
-    bool verbose
-) {
-  (void)opencl_parallel_code;
-  const int len = q.size();
-  Rcpp::NumericVector out(len);
-#ifdef USE_OPENCL
-  if (!has_opencl() || len == 0) return out;
-
-  try {
-    pq_tail_ndrange_kernel_temp_fill(
-        "src/pnorm_kernel.cl",
-        "pnorm_kernel_temp",
-        len,
-        {&q, &mean, &sd},
-        lower_tail,
-        log_p,
-        out,
-        verbose);
-  } catch (const std::exception& e) {
-    if (verbose) Rcpp::Rcout << e.what() << "\n";
-    throw;
-  }
-#endif
-  return out;
-}
-
 Rcpp::NumericVector qnorm_opencl(
     const Rcpp::NumericVector& p,
     const Rcpp::NumericVector& mean,
