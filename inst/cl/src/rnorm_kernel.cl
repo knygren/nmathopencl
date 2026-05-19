@@ -8,19 +8,6 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void rnorm_kernel(
-    const double mu,
-    const double sigma,
-    __global double* out,
-    const int n
-) {
-    if (get_global_id(0) != 0) return;
-    for (int i = 0; i < n; ++i) {
-        out[i] = rnorm(mu, sigma);
-    }
-}
-
-
 // NDRange-style name for host batch path (serial RNG: single gid==0 work-item).
 __kernel void rnorm_kernel_temp(
     const double mu,
