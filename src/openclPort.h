@@ -136,6 +136,37 @@ bool kernel_all_depends_nmath_includes_qDiscrete_search(
     const std::string& kernel_relative_path,
     const std::string& package = "nmathopencl");
 
+// -------------------------------------------------------------------------
+// fp64-capable OpenCL device selection (cached). Implemented in
+// opencl_device_selection.cpp; holds cl_platform_id / cl_device_id as void*
+// when USE_OPENCL. Runners cast at use. See opencl_device_info().
+// -------------------------------------------------------------------------
+struct OpenCLFp64DeviceCache {
+  bool valid = false;
+  std::string reason;
+  bool extension_cl_khr_fp64 = false;
+  bool probe_fp64_ok = false;
+  int platform_index = -1;
+  int device_index = -1;
+  std::string platform_vendor;
+  std::string platform_name;
+  std::string device_vendor;
+  std::string device_name;
+  std::string device_version;
+  std::string driver_version;
+  std::string device_type_label;
+  std::string selection_policy;
+  std::string probe_failure_log;
+  void* platform = nullptr;
+  void* device = nullptr;
+};
+
+bool opencl_ensure_fp64_selection(bool force);
+const OpenCLFp64DeviceCache& opencl_fp64_selection();
+void opencl_reset_fp64_selection();
+
+Rcpp::List opencl_device_info_rcpp(bool force = false, bool details = false);
+bool opencl_fp64_available_impl(bool force = false);
 
 // -------------------------------------------------------------------------
 // Conditional declarations: only available when USE_OPENCL is defined
@@ -159,6 +190,8 @@ struct OpenCLConfig {
 // Probe OpenCL device capabilities and construct build options
 OpenCLConfig configureOpenCL(cl_context context,
                              cl_device_id device);
+
+void opencl_bind_selected_fp64_device_or_throw(cl_platform_id& platform, cl_device_id& device);
 
 // -------------------------------------------------------------------------
 // Generic double-scalar kernel runner
