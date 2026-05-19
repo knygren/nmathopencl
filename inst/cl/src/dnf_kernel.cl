@@ -5,20 +5,6 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void dnf_kernel(
-    const double x,
-    const double df1,
-    const double ncp,
-    const double df2,
-    const double give_log_d,
-    __global double* out,
-    const int n
-) {
-    if (get_global_id(0) != 0) return;
-    const int give_log = (give_log_d != 0.0) ? 1 : 0;
-    for (int i = 0; i < n; ++i) out[i] = dnf(x, df1, df2, ncp, give_log);
-}
-
 __kernel void dnf_kernel_temp(
     __global const double* x,
     __global const double* df1,
