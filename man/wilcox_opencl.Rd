@@ -13,7 +13,7 @@ dwilcox_opencl(
   nn,
   log = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -24,7 +24,7 @@ pwilcox_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -35,11 +35,11 @@ qwilcox_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
-rwilcox_opencl(n, m, nn, fallback = TRUE, verbose = FALSE)
+rwilcox_opencl(n, m, nn, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{Numeric scalar quantile (must be >= 0).}
@@ -53,7 +53,7 @@ rwilcox_opencl(n, m, nn, fallback = TRUE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
@@ -76,7 +76,7 @@ for the Wilcoxon rank sum distribution.
 
 Wilcoxon kernels can still hit runtime-shim gaps depending on device and
 driver stack (for example unresolved runtime symbols in some builds).
-Prefer \code{fallback = TRUE} for production paths.
+Defaults follow \verb{fallback = FALSE}: OpenCL failures surface unless you pass \code{fallback = TRUE}.
 }
 
 \examples{

@@ -12,7 +12,7 @@ dgeom_opencl(
   prob,
   log = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -22,7 +22,7 @@ pgeom_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -32,11 +32,11 @@ qgeom_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
-rgeom_opencl(n, prob, fallback = TRUE, verbose = FALSE)
+rgeom_opencl(n, prob, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{Numeric scalar quantile.}
@@ -48,7 +48,7 @@ rgeom_opencl(n, prob, fallback = TRUE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. \code{dgeom_opencl} defaults \code{FALSE}. \code{pgeom_opencl}, \code{qgeom_opencl}, and \code{rgeom_opencl} default \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 

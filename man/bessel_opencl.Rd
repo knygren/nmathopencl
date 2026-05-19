@@ -7,13 +7,13 @@
 \alias{besselY_opencl}
 \title{Bessel Functions (OpenCL)}
 \usage{
-besselI_opencl(x, nu, expon.scaled = FALSE, fallback = TRUE, verbose = FALSE)
+besselI_opencl(x, nu, expon.scaled = FALSE, fallback = FALSE, verbose = FALSE)
 
-besselJ_opencl(x, nu, fallback = TRUE, verbose = FALSE)
+besselJ_opencl(x, nu, fallback = FALSE, verbose = FALSE)
 
-besselK_opencl(x, nu, expon.scaled = FALSE, fallback = TRUE, verbose = FALSE)
+besselK_opencl(x, nu, expon.scaled = FALSE, fallback = FALSE, verbose = FALSE)
 
-besselY_opencl(x, nu, fallback = TRUE, verbose = FALSE)
+besselY_opencl(x, nu, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x, nu}{Numeric vectors recycled together.}
@@ -22,7 +22,7 @@ besselY_opencl(x, nu, fallback = TRUE, verbose = FALSE)
 maps to the \code{expon.scaled} flag in \code{\link[base]{besselI}} /
 \code{\link[base]{besselK}}.}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 }
@@ -36,8 +36,8 @@ OpenCL-backed wrappers for Bessel functions.
 
 Current Bessel OpenCL paths may require temporary-workspace allocation
 semantics equivalent to host \code{R_alloc}/\code{vmax*} behavior. On some
-GPU stacks this can fail at runtime; keep \code{fallback = TRUE} for
-production use until device-side workspace handling is fully implemented.
+GPU stacks this can fail at runtime; use \code{fallback = TRUE} if you must
+tolerate failures until device-side workspace handling is implemented.
 }
 
 \examples{

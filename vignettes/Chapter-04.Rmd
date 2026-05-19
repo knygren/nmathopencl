@@ -1,10 +1,10 @@
 ---
-title: "Chapter 04: Kernels — Writing and Using OpenCL Kernel Files"
+title: "Chapter 04: Kernels --- Writing and Using OpenCL Kernel Files"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 04: Kernels — Writing and Using OpenCL Kernel Files}
+  %\VignetteIndexEntry{Chapter 04: Kernels --- Writing and Using OpenCL Kernel Files}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -18,8 +18,8 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 An OpenCL **kernel** is the entry point that executes on the GPU. It is
 declared with the `__kernel` qualifier and is compiled at runtime (by the
 OpenCL driver) from a source string assembled by the host program. Each
-invocation of the kernel processes one work-item — typically one element of
-an output array — in parallel with all other work-items.
+invocation of the kernel processes one work-item --- typically one element of
+an output array --- in parallel with all other work-items.
 
 In `nmathopencl`, kernels live in `inst/cl/src/`. Each file defines exactly
 one `__kernel void` function. The file name follows the pattern

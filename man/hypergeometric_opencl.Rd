@@ -14,7 +14,7 @@ dhyper_opencl(
   k,
   log = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -38,7 +38,7 @@ qhyper_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -58,7 +58,7 @@ rhyper_opencl(n, m, n_black, k, fallback = TRUE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. \code{dhyper_opencl} defaults \code{FALSE}; \code{phyper_opencl} and \code{rhyper_opencl} default \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}); \code{qhyper_opencl} defaults \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 

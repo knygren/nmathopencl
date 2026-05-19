@@ -5,14 +5,14 @@
 \alias{r_check_stack_opencl}
 \title{OpenCL-backed R_ext runtime utility linkage checks}
 \usage{
-r_check_user_interrupt_opencl(n, fallback = TRUE, verbose = FALSE)
+r_check_user_interrupt_opencl(n, fallback = FALSE, verbose = FALSE)
 
-r_check_stack_opencl(n, fallback = TRUE, verbose = FALSE)
+r_check_stack_opencl(n, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{n}{Number of observations. Non-negative integer scalar.}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 }

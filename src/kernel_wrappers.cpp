@@ -85,32 +85,16 @@ Rcpp::NumericVector runif_opencl(
 ) {
   if (n < 0) Rcpp::stop("`n` must be >= 0.");
   Rcpp::NumericVector out(n);
-
-  auto cpu_fallback = [&]() {
-    for (int i = 0; i < n; ++i) out[i] = R::runif(a, b);
-  };
-
 #ifdef USE_OPENCL
-  if (!has_opencl()) {
-    if (verbose) Rcpp::Rcout << "[INFO] OpenCL unavailable; using CPU runif fallback.\n";
-    cpu_fallback();
-    return out;
-  }
+  if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws("src/runif_kernel.cl", "runif_kernel_temp", {a, b}, n, out, verbose);
-    return out;
   } catch (const std::exception& e) {
-    if (verbose) {
-      Rcpp::Rcout << "[WARN] OpenCL runif failed; using CPU fallback.\n" << e.what() << "\n";
-    }
-    cpu_fallback();
-    return out;
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
   }
-#else
-  if (verbose) Rcpp::Rcout << "[INFO] Package built without OpenCL; using CPU runif fallback.\n";
-  cpu_fallback();
-  return out;
 #endif
+  return out;
 }
 
 Rcpp::NumericVector rnorm_opencl(
@@ -121,32 +105,16 @@ Rcpp::NumericVector rnorm_opencl(
 ) {
   if (n < 0) Rcpp::stop("`n` must be >= 0.");
   Rcpp::NumericVector out(n);
-
-  auto cpu_fallback = [&]() {
-    for (int i = 0; i < n; ++i) out[i] = R::rnorm(mu, sigma);
-  };
-
 #ifdef USE_OPENCL
-  if (!has_opencl()) {
-    if (verbose) Rcpp::Rcout << "[INFO] OpenCL unavailable; using CPU rnorm fallback.\n";
-    cpu_fallback();
-    return out;
-  }
+  if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws("src/rnorm_kernel.cl", "rnorm_kernel_temp", {mu, sigma}, n, out, verbose);
-    return out;
   } catch (const std::exception& e) {
-    if (verbose) {
-      Rcpp::Rcout << "[WARN] OpenCL rnorm failed; using CPU fallback.\n" << e.what() << "\n";
-    }
-    cpu_fallback();
-    return out;
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
   }
-#else
-  if (verbose) Rcpp::Rcout << "[INFO] Package built without OpenCL; using CPU rnorm fallback.\n";
-  cpu_fallback();
-  return out;
 #endif
+  return out;
 }
 
 Rcpp::NumericVector rexp_opencl(
@@ -156,32 +124,16 @@ Rcpp::NumericVector rexp_opencl(
 ) {
   if (n < 0) Rcpp::stop("`n` must be >= 0.");
   Rcpp::NumericVector out(n);
-
-  auto cpu_fallback = [&]() {
-    for (int i = 0; i < n; ++i) out[i] = R::rexp(scale);
-  };
-
 #ifdef USE_OPENCL
-  if (!has_opencl()) {
-    if (verbose) Rcpp::Rcout << "[INFO] OpenCL unavailable; using CPU rexp fallback.\n";
-    cpu_fallback();
-    return out;
-  }
+  if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws("src/rexp_kernel.cl", "rexp_kernel_temp", {scale}, n, out, verbose);
-    return out;
   } catch (const std::exception& e) {
-    if (verbose) {
-      Rcpp::Rcout << "[WARN] OpenCL rexp failed; using CPU fallback.\n" << e.what() << "\n";
-    }
-    cpu_fallback();
-    return out;
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
   }
-#else
-  if (verbose) Rcpp::Rcout << "[INFO] Package built without OpenCL; using CPU rexp fallback.\n";
-  cpu_fallback();
-  return out;
 #endif
+  return out;
 }
 
 Rcpp::NumericVector rwilcox_opencl(
@@ -192,32 +144,16 @@ Rcpp::NumericVector rwilcox_opencl(
 ) {
   if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
   Rcpp::NumericVector out(n_out);
-
-  auto cpu_fallback = [&]() {
-    for (int i = 0; i < n_out; ++i) out[i] = ::Rf_rwilcox(m, n2);
-  };
-
 #ifdef USE_OPENCL
-  if (!has_opencl()) {
-    if (verbose) Rcpp::Rcout << "[INFO] OpenCL unavailable; using CPU rwilcox fallback.\n";
-    cpu_fallback();
-    return out;
-  }
+  if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws("src/rwilcox_kernel.cl", "rwilcox_kernel_temp", {m, n2}, n_out, out, verbose);
-    return out;
   } catch (const std::exception& e) {
-    if (verbose) {
-      Rcpp::Rcout << "[WARN] OpenCL rwilcox failed; using CPU fallback.\n" << e.what() << "\n";
-    }
-    cpu_fallback();
-    return out;
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
   }
-#else
-  if (verbose) Rcpp::Rcout << "[INFO] Package built without OpenCL; using CPU rwilcox fallback.\n";
-  cpu_fallback();
-  return out;
 #endif
+  return out;
 }
 
 Rcpp::NumericVector rbinom_opencl(
@@ -228,33 +164,17 @@ Rcpp::NumericVector rbinom_opencl(
 ) {
   if (n_out < 0) Rcpp::stop("`n_out` must be >= 0.");
   Rcpp::NumericVector out(n_out);
-
-  auto cpu_fallback = [&]() {
-    for (int i = 0; i < n_out; ++i) out[i] = ::Rf_rbinom(size, prob);
-  };
-
 #ifdef USE_OPENCL
-  if (!has_opencl()) {
-    if (verbose) Rcpp::Rcout << "[INFO] OpenCL unavailable; using CPU rbinom fallback.\n";
-    cpu_fallback();
-    return out;
-  }
+  if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
         "src/rbinom_kernel.cl", "rbinom_kernel_temp", {size, prob}, n_out, out, verbose);
-    return out;
   } catch (const std::exception& e) {
-    if (verbose) {
-      Rcpp::Rcout << "[WARN] OpenCL rbinom failed; using CPU fallback.\n" << e.what() << "\n";
-    }
-    cpu_fallback();
-    return out;
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
   }
-#else
-  if (verbose) Rcpp::Rcout << "[INFO] Package built without OpenCL; using CPU rbinom fallback.\n";
-  cpu_fallback();
-  return out;
 #endif
+  return out;
 }
 
 #ifdef USE_OPENCL

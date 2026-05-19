@@ -4,7 +4,7 @@
 \alias{rmultinom_opencl}
 \title{The Multinomial Distribution (OpenCL linkage subset)}
 \usage{
-rmultinom_opencl(n, size, prob, fallback = TRUE, verbose = FALSE)
+rmultinom_opencl(n, size, prob, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{n}{Number of observations. Non-negative integer scalar.}
@@ -13,7 +13,7 @@ rmultinom_opencl(n, size, prob, fallback = TRUE, verbose = FALSE)
 
 \item{prob}{Probability of the first category in \code{[0, 1]}.}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 }

@@ -6,20 +6,20 @@
 #' @param expon.scaled Logical vector recycled with \code{x} and \code{nu} where applicable;
 #'   maps to the \code{expon.scaled} flag in \code{\link[base]{besselI}} /
 #'   \code{\link[base]{besselK}}.
-#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #'
 #' @section Known OpenCL limitations:
 #' Current Bessel OpenCL paths may require temporary-workspace allocation
 #' semantics equivalent to host \code{R_alloc}/\code{vmax*} behavior. On some
-#' GPU stacks this can fail at runtime; keep \code{fallback = TRUE} for
-#' production use until device-side workspace handling is fully implemented.
+#' GPU stacks this can fail at runtime; use \code{fallback = TRUE} if you must
+#' tolerate failures until device-side workspace handling is implemented.
 #'
 #' @return Numeric vector of recycled common length.
 #' @example inst/examples/Ex_bessel_opencl.R
 #' @rdname bessel_opencl
 #' @export
-besselI_opencl <- function(x, nu, expon.scaled = FALSE, fallback = TRUE, verbose = FALSE) {
+besselI_opencl <- function(x, nu, expon.scaled = FALSE, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   if (!is.numeric(nu)) stop("`nu` must be numeric.")
   if (!is.logical(expon.scaled)) stop("`expon.scaled` must be logical.")
@@ -42,7 +42,7 @@ besselI_opencl <- function(x, nu, expon.scaled = FALSE, fallback = TRUE, verbose
 
 #' @rdname bessel_opencl
 #' @export
-besselJ_opencl <- function(x, nu, fallback = TRUE, verbose = FALSE) {
+besselJ_opencl <- function(x, nu, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   if (!is.numeric(nu)) stop("`nu` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
@@ -60,7 +60,7 @@ besselJ_opencl <- function(x, nu, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname bessel_opencl
 #' @export
-besselK_opencl <- function(x, nu, expon.scaled = FALSE, fallback = TRUE, verbose = FALSE) {
+besselK_opencl <- function(x, nu, expon.scaled = FALSE, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   if (!is.numeric(nu)) stop("`nu` must be numeric.")
   if (!is.logical(expon.scaled)) stop("`expon.scaled` must be logical.")
@@ -83,7 +83,7 @@ besselK_opencl <- function(x, nu, expon.scaled = FALSE, fallback = TRUE, verbose
 
 #' @rdname bessel_opencl
 #' @export
-besselY_opencl <- function(x, nu, fallback = TRUE, verbose = FALSE) {
+besselY_opencl <- function(x, nu, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   if (!is.numeric(nu)) stop("`nu` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")

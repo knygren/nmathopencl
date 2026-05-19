@@ -2257,4 +2257,18 @@ Rcpp::CharacterVector gpu_names_cpp_export() {
   return gpu_names();
 }
 
+// [[Rcpp::export]]
+Rcpp::List opencl_device_info_cpp_export(bool force = false, bool details = false) {
+  return opencl_device_info_rcpp(force, details);
+}
+
+// [[Rcpp::export]]
+bool opencl_fp64_available_cpp_export(bool force = false) {
+  return opencl_fp64_available_impl(force);
+}
+
+// [[Rcpp::export]]
+void opencl_reset_device_selection_cpp_export() {
+  opencl_reset_fp64_selection();
+}
 

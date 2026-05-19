@@ -8,7 +8,7 @@
 #' @param q Numeric vector of quantiles for \code{pexp_opencl}; recycled like \code{stats::pexp}.
 #' @param p Numeric vector of probabilities for \code{qexp_opencl} (like \code{stats::qexp}).
 #' @param rate Rate parameter (must be > 0).
-#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
@@ -24,7 +24,7 @@ dexp_opencl <- function(
     rate = 1,
     log = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(x)) {
@@ -82,7 +82,7 @@ pexp_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(q)) {
@@ -142,7 +142,7 @@ qexp_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(p)) {
@@ -198,7 +198,7 @@ qexp_opencl <- function(
 
 #' @rdname exponential_opencl
 #' @export
-rexp_opencl <- function(n, rate = 1, fallback = TRUE, verbose = FALSE) {
+rexp_opencl <- function(n, rate = 1, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_scalar_num(rate, "rate", 0, Inf, open_lower = TRUE)
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")

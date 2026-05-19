@@ -8,7 +8,7 @@
 #' @param nmeans Number of means in each range (must be >= 2).
 #' @param df Degrees of freedom (must be > 0).
 #' @param nranges Number of groups whose maxima/minima define the range (must be >= 1).
-#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. Defaults \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}); pass \code{FALSE} to surface failures.
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}

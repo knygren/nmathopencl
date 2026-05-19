@@ -7,14 +7,14 @@
 #' @param n Number of observations. Non-negative integer scalar.
 #' @param size Number of trials per draw (non-negative integer scalar).
 #' @param prob Probability of the first category in \code{[0, 1]}.
-#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #'
 #' @return Integer matrix with 2 rows and \code{n} columns.
 #' @example inst/examples/Ex_multinomial_opencl.R
 #' @rdname multinomial_opencl
 #' @export
-rmultinom_opencl <- function(n, size, prob, fallback = TRUE, verbose = FALSE) {
+rmultinom_opencl <- function(n, size, prob, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   if (!is.numeric(size) || length(size) != 1L || is.na(size) || size < 0 || size != as.integer(size)) {
     stop("`size` must be a non-negative integer scalar.")

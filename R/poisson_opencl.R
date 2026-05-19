@@ -8,7 +8,7 @@
 #' @param q Numeric vector of quantiles for \code{ppois_opencl}; recycled like \code{stats::ppois}.
 #' @param p Numeric vector of probabilities for \code{qpois_opencl} (like \code{stats::qpois}).
 #' @param lambda Mean/rate parameter (must be >= 0).
-#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. Density \code{dpois_*} wrappers default \code{FALSE}; \code{ppois_opencl} defaults \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}); \code{qpois_opencl} and \code{rpois_opencl} default \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
@@ -24,7 +24,7 @@ dpois_raw_opencl <- function(
     lambda,
     log = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(x)) {
@@ -81,7 +81,7 @@ dpois_opencl <- function(
     lambda,
     log = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(x)) {
@@ -199,7 +199,7 @@ qpois_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(p)) {
@@ -255,7 +255,7 @@ qpois_opencl <- function(
 
 #' @rdname poisson_opencl
 #' @export
-rpois_opencl <- function(n, lambda, fallback = TRUE, verbose = FALSE) {
+rpois_opencl <- function(n, lambda, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_scalar_num(lambda, "lambda", 0, Inf)
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")

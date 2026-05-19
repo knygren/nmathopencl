@@ -28,7 +28,9 @@ sampler—builds a custom kernel on top of the ported nmath routines. See
 and the vignette \emph{GPU Acceleration} for a complete walkthrough.
 
 Optional GPU acceleration is available wherever an OpenCL runtime is
-installed. Use \code{\link{has_opencl}} to query availability at runtime and
+installed. Use \code{\link{has_opencl}} to query compile-time OpenCL support,
+\code{\link{opencl_fp64_available}} / \code{\link{opencl_device_info}} for
+double-precision device selection used by kernels, and
 \code{\link{diagnose_glmbayes}} for detailed device diagnostics.
 
 The simulation theory underlying the envelope construction is described in
@@ -46,6 +48,7 @@ Key developer entry points:
 \item \code{\link{load_kernel_library}} — assemble the nmath \code{.cl} sources
 into an OpenCL program string.
 \item \code{\link{has_opencl}} — check whether an OpenCL runtime is present.
+\item \code{\link{opencl_device_info}} — which device is used for fp64 kernels.
 \item \code{\link{Ex_EnvelopeEval}} — worked example of a custom kernel built
 on the ported nmath routines.
 }

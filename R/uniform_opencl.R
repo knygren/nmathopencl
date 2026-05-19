@@ -13,8 +13,8 @@
 #' @param p Probabilities for \code{qunif_opencl} (\code{stats::qunif} semantics).
 #' @param min Lower limit of the distribution.
 #' @param max Upper limit of the distribution.
-#' @param fallback CPU on OpenCL/dispatch failures; see tracker before relying on masking.\cr
-#'   See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
+#' Ignored when the runtime reports no OpenCL. See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 #' @param verbose Logical; print informational fallback messages.
 #' @param log \code{log} flag for densities (\code{stats} \emph{d}-family semantics).
 #'
@@ -33,7 +33,7 @@ dunif_opencl <- function(
     max = 1,
     log = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(x)) {
@@ -96,7 +96,7 @@ punif_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(q)) {
@@ -170,7 +170,7 @@ qunif_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(p)) {
@@ -234,7 +234,7 @@ runif_opencl <- function(
     n,
     min = 0,
     max = 1,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(n) || length(n) != 1L || is.na(n) || n < 0 || n != as.integer(n)) {
@@ -256,25 +256,11 @@ runif_opencl <- function(
 
   n <- as.integer(n)
 
-  if (!has_opencl()) {
-    if (fallback) {
-      if (verbose) message("[runif_opencl] OpenCL unavailable; using stats::runif fallback.")
-      return(stats::runif(n, min = min, max = max))
-    }
-    stop("OpenCL is not available in this nmathopencl build.")
-  }
-
-  out <- tryCatch(.runif_opencl(n, min = min, max = max, verbose = verbose), error = function(e) e)
-  if (inherits(out, "error")) {
-    if (fallback) {
-      if (verbose) {
-        message("[runif_opencl] OpenCL call failed; using stats::runif fallback.")
-        message(out$message)
-      }
-      return(stats::runif(n, min = min, max = max))
-    }
-    stop(out$message, call. = FALSE)
-  }
-
-  out
+  .opencl_try_or_fallback(
+    opencl_expr = function() .runif_opencl(n, min = min, max = max, verbose = verbose),
+    fallback_expr = function() stats::runif(n, min = min, max = max),
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "runif_opencl"
+  )
 }

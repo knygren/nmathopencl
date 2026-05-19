@@ -80,7 +80,7 @@ load_library_for_kernel <- function(kernel_path,
 #'
 #' Given one or more kernel `.cl` files and a library directory, determines the
 #' minimal set of library files required (union of all kernels' dependency
-#' annotations) and copies them — in dependency order — to a destination
+#' annotations) and copies them --- in dependency order --- to a destination
 #' directory.
 #'
 #' Use this to populate a project-local copy containing only the library files
@@ -113,7 +113,7 @@ load_library_for_kernel <- function(kernel_path,
 #'   `file.path(library_dir, "kernel_dependency_index.rds")` with a
 #'   `message()` nudging toward the recommended pattern.
 #' @param overwrite Logical; if `FALSE` (default) existing files in `dest_dir`
-#'   are not overwritten — the copy is skipped and `copied = FALSE` in the
+#'   are not overwritten --- the copy is skipped and `copied = FALSE` in the
 #'   returned data frame.
 #'
 #' @return A data frame (returned invisibly) with one row per copied file

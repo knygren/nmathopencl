@@ -9,7 +9,7 @@
 #' @param p Numeric vector of probabilities for \code{qcauchy_opencl} (like \code{stats::qcauchy}).
 #' @param location Location parameter.
 #' @param scale Scale parameter (must be > 0).
-#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
@@ -26,7 +26,7 @@ dcauchy_opencl <- function(
     scale = 1,
     log = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(x)) {
@@ -89,7 +89,7 @@ pcauchy_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(q)) {
@@ -162,7 +162,7 @@ qcauchy_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(p)) {
@@ -222,7 +222,7 @@ qcauchy_opencl <- function(
 
 #' @rdname cauchy_opencl
 #' @export
-rcauchy_opencl <- function(n, location = 0, scale = 1, fallback = TRUE, verbose = FALSE) {
+rcauchy_opencl <- function(n, location = 0, scale = 1, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_scalar_num(location, "location")
   .validate_scalar_num(scale, "scale", 0, Inf, open_lower = TRUE)

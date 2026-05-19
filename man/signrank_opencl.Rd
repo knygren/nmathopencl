@@ -12,7 +12,7 @@ dsignrank_opencl(
   nsize,
   log = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -22,7 +22,7 @@ psignrank_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -32,11 +32,11 @@ qsignrank_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
-rsignrank_opencl(n, nsize, fallback = TRUE, verbose = FALSE)
+rsignrank_opencl(n, nsize, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{Numeric scalar quantile (must be >= 0).}
@@ -48,7 +48,7 @@ rsignrank_opencl(n, nsize, fallback = TRUE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
@@ -70,9 +70,9 @@ for the Wilcoxon signed rank distribution.
 \section{Known OpenCL limitations}{
 
 Signed-rank kernels can fail to build on some GPU toolchains due to unresolved
-runtime allocation symbols (for example \code{R_chk_calloc}). Keep
-\code{fallback = TRUE} for production use until device-safe allocator shims are
-complete.
+runtime allocation symbols (for example \code{R_chk_calloc}). Use
+\code{fallback = TRUE} only if you need to tolerate those failures until
+device-safe shims are complete.
 }
 
 \examples{

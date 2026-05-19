@@ -14,7 +14,7 @@ df_opencl(
   ncp = 0,
   log = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -59,7 +59,7 @@ rf_opencl(n, df1, df2, fallback = TRUE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. \code{df_opencl} defaults \code{FALSE}; \code{pf_opencl}, \code{qf_opencl}, and \code{rf_opencl} default \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}).}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 

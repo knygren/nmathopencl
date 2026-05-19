@@ -9,7 +9,7 @@
 #' @param p Numeric vector of probabilities for \code{qweibull_opencl} (like \code{stats::qweibull}).
 #' @param shape Shape parameter (must be > 0).
 #' @param scale Scale parameter (must be > 0).
-#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. Defaults \code{TRUE} only for \code{qweibull_opencl} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}); density/survival/rand stay \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
@@ -26,7 +26,7 @@ dweibull_opencl <- function(
     scale = 1,
     log = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(x)) {
@@ -89,7 +89,7 @@ pweibull_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(q)) {
@@ -222,7 +222,7 @@ qweibull_opencl <- function(
 
 #' @rdname weibull_opencl
 #' @export
-rweibull_opencl <- function(n, shape, scale = 1, fallback = TRUE, verbose = FALSE) {
+rweibull_opencl <- function(n, shape, scale = 1, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_scalar_num(shape, "shape", 0, Inf, open_lower = TRUE)
   .validate_scalar_num(scale, "scale", 0, Inf, open_lower = TRUE)

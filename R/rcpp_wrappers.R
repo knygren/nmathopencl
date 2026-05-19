@@ -1,21 +1,21 @@
-﻿# -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 #  Rcpp Interface Wrappers for glmbayes
 #
-#  These functions provide the minimal, strictly positional R → C++ bridges
+#  These functions provide the minimal, strictly positional R -> C++ bridges
 #  required by the package.  Each wrapper mirrors the exact argument order
 #  expected by the corresponding C++ routine and performs no preprocessing,
 #  validation, or postprocessing.  Their sole purpose is to ensure that
-#  high‑level R code calls the correct compiled symbol with the correct
+#  high-level R code calls the correct compiled symbol with the correct
 #  signature.
 #
 #  All wrappers are internal:
 #    - They are not part of the public API.
-#    - They exist only to guarantee stable, explicit R–C++ boundaries.
+#    - They exist only to guarantee stable, explicit R-C++ boundaries.
 #    - They prevent accidental reliance on .Call() with named arguments,
 #      which R ignores, and which can silently break when signatures change.
 #
 #  Any future C++ interface changes must be reflected here to maintain
-#  positional consistency and avoid NULL → double coercion errors.
+#  positional consistency and avoid NULL -> double coercion errors.
 #
 #  Wrappers are organized by tier:
 #    Tier 2: Envelope          - EnvelopeSize, EnvelopeEval, glmb_Standardize_Model
@@ -50,7 +50,7 @@
 # =============================================================================
 #  Tier 3: Model Utilities
 #  Callers: Ex_glmb_Standardize_Model
-#  User:    Advanced users – model preparation, standardization
+#  User:    Advanced users - model preparation, standardization
 # =============================================================================
 
 #' @noRd
@@ -64,7 +64,7 @@
 #  Tier 4: OpenCL / GPU
 #  Callers: load_kernel_source, load_kernel_library, has_opencl,
 #           get_opencl_core_count, gpu_names
-#  User:    Advanced users – GPU diagnostics, kernel loading for use_opencl
+#  User:    Advanced users - GPU diagnostics, kernel loading for use_opencl
 # =============================================================================
 
 #' @noRd

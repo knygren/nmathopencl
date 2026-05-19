@@ -17,7 +17,7 @@ dnbinom_opencl(
   prob,
   log = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -39,11 +39,11 @@ qnbinom_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
-rnbinom_opencl(n, size, prob, fallback = TRUE, verbose = FALSE)
+rnbinom_opencl(n, size, prob, fallback = FALSE, verbose = FALSE)
 
 dnbinom_mu_opencl(
   x,
@@ -51,7 +51,7 @@ dnbinom_mu_opencl(
   mu,
   log = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -73,11 +73,11 @@ qnbinom_mu_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
-rnbinom_mu_opencl(n, size, mu, fallback = TRUE, verbose = FALSE)
+rnbinom_mu_opencl(n, size, mu, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{Numeric scalar quantile (must be >= 0).}
@@ -91,7 +91,7 @@ rnbinom_mu_opencl(n, size, mu, fallback = TRUE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. Density wrappers (\code{dnbinom_opencl}, \code{dnbinom_mu_opencl}) default \code{FALSE}; \code{pnbinom_opencl}/\code{pnbinom_mu_opencl} default \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}); quantiles and random wrappers default \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 

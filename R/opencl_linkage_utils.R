@@ -29,14 +29,18 @@
   }
 }
 
-# Internal helper for OpenCL call/fallback pattern
+# Internal helper for OpenCL call/fallback pattern.
+#
+# Semantics:
+# - If OpenCL runtime is unavailable (has_opencl() is FALSE), always use fallback_expr().
+# - If OpenCL is available, evaluate opencl_expr(); on failure, use fallback_expr() only when
+#   fallback is TRUE; otherwise propagate the error.
 .opencl_try_or_fallback <- function(opencl_expr, fallback_expr, fallback, verbose, fn_name) {
   if (!has_opencl()) {
-    if (fallback) {
-      if (verbose) message(sprintf("[%s] OpenCL unavailable; using CPU fallback.", fn_name))
-      return(fallback_expr())
+    if (verbose) {
+      message(sprintf("[%s] OpenCL unavailable in this session; using CPU fallback.", fn_name))
     }
-    stop("OpenCL is not available in this nmathopencl build.")
+    return(fallback_expr())
   }
 
   out <- tryCatch(opencl_expr(), error = function(e) e)

@@ -34,7 +34,7 @@ annotate their nmath dependencies with that tag.}
 \code{message()} nudging toward the recommended pattern.}
 
 \item{overwrite}{Logical; if \code{FALSE} (default) existing files in \code{dest_dir}
-are not overwritten — the copy is skipped and \code{copied = FALSE} in the
+are not overwritten --- the copy is skipped and \code{copied = FALSE} in the
 returned data frame.}
 }
 \value{
@@ -53,7 +53,7 @@ existed and \code{overwrite = FALSE}.}
 \description{
 Given one or more kernel \code{.cl} files and a library directory, determines the
 minimal set of library files required (union of all kernels' dependency
-annotations) and copies them — in dependency order — to a destination
+annotations) and copies them --- in dependency order --- to a destination
 directory.
 }
 \details{

@@ -34,8 +34,7 @@
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 #'   wrappers on this page; parallel kernels reserved.
 #' @param log \code{log} flag for \code{dnorm_opencl} (\code{stats} semantics).
-#' @param fallback Logical; if \code{TRUE}, fall back to CPU \code{stats} function
-#'   when OpenCL is unavailable or the OpenCL call fails.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
 #' @param verbose Logical; print informational fallback messages.
 #'
 #' @return Numeric vector result from the corresponding normal-family operation.
@@ -48,7 +47,7 @@ dnorm_opencl <- function(
     sd = 1,
     log = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(x)) {
@@ -115,7 +114,7 @@ pnorm_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(q)) {
@@ -214,7 +213,7 @@ qnorm_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(p)) {
@@ -282,7 +281,7 @@ rnorm_opencl <- function(
     n,
     mean = 0,
     sd = 1,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(n) || length(n) != 1L || is.na(n) || n < 0 || n != as.integer(n)) {
@@ -303,25 +302,11 @@ rnorm_opencl <- function(
 
   n <- as.integer(n)
 
-  if (!has_opencl()) {
-    if (fallback) {
-      if (verbose) message("[rnorm_opencl] OpenCL unavailable; using stats::rnorm fallback.")
-      return(stats::rnorm(n, mean = mean, sd = sd))
-    }
-    stop("OpenCL is not available in this nmathopencl build.")
-  }
-
-  out <- tryCatch(.rnorm_opencl(n, mean = mean, sd = sd, verbose = verbose), error = function(e) e)
-  if (inherits(out, "error")) {
-    if (fallback) {
-      if (verbose) {
-        message("[rnorm_opencl] OpenCL call failed; using stats::rnorm fallback.")
-        message(out$message)
-      }
-      return(stats::rnorm(n, mean = mean, sd = sd))
-    }
-    stop(out$message, call. = FALSE)
-  }
-
-  out
+  .opencl_try_or_fallback(
+    opencl_expr = function() .rnorm_opencl(n, mean = mean, sd = sd, verbose = verbose),
+    fallback_expr = function() stats::rnorm(n, mean = mean, sd = sd),
+    fallback = fallback,
+    verbose = verbose,
+    fn_name = "rnorm_opencl"
+  )
 }

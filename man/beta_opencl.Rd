@@ -14,7 +14,7 @@ dbeta_opencl(
   shape2,
   log = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -25,7 +25,7 @@ dnbeta_opencl(
   ncp,
   log = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -53,7 +53,7 @@ qbeta_opencl(
   verbose = FALSE
 )
 
-rbeta_opencl(n, shape1, shape2, fallback = TRUE, verbose = FALSE)
+rbeta_opencl(n, shape1, shape2, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{\code{(0,1)} quantiles for central/non-central densities on this page.}
@@ -67,9 +67,8 @@ rbeta_opencl(n, shape1, shape2, fallback = TRUE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{CPU when missing OpenCL/generic dispatch mismatches (\link{has_opencl}).\cr
-Do not swallow tracked kernel-program build defects ---
-\file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
+Ignored when the runtime reports no OpenCL. \strong{Density} wrappers (\code{dbeta},\code{dnbeta}) default \code{FALSE} so OpenCL errors surface (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}); \strong{distribution and quantile} (\code{pbeta},\code{qbeta}) default \code{TRUE} temporarily until the \code{pgamma_utils}-related device build issues clear. Pass \code{fallback = TRUE} on densities only if CPU recovery is acceptable. \code{rbeta_opencl} retains \code{FALSE}. See also \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 

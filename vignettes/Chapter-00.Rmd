@@ -1,10 +1,10 @@
 ---
-title: "Chapter 00: nmathopencl — Package Overview"
+title: "Chapter 00: nmathopencl --- Package Overview"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 00: nmathopencl — Package Overview}
+  %\VignetteIndexEntry{Chapter 00: nmathopencl --- Package Overview}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -23,8 +23,8 @@ core mathematical and statistical functions by porting R's internal `nmath`
 (Mathlib) library to OpenCL. It serves two distinct but related audiences:
 
 - **End users** who want to call distribution functions (`dnorm`, `pgamma`,
-  `rbinom`, …) on vectors dispatched to a GPU, with automatic CPU fallback
-  when OpenCL is unavailable.
+  `rbinom`, ...) on vectors dispatched to a GPU, with CPU execution whenever
+  OpenCL is unavailable (no GPU device / not built with OpenCL).
 - **Package developers** who need a reusable OpenCL math library to build
   their own custom GPU kernels without re-porting the underlying nmath
   functions themselves.
@@ -40,20 +40,20 @@ The package is organized in three layers, each corresponding to a set of
 vignettes:
 
 ```
-┌──────────────────────────────────────────────┐
-│  Layer 3 — Kernels  (inst/cl/src/)           │
-│  __kernel functions for the R-callable API   │
-├──────────────────────────────────────────────┤
-│  Layer 2 — nmath library  (inst/cl/nmath/)   │
-│  Ported nmath/Rmath functions as device-side │
-│  OpenCL C functions                          │
-├──────────────────────────────────────────────┤
-│  Layer 1 — Upstream shims                    │
-│  (inst/cl/R_shims/, R_ext/, System/, …)      │
-│  Type definitions, macros, and constants     │
-│  that replace C headers unavailable in       │
-│  OpenCL C                                    │
-└──────────────────────────────────────────────┘
+????????????????????????????????????????????????
+|  Layer 3 --- Kernels  (inst/cl/src/)           |
+|  __kernel functions for the R-callable API   |
+????????????????????????????????????????????????
+|  Layer 2 --- nmath library  (inst/cl/nmath/)   |
+|  Ported nmath/Rmath functions as device-side |
+|  OpenCL C functions                          |
+????????????????????????????????????????????????
+|  Layer 1 --- Upstream shims                    |
+|  (inst/cl/R_shims/, R_ext/, System/, ...)      |
+|  Type definitions, macros, and constants     |
+|  that replace C headers unavailable in       |
+|  OpenCL C                                    |
+????????????????????????????????????????????????
 ```
 
 Layer 1 is the foundation: it makes the rest of the ported code compile
@@ -81,13 +81,13 @@ structure of base R's `stats` package:
 | R file | Functions |
 |--------|-----------|
 | `normal_opencl.R` | `dnorm_opencl`, `pnorm_opencl`, `qnorm_opencl`, `rnorm_opencl` |
-| `gamma_opencl.R` | `dgamma_opencl`, `pgamma_opencl`, … |
-| `binomial_opencl.R` | `dbinom_opencl`, `pbinom_opencl`, … |
-| `poisson_opencl.R` | `dpois_opencl`, `ppois_opencl`, … |
-| `beta_opencl.R` | `dbeta_opencl`, … |
-| … | (and so on for all families) |
-| `special_opencl.R` | `lgammafn_opencl`, `gammafn_opencl`, … |
-| `math_support_opencl.R` | `fmax2_opencl`, `fmin2_opencl`, … |
+| `gamma_opencl.R` | `dgamma_opencl`, `pgamma_opencl`, ... |
+| `binomial_opencl.R` | `dbinom_opencl`, `pbinom_opencl`, ... |
+| `poisson_opencl.R` | `dpois_opencl`, `ppois_opencl`, ... |
+| `beta_opencl.R` | `dbeta_opencl`, ... |
+| ... | (and so on for all families) |
+| `special_opencl.R` | `lgammafn_opencl`, `gammafn_opencl`, ... |
+| `math_support_opencl.R` | `fmax2_opencl`, `fmin2_opencl`, ... |
 
 Every exported function follows the same calling convention: it accepts a
 scalar parameter set, dispatches to the GPU via the kernel infrastructure,
@@ -108,20 +108,20 @@ diagnose_glmbayes()
 
 `has_opencl()` returns `TRUE` only when the package was compiled with
 `-DUSE_OPENCL` **and** a functional OpenCL platform is detected at runtime.
-All exported math functions check this internally and honor their `fallback`
-argument accordingly.
+All exported wrappers branch on `has_opencl()` first; `fallback` then controls
+whether a failed OpenCL call is replaced with the CPU path (ignored when OpenCL is absent).
 
 ## Roadmap and phased release
 
 `nmathopencl` is the first package in a planned suite:
 
-1. **`nmathopencl`** (this package) — released on R-universe/CRAN first.
+1. **`nmathopencl`** (this package) --- released on R-universe/CRAN first.
    It temporarily hosts some generic OpenCL infrastructure (`openclPort`
    namespace) that will later migrate to a dedicated package.
-2. **`glmbayes`** (already on CRAN) — will be updated to import
+2. **`glmbayes`** (already on CRAN) --- will be updated to import
    `nmathopencl` for its OpenCL math dependencies, replacing its current
    bundled copy of the nmath OpenCL files.
-3. **`openclPort`** (in development) — will become a standalone CRAN
+3. **`openclPort`** (in development) --- will become a standalone CRAN
    package providing the generic OpenCL porting framework. At that point,
    the `openclPort` namespace content will migrate out of `nmathopencl`.
 

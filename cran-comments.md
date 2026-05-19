@@ -1,4 +1,4 @@
-# CRAN resubmission comments — glmbayes 0.9.3
+# CRAN resubmission comments --- glmbayes 0.9.3
 
 Thank you for the review. This is a resubmission addressing the
 requested DESCRIPTION formatting change.

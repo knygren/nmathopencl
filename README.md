@@ -4,7 +4,7 @@
 [![R-universe](https://knygren.r-universe.dev/badges/nmathopencl)](https://knygren.r-universe.dev/nmathopencl)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/knygren/nmathopencl?label=version)
 
-`nmathopencl` is an OpenCL port of R's Mathlib (`nmath`) — the C library
+`nmathopencl` is an OpenCL port of R's Mathlib (`nmath`) --- the C library
 that powers the statistical and mathematical functions in R. Its primary
 purpose is to serve as a **reusable backend library** for developers who want
 to write GPU-accelerated R code that calls nmath functions from within their
@@ -17,8 +17,8 @@ own custom OpenCL kernels.
 ### The problem: you want GPU acceleration, but your math is R's math
 
 Suppose you are writing an R package that benefits from GPU computation. Your
-algorithm is embarrassingly parallel — many independent evaluations, no
-data dependency between them — and you want to dispatch that work to an
+algorithm is embarrassingly parallel --- many independent evaluations, no
+data dependency between them --- and you want to dispatch that work to an
 OpenCL device. So far, so good.
 
 The problem arises when the computation you need to parallelize is not just
@@ -47,7 +47,7 @@ them in its own OpenCL program builds.
 The most direct illustration of how `nmathopencl` is meant to be used is
 `glmbayes`. Bayesian GLM sampling via accept-reject methods requires evaluating
 likelihood envelope functions for every posterior draw. This construction is
-embarrassingly parallel — each candidate can be evaluated independently — but
+embarrassingly parallel --- each candidate can be evaluated independently --- but
 the inner computation involves distribution functions and special functions
 from nmath: `lgamma`, `lbeta`, `pgamma`, `dnorm`, and related routines.
 
@@ -61,7 +61,7 @@ more independent envelope evaluations per draw.
 ### EnvelopeEval: the concrete case
 
 `EnvelopeEval()` in `glmbayes` is the function that evaluates the negative
-log-likelihood and its gradients across a full grid of parameter values — the
+log-likelihood and its gradients across a full grid of parameter values --- the
 step that feeds the rejection sampler. For a Bayesian binomial logit model
 with, say, fourteen predictors, this grid can contain thousands of points, and
 each point requires evaluating the binomial log-likelihood and its gradient
@@ -73,8 +73,8 @@ runtime by concatenating source layers in a fixed dependency order:
 
 1. A global configuration header (`OPENCL.cl`) that enables double-precision
    arithmetic and defines IEEE constants.
-2. The full `nmathopencl` layer — `libR_shims`, `R_ext_types`, `R_shims`,
-   `R_ext_runtime`, `R_ext_internals`, `System`, and `nmath` — loaded in that
+2. The full `nmathopencl` layer --- `libR_shims`, `R_ext_types`, `R_shims`,
+   `R_ext_runtime`, `R_ext_internals`, `System`, and `nmath` --- loaded in that
    order via `load_kernel_library(..., package = "nmathopencl")`. This makes
    functions like `lgamma`, `lbeta`, `dbinom`, and `dpois` available as
    device-side functions.
@@ -89,22 +89,22 @@ simultaneously on the GPU; the results come back as the `NegLL` vector and
 
 Without `nmathopencl`, writing `f2_f3_binomial_logit.cl` would require either
 re-implementing `lgamma`, `lbeta`, and `dbinom` from scratch inside the kernel
-or finding a compatible GPU math library — a significant engineering effort
+or finding a compatible GPU math library --- a significant engineering effort
 that would also be package-specific and non-reusable. With `nmathopencl`, the
 nmath layer is already there, annotated for dependency resolution, and
 available to any package that lists `nmathopencl` as a dependency.
 
-For a detailed walkthrough of the `EnvelopeEval` workflow — including the
+For a detailed walkthrough of the `EnvelopeEval` workflow --- including the
 full program assembly sequence, the CPU and GPU backends, and the role of the
-computed values in the rejection sampler — see:
+computed values in the rejection sampler --- see:
 
 - `?EnvelopeEval` in `glmbayes`
 - `example("EnvelopeEval")` for a runnable isolated demonstration
-- [Chapter A10 — Accelerated EnvelopeBuild Implementation using OpenCL](https://knygren.r-universe.dev/articles/glmbayes/Chapter-A10.html)
-- [Chapter 12 — Large Models: GPU Acceleration using OpenCL](https://knygren.r-universe.dev/articles/glmbayes/Chapter-12.html)
+- [Chapter A10 --- Accelerated EnvelopeBuild Implementation using OpenCL](https://knygren.r-universe.dev/articles/glmbayes/Chapter-A10.html)
+- [Chapter 12 --- Large Models: GPU Acceleration using OpenCL](https://knygren.r-universe.dev/articles/glmbayes/Chapter-12.html)
 
-This pattern — borrow the nmath layer from `nmathopencl`, write your own
-kernel logic that calls into it — is exactly what this package is designed to
+This pattern --- borrow the nmath layer from `nmathopencl`, write your own
+kernel logic that calls into it --- is exactly what this package is designed to
 enable. `glmbayes` provides the reference implementation, but the same approach
 applies to any package that needs statistical math inside an OpenCL kernel.
 
@@ -115,7 +115,7 @@ applies to any package that needs statistical math inside an OpenCL kernel.
 The assembly of an OpenCL program is done in C++ using `load_kernel_source()`
 and `load_kernel_library()` from `glmbayes`. These functions handle file
 discovery, `@provides`/`@depends` annotation parsing, and dependency-ordered
-concatenation automatically — you specify a library directory name, not
+concatenation automatically --- you specify a library directory name, not
 individual files.
 
 The full load order that `glmbayes` uses (reflected in `f2_f3_opencl`) is:
@@ -148,12 +148,12 @@ std::string all_src = OPENCL_source
   + "\n" + ksrc;
 ```
 
-The key point is steps 2–7: these are the layers from `nmathopencl`, loaded
+The key point is steps 2-7: these are the layers from `nmathopencl`, loaded
 via the `package = "nmathopencl"` argument so that `load_kernel_library`
 finds them at `system.file("cl/<subdir>", package = "nmathopencl")`. Together
 they satisfy all of nmath's type, macro, and runtime dependencies.
 Step 8 is entirely your own code. Inside `my_kernel.cl` you can call any
-nmath function — `lgamma`, `lbeta`, `pbeta`, `dnorm`, `rgamma`, and so on —
+nmath function --- `lgamma`, `lbeta`, `pbeta`, `dnorm`, `rgamma`, and so on ---
 exactly as you would in regular C, because the nmath layer above has already
 defined them as inline OpenCL device functions.
 
@@ -163,8 +163,8 @@ subdirectory are concatenated in the correct dependency order. You do not need
 to enumerate individual files.
 
 The result is that you can write kernel logic that looks essentially identical
-to what you would write in R — using the same functions, the same parameter
-conventions, the same numeric behavior — but executes on the GPU.
+to what you would write in R --- using the same functions, the same parameter
+conventions, the same numeric behavior --- but executes on the GPU.
 
 ---
 
@@ -176,14 +176,14 @@ these components:
 
 ```
 inst/cl/
-  R_ext_types/       — type definitions (SEXP, Rboolean, etc.)
-  R_ext_runtime/     — memory, error, and I/O interface shims
-  R_ext_internals/   — internal R extension definitions
-  libR_shims/        — host runtime compatibility shims (R_pow, R_pow_di, etc.)
-  R_shims/           — additional R API shims
-  System/            — system-level OpenCL prelude
-  nmath/             — the ported Mathlib sources (~137 .cl files)
-  src/               — kernel entry points for the included R wrappers
+  R_ext_types/       --- type definitions (SEXP, Rboolean, etc.)
+  R_ext_runtime/     --- memory, error, and I/O interface shims
+  R_ext_internals/   --- internal R extension definitions
+  libR_shims/        --- host runtime compatibility shims (R_pow, R_pow_di, etc.)
+  R_shims/           --- additional R API shims
+  System/            --- system-level OpenCL prelude
+  nmath/             --- the ported Mathlib sources (~137 .cl files)
+  src/               --- kernel entry points for the included R wrappers
 ```
 
 The `nmath/` directory contains the translated sources for the following
@@ -253,13 +253,13 @@ These wrappers serve two purposes. First, they are useful for **testing and
 validation**: they let you verify that a particular ported function behaves
 correctly before embedding it inside a larger kernel. Second, they provide a
 convenient interface for cases where the entire bottleneck really is a large
-batch of identical distribution evaluations — though as noted above, this is
+batch of identical distribution evaluations --- though as noted above, this is
 not the primary use case the package was designed around.
 
 Each wrapper accepts `fallback = TRUE` (default), which silently falls back
 to the corresponding `stats` function if OpenCL is unavailable or fails. This
 means packages that use these wrappers work correctly on machines without a
-GPU — they simply lose the acceleration. Set `fallback = FALSE` if you need
+GPU --- they simply lose the acceleration. Set `fallback = FALSE` if you need
 hard failures rather than silent fallback.
 
 To check OpenCL availability:
@@ -287,8 +287,8 @@ none of these. Making the port work required:
   environment. The ported shim files replace them with OpenCL-compatible
   equivalents.
 
-- **Runtime symbol replacement.** Host-only R runtime symbols —
-  `R_pow`, `R_pow_di`, `R_CheckUserInterrupt`, and others — are replaced by
+- **Runtime symbol replacement.** Host-only R runtime symbols ---
+  `R_pow`, `R_pow_di`, `R_CheckUserInterrupt`, and others --- are replaced by
   inline device implementations in the `libR_shims` layer.
 
 - **Linkage model differences.** OpenCL C's compilation model differs from
@@ -300,8 +300,8 @@ none of these. Making the port work required:
 
 ## Performance: first call versus subsequent calls
 
-When an OpenCL program is first built — whether from `nmathopencl`'s own
-wrappers or from a downstream package like `glmbayes` — the driver performs a
+When an OpenCL program is first built --- whether from `nmathopencl`'s own
+wrappers or from a downstream package like `glmbayes` --- the driver performs a
 JIT compilation of the program source for your specific GPU hardware. This step
 can take several seconds for programs that include substantial portions of the
 nmath library. It happens once per program, per session.
@@ -363,7 +363,7 @@ which will reduce first-call compilation time.
 
 ### R-universe and CRAN-style repos
 
-Browsing [the package dashboard on **R-universe**](https://knygren.r-universe.dev/nmathopencl) lists **binaries**, **DESCRIPTION**, **exported objects**, rendered **manual** pages, **vignettes**, and dependency graphs—useful both for users and for ongoing development visibility.
+Browsing [the package dashboard on **R-universe**](https://knygren.r-universe.dev/nmathopencl) lists **binaries**, **DESCRIPTION**, **exported objects**, rendered **manual** pages, **vignettes**, and dependency graphs---useful both for users and for ongoing development visibility.
 
 Pick your mirror order (prefer R-universe first if you rely on nightly builds):
 
@@ -432,13 +432,13 @@ about the minimal OpenCL program needed for any given model.
 | `f2_f3_binomial_cloglog.cl` | `dbinom_raw` |
 | `f2_f3_gamma.cl` | `dgamma` |
 | `f2_f3_gaussian.cl` | `dnorm4` |
-| `f2_f3_poisson.cl` | `lgamma` (OpenCL built-in — no nmath file required) |
+| `f2_f3_poisson.cl` | `lgamma` (OpenCL built-in --- no nmath file required) |
 
 The Poisson kernel is the simplest case: it evaluates the log-likelihood
 entirely inline as `-mu + y*log(mu) - lgamma(y+1)`, where `lgamma` is a
 standard OpenCL double-precision built-in. It pulls in no ported nmath files.
 
-### Complete set of nmath `.cl` files — including transitive dependencies
+### Complete set of nmath `.cl` files --- including transitive dependencies
 
 The `@all_depends` metadata embedded in each `.cl` file records the full
 transitive closure of its dependencies. Taking the union across `dbinom.cl`,
@@ -447,30 +447,30 @@ all six kernels.
 
 | CPU source (`.c`) | GPU port (`.cl`) | Provides / Description | In `glmbayes/src/nmath/`? |
 |---|---|---|---|
-| `dbinom.c` | `dbinom.cl` | `dbinom_raw`, `dbinom` — binomial density | ✓ |
-| `pnorm.c` | `pnorm.cl` | `pnorm5`, `pnorm_both` — normal CDF | ✓ |
-| `dnorm.c` | `dnorm.cl` | `dnorm4` — normal density | ✓ |
-| `dgamma.c` | `dgamma.cl` | `dgamma` — gamma density | ✓ |
-| `dpois.c` | `dpois.cl` | `dpois_raw`, `dpois` — Poisson density (called by `dgamma`) | ✓ |
-| `bd0.c` | `bd0.cl` | `bd0`, `ebd0` — binomial deviance (called by `dbinom`, `dpois`) | ✓ |
-| `stirlerr.c` | `stirlerr.cl` | `stirlerr` — Stirling error term; dispatches to the two fragments below | ✓ |
-| `stirlerr.c` (split) | `stirlerr_cycle_free.cl` | `stirlerr_cycle_free` — table-lookup path for small arguments | ❌ split artifact |
-| `stirlerr.c` (split) | `stirlerr_cycle_dependent.cl` | `stirlerr_cycle_dependent` — series path for large arguments | ❌ split artifact |
-| `pgamma.c` (extracted) | `pgamma_utils.cl` | `log1pmx`, `lgamma1p` — utilities called by `bd0` | ❌ split artifact |
-| `lgamma.c` | `lgamma.cl` | `lgammafn_sign`, `lgammafn` — log-gamma function | ✓ |
-| `gamma.c` | `gamma.cl` | `gammafn` — gamma function | ✓ |
-| `lgammacor.c` | `lgammacor.cl` | `lgammacor` — series correction for large arguments | ✓ |
-| `chebyshev.c` | `chebyshev.cl` | `chebyshev_init`, `chebyshev_eval` — called by `lgammacor` | ✓ |
-| `cospi.c` | `cospi.cl` | `cospi`, `sinpi`, `tanpi` — `sinpi` called by `gammafn` for the negative-argument reflection formula | ✓ |
-| `fmax2.c` | `fmax2.cl` | `fmax2` — max of two doubles, called by `gammalims` | ✓ |
-| `gammalims.c` | `gammalims.cl` | `gammalims` — gamma function overflow/underflow bounds | ✓ |
+| `dbinom.c` | `dbinom.cl` | `dbinom_raw`, `dbinom` --- binomial density | ? |
+| `pnorm.c` | `pnorm.cl` | `pnorm5`, `pnorm_both` --- normal CDF | ? |
+| `dnorm.c` | `dnorm.cl` | `dnorm4` --- normal density | ? |
+| `dgamma.c` | `dgamma.cl` | `dgamma` --- gamma density | ? |
+| `dpois.c` | `dpois.cl` | `dpois_raw`, `dpois` --- Poisson density (called by `dgamma`) | ? |
+| `bd0.c` | `bd0.cl` | `bd0`, `ebd0` --- binomial deviance (called by `dbinom`, `dpois`) | ? |
+| `stirlerr.c` | `stirlerr.cl` | `stirlerr` --- Stirling error term; dispatches to the two fragments below | ? |
+| `stirlerr.c` (split) | `stirlerr_cycle_free.cl` | `stirlerr_cycle_free` --- table-lookup path for small arguments | ? split artifact |
+| `stirlerr.c` (split) | `stirlerr_cycle_dependent.cl` | `stirlerr_cycle_dependent` --- series path for large arguments | ? split artifact |
+| `pgamma.c` (extracted) | `pgamma_utils.cl` | `log1pmx`, `lgamma1p` --- utilities called by `bd0` | ? split artifact |
+| `lgamma.c` | `lgamma.cl` | `lgammafn_sign`, `lgammafn` --- log-gamma function | ? |
+| `gamma.c` | `gamma.cl` | `gammafn` --- gamma function | ? |
+| `lgammacor.c` | `lgammacor.cl` | `lgammacor` --- series correction for large arguments | ? |
+| `chebyshev.c` | `chebyshev.cl` | `chebyshev_init`, `chebyshev_eval` --- called by `lgammacor` | ? |
+| `cospi.c` | `cospi.cl` | `cospi`, `sinpi`, `tanpi` --- `sinpi` called by `gammafn` for the negative-argument reflection formula | ? |
+| `fmax2.c` | `fmax2.cl` | `fmax2` --- max of two doubles, called by `gammalims` | ? |
+| `gammalims.c` | `gammalims.cl` | `gammalims` --- gamma function overflow/underflow bounds | ? |
 | `refactored.h` | `refactored.cl` | Forward declarations for cycle-broken functions | N/A (header) |
 
 ### Key observations
 
 **`pnorm.cl` and `dnorm.cl` are self-contained.** Their only dependencies are
 the `nmath.cl` infrastructure shim and `dpq`-style macros. No additional math
-function files are pulled in — the algorithms (Cody's rational approximation for
+function files are pulled in --- the algorithms (Cody's rational approximation for
 `pnorm`, the standard Gaussian density formula for `dnorm`) close entirely on
 primitive arithmetic.
 
@@ -496,6 +496,6 @@ the simplest kernel and the one with zero nmath dependency footprint.
 
 ## References
 
-Nygren, K.N. and Nygren, Å. (2006), Likelihood Subgradient Densities. *Journal
-of the American Statistical Association*, 101, 1144–1156.
+Nygren, K.N. and Nygren, A. (2006), Likelihood Subgradient Densities. *Journal
+of the American Statistical Association*, 101, 1144-1156.
 DOI: [10.1198/016214506000000357](https://doi.org/10.1198/016214506000000357)

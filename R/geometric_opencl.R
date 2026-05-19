@@ -8,7 +8,7 @@
 #' @param q Numeric vector of quantiles for \code{pgeom_opencl}; recycled like \code{stats::pgeom}.
 #' @param p Numeric vector of probabilities for \code{qgeom_opencl} (like \code{stats::qgeom}).
 #' @param prob Probability of success in \code{[0, 1]}.
-#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. \code{dgeom_opencl} defaults \code{FALSE}. \code{pgeom_opencl}, \code{qgeom_opencl}, and \code{rgeom_opencl} default \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
@@ -24,7 +24,7 @@ dgeom_opencl <- function(
     prob,
     log = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(x)) {
@@ -82,7 +82,7 @@ pgeom_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(q)) {
@@ -142,7 +142,7 @@ qgeom_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(p)) {
@@ -198,7 +198,7 @@ qgeom_opencl <- function(
 
 #' @rdname geometric_opencl
 #' @export
-rgeom_opencl <- function(n, prob, fallback = TRUE, verbose = FALSE) {
+rgeom_opencl <- function(n, prob, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_scalar_num(prob, "prob", 0, 1)
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")

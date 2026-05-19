@@ -8,14 +8,14 @@
 #' @param a,b Parameters for \code{beta_opencl} / \code{lbeta_opencl} (recycled together).
 #' @param n,k Arguments for \code{choose_opencl} / \code{lchoose_opencl}, like
 #'   \code{base::choose(n, k)} (recycled together).
-#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #'
 #' @return Numeric vector of recycled common length.
 #' @example inst/examples/Ex_special_opencl.R
 #' @rdname special_opencl
 #' @export
-gammafn_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
+gammafn_opencl <- function(x, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
   if (length(x) == 0L) return(numeric(0))
@@ -29,7 +29,7 @@ gammafn_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname special_opencl
 #' @export
-lgammafn_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
+lgammafn_opencl <- function(x, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
   if (length(x) == 0L) return(numeric(0))
@@ -43,7 +43,7 @@ lgammafn_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname special_opencl
 #' @export
-digamma_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
+digamma_opencl <- function(x, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
   if (length(x) == 0L) return(numeric(0))
@@ -57,7 +57,7 @@ digamma_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname special_opencl
 #' @export
-trigamma_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
+trigamma_opencl <- function(x, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
   if (length(x) == 0L) return(numeric(0))
@@ -71,7 +71,7 @@ trigamma_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname special_opencl
 #' @export
-tetragamma_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
+tetragamma_opencl <- function(x, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
   if (length(x) == 0L) return(numeric(0))
@@ -85,7 +85,7 @@ tetragamma_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname special_opencl
 #' @export
-pentagamma_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
+pentagamma_opencl <- function(x, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
   if (length(x) == 0L) return(numeric(0))
@@ -99,7 +99,7 @@ pentagamma_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname special_opencl
 #' @export
-psigamma_opencl <- function(x, deriv, fallback = TRUE, verbose = FALSE) {
+psigamma_opencl <- function(x, deriv, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   if (!is.numeric(deriv)) stop("`deriv` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
@@ -117,7 +117,7 @@ psigamma_opencl <- function(x, deriv, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname special_opencl
 #' @export
-beta_opencl <- function(a, b, fallback = TRUE, verbose = FALSE) {
+beta_opencl <- function(a, b, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(a)) stop("`a` must be numeric.")
   if (!is.numeric(b)) stop("`b` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
@@ -135,7 +135,7 @@ beta_opencl <- function(a, b, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname special_opencl
 #' @export
-lbeta_opencl <- function(a, b, fallback = TRUE, verbose = FALSE) {
+lbeta_opencl <- function(a, b, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(a)) stop("`a` must be numeric.")
   if (!is.numeric(b)) stop("`b` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
@@ -153,7 +153,7 @@ lbeta_opencl <- function(a, b, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname special_opencl
 #' @export
-choose_opencl <- function(n, k, fallback = TRUE, verbose = FALSE) {
+choose_opencl <- function(n, k, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(n)) stop("`n` must be numeric.")
   if (!is.numeric(k)) stop("`k` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
@@ -171,7 +171,7 @@ choose_opencl <- function(n, k, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname special_opencl
 #' @export
-lchoose_opencl <- function(n, k, fallback = TRUE, verbose = FALSE) {
+lchoose_opencl <- function(n, k, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(n)) stop("`n` must be numeric.")
   if (!is.numeric(k)) stop("`k` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")

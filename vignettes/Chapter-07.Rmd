@@ -61,26 +61,26 @@ void opencl_dbl_scalar_kernel_runner(
 The runner performs the complete OpenCL lifecycle for a single kernel
 invocation:
 
-1. **Platform and device selection** — queries `clGetPlatformIDs` and
+1. **Platform and device selection** --- queries `clGetPlatformIDs` and
    `clGetDeviceIDs` to select the first available GPU device.
-2. **Context and command queue** — creates a `cl_context` and a
+2. **Context and command queue** --- creates a `cl_context` and a
    `cl_command_queue` for the selected device.
-3. **Program build** — calls `clCreateProgramWithSource` followed by
+3. **Program build** --- calls `clCreateProgramWithSource` followed by
    `clBuildProgram`. On failure, it retrieves the build log via
    `CL_PROGRAM_BUILD_LOG` and throws a `std::runtime_error` containing the
    compiler output.
-4. **Kernel creation** — calls `clCreateKernel` with the supplied
+4. **Kernel creation** --- calls `clCreateKernel` with the supplied
    `kernel_name`.
-5. **Output buffer** — allocates a `CL_MEM_WRITE_ONLY` device buffer of
+5. **Output buffer** --- allocates a `CL_MEM_WRITE_ONLY` device buffer of
    size `n_out * sizeof(double)`.
-6. **Argument setting** — sets each element of `dargs` as a scalar kernel
+6. **Argument setting** --- sets each element of `dargs` as a scalar kernel
    argument (`clSetKernelArg`) in index order, then sets the output buffer
    as the next argument, and finally `n_out` as the last integer argument.
-7. **Execution** — enqueues the kernel with a 1-D global work size of
+7. **Execution** --- enqueues the kernel with a 1-D global work size of
    `n_out` via `clEnqueueNDRangeKernel`.
-8. **Result retrieval** — blocks on `clFinish` then reads the output buffer
+8. **Result retrieval** --- blocks on `clFinish` then reads the output buffer
    back to host memory via `clEnqueueReadBuffer`.
-9. **Resource cleanup** — releases all OpenCL objects in reverse order of
+9. **Resource cleanup** --- releases all OpenCL objects in reverse order of
    creation.
 
 Error checking is performed after every OpenCL API call. Any non-`CL_SUCCESS`
@@ -167,7 +167,7 @@ Returns a plain-English diagnostic hint for the most actionable error codes:
 
 | Status | Hint |
 |--------|------|
-| `CL_OUT_OF_RESOURCES` | Device/runtime resource limit exceeded (watchdog, register pressure, …) |
+| `CL_OUT_OF_RESOURCES` | Device/runtime resource limit exceeded (watchdog, register pressure, ...) |
 | `CL_OUT_OF_HOST_MEMORY` | Host memory allocation failed |
 | `CL_MEM_OBJECT_ALLOCATION_FAILURE` | Device memory allocation failed |
 | `CL_BUILD_PROGRAM_FAILURE` | Kernel compilation failed; inspect build log |
@@ -221,7 +221,7 @@ immediately after a `clCreateContext` failure.
 
 ## Other utilities in `openclPort`
 
-### Rcpp → `std::vector` conversion
+### Rcpp -> `std::vector` conversion
 
 ```cpp
 std::vector<double> openclPort::flattenMatrix(const Rcpp::NumericMatrix& mat);
@@ -242,13 +242,13 @@ bool                  openclPort::has_opencl();
 int                   openclPort::get_opencl_core_count();
 ```
 
-- `gpu_names()` — returns the `CL_DEVICE_NAME` of every GPU device found
+- `gpu_names()` --- returns the `CL_DEVICE_NAME` of every GPU device found
   by iterating over all platforms and devices.
-- `detect_num_gpus_internal()` — returns the count of GPU devices;
+- `detect_num_gpus_internal()` --- returns the count of GPU devices;
   used by envelope construction routines to decide whether to use OpenCL.
-- `has_opencl()` — returns `true` if compiled with `USE_OPENCL` and at
+- `has_opencl()` --- returns `true` if compiled with `USE_OPENCL` and at
   least one GPU device is found at runtime.
-- `get_opencl_core_count()` — queries `CL_DEVICE_MAX_COMPUTE_UNITS` on
+- `get_opencl_core_count()` --- queries `CL_DEVICE_MAX_COMPUTE_UNITS` on
   the first GPU and returns the core count.
 
 ### OpenCL build configuration

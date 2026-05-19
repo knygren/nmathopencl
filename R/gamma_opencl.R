@@ -17,9 +17,8 @@
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for
 #'   \code{pgamma_opencl}/\code{qgamma_opencl}; parallel dispatch reserved.
-#' @param fallback CPU when GPU dispatch/OpenCL lacks (\link{has_opencl}).\cr
-#' Prefer fixing kernel builds over masking ---
-#' \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
+#' Ignored when the runtime reports no OpenCL. \code{dgamma_opencl} defaults \code{FALSE}; distribution/quantile wrappers follow \file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}. Pass explicit \code{fallback} where needed.
 #' @param verbose Logical; print informational fallback messages.
 #'
 #' @details
@@ -49,7 +48,7 @@ dgamma_opencl <- function(
     scale = 1,
     log = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(x)) {
@@ -113,7 +112,7 @@ pgamma_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(q)) {
@@ -291,7 +290,7 @@ qgamma_opencl <- function(
 
 #' @rdname gamma_opencl
 #' @export
-rgamma_opencl <- function(n, shape, scale = 1, fallback = TRUE, verbose = FALSE) {
+rgamma_opencl <- function(n, shape, scale = 1, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_scalar_num(shape, "shape", 0, Inf, open_lower = TRUE)
   .validate_scalar_num(scale, "scale", 0, Inf, open_lower = TRUE)

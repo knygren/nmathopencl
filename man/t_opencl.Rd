@@ -13,7 +13,7 @@ dt_opencl(
   ncp = 0,
   log = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -53,8 +53,8 @@ rt_opencl(n, df, fallback = TRUE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{CPU on OpenCL/dispatch failures; see tracker before relying on masking.\cr
-See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
+Ignored when the runtime reports no OpenCL. \code{dt_opencl} defaults \code{FALSE}; \code{pt_opencl}, \code{qt_opencl}, and \code{rt_opencl} default \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}).}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 

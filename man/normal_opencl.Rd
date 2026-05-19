@@ -13,7 +13,7 @@ dnorm_opencl(
   sd = 1,
   log = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -24,7 +24,7 @@ pnorm_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -35,11 +35,11 @@ qnorm_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
-rnorm_opencl(n, mean = 0, sd = 1, fallback = TRUE, verbose = FALSE)
+rnorm_opencl(n, mean = 0, sd = 1, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{Numeric vector of quantiles.}
@@ -58,8 +58,7 @@ function. The GPU path runs only when every recycled value is strictly positive 
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU \code{stats} function
-when OpenCL is unavailable or the OpenCL call fails.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
 
 \item{verbose}{Logical; print informational fallback messages.}
 

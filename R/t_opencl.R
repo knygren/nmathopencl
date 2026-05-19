@@ -13,8 +13,8 @@
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 #'   wrappers on this page; parallel kernels reserved.
-#' @param fallback CPU on OpenCL/dispatch failures; see tracker before relying on masking.\cr
-#'   See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
+#' Ignored when the runtime reports no OpenCL. \code{dt_opencl} defaults \code{FALSE}; \code{pt_opencl}, \code{qt_opencl}, and \code{rt_opencl} default \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}).
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param log \code{log} flag for densities (\code{stats} \emph{d}-family semantics).
 #'
@@ -34,7 +34,7 @@ dt_opencl <- function(
     ncp = 0,
     log = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(x)) {

@@ -323,10 +323,10 @@
 #' OpenCL execution into two layers: a \emph{kernel runner} and a
 #' \emph{kernel wrapper}. This is the design used throughout the
 #' \pkg{glmbayes} implementation and provides a clean, modular structure for
-#' preparing inputs, launching OpenCL kernels, and post‑processing results.
+#' preparing inputs, launching OpenCL kernels, and post-processing results.
 #'
 #' \subsection{Kernel Runners}{
-#' A kernel runner is a low‑level C++ function that interacts directly with
+#' A kernel runner is a low-level C++ function that interacts directly with
 #' the OpenCL runtime. It is responsible for:
 #'
 #' \itemize{
@@ -340,7 +340,7 @@
 #'   \item releasing all OpenCL resources.
 #' }
 #'
-#' Kernel runners contain \emph{no R‑specific logic}. They operate entirely on
+#' Kernel runners contain \emph{no R-specific logic}. They operate entirely on
 #' flattened numeric arrays and primitive types. This makes them reusable
 #' across many kernels and easy to test in isolation.
 #'
@@ -350,9 +350,9 @@
 #' }
 #'
 #' \subsection{Kernel Wrappers}{
-#' A kernel wrapper is an R‑facing function (typically exported via
+#' A kernel wrapper is an R-facing function (typically exported via
 #' \code{[[Rcpp::export]]}) that prepares inputs for the runner and performs
-#' any necessary post‑processing. A wrapper is responsible for:
+#' any necessary post-processing. A wrapper is responsible for:
 #'
 #' \itemize{
 #'   \item validating R inputs and extracting dimensions,
@@ -360,14 +360,14 @@
 #'   \item selecting the appropriate kernel name and kernel file based on
 #'         model family and link function,
 #'   \item assembling the full OpenCL program source by concatenating the
-#'         core OpenCL header, library sources, and the model‑specific kernel,
+#'         core OpenCL header, library sources, and the model-specific kernel,
 #'   \item invoking the kernel runner with the prepared inputs, and
-#'   \item reshaping or converting the runner’s outputs into R‑friendly
+#'   \item reshaping or converting the runner's outputs into R-friendly
 #'         structures (e.g., \code{NumericVector}, \code{arma::mat}).
 #' }
 #'
-#' Kernel wrappers contain all R‑level logic and none of the OpenCL plumbing.
-#' They provide a stable, user‑facing API while delegating GPU execution to
+#' Kernel wrappers contain all R-level logic and none of the OpenCL plumbing.
+#' They provide a stable, user-facing API while delegating GPU execution to
 #' the runner.
 #'
 #' In \pkg{glmbayes}, the function \code{f2_f3_opencl()} is the kernel wrapper
@@ -377,14 +377,14 @@
 #' }
 #'
 #' \subsection{Why Separate Runners and Wrappers?}{
-#' This two‑layer design is recommended because it:
+#' This two-layer design is recommended because it:
 #'
 #' \itemize{
-#'   \item isolates OpenCL resource management from R‑level logic,
+#'   \item isolates OpenCL resource management from R-level logic,
 #'   \item makes kernel runners reusable across many models,
 #'   \item simplifies debugging by separating data preparation from GPU
 #'         execution,
-#'   \item allows wrappers to evolve independently of the low‑level runner,
+#'   \item allows wrappers to evolve independently of the low-level runner,
 #'   \item enables consistent program assembly across kernels, and
 #'   \item keeps exported R functions clean, readable, and easy to maintain.
 #' }

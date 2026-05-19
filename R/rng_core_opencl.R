@@ -4,14 +4,14 @@
 #'
 #' @param n Number of observations. Non-negative integer scalar.
 #' @param dn Positive upper bound used by \code{r_unif_index_opencl}.
-#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #'
 #' @return Numeric vector of length \code{n}.
 #' @example inst/examples/Ex_rng_core_opencl.R
 #' @rdname rng_core_opencl
 #' @export
-norm_rand_opencl <- function(n, fallback = TRUE, verbose = FALSE) {
+norm_rand_opencl <- function(n, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n); .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
   .opencl_try_or_fallback(
     opencl_expr = function() .norm_rand_opencl(n, verbose = verbose),
@@ -22,7 +22,7 @@ norm_rand_opencl <- function(n, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname rng_core_opencl
 #' @export
-unif_rand_opencl <- function(n, fallback = TRUE, verbose = FALSE) {
+unif_rand_opencl <- function(n, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n); .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
   .opencl_try_or_fallback(
     opencl_expr = function() .unif_rand_opencl(n, verbose = verbose),
@@ -33,7 +33,7 @@ unif_rand_opencl <- function(n, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname rng_core_opencl
 #' @export
-r_unif_index_opencl <- function(n, dn, fallback = TRUE, verbose = FALSE) {
+r_unif_index_opencl <- function(n, dn, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_scalar_num(dn, "dn", lower = 0, upper = Inf, open_lower = TRUE)
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
@@ -46,7 +46,7 @@ r_unif_index_opencl <- function(n, dn, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname rng_core_opencl
 #' @export
-exp_rand_opencl <- function(n, fallback = TRUE, verbose = FALSE) {
+exp_rand_opencl <- function(n, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n); .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
   .opencl_try_or_fallback(
     opencl_expr = function() .exp_rand_opencl(n, verbose = verbose),

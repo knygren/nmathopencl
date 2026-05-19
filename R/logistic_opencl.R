@@ -9,8 +9,8 @@
 #' @param p Numeric vector of probabilities for \code{qlogis_opencl} (like \code{stats::qlogis}).
 #' @param location Location parameter.
 #' @param scale Scale parameter (must be > 0).
-#' @param fallback CPU on OpenCL/dispatch failures; see tracker before relying on masking.\cr
-#' See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
+#' Ignored when the runtime reports no OpenCL. See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
 #' @param opencl_parallel Dispatch hint (\code{TRUE}, \code{FALSE}, \code{NA}) for \code{plogis_opencl}
@@ -32,7 +32,7 @@ dlogis_opencl <- function(
     scale = 1,
     log = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(x)) {
@@ -95,7 +95,7 @@ plogis_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(q)) {
@@ -168,7 +168,7 @@ qlogis_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(p)) {
@@ -228,7 +228,7 @@ qlogis_opencl <- function(
 
 #' @rdname logistic_opencl
 #' @export
-rlogis_opencl <- function(n, location = 0, scale = 1, fallback = TRUE, verbose = FALSE) {
+rlogis_opencl <- function(n, location = 0, scale = 1, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_scalar_num(location, "location")
   .validate_scalar_num(scale, "scale", 0, Inf, open_lower = TRUE)

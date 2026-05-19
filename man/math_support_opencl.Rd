@@ -12,28 +12,28 @@
 \alias{ftrunc_opencl}
 \title{Math Support Functions (OpenCL)}
 \usage{
-imax2_opencl(x, y, fallback = TRUE, verbose = FALSE)
+imax2_opencl(x, y, fallback = FALSE, verbose = FALSE)
 
-imin2_opencl(x, y, fallback = TRUE, verbose = FALSE)
+imin2_opencl(x, y, fallback = FALSE, verbose = FALSE)
 
-fmax2_opencl(x, y, fallback = TRUE, verbose = FALSE)
+fmax2_opencl(x, y, fallback = FALSE, verbose = FALSE)
 
-fmin2_opencl(x, y, fallback = TRUE, verbose = FALSE)
+fmin2_opencl(x, y, fallback = FALSE, verbose = FALSE)
 
-sign_opencl(x, fallback = TRUE, verbose = FALSE)
+sign_opencl(x, fallback = FALSE, verbose = FALSE)
 
-fprec_opencl(x, digits, fallback = TRUE, verbose = FALSE)
+fprec_opencl(x, digits, fallback = FALSE, verbose = FALSE)
 
-fround_opencl(x, digits, fallback = TRUE, verbose = FALSE)
+fround_opencl(x, digits, fallback = FALSE, verbose = FALSE)
 
-fsign_opencl(x, y, fallback = TRUE, verbose = FALSE)
+fsign_opencl(x, y, fallback = FALSE, verbose = FALSE)
 
-ftrunc_opencl(x, fallback = TRUE, verbose = FALSE)
+ftrunc_opencl(x, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x, y}{Numeric vectors recycled together (where both appear).}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 

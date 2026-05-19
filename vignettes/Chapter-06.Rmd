@@ -1,10 +1,10 @@
 ---
-title: "Chapter 06: Kernel Loading — load_kernel_source and load_kernel_library"
+title: "Chapter 06: Kernel Loading --- load_kernel_source and load_kernel_library"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 06: Kernel Loading — load_kernel_source and load_kernel_library}
+  %\VignetteIndexEntry{Chapter 06: Kernel Loading --- load_kernel_source and load_kernel_library}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -197,7 +197,7 @@ program <- paste(nmath_sub, my_kernel, sep = "\n")
 This is exactly the pattern used by `f2_f3_opencl()` in the `ex_glmbayes`
 example (see Chapter 08).
 
-## Dependency index — faster, kernel-specific loading
+## Dependency index --- faster, kernel-specific loading
 
 `load_kernel_library()` always sorts and loads **all** files in the
 subdirectory. For a large library like `nmath` (137 files) this is
@@ -208,12 +208,12 @@ kernel.
 curated library subdirectory. The index encodes the full transitive dependency
 map and the global load order, enabling two important optimisations:
 
-1. **`load_library_for_kernel()` (R)** — loads only the files required by one
+1. **`load_library_for_kernel()` (R)** --- loads only the files required by one
    specific kernel, with no sort at runtime.
-2. **`load_library_for_kernel()` (C++)** — the same function implemented
+2. **`load_library_for_kernel()` (C++)** --- the same function implemented
    entirely in C++, suitable for use inside Rcpp kernel wrappers.
 
-### Building the index — `write_kernel_dependency_index()`
+### Building the index --- `write_kernel_dependency_index()`
 
 ```{r, eval = FALSE}
 write_kernel_dependency_index(library_dir, verbose = TRUE)
@@ -249,7 +249,7 @@ nmath_dir <- system.file("cl", "nmath", package = "nmathopencl")
 write_kernel_dependency_index(nmath_dir, verbose = TRUE)
 ```
 
-### Loading with the index — `load_library_for_kernel()` (R)
+### Loading with the index --- `load_library_for_kernel()` (R)
 
 ```{r, eval = FALSE}
 load_library_for_kernel(kernel_path, library_dir,
@@ -272,7 +272,7 @@ nmath_dir <- system.file("cl", "nmath", package = "nmathopencl")
 # Load the index once
 idx <- readRDS(file.path(nmath_dir, "kernel_dependency_index.rds"))
 
-# Re-use across multiple kernels — only the subset for each kernel is read
+# Re-use across multiple kernels --- only the subset for each kernel is read
 src_gaussian <- load_library_for_kernel(
     kernel_path = system.file("cl", "ex_glmbayes_src",
                               "f2_f3_gaussian.cl", package = "nmathopencl"),
@@ -296,7 +296,7 @@ throughout the library:
 // @depends_nmath: dbinom, pnorm, dnorm
 ```
 
-### Extracting a subset — `extract_library_subset()`
+### Extracting a subset --- `extract_library_subset()`
 
 ```{r, eval = FALSE}
 extract_library_subset(kernel_paths, library_dir, dest_dir,
@@ -331,7 +331,7 @@ The result includes a row for `kernel_dependency_index.rds` and
 `kernel_dependency_index.tsv` so the extracted subset is immediately usable
 by both R and C++.
 
-### C++ equivalent — `openclPort::load_library_for_kernel()`
+### C++ equivalent --- `openclPort::load_library_for_kernel()`
 
 For use inside Rcpp kernel wrappers (where calling back into R is not
 permitted), `kernel_loader.cpp` provides a C++ implementation with the

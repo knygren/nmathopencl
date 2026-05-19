@@ -13,7 +13,7 @@ dunif_opencl(
   max = 1,
   log = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -24,7 +24,7 @@ punif_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -35,11 +35,11 @@ qunif_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
-runif_opencl(n, min = 0, max = 1, fallback = TRUE, verbose = FALSE)
+runif_opencl(n, min = 0, max = 1, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{Numeric scalar quantile for \code{dunif_opencl}.}
@@ -53,8 +53,8 @@ runif_opencl(n, min = 0, max = 1, fallback = TRUE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{CPU on OpenCL/dispatch failures; see tracker before relying on masking.\cr
-See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
+Ignored when the runtime reports no OpenCL. See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.}
 
 \item{verbose}{Logical; print informational fallback messages.}
 

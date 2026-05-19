@@ -1,10 +1,10 @@
 ---
-title: "Chapter 02: Upstream Shims — Porting C Headers to OpenCL C"
+title: "Chapter 02: Upstream Shims --- Porting C Headers to OpenCL C"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 02: Upstream Shims — Porting C Headers to OpenCL C}
+  %\VignetteIndexEntry{Chapter 02: Upstream Shims --- Porting C Headers to OpenCL C}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -37,49 +37,49 @@ GPU program string.
 
 ```
 inst/cl/
-├── System/
-│   └── stdint.cl          # Portable integer types (<stdint.h> replacement)
-├── R_shims/
-│   ├── Rconfig.cl         # Platform capabilities (HAVE_*, IEEE_754)
-│   ├── Rdefines.cl        # R-level macros (LOGICAL, INTEGER, ...)
-│   └── Rinternals.cl      # Core R type stubs (SEXP, Rboolean, SEXPREC)
-├── R_ext/                 # Complete R_ext/ header family
-│   ├── Arith.cl           # R_FINITE, ISNAN, ML_NAN, ML_POSINF, ...
-│   ├── Boolean.cl         # Rboolean
-│   ├── Complex.cl         # Rcomplex
-│   ├── Constants.cl       # M_PI, M_E, M_SQRT2, ...
-│   ├── Error.cl           # error()/warning() → no-op stubs
-│   ├── Memory.cl          # R_alloc → no-op stubs
-│   ├── MathThreads.cl     # Thread-safe math stubs
-│   ├── Parse.cl           # Parser stubs
-│   ├── Print.cl           # Rprintf → no-op stub
-│   ├── Random.cl          # unif_rand, norm_rand, exp_rand declarations
-│   ├── Riconv.cl          # Encoding stubs
-│   ├── RS.cl              # R/S compatibility macros
-│   ├── Utils.cl           # Various utility stubs
-│   ├── Visibility.cl      # SEXP visibility macros
-│   └── stats_package.cl   # Stats package type stubs
-├── R_ext_types/           # Type-only subset (no function bodies)
-│   ├── Boolean.cl
-│   ├── Complex.cl
-│   ├── Constants.cl
-│   ├── libextern.cl       # LibExtern macro
-│   └── Visibility.cl
-├── R_ext_runtime/         # Runtime-only subset (function declarations)
-│   ├── Arith.cl
-│   ├── Error.cl
-│   ├── Memory.cl
-│   ├── MathThreads.cl
-│   ├── Print.cl
-│   ├── Random.cl
-│   ├── Riconv.cl
-│   ├── RS.cl
-│   └── Utils.cl
-├── libR_shims/
-│   └── libR.cl            # libR.so symbol stubs
-└── nmath/
-    ├── Rmath.cl           # Port of Rmath.h (declarations, constants)
-    └── nmath.cl           # Port of nmath.h (macros, error codes, helpers)
+??? System/
+|   ??? stdint.cl          # Portable integer types (<stdint.h> replacement)
+??? R_shims/
+|   ??? Rconfig.cl         # Platform capabilities (HAVE_*, IEEE_754)
+|   ??? Rdefines.cl        # R-level macros (LOGICAL, INTEGER, ...)
+|   ??? Rinternals.cl      # Core R type stubs (SEXP, Rboolean, SEXPREC)
+??? R_ext/                 # Complete R_ext/ header family
+|   ??? Arith.cl           # R_FINITE, ISNAN, ML_NAN, ML_POSINF, ...
+|   ??? Boolean.cl         # Rboolean
+|   ??? Complex.cl         # Rcomplex
+|   ??? Constants.cl       # M_PI, M_E, M_SQRT2, ...
+|   ??? Error.cl           # error()/warning() -> no-op stubs
+|   ??? Memory.cl          # R_alloc -> no-op stubs
+|   ??? MathThreads.cl     # Thread-safe math stubs
+|   ??? Parse.cl           # Parser stubs
+|   ??? Print.cl           # Rprintf -> no-op stub
+|   ??? Random.cl          # unif_rand, norm_rand, exp_rand declarations
+|   ??? Riconv.cl          # Encoding stubs
+|   ??? RS.cl              # R/S compatibility macros
+|   ??? Utils.cl           # Various utility stubs
+|   ??? Visibility.cl      # SEXP visibility macros
+|   ??? stats_package.cl   # Stats package type stubs
+??? R_ext_types/           # Type-only subset (no function bodies)
+|   ??? Boolean.cl
+|   ??? Complex.cl
+|   ??? Constants.cl
+|   ??? libextern.cl       # LibExtern macro
+|   ??? Visibility.cl
+??? R_ext_runtime/         # Runtime-only subset (function declarations)
+|   ??? Arith.cl
+|   ??? Error.cl
+|   ??? Memory.cl
+|   ??? MathThreads.cl
+|   ??? Print.cl
+|   ??? Random.cl
+|   ??? Riconv.cl
+|   ??? RS.cl
+|   ??? Utils.cl
+??? libR_shims/
+|   ??? libR.cl            # libR.so symbol stubs
+??? nmath/
+    ??? Rmath.cl           # Port of Rmath.h (declarations, constants)
+    ??? nmath.cl           # Port of nmath.h (macros, error codes, helpers)
 ```
 
 ## What each shim does
@@ -87,7 +87,7 @@ inst/cl/
 ### `System/stdint.cl`
 
 OpenCL C defines `int`, `uint`, `long`, `ulong` etc., but not the
-`<stdint.h>` typedefs (`int32_t`, `uint64_t`, …) that some nmath functions
+`<stdint.h>` typedefs (`int32_t`, `uint64_t`, ...) that some nmath functions
 rely on. This shim provides those typedefs using the OpenCL built-in integer
 types.
 
@@ -117,11 +117,11 @@ transitively include `<Rinternals.h>` compile without errors.
 
 The most heavily used shim. It provides:
 
-- `R_FINITE(x)` — maps to OpenCL's `isfinite(x)`.
-- `ISNAN(x)` — maps to OpenCL's `isnan(x)`.
-- `ML_NAN`, `ML_POSINF`, `ML_NEGINF` — IEEE special values via OpenCL
+- `R_FINITE(x)` --- maps to OpenCL's `isfinite(x)`.
+- `ISNAN(x)` --- maps to OpenCL's `isnan(x)`.
+- `ML_NAN`, `ML_POSINF`, `ML_NEGINF` --- IEEE special values via OpenCL
   arithmetic (`0.0/0.0`, `1.0/0.0`, `-1.0/0.0`).
-- `R_D__0`, `R_D__1`, `R_DT_0`, `R_DT_1` — log-probability helper macros.
+- `R_D__0`, `R_D__1`, `R_DT_0`, `R_DT_1` --- log-probability helper macros.
 
 ### `R_ext/Error.cl`
 
@@ -167,7 +167,7 @@ The central configuration header for the nmath OpenCL library (analogous to
 `nmath.h` in the C source). It defines:
 
 - Numerical special values and IEEE constants.
-- Error codes (`ME_DOMAIN = 1`, `ME_RANGE = 2`, …).
+- Error codes (`ME_DOMAIN = 1`, `ME_RANGE = 2`, ...).
 - Validation macros (`ISNAN`, `R_FINITE`, `R_D_*`).
 - Library-wide error-handling macros (`ML_ERR_return_NAN`,
   `ML_WARN_return_NAN`, `MATHLIB_ERROR`).

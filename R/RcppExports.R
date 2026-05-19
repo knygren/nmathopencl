@@ -565,3 +565,15 @@ gpu_names_cpp_export <- function() {
     .Call(`_nmathopencl_gpu_names_cpp_export`)
 }
 
+opencl_device_info_cpp_export <- function(force = FALSE, details = FALSE) {
+    .Call(`_nmathopencl_opencl_device_info_cpp_export`, force, details)
+}
+
+opencl_fp64_available_cpp_export <- function(force = FALSE) {
+    .Call(`_nmathopencl_opencl_fp64_available_cpp_export`, force)
+}
+
+opencl_reset_device_selection_cpp_export <- function() {
+    invisible(.Call(`_nmathopencl_opencl_reset_device_selection_cpp_export`))
+}
+

@@ -62,33 +62,7 @@ void opencl_dbl_scalar_kernel_runner(
   cl_device_id   device   = nullptr;
 
   try {
-    status = clGetPlatformIDs(1, &platform, nullptr);
-    if (status == -1001) {
-      throw std::runtime_error(
-        "OpenCL error: no OpenCL platforms found (clGetPlatformIDs returned -1001)."
-      );
-    }
-    if (status != CL_SUCCESS) {
-      std::ostringstream msg;
-      msg << "OpenCL error: clGetPlatformIDs failed with status " << status
-          << " (" << opencl_status_name(status) << "). "
-          << opencl_status_hint(status);
-      throw std::runtime_error(msg.str());
-    }
-
-    status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_DEFAULT, 1, &device, nullptr);
-    if (status == -9) {
-      throw std::runtime_error(
-        "OpenCL error: no suitable OpenCL devices found (clGetDeviceIDs returned -9)."
-      );
-    }
-    if (status != CL_SUCCESS) {
-      std::ostringstream msg;
-      msg << "OpenCL error: clGetDeviceIDs failed with status " << status
-          << " (" << opencl_status_name(status) << "). "
-          << opencl_status_hint(status);
-      throw std::runtime_error(msg.str());
-    }
+    opencl_bind_selected_fp64_device_or_throw(platform, device);
 
     context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &status);
     if (status != CL_SUCCESS) {
@@ -253,31 +227,7 @@ void opencl_pq_tail_kernel_runner_temp(
   cl_device_id   device   = nullptr;
 
   try {
-    status = clGetPlatformIDs(1, &platform, nullptr);
-    if (status == -1001) {
-      throw std::runtime_error(
-          "OpenCL error: no OpenCL platforms found (clGetPlatformIDs returned -1001).");
-    }
-    if (status != CL_SUCCESS) {
-      std::ostringstream msg;
-      msg << "OpenCL error: clGetPlatformIDs failed with status " << status
-          << " (" << opencl_status_name(status) << "). "
-          << opencl_status_hint(status);
-      throw std::runtime_error(msg.str());
-    }
-
-    status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_DEFAULT, 1, &device, nullptr);
-    if (status == -9) {
-      throw std::runtime_error(
-          "OpenCL error: no suitable OpenCL devices found (clGetDeviceIDs returned -9).");
-    }
-    if (status != CL_SUCCESS) {
-      std::ostringstream msg;
-      msg << "OpenCL error: clGetDeviceIDs failed with status " << status
-          << " (" << opencl_status_name(status) << "). "
-          << opencl_status_hint(status);
-      throw std::runtime_error(msg.str());
-    }
+    opencl_bind_selected_fp64_device_or_throw(platform, device);
 
     context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &status);
     if (status != CL_SUCCESS) throw opencl_make_context_error(status, platform, device);
@@ -453,31 +403,7 @@ void opencl_d_givelog_kernel_runner_temp(
   cl_device_id   device   = nullptr;
 
   try {
-    status = clGetPlatformIDs(1, &platform, nullptr);
-    if (status == -1001) {
-      throw std::runtime_error(
-          "OpenCL error: no OpenCL platforms found (clGetPlatformIDs returned -1001).");
-    }
-    if (status != CL_SUCCESS) {
-      std::ostringstream msg;
-      msg << "OpenCL error: clGetPlatformIDs failed with status " << status
-          << " (" << opencl_status_name(status) << "). "
-          << opencl_status_hint(status);
-      throw std::runtime_error(msg.str());
-    }
-
-    status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_DEFAULT, 1, &device, nullptr);
-    if (status == -9) {
-      throw std::runtime_error(
-          "OpenCL error: no suitable OpenCL devices found (clGetDeviceIDs returned -9).");
-    }
-    if (status != CL_SUCCESS) {
-      std::ostringstream msg;
-      msg << "OpenCL error: clGetDeviceIDs failed with status " << status
-          << " (" << opencl_status_name(status) << "). "
-          << opencl_status_hint(status);
-      throw std::runtime_error(msg.str());
-    }
+    opencl_bind_selected_fp64_device_or_throw(platform, device);
 
     context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &status);
     if (status != CL_SUCCESS) throw opencl_make_context_error(status, platform, device);
@@ -638,31 +564,7 @@ void opencl_numeric_cols_kernel_runner_temp(
   cl_device_id   device   = nullptr;
 
   try {
-    status = clGetPlatformIDs(1, &platform, nullptr);
-    if (status == -1001) {
-      throw std::runtime_error(
-          "OpenCL error: no OpenCL platforms found (clGetPlatformIDs returned -1001).");
-    }
-    if (status != CL_SUCCESS) {
-      std::ostringstream msg;
-      msg << "OpenCL error: clGetPlatformIDs failed with status " << status
-          << " (" << opencl_status_name(status) << "). "
-          << opencl_status_hint(status);
-      throw std::runtime_error(msg.str());
-    }
-
-    status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_DEFAULT, 1, &device, nullptr);
-    if (status == -9) {
-      throw std::runtime_error(
-          "OpenCL error: no suitable OpenCL devices found (clGetDeviceIDs returned -9).");
-    }
-    if (status != CL_SUCCESS) {
-      std::ostringstream msg;
-      msg << "OpenCL error: clGetDeviceIDs failed with status " << status
-          << " (" << opencl_status_name(status) << "). "
-          << opencl_status_hint(status);
-      throw std::runtime_error(msg.str());
-    }
+    opencl_bind_selected_fp64_device_or_throw(platform, device);
 
     context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &status);
     if (status != CL_SUCCESS) throw opencl_make_context_error(status, platform, device);

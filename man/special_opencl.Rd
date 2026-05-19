@@ -14,33 +14,33 @@
 \alias{lchoose_opencl}
 \title{Special Functions (OpenCL)}
 \usage{
-gammafn_opencl(x, fallback = TRUE, verbose = FALSE)
+gammafn_opencl(x, fallback = FALSE, verbose = FALSE)
 
-lgammafn_opencl(x, fallback = TRUE, verbose = FALSE)
+lgammafn_opencl(x, fallback = FALSE, verbose = FALSE)
 
-digamma_opencl(x, fallback = TRUE, verbose = FALSE)
+digamma_opencl(x, fallback = FALSE, verbose = FALSE)
 
-trigamma_opencl(x, fallback = TRUE, verbose = FALSE)
+trigamma_opencl(x, fallback = FALSE, verbose = FALSE)
 
-tetragamma_opencl(x, fallback = TRUE, verbose = FALSE)
+tetragamma_opencl(x, fallback = FALSE, verbose = FALSE)
 
-pentagamma_opencl(x, fallback = TRUE, verbose = FALSE)
+pentagamma_opencl(x, fallback = FALSE, verbose = FALSE)
 
-psigamma_opencl(x, deriv, fallback = TRUE, verbose = FALSE)
+psigamma_opencl(x, deriv, fallback = FALSE, verbose = FALSE)
 
-beta_opencl(a, b, fallback = TRUE, verbose = FALSE)
+beta_opencl(a, b, fallback = FALSE, verbose = FALSE)
 
-lbeta_opencl(a, b, fallback = TRUE, verbose = FALSE)
+lbeta_opencl(a, b, fallback = FALSE, verbose = FALSE)
 
-choose_opencl(n, k, fallback = TRUE, verbose = FALSE)
+choose_opencl(n, k, fallback = FALSE, verbose = FALSE)
 
-lchoose_opencl(n, k, fallback = TRUE, verbose = FALSE)
+lchoose_opencl(n, k, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{Numeric vector (and additional vectors where listed); arguments are
 recycled to a common length like the corresponding base functions.}
 
-\item{fallback}{Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 

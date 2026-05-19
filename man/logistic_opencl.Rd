@@ -13,7 +13,7 @@ dlogis_opencl(
   scale = 1,
   log = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -24,7 +24,7 @@ plogis_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -35,11 +35,11 @@ qlogis_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
-rlogis_opencl(n, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
+rlogis_opencl(n, location = 0, scale = 1, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{Numeric scalar quantile.}
@@ -53,8 +53,8 @@ rlogis_opencl(n, location = 0, scale = 1, fallback = TRUE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint (\code{TRUE}, \code{FALSE}, \code{NA}) for \code{plogis_opencl}
 and \code{qlogis_opencl}; parallel kernels reserved.}
 
-\item{fallback}{CPU on OpenCL/dispatch failures; see tracker before relying on masking.\cr
-See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
+Ignored when the runtime reports no OpenCL. See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 

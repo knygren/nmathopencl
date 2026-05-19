@@ -11,9 +11,8 @@
 #' @param shape2 Second shape parameter (must be > 0).
 #' @param ncp Non-centrality parameter (must be >= 0). Used by
 #'   \code{dnbeta_opencl()}, \code{pbeta_opencl()}, and \code{qbeta_opencl()}.
-#' @param fallback CPU when missing OpenCL/generic dispatch mismatches (\link{has_opencl}).\cr
-#' Do not swallow tracked kernel-program build defects ---
-#' \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
+#' Ignored when the runtime reports no OpenCL. \strong{Density} wrappers (\code{dbeta},\code{dnbeta}) default \code{FALSE} so OpenCL errors surface (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}); \strong{distribution and quantile} (\code{pbeta},\code{qbeta}) default \code{TRUE} temporarily until the \code{pgamma_utils}-related device build issues clear. Pass \code{fallback = TRUE} on densities only if CPU recovery is acceptable. \code{rbeta_opencl} retains \code{FALSE}. See also \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param q Numeric vector of quantiles for \code{pbeta_opencl}; recycled like \code{stats::pbeta}.
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
@@ -38,7 +37,7 @@ dbeta_opencl <- function(
     shape2,
     log = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(x)) {
@@ -105,7 +104,7 @@ dnbeta_opencl <- function(
     ncp,
     log = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(x)) {
@@ -348,7 +347,7 @@ qbeta_opencl <- function(
 
 #' @rdname beta_opencl
 #' @export
-rbeta_opencl <- function(n, shape1, shape2, fallback = TRUE, verbose = FALSE) {
+rbeta_opencl <- function(n, shape1, shape2, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_scalar_num(shape1, "shape1", 0, Inf, open_lower = TRUE)
   .validate_scalar_num(shape2, "shape2", 0, Inf, open_lower = TRUE)

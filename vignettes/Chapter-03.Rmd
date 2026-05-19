@@ -16,14 +16,14 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ## What is `inst/cl/nmath/`?
 
 The `nmath/` subdirectory under `inst/cl/` contains a complete OpenCL C
-port of R's `nmath` (Mathlib) library — approximately 180 `.cl` files,
+port of R's `nmath` (Mathlib) library --- approximately 180 `.cl` files,
 one per source file in R's `src/nmath/`. Together they implement the full
 suite of statistical distribution functions (densities, CDFs, quantiles,
 random-variate generators) and supporting mathematical helpers that make up
 R's statistical computing core.
 
 The port is designed so that any downstream package can load a **subset** of
-this library — just the functions it actually needs — without pulling in the
+this library --- just the functions it actually needs --- without pulling in the
 entire collection. The annotation scheme and dependency resolver (described
 in Chapter 06) make this automatic.
 
@@ -54,7 +54,7 @@ Every `.cl` file in `nmath/` begins with a standard metadata block:
 | `@load_order` | Pre-computed position in the topologically sorted order |
 
 The `@depends` tag is what `load_kernel_library()` uses to sort files. The
-`@all_depends` tag is informational — it documents the complete dependency
+`@all_depends` tag is informational --- it documents the complete dependency
 set so that a developer extracting a minimal subset knows exactly which files
 to include.
 
@@ -69,7 +69,7 @@ representative entries for the main families.
 |------|----------|
 | `nmath.cl` | Library header: constants, macros, error codes |
 | `Rmath.cl` | Forward declarations for all Mathlib functions |
-| `dpq.cl` | `R_D__0`, `R_D__1`, `R_DT_0`, `R_DT_1`, `R_D_Lval`, … (log-prob helpers) |
+| `dpq.cl` | `R_D__0`, `R_D__1`, `R_DT_0`, `R_DT_1`, `R_D_Lval`, ... (log-prob helpers) |
 | `refactored.cl` | Forward declarations for cycle-broken functions |
 
 ### Core math helpers
@@ -143,7 +143,7 @@ runner.
 | `beta.cl` | `beta` (beta function) |
 | `lbeta.cl` | `lbeta` |
 | `choose.cl` | `choose`, `lchoose` |
-| `polygamma.cl` | `psigamma`, `digamma`, `trigamma`, … |
+| `polygamma.cl` | `psigamma`, `digamma`, `trigamma`, ... |
 | `toms708.cl` | Incomplete beta (TOMS 708 algorithm) |
 | `bessel.cl` | `bessel_i`, `bessel_j`, `bessel_k`, `bessel_y` |
 | `signrank.cl` | `dsignrank`, `psignrank`, `qsignrank`, `rsignrank` |
@@ -171,7 +171,7 @@ recursive in ways that C handles via separate compilation but OpenCL cannot.
 into two `.cl` files:
 
 ```
-stirlerr.c  →  stirlerr_cycle_free.cl      (no forward references)
+stirlerr.c  ->  stirlerr_cycle_free.cl      (no forward references)
                stirlerr_cycle_dependent.cl  (calls the forward-declared part)
                refactored.cl               (forward declarations only)
 ```
@@ -179,8 +179,8 @@ stirlerr.c  →  stirlerr_cycle_free.cl      (no forward references)
 `refactored.cl` contains `extern`-style forward declarations so that the
 cycle-dependent portion can reference symbols that appear later in the
 concatenated source. The `@depends` tags ensure the three files are loaded
-in the correct order: `refactored` → `stirlerr_cycle_free` →
-`stirlerr_cycle_dependent` → `stirlerr`.
+in the correct order: `refactored` -> `stirlerr_cycle_free` ->
+`stirlerr_cycle_dependent` -> `stirlerr`.
 
 Similarly, `bessel_j` and `bessel_y` are each split into `*_cycle_free.cl`
 and `*_cycle_dependent.cl` for the same reason.
@@ -188,7 +188,7 @@ and `*_cycle_dependent.cl` for the same reason.
 ## The `ex_glmbayes_nmath/` subset
 
 Because the full `nmath/` library is large (~180 files), the package also
-ships a pre-curated minimal subset in `inst/cl/ex_glmbayes_nmath/` —
+ships a pre-curated minimal subset in `inst/cl/ex_glmbayes_nmath/` ---
 exactly the 20 files needed by the six `glmbayes` kernels:
 
 ```

@@ -1,10 +1,10 @@
 ---
-title: "Chapter 08: Case Study — Building Custom GLM Kernels (ex_glmbayes)"
+title: "Chapter 08: Case Study --- Building Custom GLM Kernels (ex_glmbayes)"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 08: Case Study — Building Custom GLM Kernels (ex_glmbayes)}
+  %\VignetteIndexEntry{Chapter 08: Case Study --- Building Custom GLM Kernels (ex_glmbayes)}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 ## Overview
 
-Chapters 02–07 describe the infrastructure of `nmathopencl`: the shim layer,
+Chapters 02-07 describe the infrastructure of `nmathopencl`: the shim layer,
 the `nmath` library, the kernel format, and the runner API. This chapter
 shows how to put all of it together by walking through a concrete downstream
 use-case: the `ex_glmbayes` example built into the package.
@@ -28,7 +28,7 @@ likelihood computations. The name `ex_glmbayes` signals that this is an
 example, not a core part of the library; it lives entirely in
 `ex_glmbayes_*`-prefixed files and within the `ex_glmbayes` C++ namespace.
 
-## Step 1 — Identify the nmath functions your kernel needs
+## Step 1 --- Identify the nmath functions your kernel needs
 
 For each GLM family, determine which nmath functions the GPU kernel must
 call:
@@ -47,7 +47,7 @@ math specification) so no nmath files are needed at all. For the others,
 consult the `@all_depends_nmath` tag of each kernel file to get the full
 transitive dependency list.
 
-## Step 2 — Extract the minimal nmath subset
+## Step 2 --- Extract the minimal nmath subset
 
 The `@all_depends_nmath` tag in each kernel file gives the complete
 transitive closure. Taking the union across the five non-Poisson kernels
@@ -90,7 +90,7 @@ indexed loading described in Step 5.
 A package developer would create an analogous subdirectory for their own
 kernel set using the same function.
 
-## Step 3 — Write the kernel files
+## Step 3 --- Write the kernel files
 
 Each kernel file in `inst/cl/ex_glmbayes_src/` starts with the dependency
 metadata block followed by the kernel body:
@@ -166,7 +166,7 @@ __kernel void f2_f3_binomial_logit(
 
 Key design choices:
 
-- `MAX_L2 64` — a compile-time upper bound on the number of predictors,
+- `MAX_L2 64` --- a compile-time upper bound on the number of predictors,
   used to size local arrays (OpenCL C does not support variable-length
   arrays in all implementations).
 - Column-major layout for `X` (matches R's memory layout for matrices
@@ -176,7 +176,7 @@ Key design choices:
   `m1` (number of grid points) is much larger than `l1` (number of
   observations), as is typical for envelope sampling.
 
-## Step 4 — Write the kernel runner (C++)
+## Step 4 --- Write the kernel runner (C++)
 
 The kernel runner is the low-level C++ function that manages the OpenCL
 lifecycle for this specific kernel. It lives in
@@ -217,7 +217,7 @@ The runner uses the error-handling utilities from `openclPort.h`
 (`opencl_make_context_error`, `opencl_status_name`) to produce informative
 exceptions on failure.
 
-## Step 5 — Write the kernel wrapper (C++)
+## Step 5 --- Write the kernel wrapper (C++)
 
 The kernel wrapper is the R-facing `[[Rcpp::export]]` function. It
 validates and converts R inputs, selects the kernel name based on
@@ -255,7 +255,7 @@ Rcpp::List f2_f3_opencl(
     // 3. Assemble program source using the pre-built dependency index.
     //    load_library_for_kernel() reads @depends_nmath from the kernel file,
     //    looks up the transitive closure in kernel_dependency_index.tsv, and
-    //    loads only the required subset in the correct order — no sort at runtime.
+    //    loads only the required subset in the correct order --- no sort at runtime.
     std::string nmath_src = openclPort::load_library_for_kernel(
         kernel_file,          // kernel .cl path (relative to inst/cl/)
         "ex_glmbayes_nmath",  // library subdir containing index + .cl files
@@ -292,7 +292,7 @@ Rcpp::List f2_f3_opencl(
 subdirectory on every call. For a 137-file library like `nmath` this requires
 reading all files sequentially. `load_library_for_kernel()` reads the
 pre-built `kernel_dependency_index.tsv` once, then reads only the small
-subset of files that the specific kernel actually needs — 3 files for
+subset of files that the specific kernel actually needs --- 3 files for
 `f2_f3_gaussian`, 17 for `f2_f3_binomial_logit`, and so on. The savings are
 significant for large libraries and become important when the kernel wrapper is
 called repeatedly.
@@ -301,12 +301,12 @@ The old full-library approach is still available for cases where the exact
 dependency set is unknown or all files are genuinely needed:
 
 ```cpp
-// Old approach — loads all files in the subdirectory (kept for reference)
+// Old approach --- loads all files in the subdirectory (kept for reference)
 // std::string nmath_src = openclPort::load_kernel_library(
 //     "ex_glmbayes_nmath", "nmathopencl", false);
 ```
 
-## Step 6 — Write the Rcpp export wrappers (C++ and R)
+## Step 6 --- Write the Rcpp export wrappers (C++ and R)
 
 The `[[Rcpp::export]]` annotation on `f2_f3_opencl` causes
 `Rcpp::compileAttributes()` to generate:
@@ -328,17 +328,17 @@ f2_f3_opencl_R <- function(family, link, b, y, x, mu, P, alpha, wt,
 }
 ```
 
-## Step 7 — Implement the CPU fallback
+## Step 7 --- Implement the CPU fallback
 
 The CPU fallback uses the same mathematical logic as the kernel but
 executes in C++ using standard R math calls. The relevant code lives in:
 
-- `ex_glmbayes_famfuncs_binomial.cpp` — binomial family functions
-- `ex_glmbayes_famfuncs_poisson.cpp` — Poisson family
-- `ex_glmbayes_famfuncs_Gamma.cpp` — Gamma family
-- `ex_glmbayes_famfuncs_gaussian.cpp` — Gaussian family
-- `ex_glmbayes_EnvelopeEval.cpp` — orchestrates the CPU path
-- `ex_glmbayes_EnvelopeSize.cpp` — memory allocation for the envelope
+- `ex_glmbayes_famfuncs_binomial.cpp` --- binomial family functions
+- `ex_glmbayes_famfuncs_poisson.cpp` --- Poisson family
+- `ex_glmbayes_famfuncs_Gamma.cpp` --- Gamma family
+- `ex_glmbayes_famfuncs_gaussian.cpp` --- Gaussian family
+- `ex_glmbayes_EnvelopeEval.cpp` --- orchestrates the CPU path
+- `ex_glmbayes_EnvelopeSize.cpp` --- memory allocation for the envelope
 
 These files are grouped under the `ex_glmbayes::fam` and `ex_glmbayes::env`
 sub-namespaces. They use R's standard `<Rmath.h>` functions (the same
@@ -392,7 +392,7 @@ The complete set of files contributing to the `ex_glmbayes` example:
 
 To build a similar component in your own package:
 
-1. **Identify your nmath dependencies** — write the `@depends_nmath`
+1. **Identify your nmath dependencies** --- write the `@depends_nmath`
    annotation in each of your kernel files (listing the direct nmath entry
    points your kernel calls). Then call `extract_library_subset()` to copy
    the exact transitive closure of files, plus the companion index files,
@@ -411,24 +411,24 @@ To build a similar component in your own package:
    )
    ```
 
-2. **Write your kernel(s)** — add `@library_deps`, `@calls_nmath`, and
+2. **Write your kernel(s)** --- add `@library_deps`, `@calls_nmath`, and
    `@all_depends_nmath` tags at the top of each `.cl` file. Store them in
    `inst/cl/<yourpkg_src>/`.
 
-3. **Write a kernel runner** — use `openclPort::opencl_dbl_scalar_kernel_runner`
+3. **Write a kernel runner** --- use `openclPort::opencl_dbl_scalar_kernel_runner`
    directly if your kernel fits the double-scalar layout, or write a custom
    runner following the same OpenCL lifecycle pattern as `f2_f3_kernel_runner`.
    Use `openclPort::opencl_make_context_error` and `opencl_status_name` for
    error handling.
 
-4. **Write a kernel wrapper** — flatten your R inputs with
+4. **Write a kernel wrapper** --- flatten your R inputs with
    `openclPort::flattenMatrix` / `openclPort::copyVector`, assemble the
    program string with `openclPort::load_library_for_kernel()` +
    `openclPort::load_kernel_source()`, call the runner, and return an
    R-friendly result. The `@depends_nmath` annotation in your kernel file
    drives the subset selection automatically.
 
-5. **Write a CPU fallback** — implement the same computation using standard
+5. **Write a CPU fallback** --- implement the same computation using standard
    R math (`<Rmath.h>`) or base-R functions. Guard the GPU path with
    `has_opencl()`.
 

@@ -9,7 +9,7 @@
 #' @param p Numeric vector of probabilities for \code{qlnorm_opencl} (like \code{stats::qlnorm}).
 #' @param meanlog Mean of the distribution on the log scale.
 #' @param sdlog Standard deviation on the log scale (must be > 0).
-#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
@@ -26,7 +26,7 @@ dlnorm_opencl <- function(
     sdlog = 1,
     log = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(x)) {
@@ -93,7 +93,7 @@ plnorm_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(q)) {
@@ -166,7 +166,7 @@ qlnorm_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(p)) {
@@ -226,7 +226,7 @@ qlnorm_opencl <- function(
 
 #' @rdname lnorm_opencl
 #' @export
-rlnorm_opencl <- function(n, meanlog = 0, sdlog = 1, fallback = TRUE, verbose = FALSE) {
+rlnorm_opencl <- function(n, meanlog = 0, sdlog = 1, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_scalar_num(meanlog, "meanlog")
   .validate_scalar_num(sdlog, "sdlog", 0, Inf, open_lower = TRUE)

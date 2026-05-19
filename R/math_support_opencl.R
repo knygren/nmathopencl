@@ -4,14 +4,14 @@
 #'
 #' @param x,y Numeric vectors recycled together (where both appear).
 #' @param digits Numeric vector recycled with \code{x} for precision/rounding helpers.
-#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #'
 #' @return Numeric vector of recycled common length.
 #' @example inst/examples/Ex_math_support_opencl.R
 #' @rdname math_support_opencl
 #' @export
-imax2_opencl <- function(x, y, fallback = TRUE, verbose = FALSE) {
+imax2_opencl <- function(x, y, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   if (!is.numeric(y)) stop("`y` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
@@ -29,7 +29,7 @@ imax2_opencl <- function(x, y, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname math_support_opencl
 #' @export
-imin2_opencl <- function(x, y, fallback = TRUE, verbose = FALSE) {
+imin2_opencl <- function(x, y, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   if (!is.numeric(y)) stop("`y` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
@@ -47,7 +47,7 @@ imin2_opencl <- function(x, y, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname math_support_opencl
 #' @export
-fmax2_opencl <- function(x, y, fallback = TRUE, verbose = FALSE) {
+fmax2_opencl <- function(x, y, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   if (!is.numeric(y)) stop("`y` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
@@ -65,7 +65,7 @@ fmax2_opencl <- function(x, y, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname math_support_opencl
 #' @export
-fmin2_opencl <- function(x, y, fallback = TRUE, verbose = FALSE) {
+fmin2_opencl <- function(x, y, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   if (!is.numeric(y)) stop("`y` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
@@ -83,7 +83,7 @@ fmin2_opencl <- function(x, y, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname math_support_opencl
 #' @export
-sign_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
+sign_opencl <- function(x, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
   if (length(x) == 0L) return(numeric(0))
@@ -97,7 +97,7 @@ sign_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname math_support_opencl
 #' @export
-fprec_opencl <- function(x, digits, fallback = TRUE, verbose = FALSE) {
+fprec_opencl <- function(x, digits, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   if (!is.numeric(digits)) stop("`digits` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
@@ -116,7 +116,7 @@ fprec_opencl <- function(x, digits, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname math_support_opencl
 #' @export
-fround_opencl <- function(x, digits, fallback = TRUE, verbose = FALSE) {
+fround_opencl <- function(x, digits, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   if (!is.numeric(digits)) stop("`digits` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
@@ -135,7 +135,7 @@ fround_opencl <- function(x, digits, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname math_support_opencl
 #' @export
-fsign_opencl <- function(x, y, fallback = TRUE, verbose = FALSE) {
+fsign_opencl <- function(x, y, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   if (!is.numeric(y)) stop("`y` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
@@ -153,7 +153,7 @@ fsign_opencl <- function(x, y, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname math_support_opencl
 #' @export
-ftrunc_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
+ftrunc_opencl <- function(x, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")
   if (length(x) == 0L) return(numeric(0))

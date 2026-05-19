@@ -77,35 +77,7 @@ void f2_f3_kernel_runner(
   cl_platform_id platform = nullptr;
   cl_device_id   device   = nullptr;
 
-  status = clGetPlatformIDs(1, &platform, nullptr);
-  if (status == -1001) {
-    throw std::runtime_error(
-        "OpenCL error: no OpenCL platforms found (clGetPlatformIDs returned -1001). "
-        "Your system does not expose an OpenCL platform."
-    );
-  }
-  if (status != CL_SUCCESS) {
-    std::ostringstream msg;
-    msg << "OpenCL error: clGetPlatformIDs failed with status " << status
-        << " (" << opencl_status_name(status) << "). "
-        << opencl_status_hint(status);
-    throw std::runtime_error(msg.str());
-  }
-
-  status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_DEFAULT, 1, &device, nullptr);
-  if (status == -9) {
-    throw std::runtime_error(
-        "OpenCL error: no suitable OpenCL GPU devices found "
-        "(clGetDeviceIDs returned -9)."
-    );
-  }
-  if (status != CL_SUCCESS) {
-    std::ostringstream msg;
-    msg << "OpenCL error: clGetDeviceIDs failed with status " << status
-        << " (" << opencl_status_name(status) << "). "
-        << opencl_status_hint(status);
-    throw std::runtime_error(msg.str());
-  }
+  opencl_bind_selected_fp64_device_or_throw(platform, device);
 
   // 3) Context & Queue
   cl_context context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &status);

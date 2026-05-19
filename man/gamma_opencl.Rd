@@ -13,7 +13,7 @@ dgamma_opencl(
   scale = 1,
   log = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -25,7 +25,7 @@ pgamma_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -40,7 +40,7 @@ qgamma_opencl(
   verbose = FALSE
 )
 
-rgamma_opencl(n, shape, scale = 1, fallback = TRUE, verbose = FALSE)
+rgamma_opencl(n, shape, scale = 1, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{Numeric vector of quantiles for \code{dgamma_opencl}.}
@@ -55,9 +55,8 @@ like \code{stats::pgamma}.}
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for
 \code{pgamma_opencl}/\code{qgamma_opencl}; parallel dispatch reserved.}
 
-\item{fallback}{CPU when GPU dispatch/OpenCL lacks (\link{has_opencl}).\cr
-Prefer fixing kernel builds over masking ---
-\file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
+Ignored when the runtime reports no OpenCL. \code{dgamma_opencl} defaults \code{FALSE}; distribution/quantile wrappers follow \file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}. Pass explicit \code{fallback} where needed.}
 
 \item{verbose}{Logical; print informational fallback messages.}
 

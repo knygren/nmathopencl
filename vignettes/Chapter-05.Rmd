@@ -1,10 +1,10 @@
 ---
-title: "Chapter 05: The nmathopencl R API — Distribution Functions on the GPU"
+title: "Chapter 05: The nmathopencl R API --- Distribution Functions on the GPU"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 05: The nmathopencl R API — Distribution Functions on the GPU}
+  %\VignetteIndexEntry{Chapter 05: The nmathopencl R API --- Distribution Functions on the GPU}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -24,8 +24,8 @@ All exported functions share three common arguments:
 
 | Argument | Type | Default | Meaning |
 |----------|------|---------|---------|
-| `fallback` | logical | `TRUE` | Fall back to the `stats::` equivalent if OpenCL is unavailable or fails |
-| `verbose` | logical | `FALSE` | Print informational messages when a fallback occurs |
+| `fallback` | logical | `FALSE` | If `TRUE` while `has_opencl()` is `TRUE`, fall back to the `stats::` analogue when the OpenCL call fails; ignored when OpenCL is unavailable (CPU is used anyway) |
+| `verbose` | logical | `FALSE` | Extra diagnostics (including when picking the CPU path with no OpenCL runtime) |
 | `log` / `lower.tail` | logical | distribution-specific | Mirror the `stats::` convention for the same function |
 
 ## Checking availability
@@ -40,10 +40,12 @@ has_opencl()
 gpu_names()
 ```
 
-Because all functions honor `fallback = TRUE` by default, they are safe to
-call unconditionally: on a machine without OpenCL they silently use the CPU.
-To force GPU-only execution and get an error instead of a fallback, set
-`fallback = FALSE`.
+If OpenCL is not available (`has_opencl()` returns `FALSE`), calls use the CPU
+equivalent unconditionally so examples and CI keep working.
+
+By default `fallback = FALSE`: when OpenCL **is** available but a dispatch fails,
+the error propagates---useful while debugging kernels. Pass `fallback = TRUE`
+only when you deliberately want GPU failures masked with the CPU analogue.
 
 ## Normal distribution
 
@@ -53,7 +55,7 @@ x  <- rnorm(1e6)
 # Density
 d  <- dnorm_opencl(x, mean = 0, sd = 1, log = FALSE)
 
-# CDF — same core arguments as stats::pnorm(q, mean, sd, lower.tail, log.p);
+# CDF --- same core arguments as stats::pnorm(q, mean, sd, lower.tail, log.p);
 #          plus opencl_parallel, fallback, verbose. Long outputs use recycling length.
 p <- pnorm_opencl(
   rep(1.96, 1e6),
@@ -210,34 +212,33 @@ r_unif_index_opencl(n, dt)
 ```
 
 These generate random samples using device-side implementations of the
-same Kinderman–Ramage / Ahrens–Dieter algorithms used by R's internal RNG.
+same Kinderman-Ramage / Ahrens-Dieter algorithms used by R's internal RNG.
 They are exported via `rng_core_opencl.R`.
 
 ## Fallback behavior in detail
 
-The `fallback` logic follows a two-stage check:
+1. **`has_opencl()` is `FALSE`** (no runtime device / not compiled with OpenCL): the wrapper
+   always uses the CPU `stats::`/base analogue. The **`fallback` argument does not gate this**;
+   it is ignored for this branch.
 
-1. **Compile-time check** (`has_opencl()`): if the package was not built
-   with `USE_OPENCL`, there is no OpenCL runtime at all. With
-   `fallback = TRUE` the function immediately calls the `stats::` equivalent;
-   with `fallback = FALSE` it throws an error.
+2. **`has_opencl()` is `TRUE`**, but OpenCL enqueue/compile/bind fails inside the `.Call`: the outer
+   R shim catches the failure. **`fallback = FALSE` (default):** propagate the error.
+   **`fallback = TRUE`:** return the CPU analogue instead (optional masking for fragile stacks).
 
-2. **Runtime check**: even with a working OpenCL build, a kernel call can
-   fail (device lost, out-of-memory, compilation error). The call is wrapped
-   in `tryCatch`; on error, `fallback = TRUE` silently returns the `stats::`
-   result while `fallback = FALSE` re-throws the error.
+Runnable examples under `inst/examples/` mostly use **`fallback = FALSE`** so `R CMD check`
+surfaces real OpenCL breakage when a device is present.
 
 ```{r, eval = FALSE}
-# Explicit error on GPU failure (no silent fallback):
-dnorm_opencl(x, fallback = FALSE)
+# Default --- surface GPU/build errors during development / local check with OpenCL enabled:
+dnorm_opencl(x)
 
-# Print a message whenever the fallback is used:
+# Permit CPU masking while OpenCL is flaky (not the development default):
 dnorm_opencl(x, fallback = TRUE, verbose = TRUE)
 ```
 
 ## Performance notes
 
-GPU acceleration is most beneficial for **large vectors** (≥ ~10,000
+GPU acceleration is most beneficial for **large vectors** (>= ~10,000
 elements) and for functions with non-trivial per-element computation
 (e.g., `pgamma`, `pt`, `qnorm`). For very small inputs the kernel
 compilation overhead and data transfer latency dominate.

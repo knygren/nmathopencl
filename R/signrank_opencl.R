@@ -8,7 +8,7 @@
 #' @param q \code{p*}-wrapper quantiles (\code{stats::psignrank} semantics).
 #' @param p \code{q*}-wrapper probabilities (\code{stats::qsignrank} semantics).
 #' @param nsize Number of observations used by signed-rank routines (must be > 0).
-#' @param fallback Logical; if \code{TRUE}, fall back to CPU behavior on OpenCL error.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
@@ -17,9 +17,9 @@
 #'
 #' @section Known OpenCL limitations:
 #' Signed-rank kernels can fail to build on some GPU toolchains due to unresolved
-#' runtime allocation symbols (for example \code{R_chk_calloc}). Keep
-#' \code{fallback = TRUE} for production use until device-safe allocator shims are
-#' complete.
+#' runtime allocation symbols (for example \code{R_chk_calloc}). Use
+#' \code{fallback = TRUE} only if you need to tolerate those failures until
+#' device-safe shims are complete.
 #'
 #' @return Numeric vector result from the corresponding signed-rank operation.
 #' @example inst/examples/Ex_signrank_opencl.R
@@ -30,7 +30,7 @@ dsignrank_opencl <- function(
     nsize,
     log = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(x)) {
@@ -88,7 +88,7 @@ psignrank_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(q)) {
@@ -148,7 +148,7 @@ qsignrank_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(p)) {
@@ -204,7 +204,7 @@ qsignrank_opencl <- function(
 
 #' @rdname signrank_opencl
 #' @export
-rsignrank_opencl <- function(n, nsize, fallback = TRUE, verbose = FALSE) {
+rsignrank_opencl <- function(n, nsize, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_scalar_num(nsize, "nsize", 0, Inf, open_lower = TRUE)
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")

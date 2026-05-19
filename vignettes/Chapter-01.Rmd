@@ -217,5 +217,7 @@ system.time(dnorm(x, mean = 0, sd = 1))
 ```
 
 For large vectors the GPU path is substantially faster. For small vectors
-the overhead of kernel compilation and data transfer may make it slower;
-the `fallback = TRUE` argument (the default) ensures graceful degradation.
+the overhead of kernel compilation and data transfer may make it slower.
+When OpenCL is unavailable (`has_opencl()` is `FALSE`), functions use CPU
+implementations anyway. When OpenCL is available, the default **`fallback = FALSE`**
+surfaces failures so kernels can be debugged.

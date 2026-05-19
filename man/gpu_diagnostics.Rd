@@ -7,6 +7,9 @@
 \alias{detect_or_install_gpu_drivers}
 \alias{detect_compute_runtimes}
 \alias{has_opencl}
+\alias{opencl_device_info}
+\alias{opencl_fp64_available}
+\alias{opencl_reset_device_selection}
 \alias{verify_opencl_runtime}
 \alias{check_runtime_env}
 \alias{gpu_diagnostics}
@@ -24,6 +27,12 @@ detect_compute_runtimes(info)
 
 has_opencl()
 
+opencl_device_info(force = FALSE, details = FALSE)
+
+opencl_fp64_available(force = FALSE)
+
+opencl_reset_device_selection()
+
 verify_opencl_runtime(lib_dirs = NULL)
 
 check_runtime_env(runtime_info)
@@ -38,11 +47,22 @@ contain the following elements:
 \item{intel}{A list with elements \code{present} (logical) and \code{names} (character).}
 }}
 
+\item{force}{If \code{TRUE}, rerun discovery even when a previous selection
+is cached.}
+
+\item{details}{If \code{TRUE}, include a \code{candidates} list describing
+every platform/device pair (extension flag and probe result per device).}
+
 \item{lib_dirs}{A list of OpenCL directories}
 
 \item{runtime_info}{The structured list returned by \code{detect_compute_runtimes()}.}
 }
 \value{
+\code{opencl_device_info} returns a list with \code{ok} (logical),
+\code{reason} (character), indices, vendor/name strings, \code{device_type},
+\code{extension_cl_khr_fp64}, \code{probe_fp64_ok}, \code{selection_policy},
+and optionally \code{candidates}.
+
 A structured list with diagnostics for each runtime, including:
 \itemize{
 \item installed: whether the runtime was detected
@@ -62,13 +82,13 @@ all intermediate diagnostic results.
 A collection of tools for detecting GPU hardware, verifying OpenCL
 availability, checking driver installation, validating environment
 configuration, and diagnosing whether \pkg{glmbayes} can use GPU
-acceleration. These functions provide both highâ€‘level diagnostic
-summaries and lowâ€‘level checks of system components such as PATH,
+acceleration. These functions provide both high-level diagnostic
+summaries and low-level checks of system components such as PATH,
 library directories, OpenCL headers, and the ICD loader.
 
 The diagnostic workflow is centered around
 \code{diagnose_glmbayes()}, which orchestrates all other checks and
-prints a detailed, humanâ€‘readable report. Lowerâ€‘level helpers can be
+prints a detailed, human-readable report. Lower-level helpers can be
 called individually for programmatic inspection or automated testing.
 }
 \details{
@@ -106,35 +126,55 @@ because platform-creation failures are often uninformative; rely on
 Start with \code{\link{diagnose_glmbayes}()} for a single readable report;
 use \code{\link{has_opencl}()} for a quick boolean when scripting.
 }
-\section{Highâ€‘level diagnostic}{
+\section{Functions}{
+\itemize{
+\item \code{opencl_device_info()}: Cached OpenCL device selection for double-precision
+(\code{cl_khr_fp64}) kernels: enumerates platforms and devices, prefers GPU,
+checks the extension token, then verifies with a tiny \code{clBuildProgram}
+probe. Override with environment variables \code{NMATHOPENCL_PLATFORM_INDEX}
+and/or \code{NMATHOPENCL_DEVICE_INDEX} (0-based; device index is within the
+platform's device list). Use \code{\link{opencl_reset_device_selection}()}
+to clear the cache (e.g. after driver changes).
+
+\item \code{opencl_fp64_available()}: Returns \code{TRUE} if a cached OpenCL device
+passes the \code{cl_khr_fp64} extension check and build probe used for
+\pkg{nmathopencl} double kernels.
+
+\item \code{opencl_reset_device_selection()}: Clears the process-local OpenCL device selection
+cache so the next kernel or \code{\link{opencl_device_info}()} run
+re-enumerates devices.
+
+}}
+\section{High-level diagnostic}{
 
 \itemize{
-\item \code{diagnose_glmbayes()} â€” full GPU/OpenCL diagnostic report.
+\item \code{diagnose_glmbayes()} --- full GPU/OpenCL diagnostic report.
 }
 }
 
 \section{Environment and hardware detection}{
 
 \itemize{
-\item \code{detect_environment_and_gpus()} â€” detect OS and GPU vendor.
-\item \code{gpu_names()} â€” enumerate available GPU device names.
-\item \code{detect_compute_runtimes()} â€” detect CUDA/OpenCL runtimes.
+\item \code{detect_environment_and_gpus()} --- detect OS and GPU vendor.
+\item \code{gpu_names()} --- enumerate available GPU device names.
+\item \code{detect_compute_runtimes()} --- detect CUDA/OpenCL runtimes.
 }
 }
 
 \section{OpenCL availability and runtime checks}{
 
 \itemize{
-\item \code{has_opencl()} â€” quick check for OpenCL support.
-\item \code{verify_opencl_runtime()} â€” probe OpenCL platform/device availability.
-\item \code{check_runtime_env()} â€” validate PATH and library directories.
+\item \code{has_opencl()} --- quick check for OpenCL support.
+\item \code{opencl_fp64_available()}, \code{opencl_device_info()} --- double-precision OpenCL device selection.
+\item \code{verify_opencl_runtime()} --- probe OpenCL platform/device availability.
+\item \code{check_runtime_env()} --- validate PATH and library directories.
 }
 }
 
 \section{Driver installation helpers}{
 
 \itemize{
-\item \code{detect_or_install_gpu_drivers()} â€” detect driver presence and issues.
+\item \code{detect_or_install_gpu_drivers()} --- detect driver presence and issues.
 }
 }
 
