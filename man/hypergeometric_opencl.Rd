@@ -26,7 +26,7 @@ phyper_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -42,7 +42,7 @@ qhyper_opencl(
   verbose = FALSE
 )
 
-rhyper_opencl(n, m, n_black, k, fallback = TRUE, verbose = FALSE)
+rhyper_opencl(n, m, n_black, k, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{Numeric scalar quantile.}

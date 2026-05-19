@@ -22,6 +22,6 @@ Add new rows when `R CMD check` or manual runs surface reproducible failures.
 ## Notes
 
 - **No OpenCL at runtime (`has_opencl()` is FALSE):** wrappers use the CPU `stats`/base analogue unconditionally; the exported `fallback` flag does **not** control that path---it only affects what happens **after** OpenCL appears available (`has_opencl()` TRUE) yet the GPU call errors.
-- **Defaults:** most exported paths default to **`fallback = FALSE`** so OpenCL faults surface during development (pass **`fallback = TRUE`** when you intentionally want masking). Temporary exception: wrappers whose programs stitch **`pgamma_utils.cl`** --- see **`inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md`** --- default **`fallback = TRUE`** until fp64 / overload issues are fixed.
+- **Defaults:** exported wrappers default **`fallback = FALSE`** so OpenCL faults surface during development (pass **`fallback = TRUE`** when you intentionally want masking). **`pgamma_utils.cl`** subgraphs remain a common source of fragile device builds; see **`inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md`**.
 - **Goal:** shrink this list by refactoring kernels to inlined device-safe helpers or narrower nmath subgraphs where feasible.
 - **Hypothesis:** loading or linking more of bundled nmath into the assembled OpenCL program could define additional `Rf_*` symbols currently missing at device link; not verified yet.

@@ -97,7 +97,7 @@ pt_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(q)) {
@@ -170,7 +170,7 @@ qt_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(p)) {
@@ -230,7 +230,7 @@ qt_opencl <- function(
 
 #' @rdname t_opencl
 #' @export
-rt_opencl <- function(n, df, fallback = TRUE, verbose = FALSE) {
+rt_opencl <- function(n, df, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_scalar_num(df, "df", 0, Inf, open_lower = TRUE)
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")

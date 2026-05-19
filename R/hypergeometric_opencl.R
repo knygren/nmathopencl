@@ -96,7 +96,7 @@ phyper_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(q)) {
@@ -246,7 +246,7 @@ qhyper_opencl <- function(
 
 #' @rdname hypergeometric_opencl
 #' @export
-rhyper_opencl <- function(n, m, n_black, k, fallback = TRUE, verbose = FALSE) {
+rhyper_opencl <- function(n, m, n_black, k, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_scalar_num(m, "m", 0, Inf)
   .validate_scalar_num(n_black, "n_black", 0, Inf)

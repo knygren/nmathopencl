@@ -17,21 +17,21 @@ r_pow_opencl(x, y, fallback = FALSE, verbose = FALSE)
 
 r_pow_di_opencl(x, n_exp, fallback = FALSE, verbose = FALSE)
 
-log1pmx_opencl(x, fallback = TRUE, verbose = FALSE)
+log1pmx_opencl(x, fallback = FALSE, verbose = FALSE)
 
 log1pexp_opencl(x, fallback = FALSE, verbose = FALSE)
 
 log1mexp_opencl(x, fallback = FALSE, verbose = FALSE)
 
-lgamma1p_opencl(x, fallback = TRUE, verbose = FALSE)
+lgamma1p_opencl(x, fallback = FALSE, verbose = FALSE)
 
-pow1p_opencl(x, y, fallback = TRUE, verbose = FALSE)
+pow1p_opencl(x, y, fallback = FALSE, verbose = FALSE)
 
-logspace_add_opencl(logx, logy, fallback = TRUE, verbose = FALSE)
+logspace_add_opencl(logx, logy, fallback = FALSE, verbose = FALSE)
 
-logspace_sub_opencl(logx, logy, fallback = TRUE, verbose = FALSE)
+logspace_sub_opencl(logx, logy, fallback = FALSE, verbose = FALSE)
 
-logspace_sum_opencl(logx, logy, fallback = TRUE, verbose = FALSE)
+logspace_sum_opencl(logx, logy, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{Numeric vector(s): primary input, recycled together like \code{stats}

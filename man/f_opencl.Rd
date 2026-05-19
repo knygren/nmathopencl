@@ -26,7 +26,7 @@ pf_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -38,11 +38,11 @@ qf_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
-rf_opencl(n, df1, df2, fallback = TRUE, verbose = FALSE)
+rf_opencl(n, df1, df2, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{Numeric vector of quantiles (\code{df_opencl}).}

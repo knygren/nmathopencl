@@ -256,11 +256,11 @@ convenient interface for cases where the entire bottleneck really is a large
 batch of identical distribution evaluations --- though as noted above, this is
 not the primary use case the package was designed around.
 
-Each wrapper accepts `fallback = TRUE` (default), which silently falls back
-to the corresponding `stats` function if OpenCL is unavailable or fails. This
-means packages that use these wrappers work correctly on machines without a
-GPU --- they simply lose the acceleration. Set `fallback = FALSE` if you need
-hard failures rather than silent fallback.
+Each wrapper accepts `fallback`, default **`FALSE`** so GPU build/runtime faults
+surface. When **`fallback = TRUE`**, failures while OpenCL appears available
+recover quietly with the CPU `stats` analogue (silent when **`verbose`** is false).
+Machines **without OpenCL support** (`has_opencl()` false) use CPU routines
+regardless; the `fallback` flag only affects behavior after OpenCL dispatch is tried.
 
 To check OpenCL availability:
 

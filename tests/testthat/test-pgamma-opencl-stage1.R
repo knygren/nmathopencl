@@ -11,7 +11,7 @@ test_that("pgamma_opencl matches stats recycling (vary q, shape, scale; scalar t
     scale = sc,
     lower.tail = TRUE,
     log.p = FALSE,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
   )
   cpu <- stats::pgamma(q, shape = sh, scale = sc, lower.tail = TRUE, log.p = FALSE)
@@ -32,7 +32,7 @@ test_that("pgamma_opencl lower.tail / log.p recycled row-wise (stats scalar-call
     scale = 1,
     lower.tail = lt,
     log.p = lp,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
   )
   len <- max(length(q), length(sh), length(lt), length(lp))

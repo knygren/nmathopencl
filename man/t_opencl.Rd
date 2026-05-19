@@ -24,7 +24,7 @@ pt_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -35,11 +35,11 @@ qt_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
-rt_opencl(n, df, fallback = TRUE, verbose = FALSE)
+rt_opencl(n, df, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{Numeric vector of quantiles (\code{dt_opencl}).}

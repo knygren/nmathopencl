@@ -24,7 +24,7 @@ pchisq_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
@@ -35,11 +35,11 @@ qchisq_opencl(
   lower.tail = TRUE,
   log.p = FALSE,
   opencl_parallel = NA,
-  fallback = TRUE,
+  fallback = FALSE,
   verbose = FALSE
 )
 
-rchisq_opencl(n, df, ncp = 0, fallback = TRUE, verbose = FALSE)
+rchisq_opencl(n, df, ncp = 0, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{Numeric vector of quantiles for \code{dchisq_opencl}.}

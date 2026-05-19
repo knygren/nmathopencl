@@ -11,7 +11,7 @@ test_that("pnorm_opencl matches stats recycling (vary q, mean, sd; scalar tails)
     sd = sg,
     lower.tail = TRUE,
     log.p = FALSE,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
   )
   cpu <- stats::pnorm(q, mean = mu, sd = sg, lower.tail = TRUE, log.p = FALSE)

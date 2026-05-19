@@ -63,7 +63,7 @@ r_pow_di_opencl <- function(x, n_exp, fallback = FALSE, verbose = FALSE) {
 
 #' @rdname rmath_runtime_opencl
 #' @export
-log1pmx_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
+log1pmx_opencl <- function(x, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   .validate_flag(fallback, "fallback")
   .validate_flag(verbose, "verbose")
@@ -115,7 +115,7 @@ log1mexp_opencl <- function(x, fallback = FALSE, verbose = FALSE) {
 
 #' @rdname rmath_runtime_opencl
 #' @export
-lgamma1p_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
+lgamma1p_opencl <- function(x, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   .validate_flag(fallback, "fallback")
   .validate_flag(verbose, "verbose")
@@ -132,7 +132,7 @@ lgamma1p_opencl <- function(x, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname rmath_runtime_opencl
 #' @export
-pow1p_opencl <- function(x, y, fallback = TRUE, verbose = FALSE) {
+pow1p_opencl <- function(x, y, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   if (!is.numeric(y)) stop("`y` must be numeric.")
   .validate_flag(fallback, "fallback")
@@ -153,7 +153,7 @@ pow1p_opencl <- function(x, y, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname rmath_runtime_opencl
 #' @export
-logspace_add_opencl <- function(logx, logy, fallback = TRUE, verbose = FALSE) {
+logspace_add_opencl <- function(logx, logy, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(logx)) stop("`logx` must be numeric.")
   if (!is.numeric(logy)) stop("`logy` must be numeric.")
   .validate_flag(fallback, "fallback")
@@ -175,7 +175,7 @@ logspace_add_opencl <- function(logx, logy, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname rmath_runtime_opencl
 #' @export
-logspace_sub_opencl <- function(logx, logy, fallback = TRUE, verbose = FALSE) {
+logspace_sub_opencl <- function(logx, logy, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(logx)) stop("`logx` must be numeric.")
   if (!is.numeric(logy)) stop("`logy` must be numeric.")
   .validate_flag(fallback, "fallback")
@@ -199,7 +199,7 @@ logspace_sub_opencl <- function(logx, logy, fallback = TRUE, verbose = FALSE) {
 
 #' @rdname rmath_runtime_opencl
 #' @export
-logspace_sum_opencl <- function(logx, logy, fallback = TRUE, verbose = FALSE) {
+logspace_sum_opencl <- function(logx, logy, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(logx)) stop("`logx` must be numeric.")
   if (!is.numeric(logy)) stop("`logy` must be numeric.")
   .validate_flag(fallback, "fallback")

@@ -12,7 +12,7 @@
 #' @param ncp Non-centrality parameter (must be >= 0). Used by
 #'   \code{dnbeta_opencl()}, \code{pbeta_opencl()}, and \code{qbeta_opencl()}.
 #' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
-#' Ignored when the runtime reports no OpenCL. \strong{Density} wrappers (\code{dbeta},\code{dnbeta}) default \code{FALSE} so OpenCL errors surface (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}); \strong{distribution and quantile} (\code{pbeta},\code{qbeta}) default \code{TRUE} temporarily until the \code{pgamma_utils}-related device build issues clear. Pass \code{fallback = TRUE} on densities only if CPU recovery is acceptable. \code{rbeta_opencl} retains \code{FALSE}. See also \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
+#' Ignored when the runtime reports no OpenCL. All wrappers on this page default \code{FALSE} so OpenCL build/runtime faults surface unless you opt in (\code{fallback = TRUE}). Kernels overlapping \file{inst/cl/nmath/pgamma_utils.cl} can still be brittle on some devices; see \file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md} and \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param q Numeric vector of quantiles for \code{pbeta_opencl}; recycled like \code{stats::pbeta}.
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
@@ -176,7 +176,7 @@ pbeta_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(q)) {
@@ -269,7 +269,7 @@ qbeta_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(p)) {

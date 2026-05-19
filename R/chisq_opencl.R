@@ -94,7 +94,7 @@ pchisq_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(q)) {
@@ -167,7 +167,7 @@ qchisq_opencl <- function(
     lower.tail = TRUE,
     log.p = FALSE,
     opencl_parallel = NA,
-    fallback = TRUE,
+    fallback = FALSE,
     verbose = FALSE
 ) {
   if (!is.numeric(p)) {
@@ -227,7 +227,7 @@ qchisq_opencl <- function(
 
 #' @rdname chisq_opencl
 #' @export
-rchisq_opencl <- function(n, df, ncp = 0, fallback = TRUE, verbose = FALSE) {
+rchisq_opencl <- function(n, df, ncp = 0, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_scalar_num(df, "df", 0, Inf, open_lower = TRUE)
   .validate_scalar_num(ncp, "ncp", 0, Inf)
