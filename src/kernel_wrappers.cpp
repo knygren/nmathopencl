@@ -335,6 +335,220 @@ static void numeric_cols_ndrange_kernel_temp_fill(
   }
 }
 
+// Mixed ncp (some rows central, some non-central): partition rows, run up to two
+// vectored *_kernel_temp enqueues on packed buffers, scatter back into full `out`.
+static Rcpp::IntegerVector gather_int_at_ix(
+    const std::vector<int>& ix, const Rcpp::IntegerVector& v
+) {
+  const int nk = static_cast<int>(ix.size());
+  Rcpp::IntegerVector o(nk);
+  for (int j = 0; j < nk; ++j) {
+    o[j] = v[ix[static_cast<size_t>(j)]];
+  }
+  return o;
+}
+
+static Rcpp::NumericVector gather_num_at_ix(
+    const std::vector<int>& ix, const Rcpp::NumericVector& v
+) {
+  const int nk = static_cast<int>(ix.size());
+  Rcpp::NumericVector o(nk);
+  for (int j = 0; j < nk; ++j) {
+    o[j] = v[ix[static_cast<size_t>(j)]];
+  }
+  return o;
+}
+
+/** Partition row indices where ncp[i] == 0 (central) vs ncp[i] != 0. */
+static void ncp_partition_zero_vs_positive(
+    int len, const Rcpp::NumericVector& ncp, std::vector<int>* idx_z, std::vector<int>* idx_n
+) {
+  idx_z->clear();
+  idx_n->clear();
+  idx_z->reserve(static_cast<size_t>(len));
+  idx_n->reserve(static_cast<size_t>(len));
+  for (int i = 0; i < len; ++i) {
+    if (ncp[i] == 0.0)
+      idx_z->push_back(i);
+    else
+      idx_n->push_back(i);
+  }
+}
+
+// Mixed ncp vector: central kernels use three numeric buffers; non-central adds ncp (+4 cols).
+static void pq_mixed_ncp_three_four_ndrange_twopass(
+    const char* path_z,
+    const char* ker_z,
+    const char* path_n,
+    const char* ker_n,
+    int len,
+    const Rcpp::NumericVector& ncp,
+    const Rcpp::NumericVector& v0,
+    const Rcpp::NumericVector& v1,
+    const Rcpp::NumericVector& v2,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    Rcpp::NumericVector&       out,
+    bool                       verbose
+) {
+  std::vector<int> iz;
+  std::vector<int> in_;
+  ncp_partition_zero_vs_positive(len, ncp, &iz, &in_);
+  const int nz = static_cast<int>(iz.size());
+  const int nn = static_cast<int>(in_.size());
+
+  if (nz > 0) {
+    Rcpp::NumericVector az = gather_num_at_ix(iz, v0);
+    Rcpp::NumericVector bz = gather_num_at_ix(iz, v1);
+    Rcpp::NumericVector cz = gather_num_at_ix(iz, v2);
+    Rcpp::IntegerVector ltz = gather_int_at_ix(iz, lower_tail);
+    Rcpp::IntegerVector lpz = gather_int_at_ix(iz, log_p);
+    Rcpp::NumericVector oz(nz);
+    pq_tail_ndrange_kernel_temp_fill(
+        path_z, ker_z, nz, {&az, &bz, &cz}, ltz, lpz, oz, verbose);
+    for (int j = 0; j < nz; ++j) out[iz[static_cast<size_t>(j)]] = oz[j];
+  }
+  if (nn > 0) {
+    Rcpp::NumericVector an = gather_num_at_ix(in_, v0);
+    Rcpp::NumericVector bn = gather_num_at_ix(in_, v1);
+    Rcpp::NumericVector cn = gather_num_at_ix(in_, v2);
+    Rcpp::NumericVector nnv = gather_num_at_ix(in_, ncp);
+    Rcpp::IntegerVector ltn = gather_int_at_ix(in_, lower_tail);
+    Rcpp::IntegerVector lpn = gather_int_at_ix(in_, log_p);
+    Rcpp::NumericVector on(nn);
+    pq_tail_ndrange_kernel_temp_fill(
+        path_n, ker_n, nn, {&an, &bn, &cn, &nnv}, ltn, lpn, on, verbose);
+    for (int j = 0; j < nn; ++j) out[in_[static_cast<size_t>(j)]] = on[j];
+  }
+}
+
+// Mixed ncp vector: central two numeric buffers vs non-central three (adds ncp).
+static void pq_mixed_ncp_two_three_ndrange_twopass(
+    const char* path_z,
+    const char* ker_z,
+    const char* path_n,
+    const char* ker_n,
+    int len,
+    const Rcpp::NumericVector& ncp,
+    const Rcpp::NumericVector& v0,
+    const Rcpp::NumericVector& v1,
+    const Rcpp::IntegerVector& lower_tail,
+    const Rcpp::IntegerVector& log_p,
+    Rcpp::NumericVector&       out,
+    bool                       verbose
+) {
+  std::vector<int> iz;
+  std::vector<int> in_;
+  ncp_partition_zero_vs_positive(len, ncp, &iz, &in_);
+  const int nz = static_cast<int>(iz.size());
+  const int nn = static_cast<int>(in_.size());
+
+  if (nz > 0) {
+    Rcpp::NumericVector az = gather_num_at_ix(iz, v0);
+    Rcpp::NumericVector bz = gather_num_at_ix(iz, v1);
+    Rcpp::IntegerVector ltz = gather_int_at_ix(iz, lower_tail);
+    Rcpp::IntegerVector lpz = gather_int_at_ix(iz, log_p);
+    Rcpp::NumericVector oz(nz);
+    pq_tail_ndrange_kernel_temp_fill(path_z, ker_z, nz, {&az, &bz}, ltz, lpz, oz, verbose);
+    for (int j = 0; j < nz; ++j) out[iz[static_cast<size_t>(j)]] = oz[j];
+  }
+  if (nn > 0) {
+    Rcpp::NumericVector an = gather_num_at_ix(in_, v0);
+    Rcpp::NumericVector bn = gather_num_at_ix(in_, v1);
+    Rcpp::NumericVector nnv = gather_num_at_ix(in_, ncp);
+    Rcpp::IntegerVector ltn = gather_int_at_ix(in_, lower_tail);
+    Rcpp::IntegerVector lpn = gather_int_at_ix(in_, log_p);
+    Rcpp::NumericVector on(nn);
+    pq_tail_ndrange_kernel_temp_fill(path_n, ker_n, nn, {&an, &bn, &nnv}, ltn, lpn, on, verbose);
+    for (int j = 0; j < nn; ++j) out[in_[static_cast<size_t>(j)]] = on[j];
+  }
+}
+
+// Density with give_log: two numeric columns (central) vs three (non-central adds ncp).
+static void dg_mixed_ncp_two_three_ndrange_twopass(
+    const char* path_z,
+    const char* ker_z,
+    const char* path_n,
+    const char* ker_n,
+    int len,
+    const Rcpp::NumericVector& ncp,
+    const Rcpp::NumericVector& v0,
+    const Rcpp::NumericVector& v1,
+    const Rcpp::IntegerVector& give_log,
+    Rcpp::NumericVector& out,
+    bool                   verbose
+) {
+  std::vector<int> iz;
+  std::vector<int> in_;
+  ncp_partition_zero_vs_positive(len, ncp, &iz, &in_);
+  const int nz = static_cast<int>(iz.size());
+  const int nn = static_cast<int>(in_.size());
+
+  if (nz > 0) {
+    Rcpp::NumericVector az = gather_num_at_ix(iz, v0);
+    Rcpp::NumericVector bz = gather_num_at_ix(iz, v1);
+    Rcpp::IntegerVector glz = gather_int_at_ix(iz, give_log);
+    Rcpp::NumericVector oz(nz);
+    d_givelog_ndrange_kernel_temp_fill(path_z, ker_z, nz, {&az, &bz}, glz, oz, verbose);
+    for (int j = 0; j < nz; ++j) out[iz[static_cast<size_t>(j)]] = oz[j];
+  }
+  if (nn > 0) {
+    Rcpp::NumericVector an = gather_num_at_ix(in_, v0);
+    Rcpp::NumericVector bn = gather_num_at_ix(in_, v1);
+    Rcpp::NumericVector nc = gather_num_at_ix(in_, ncp);
+    Rcpp::IntegerVector gln = gather_int_at_ix(in_, give_log);
+    Rcpp::NumericVector on(nn);
+    d_givelog_ndrange_kernel_temp_fill(path_n, ker_n, nn, {&an, &bn, &nc}, gln, on, verbose);
+    for (int j = 0; j < nn; ++j) out[in_[static_cast<size_t>(j)]] = on[j];
+  }
+}
+
+/** df vs dnf: central (x,df1,df2); non-central OpenCL buffers are (x,df1,ncp,df2). */
+static void df_nf_mixed_ncp_ndrange_twopass(
+    int len,
+    const Rcpp::NumericVector& ncp,
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& df1,
+    const Rcpp::NumericVector& df2,
+    const Rcpp::IntegerVector& give_log,
+    Rcpp::NumericVector&       out,
+    bool                       verbose
+) {
+  std::vector<int> iz;
+  std::vector<int> in_;
+  ncp_partition_zero_vs_positive(len, ncp, &iz, &in_);
+  const int nz = static_cast<int>(iz.size());
+  const int nn = static_cast<int>(in_.size());
+
+  if (nz > 0) {
+    Rcpp::NumericVector xz = gather_num_at_ix(iz, x);
+    Rcpp::NumericVector df1z = gather_num_at_ix(iz, df1);
+    Rcpp::NumericVector df2z = gather_num_at_ix(iz, df2);
+    Rcpp::IntegerVector glz = gather_int_at_ix(iz, give_log);
+    Rcpp::NumericVector oz(nz);
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/df_kernel.cl", "df_kernel_temp", nz, {&xz, &df1z, &df2z}, glz, oz, verbose);
+    for (int j = 0; j < nz; ++j) out[iz[static_cast<size_t>(j)]] = oz[j];
+  }
+  if (nn > 0) {
+    Rcpp::NumericVector xn = gather_num_at_ix(in_, x);
+    Rcpp::NumericVector df1n = gather_num_at_ix(in_, df1);
+    Rcpp::NumericVector df2n = gather_num_at_ix(in_, df2);
+    Rcpp::NumericVector ncn = gather_num_at_ix(in_, ncp);
+    Rcpp::IntegerVector gln = gather_int_at_ix(in_, give_log);
+    Rcpp::NumericVector on(nn);
+    d_givelog_ndrange_kernel_temp_fill(
+        "src/dnf_kernel.cl",
+        "dnf_kernel_temp",
+        nn,
+        {&xn, &df1n, &ncn, &df2n},
+        gln,
+        on,
+        verbose);
+    for (int j = 0; j < nn; ++j) out[in_[static_cast<size_t>(j)]] = on[j];
+  }
+}
+
 #endif
 
 Rcpp::NumericVector r_pow_opencl(
@@ -975,28 +1189,20 @@ Rcpp::NumericVector pbeta_opencl(
           out,
           verbose);
     } else {
-      // Mixed ncp over rows: scalar launches (distinct kernel deps per row).
-      for (int i = 0; i < len; ++i) {
-        const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-        const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-        std::vector<double> out_flat;
-        if (ncp[i] == 0.0) {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/pbeta_kernel.cl"),
-              "pbeta_kernel",
-              {q[i], shape1[i], shape2[i], lt_d, lp_d},
-              1,
-              out_flat);
-        } else {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/pnbeta_kernel.cl"),
-              "pnbeta_kernel",
-              {q[i], shape1[i], shape2[i], ncp[i], lt_d, lp_d},
-              1,
-              out_flat);
-        }
-        out[i] = out_flat[0];
-      }
+      pq_mixed_ncp_three_four_ndrange_twopass(
+          "src/pbeta_kernel.cl",
+          "pbeta_kernel_temp",
+          "src/pnbeta_kernel.cl",
+          "pnbeta_kernel_temp",
+          len,
+          ncp,
+          q,
+          shape1,
+          shape2,
+          lower_tail,
+          log_p,
+          out,
+          verbose);
     }
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
@@ -1054,27 +1260,20 @@ Rcpp::NumericVector qbeta_opencl(
           out,
           verbose);
     } else {
-      for (int i = 0; i < len; ++i) {
-        const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-        const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-        std::vector<double> out_flat;
-        if (ncp[i] == 0.0) {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/qbeta_kernel.cl"),
-              "qbeta_kernel",
-              {p[i], shape1[i], shape2[i], lt_d, lp_d},
-              1,
-              out_flat);
-        } else {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/qnbeta_kernel.cl"),
-              "qnbeta_kernel",
-              {p[i], shape1[i], shape2[i], ncp[i], lt_d, lp_d},
-              1,
-              out_flat);
-        }
-        out[i] = out_flat[0];
-      }
+      pq_mixed_ncp_three_four_ndrange_twopass(
+          "src/qbeta_kernel.cl",
+          "qbeta_kernel_temp",
+          "src/qnbeta_kernel.cl",
+          "qnbeta_kernel_temp",
+          len,
+          ncp,
+          p,
+          shape1,
+          shape2,
+          lower_tail,
+          log_p,
+          out,
+          verbose);
     }
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
@@ -1255,26 +1454,18 @@ Rcpp::NumericVector dchisq_opencl(
           out,
           verbose);
     } else {
-      for (int i = 0; i < len; ++i) {
-        const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
-        std::vector<double> out_flat;
-        if (ncp[i] == 0.0) {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/dchisq_kernel.cl"),
-              "dchisq_kernel",
-              {x[i], df[i], gl_d, 0.0, 0.0},
-              1,
-              out_flat);
-        } else {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/dnchisq_kernel.cl"),
-              "dnchisq_kernel",
-              {x[i], df[i], ncp[i], gl_d, 0.0},
-              1,
-              out_flat);
-        }
-        out[i] = out_flat[0];
-      }
+      dg_mixed_ncp_two_three_ndrange_twopass(
+          "src/dchisq_kernel.cl",
+          "dchisq_kernel_temp",
+          "src/dnchisq_kernel.cl",
+          "dnchisq_kernel_temp",
+          len,
+          ncp,
+          x,
+          df,
+          give_log,
+          out,
+          verbose);
     }
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
@@ -1331,27 +1522,19 @@ Rcpp::NumericVector pchisq_opencl(
           out,
           verbose);
     } else {
-      for (int i = 0; i < len; ++i) {
-        const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-        const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-        std::vector<double> out_flat;
-        if (ncp[i] == 0.0) {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/pchisq_kernel.cl"),
-              "pchisq_kernel",
-              {q[i], df[i], lt_d, lp_d},
-              1,
-              out_flat);
-        } else {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/pnchisq_kernel.cl"),
-              "pnchisq_kernel",
-              {q[i], df[i], ncp[i], lt_d, lp_d},
-              1,
-              out_flat);
-        }
-        out[i] = out_flat[0];
-      }
+      pq_mixed_ncp_two_three_ndrange_twopass(
+          "src/pchisq_kernel.cl",
+          "pchisq_kernel_temp",
+          "src/pnchisq_kernel.cl",
+          "pnchisq_kernel_temp",
+          len,
+          ncp,
+          q,
+          df,
+          lower_tail,
+          log_p,
+          out,
+          verbose);
     }
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
@@ -1408,27 +1591,19 @@ Rcpp::NumericVector qchisq_opencl(
           out,
           verbose);
     } else {
-      for (int i = 0; i < len; ++i) {
-        const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-        const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-        std::vector<double> out_flat;
-        if (ncp[i] == 0.0) {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/qchisq_kernel.cl"),
-              "qchisq_kernel",
-              {p[i], df[i], lt_d, lp_d},
-              1,
-              out_flat);
-        } else {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/qnchisq_kernel.cl"),
-              "qnchisq_kernel",
-              {p[i], df[i], ncp[i], lt_d, lp_d},
-              1,
-              out_flat);
-        }
-        out[i] = out_flat[0];
-      }
+      pq_mixed_ncp_two_three_ndrange_twopass(
+          "src/qchisq_kernel.cl",
+          "qchisq_kernel_temp",
+          "src/qnchisq_kernel.cl",
+          "qnchisq_kernel_temp",
+          len,
+          ncp,
+          p,
+          df,
+          lower_tail,
+          log_p,
+          out,
+          verbose);
     }
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
@@ -1513,26 +1688,7 @@ Rcpp::NumericVector df_opencl(
           out,
           verbose);
     } else {
-      for (int i = 0; i < len; ++i) {
-        const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
-        std::vector<double> out_flat;
-        if (ncp[i] == 0.0) {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/df_kernel.cl"),
-              "df_kernel",
-              {x[i], df1[i], df2[i], gl_d, 0.0},
-              1,
-              out_flat);
-        } else {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/dnf_kernel.cl"),
-              "dnf_kernel",
-              {x[i], df1[i], ncp[i], df2[i], gl_d},
-              1,
-              out_flat);
-        }
-        out[i] = out_flat[0];
-      }
+      df_nf_mixed_ncp_ndrange_twopass(len, ncp, x, df1, df2, give_log, out, verbose);
     }
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
@@ -1590,27 +1746,20 @@ Rcpp::NumericVector pf_opencl(
           out,
           verbose);
     } else {
-      for (int i = 0; i < len; ++i) {
-        const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-        const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-        std::vector<double> out_flat;
-        if (ncp[i] == 0.0) {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/pf_kernel.cl"),
-              "pf_kernel",
-              {q[i], df1[i], df2[i], lt_d, lp_d},
-              1,
-              out_flat);
-        } else {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/pnf_kernel.cl"),
-              "pnf_kernel",
-              {q[i], df1[i], df2[i], ncp[i], lt_d, lp_d},
-              1,
-              out_flat);
-        }
-        out[i] = out_flat[0];
-      }
+      pq_mixed_ncp_three_four_ndrange_twopass(
+          "src/pf_kernel.cl",
+          "pf_kernel_temp",
+          "src/pnf_kernel.cl",
+          "pnf_kernel_temp",
+          len,
+          ncp,
+          q,
+          df1,
+          df2,
+          lower_tail,
+          log_p,
+          out,
+          verbose);
     }
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
@@ -1668,27 +1817,20 @@ Rcpp::NumericVector qf_opencl(
           out,
           verbose);
     } else {
-      for (int i = 0; i < len; ++i) {
-        const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-        const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-        std::vector<double> out_flat;
-        if (ncp[i] == 0.0) {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/qf_kernel.cl"),
-              "qf_kernel",
-              {p[i], df1[i], df2[i], lt_d, lp_d},
-              1,
-              out_flat);
-        } else {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/qnf_kernel.cl"),
-              "qnf_kernel",
-              {p[i], df1[i], df2[i], ncp[i], lt_d, lp_d},
-              1,
-              out_flat);
-        }
-        out[i] = out_flat[0];
-      }
+      pq_mixed_ncp_three_four_ndrange_twopass(
+          "src/qf_kernel.cl",
+          "qf_kernel_temp",
+          "src/qnf_kernel.cl",
+          "qnf_kernel_temp",
+          len,
+          ncp,
+          p,
+          df1,
+          df2,
+          lower_tail,
+          log_p,
+          out,
+          verbose);
     }
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
@@ -1757,26 +1899,18 @@ Rcpp::NumericVector dt_opencl(
           out,
           verbose);
     } else {
-      for (int i = 0; i < len; ++i) {
-        const double gl_d = (give_log[i] != 0) ? 1.0 : 0.0;
-        std::vector<double> out_flat;
-        if (ncp[i] == 0.0) {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/dt_kernel.cl"),
-              "dt_kernel",
-              {x[i], df[i], gl_d, 0.0, 0.0},
-              1,
-              out_flat);
-        } else {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/dnt_kernel.cl"),
-              "dnt_kernel",
-              {x[i], df[i], ncp[i], gl_d, 0.0},
-              1,
-              out_flat);
-        }
-        out[i] = out_flat[0];
-      }
+      dg_mixed_ncp_two_three_ndrange_twopass(
+          "src/dt_kernel.cl",
+          "dt_kernel_temp",
+          "src/dnt_kernel.cl",
+          "dnt_kernel_temp",
+          len,
+          ncp,
+          x,
+          df,
+          give_log,
+          out,
+          verbose);
     }
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
@@ -1833,27 +1967,19 @@ Rcpp::NumericVector pt_opencl(
           out,
           verbose);
     } else {
-      for (int i = 0; i < len; ++i) {
-        const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-        const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-        std::vector<double> out_flat;
-        if (ncp[i] == 0.0) {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/pt_kernel.cl"),
-              "pt_kernel",
-              {q[i], df[i], lt_d, lp_d},
-              1,
-              out_flat);
-        } else {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/pnt_kernel.cl"),
-              "pnt_kernel",
-              {q[i], df[i], ncp[i], lt_d, lp_d},
-              1,
-              out_flat);
-        }
-        out[i] = out_flat[0];
-      }
+      pq_mixed_ncp_two_three_ndrange_twopass(
+          "src/pt_kernel.cl",
+          "pt_kernel_temp",
+          "src/pnt_kernel.cl",
+          "pnt_kernel_temp",
+          len,
+          ncp,
+          q,
+          df,
+          lower_tail,
+          log_p,
+          out,
+          verbose);
     }
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
@@ -1910,27 +2036,19 @@ Rcpp::NumericVector qt_opencl(
           out,
           verbose);
     } else {
-      for (int i = 0; i < len; ++i) {
-        const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-        const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-        std::vector<double> out_flat;
-        if (ncp[i] == 0.0) {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/qt_kernel.cl"),
-              "qt_kernel",
-              {p[i], df[i], lt_d, lp_d},
-              1,
-              out_flat);
-        } else {
-          opencl_dbl_scalar_kernel_runner(
-              build_rmath_program_indexed("src/qnt_kernel.cl"),
-              "qnt_kernel",
-              {p[i], df[i], ncp[i], lt_d, lp_d},
-              1,
-              out_flat);
-        }
-        out[i] = out_flat[0];
-      }
+      pq_mixed_ncp_two_three_ndrange_twopass(
+          "src/qt_kernel.cl",
+          "qt_kernel_temp",
+          "src/qnt_kernel.cl",
+          "qnt_kernel_temp",
+          len,
+          ncp,
+          p,
+          df,
+          lower_tail,
+          log_p,
+          out,
+          verbose);
     }
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
