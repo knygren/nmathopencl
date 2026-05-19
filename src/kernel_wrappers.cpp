@@ -730,22 +730,6 @@ Rcpp::NumericVector pnorm_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    // -------------------------------------------------------------------------
-    // Serial path (opencl_dbl_scalar_kernel_runner + pnorm_kernel), retained for revert:
-    //
-    // for (int i = 0; i < len; ++i) {
-    //   const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-    //   const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-    //   std::vector<double> out_flat;
-    //   opencl_dbl_scalar_kernel_runner(
-    //       build_rmath_program_indexed("src/pnorm_kernel.cl"),
-    //       "pnorm_kernel",
-    //       {q[i], mean[i], sd[i], lt_d, lp_d},
-    //       1,
-    //       out_flat);
-    //   out[i] = out_flat[0];
-    // }
-    // -------------------------------------------------------------------------
     pq_tail_ndrange_kernel_temp_fill(
         "src/pnorm_kernel.cl",
         "pnorm_kernel_temp",
@@ -904,20 +888,6 @@ Rcpp::NumericVector punif_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/punif_kernel.cl"),
-          "punif_kernel",
-          {q[i], min[i], max[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/punif_kernel.cl",
         "punif_kernel_temp",
@@ -1042,20 +1012,6 @@ Rcpp::NumericVector pgamma_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/pgamma_kernel.cl"),
-          "pgamma_kernel",
-          {q[i], shape[i], scale[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/pgamma_kernel.cl",
         "pgamma_kernel_temp",
@@ -1206,29 +1162,6 @@ Rcpp::NumericVector pbeta_opencl(
   }
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      if (ncp[i] == 0.0) {
-        opencl_dbl_scalar_kernel_runner(
-            build_rmath_program_indexed("src/pbeta_kernel.cl"),
-            "pbeta_kernel",
-            {q[i], shape1[i], shape2[i], lt_d, lp_d},
-            1,
-            out_flat);
-      } else {
-        opencl_dbl_scalar_kernel_runner(
-            build_rmath_program_indexed("src/pnbeta_kernel.cl"),
-            "pnbeta_kernel",
-            {q[i], shape1[i], shape2[i], ncp[i], lt_d, lp_d},
-            1,
-            out_flat);
-      }
-      out[i] = out_flat[0];
-    }
-    */
     if (all_ncp_zero) {
       pq_tail_ndrange_kernel_temp_fill(
           "src/pbeta_kernel.cl",
@@ -1457,20 +1390,6 @@ Rcpp::NumericVector plnorm_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/plnorm_kernel.cl"),
-          "plnorm_kernel",
-          {q[i], meanlog[i], sdlog[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/plnorm_kernel.cl",
         "plnorm_kernel_temp",
@@ -1671,29 +1590,6 @@ Rcpp::NumericVector pchisq_opencl(
   }
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      if (ncp[i] == 0.0) {
-        opencl_dbl_scalar_kernel_runner(
-            build_rmath_program_indexed("src/pchisq_kernel.cl"),
-            "pchisq_kernel",
-            {q[i], df[i], lt_d, lp_d},
-            1,
-            out_flat);
-      } else {
-        opencl_dbl_scalar_kernel_runner(
-            build_rmath_program_indexed("src/pnchisq_kernel.cl"),
-            "pnchisq_kernel",
-            {q[i], df[i], ncp[i], lt_d, lp_d},
-            1,
-            out_flat);
-      }
-      out[i] = out_flat[0];
-    }
-    */
     if (all_ncp_zero) {
       pq_tail_ndrange_kernel_temp_fill(
           "src/pchisq_kernel.cl",
@@ -1998,29 +1894,6 @@ Rcpp::NumericVector pf_opencl(
   }
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      if (ncp[i] == 0.0) {
-        opencl_dbl_scalar_kernel_runner(
-            build_rmath_program_indexed("src/pf_kernel.cl"),
-            "pf_kernel",
-            {q[i], df1[i], df2[i], lt_d, lp_d},
-            1,
-            out_flat);
-      } else {
-        opencl_dbl_scalar_kernel_runner(
-            build_rmath_program_indexed("src/pnf_kernel.cl"),
-            "pnf_kernel",
-            {q[i], df1[i], df2[i], ncp[i], lt_d, lp_d},
-            1,
-            out_flat);
-      }
-      out[i] = out_flat[0];
-    }
-    */
     if (all_ncp_zero) {
       pq_tail_ndrange_kernel_temp_fill(
           "src/pf_kernel.cl",
@@ -2309,29 +2182,6 @@ Rcpp::NumericVector pt_opencl(
   }
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      if (ncp[i] == 0.0) {
-        opencl_dbl_scalar_kernel_runner(
-            build_rmath_program_indexed("src/pt_kernel.cl"),
-            "pt_kernel",
-            {q[i], df[i], lt_d, lp_d},
-            1,
-            out_flat);
-      } else {
-        opencl_dbl_scalar_kernel_runner(
-            build_rmath_program_indexed("src/pnt_kernel.cl"),
-            "pnt_kernel",
-            {q[i], df[i], ncp[i], lt_d, lp_d},
-            1,
-            out_flat);
-      }
-      out[i] = out_flat[0];
-    }
-    */
     if (all_ncp_zero) {
       pq_tail_ndrange_kernel_temp_fill(
           "src/pt_kernel.cl",
@@ -2603,20 +2453,6 @@ Rcpp::NumericVector pbinom_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/pbinom_kernel.cl"),
-          "pbinom_kernel",
-          {q[i], size[i], prob[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/pbinom_kernel.cl",
         "pbinom_kernel_temp",
@@ -2694,20 +2530,6 @@ Rcpp::NumericVector pnbinom_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/pnbinom_kernel.cl"),
-          "pnbinom_kernel",
-          {q[i], size[i], prob[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/pnbinom_kernel.cl",
         "pnbinom_kernel_temp",
@@ -2847,20 +2669,6 @@ Rcpp::NumericVector pnbinom_mu_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/pnbinom_mu_kernel.cl"),
-          "pnbinom_mu_kernel",
-          {q[i], size[i], mu[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/pnbinom_mu_kernel.cl",
         "pnbinom_mu_kernel_temp",
@@ -2953,20 +2761,6 @@ Rcpp::NumericVector pcauchy_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/pcauchy_kernel.cl"),
-          "pcauchy_kernel",
-          {q[i], location[i], scale[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/pcauchy_kernel.cl",
         "pcauchy_kernel_temp",
@@ -3104,20 +2898,6 @@ Rcpp::NumericVector pexp_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/pexp_kernel.cl"),
-          "pexp_kernel",
-          {q[i], rate[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/pexp_kernel.cl",
         "pexp_kernel_temp",
@@ -3239,20 +3019,6 @@ Rcpp::NumericVector pgeom_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/pgeom_kernel.cl"),
-          "pgeom_kernel",
-          {q[i], prob[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/pgeom_kernel.cl",
         "pgeom_kernel_temp",
@@ -3393,20 +3159,6 @@ Rcpp::NumericVector phyper_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/phyper_kernel.cl"),
-          "phyper_kernel",
-          {q[i], m[i], n_black[i], k[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/phyper_kernel.cl",
         "phyper_kernel_temp",
@@ -3681,20 +3433,6 @@ Rcpp::NumericVector ppois_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/ppois_kernel.cl"),
-          "ppois_kernel",
-          {q[i], lambda[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/ppois_kernel.cl",
         "ppois_kernel_temp",
@@ -3849,20 +3587,6 @@ Rcpp::NumericVector pweibull_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/pweibull_kernel.cl"),
-          "pweibull_kernel",
-          {q[i], shape[i], scale[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/pweibull_kernel.cl",
         "pweibull_kernel_temp",
@@ -4002,20 +3726,6 @@ Rcpp::NumericVector plogis_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/plogis_kernel.cl"),
-          "plogis_kernel",
-          {q[i], location[i], scale[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/plogis_kernel.cl",
         "plogis_kernel_temp",
@@ -4157,20 +3867,6 @@ Rcpp::NumericVector ptukey_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/ptukey_kernel.cl"),
-          "ptukey_kernel",
-          {q[i], nmeans[i], df[i], nranges[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/ptukey_kernel.cl",
         "ptukey_kernel_temp",
@@ -4296,20 +3992,6 @@ Rcpp::NumericVector pwilcox_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/pwilcox_kernel.cl"),
-          "pwilcox_kernel",
-          {q[i], m[i], n2[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/pwilcox_kernel.cl",
         "pwilcox_kernel_temp",
@@ -4432,20 +4114,6 @@ Rcpp::NumericVector psignrank_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/psignrank_kernel.cl"),
-          "psignrank_kernel",
-          {q[i], nsize[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/psignrank_kernel.cl",
         "psignrank_kernel_temp",
