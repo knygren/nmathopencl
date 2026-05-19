@@ -784,20 +784,6 @@ Rcpp::NumericVector qnorm_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/qnorm_kernel.cl"),
-          "qnorm_kernel",
-          {p[i], mean[i], sd[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/qnorm_kernel.cl",
         "qnorm_kernel_temp",
@@ -895,20 +881,6 @@ Rcpp::NumericVector qunif_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/qunif_kernel.cl"),
-          "qunif_kernel",
-          {p[i], min[i], max[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/qunif_kernel.cl",
         "qunif_kernel_temp",
@@ -1006,20 +978,6 @@ Rcpp::NumericVector qgamma_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/qgamma_kernel.cl"),
-          "qgamma_kernel",
-          {p[i], shape[i], scale[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/qgamma_kernel.cl",
         "qgamma_kernel_temp",
@@ -1189,29 +1147,6 @@ Rcpp::NumericVector qbeta_opencl(
   }
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      if (ncp[i] == 0.0) {
-        opencl_dbl_scalar_kernel_runner(
-            build_rmath_program_indexed("src/qbeta_kernel.cl"),
-            "qbeta_kernel",
-            {p[i], shape1[i], shape2[i], lt_d, lp_d},
-            1,
-            out_flat);
-      } else {
-        opencl_dbl_scalar_kernel_runner(
-            build_rmath_program_indexed("src/qnbeta_kernel.cl"),
-            "qnbeta_kernel",
-            {p[i], shape1[i], shape2[i], ncp[i], lt_d, lp_d},
-            1,
-            out_flat);
-      }
-      out[i] = out_flat[0];
-    }
-    */
     if (all_ncp_zero) {
       pq_tail_ndrange_kernel_temp_fill(
           "src/qbeta_kernel.cl",
@@ -1358,20 +1293,6 @@ Rcpp::NumericVector qlnorm_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/qlnorm_kernel.cl"),
-          "qlnorm_kernel",
-          {p[i], meanlog[i], sdlog[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/qlnorm_kernel.cl",
         "qlnorm_kernel_temp",
@@ -1580,29 +1501,6 @@ Rcpp::NumericVector qchisq_opencl(
   }
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      if (ncp[i] == 0.0) {
-        opencl_dbl_scalar_kernel_runner(
-            build_rmath_program_indexed("src/qchisq_kernel.cl"),
-            "qchisq_kernel",
-            {p[i], df[i], lt_d, lp_d},
-            1,
-            out_flat);
-      } else {
-        opencl_dbl_scalar_kernel_runner(
-            build_rmath_program_indexed("src/qnchisq_kernel.cl"),
-            "qnchisq_kernel",
-            {p[i], df[i], ncp[i], lt_d, lp_d},
-            1,
-            out_flat);
-      }
-      out[i] = out_flat[0];
-    }
-    */
     if (all_ncp_zero) {
       pq_tail_ndrange_kernel_temp_fill(
           "src/qchisq_kernel.cl",
@@ -1863,29 +1761,6 @@ Rcpp::NumericVector qf_opencl(
   }
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      if (ncp[i] == 0.0) {
-        opencl_dbl_scalar_kernel_runner(
-            build_rmath_program_indexed("src/qf_kernel.cl"),
-            "qf_kernel",
-            {p[i], df1[i], df2[i], lt_d, lp_d},
-            1,
-            out_flat);
-      } else {
-        opencl_dbl_scalar_kernel_runner(
-            build_rmath_program_indexed("src/qnf_kernel.cl"),
-            "qnf_kernel",
-            {p[i], df1[i], df2[i], ncp[i], lt_d, lp_d},
-            1,
-            out_flat);
-      }
-      out[i] = out_flat[0];
-    }
-    */
     if (all_ncp_zero) {
       pq_tail_ndrange_kernel_temp_fill(
           "src/qf_kernel.cl",
@@ -2128,29 +2003,6 @@ Rcpp::NumericVector qt_opencl(
   }
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      if (ncp[i] == 0.0) {
-        opencl_dbl_scalar_kernel_runner(
-            build_rmath_program_indexed("src/qt_kernel.cl"),
-            "qt_kernel",
-            {p[i], df[i], lt_d, lp_d},
-            1,
-            out_flat);
-      } else {
-        opencl_dbl_scalar_kernel_runner(
-            build_rmath_program_indexed("src/qnt_kernel.cl"),
-            "qnt_kernel",
-            {p[i], df[i], ncp[i], lt_d, lp_d},
-            1,
-            out_flat);
-      }
-      out[i] = out_flat[0];
-    }
-    */
     if (all_ncp_zero) {
       pq_tail_ndrange_kernel_temp_fill(
           "src/qt_kernel.cl",
@@ -2393,20 +2245,6 @@ Rcpp::NumericVector qnbinom_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/qnbinom_kernel.cl"),
-          "qnbinom_kernel",
-          {p[i], size[i], prob[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/qnbinom_kernel.cl",
         "qnbinom_kernel_temp",
@@ -2598,20 +2436,6 @@ Rcpp::NumericVector qcauchy_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/qcauchy_kernel.cl"),
-          "qcauchy_kernel",
-          {p[i], location[i], scale[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/qcauchy_kernel.cl",
         "qcauchy_kernel_temp",
@@ -2721,20 +2545,6 @@ Rcpp::NumericVector qexp_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/qexp_kernel.cl"),
-          "qexp_kernel",
-          {p[i], rate[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/qexp_kernel.cl",
         "qexp_kernel_temp",
@@ -2829,20 +2639,6 @@ Rcpp::NumericVector qgeom_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/qgeom_kernel.cl"),
-          "qgeom_kernel",
-          {p[i], prob[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/qgeom_kernel.cl",
         "qgeom_kernel_temp",
@@ -2958,20 +2754,6 @@ Rcpp::NumericVector qhyper_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/qhyper_kernel.cl"),
-          "qhyper_kernel",
-          {p[i], r[i], b[i], n1[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/qhyper_kernel.cl",
         "qhyper_kernel_temp",
@@ -3020,20 +2802,6 @@ Rcpp::NumericVector qbinom_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/qbinom_kernel.cl"),
-          "qbinom_kernel",
-          {size[i], prob[i], p[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/qbinom_kernel.cl",
         "qbinom_kernel_temp",
@@ -3066,20 +2834,6 @@ Rcpp::NumericVector qpois_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/qpois_kernel.cl"),
-          "qpois_kernel",
-          {p[i], lambda[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/qpois_kernel.cl",
         "qpois_kernel_temp",
@@ -3205,20 +2959,6 @@ Rcpp::NumericVector qnbinom_mu_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/qnbinom_mu_kernel.cl"),
-          "qnbinom_mu_kernel",
-          {p[i], size[i], mu[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/qnbinom_mu_kernel.cl",
         "qnbinom_mu_kernel_temp",
@@ -3346,20 +3086,6 @@ Rcpp::NumericVector qweibull_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/qweibull_kernel.cl"),
-          "qweibull_kernel",
-          {p[i], shape[i], scale[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/qweibull_kernel.cl",
         "qweibull_kernel_temp",
@@ -3472,20 +3198,6 @@ Rcpp::NumericVector qlogis_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/qlogis_kernel.cl"),
-          "qlogis_kernel",
-          {p[i], location[i], scale[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/qlogis_kernel.cl",
         "qlogis_kernel_temp",
@@ -3601,20 +3313,6 @@ Rcpp::NumericVector qtukey_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/qtukey_kernel.cl"),
-          "qtukey_kernel",
-          {p[i], nmeans[i], df[i], nranges[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/qtukey_kernel.cl",
         "qtukey_kernel_temp",
@@ -3712,20 +3410,6 @@ Rcpp::NumericVector qwilcox_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/qwilcox_kernel.cl"),
-          "qwilcox_kernel",
-          {p[i], m[i], n2[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/qwilcox_kernel.cl",
         "qwilcox_kernel_temp",
@@ -3820,20 +3504,6 @@ Rcpp::NumericVector qsignrank_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    /*
-    for (int i = 0; i < len; ++i) {
-      const double lt_d = (lower_tail[i] != 0) ? 1.0 : 0.0;
-      const double lp_d = (log_p[i] != 0) ? 1.0 : 0.0;
-      std::vector<double> out_flat;
-      opencl_dbl_scalar_kernel_runner(
-          build_rmath_program_indexed("src/qsignrank_kernel.cl"),
-          "qsignrank_kernel",
-          {p[i], nsize[i], lt_d, lp_d},
-          1,
-          out_flat);
-      out[i] = out_flat[0];
-    }
-    */
     pq_tail_ndrange_kernel_temp_fill(
         "src/qsignrank_kernel.cl",
         "qsignrank_kernel_temp",

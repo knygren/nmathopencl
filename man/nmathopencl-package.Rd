@@ -6,7 +6,7 @@
 \alias{nmathopencl}
 \title{nmathopencl: OpenCL-Ported R Math Library for GPU-Accelerated Packages}
 \description{
-\code{nmathopencl} provides OpenCL-ported versions of R's internal \code{nmath} and
+\pkg{nmathopencl} provides OpenCL-ported versions of R's internal \code{nmath} and
 \code{R_ext} math routines, enabling downstream R packages to build custom
 GPU-accelerated kernels that call the same statistical distribution functions
 available in base R. The package is intended as a \strong{developer library}: users
@@ -22,7 +22,7 @@ assemble them into an OpenCL program using \code{load_kernel_library()}.
 
 The package also ships \code{\link{Ex_EnvelopeEval}} and its supporting
 functions (\code{Ex_glmbfamfunc}, \code{Ex_glmb_Standardize_Model}, \code{Ex_EnvelopeSize}) as a
-worked example of how a downstream package—here the \code{glmbayes} Bayesian GLM
+worked example of how a downstream package—here the \pkg{glmbayes} Bayesian GLM
 sampler—builds a custom kernel on top of the ported nmath routines. See
 \code{system.file("examples", "Ex_EnvelopeEval.R", package = "nmathopencl")}
 and the vignette \emph{GPU Acceleration} for a complete walkthrough.
