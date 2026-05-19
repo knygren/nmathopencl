@@ -36,3 +36,6 @@ stamp-h1
 
 # Editor / autoconf backup files
 *~
+
+# Built executables under tools/ (local builds; do not commit)
+tools/**/*.exe

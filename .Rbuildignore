@@ -32,3 +32,4 @@
 ^\.positai$
 ^\.claude$
 ^CRAN-SUBMISSION$
+^tools/.*\.exe$
