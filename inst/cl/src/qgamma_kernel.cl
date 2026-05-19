@@ -19,3 +19,19 @@ __kernel void qgamma_kernel(
     if (get_global_id(0) != 0) return;
     for (int i = 0; i < n; ++i) out[i] = qgamma(p, shape, scale, lt_i, lp_i);
 }
+
+__kernel void qgamma_kernel_temp(
+    __global const double* p,
+    __global const double* shape,
+    __global const double* scale,
+    __global const int* lower_tail,
+    __global const int* log_p,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    int lt = (lower_tail[i] != 0) ? 1 : 0;
+    int lp = (log_p[i] != 0) ? 1 : 0;
+    out[i] = qgamma(p[i], shape[i], scale[i], lt, lp);
+}

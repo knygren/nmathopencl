@@ -19,3 +19,19 @@ __kernel void qbinom_kernel(
     if (get_global_id(0) != 0) return;
     for (int i = 0; i < n; ++i) out[i] = qbinom(p, size, prob, lt_i, lp_i);
 }
+
+__kernel void qbinom_kernel_temp(
+    __global const double* size,
+    __global const double* prob,
+    __global const double* p,
+    __global const int* lower_tail,
+    __global const int* log_p,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    int lt = (lower_tail[i] != 0) ? 1 : 0;
+    int lp = (log_p[i] != 0) ? 1 : 0;
+    out[i] = qbinom(p[i], size[i], prob[i], lt, lp);
+}

@@ -19,3 +19,19 @@ __kernel void qbeta_kernel(
     if (get_global_id(0) != 0) return;
     for (int i = 0; i < n; ++i) out[i] = qbeta(p, a, b, lt_i, lp_i);
 }
+
+__kernel void qbeta_kernel_temp(
+    __global const double* p,
+    __global const double* a,
+    __global const double* b,
+    __global const int* lower_tail,
+    __global const int* log_p,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    int lt = (lower_tail[i] != 0) ? 1 : 0;
+    int lp = (log_p[i] != 0) ? 1 : 0;
+    out[i] = qbeta(p[i], a[i], b[i], lt, lp);
+}

@@ -20,3 +20,20 @@ __kernel void qnf_kernel(
     if (get_global_id(0) != 0) return;
     for (int i = 0; i < n; ++i) out[i] = qnf(p, df1, df2, ncp, lt_i, lp_i);
 }
+
+__kernel void qnf_kernel_temp(
+    __global const double* p,
+    __global const double* df1,
+    __global const double* df2,
+    __global const double* ncp,
+    __global const int* lower_tail,
+    __global const int* log_p,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    int lt = (lower_tail[i] != 0) ? 1 : 0;
+    int lp = (log_p[i] != 0) ? 1 : 0;
+    out[i] = qnf(p[i], df1[i], df2[i], ncp[i], lt, lp);
+}

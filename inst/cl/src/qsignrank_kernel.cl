@@ -18,3 +18,18 @@ __kernel void qsignrank_kernel(
     if (get_global_id(0) != 0) return;
     for (int i = 0; i < n; ++i) out[i] = qsignrank(p, nsize, lt_i, lp_i);
 }
+
+__kernel void qsignrank_kernel_temp(
+    __global const double* p,
+    __global const double* nsize,
+    __global const int* lower_tail,
+    __global const int* log_p,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    int lt = (lower_tail[i] != 0) ? 1 : 0;
+    int lp = (log_p[i] != 0) ? 1 : 0;
+    out[i] = qsignrank(p[i], nsize[i], lt, lp);
+}

@@ -19,3 +19,19 @@ __kernel void qf_kernel(
     if (get_global_id(0) != 0) return;
     for (int i = 0; i < n; ++i) out[i] = qf(p, df1, df2, lt_i, lp_i);
 }
+
+__kernel void qf_kernel_temp(
+    __global const double* p,
+    __global const double* df1,
+    __global const double* df2,
+    __global const int* lower_tail,
+    __global const int* log_p,
+    __global double* out,
+    const int len
+) {
+    int i = get_global_id(0);
+    if (i >= len) return;
+    int lt = (lower_tail[i] != 0) ? 1 : 0;
+    int lp = (log_p[i] != 0) ? 1 : 0;
+    out[i] = qf(p[i], df1[i], df2[i], lt, lp);
+}
