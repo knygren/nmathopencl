@@ -6,20 +6,6 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void dbinom_raw_kernel(
-    const double x,
-    const double n_size,
-    const double prob,
-    const double qprob,
-    const double give_log_d,
-    __global double* out,
-    const int n
-) {
-    if (get_global_id(0) != 0) return;
-    const int give_log = (give_log_d != 0.0) ? 1 : 0;
-    for (int i = 0; i < n; ++i) out[i] = dbinom_raw(x, n_size, prob, qprob, give_log);
-}
-
 __kernel void dbinom_raw_kernel_temp(
     __global const double* x,
     __global const double* n_size,

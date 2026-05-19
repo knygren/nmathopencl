@@ -5,20 +5,6 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void dnbeta_kernel(
-    const double x,
-    const double a,
-    const double ncp,
-    const double b,
-    const double give_log_d,
-    __global double* out,
-    const int n
-) {
-    if (get_global_id(0) != 0) return;
-    const int give_log = (give_log_d != 0.0) ? 1 : 0;
-    for (int i = 0; i < n; ++i) out[i] = dnbeta(x, a, b, ncp, give_log);
-}
-
 __kernel void dnbeta_kernel_temp(
     __global const double* x,
     __global const double* a,
