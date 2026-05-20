@@ -58,7 +58,7 @@ rpois_opencl(n, lambda, fallback = FALSE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. Density \code{dpois_*} wrappers default \code{FALSE}; \code{ppois_opencl} defaults \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}); \code{qpois_opencl} and \code{rpois_opencl} default \code{FALSE}.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. Density \code{dpois_*} wrappers default \code{FALSE}; \code{ppois_opencl} defaults \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md}); \code{qpois_opencl} and \code{rpois_opencl} default \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 

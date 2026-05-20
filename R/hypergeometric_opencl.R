@@ -10,7 +10,7 @@
 #' @param m Number of white balls in the urn (must be >= 0).
 #' @param n_black Number of black balls in the urn (must be >= 0).
 #' @param k Number of draws (must be >= 0).
-#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. \code{dhyper_opencl} defaults \code{FALSE}; \code{phyper_opencl} and \code{rhyper_opencl} default \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}); \code{qhyper_opencl} defaults \code{FALSE}.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. \code{dhyper_opencl} defaults \code{FALSE}; \code{phyper_opencl} and \code{rhyper_opencl} default \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md}); \code{qhyper_opencl} defaults \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}

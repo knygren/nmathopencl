@@ -15,14 +15,14 @@ namespace nmathopencl {
 static std::string build_rmath_program_indexed(const std::string& kernel_rel_path);
 static void opencl_serial_scalar_draws(
     const std::string& kernel_rel_path,
-    const char* kernel_temp_name,
+    const char* kernel_name,
     const std::vector<double>& dargs,
     int n_out,
     Rcpp::NumericVector& out,
     bool verbose);
 static void d_givelog_ndrange_kernel_fill(
     const char* kernel_rel_path,
-    const char* kernel_temp_name,
+    const char* kernel_name,
     int len,
     const std::vector<const Rcpp::NumericVector*>& numeric_args,
     const Rcpp::IntegerVector& give_log,
@@ -30,7 +30,7 @@ static void d_givelog_ndrange_kernel_fill(
     bool verbose);
 static void pq_tail_ndrange_kernel_fill(
     const char* kernel_rel_path,
-    const char* kernel_temp_name,
+    const char* kernel_name,
     int len,
     const std::vector<const Rcpp::NumericVector*>& numeric_args,
     const Rcpp::IntegerVector& lower_tail,
@@ -39,7 +39,7 @@ static void pq_tail_ndrange_kernel_fill(
     bool verbose);
 static void numeric_cols_ndrange_kernel_fill(
     const char*                                          kernel_rel_path,
-    const char*                                          kernel_temp_name,
+    const char*                                          kernel_name,
     int                                                  len,
     const std::vector<const Rcpp::NumericVector*>&        numeric_args,
     Rcpp::NumericVector&                                 out,
@@ -213,7 +213,7 @@ static std::string build_rmath_program_indexed(const std::string& kernel_rel_pat
 // Match d/p/q: build program once, then enqueue the canonical *_kernel (serial RNG inner loop).
 static void opencl_serial_scalar_draws(
     const std::string& kernel_rel_path,
-    const char* kernel_temp_name,
+    const char* kernel_name,
     const std::vector<double>& dargs,
     int n_out,
     Rcpp::NumericVector& out,
@@ -231,7 +231,7 @@ static void opencl_serial_scalar_draws(
     }
     */
     std::vector<double> flat(static_cast<size_t>(n_out));
-    opencl_dbl_scalar_kernel_runner(all_src, kernel_temp_name, dargs, n_out, flat);
+    opencl_dbl_scalar_kernel_runner(all_src, kernel_name, dargs, n_out, flat);
     for (int i = 0; i < n_out; ++i) {
       out[i] = flat[static_cast<size_t>(i)];
     }
@@ -255,7 +255,7 @@ static std::vector<std::vector<double>> pq_pack_numeric_cols_for_tail(
 
 static void pq_tail_ndrange_kernel_fill(
     const char* kernel_rel_path,
-    const char* kernel_temp_name,
+    const char* kernel_name,
     int len,
     const std::vector<const Rcpp::NumericVector*>& numeric_args,
     const Rcpp::IntegerVector& lower_tail,
@@ -271,7 +271,7 @@ static void pq_tail_ndrange_kernel_fill(
   std::vector<double> out_flat;
   opencl_pq_tail_kernel_runner(
       build_rmath_program_indexed(kernel_rel_path),
-      kernel_temp_name,
+      kernel_name,
       len,
       arg_cols,
       lt,
@@ -284,7 +284,7 @@ static void pq_tail_ndrange_kernel_fill(
 
 static void d_givelog_ndrange_kernel_fill(
     const char*                                            kernel_rel_path,
-    const char*                                            kernel_temp_name,
+    const char*                                            kernel_name,
     int                                                    len,
     const std::vector<const Rcpp::NumericVector*>&          numeric_args,
     const Rcpp::IntegerVector&                             give_log,
@@ -298,7 +298,7 @@ static void d_givelog_ndrange_kernel_fill(
   std::vector<double> out_flat;
   opencl_d_givelog_kernel_runner(
       build_rmath_program_indexed(kernel_rel_path),
-      kernel_temp_name,
+      kernel_name,
       len,
       arg_cols,
       gl,
@@ -310,7 +310,7 @@ static void d_givelog_ndrange_kernel_fill(
 
 static void numeric_cols_ndrange_kernel_fill(
     const char*                                           kernel_rel_path,
-    const char*                                           kernel_temp_name,
+    const char*                                           kernel_name,
     int                                                   len,
     const std::vector<const Rcpp::NumericVector*>&         numeric_args,
     Rcpp::NumericVector&                                  out,
@@ -322,7 +322,7 @@ static void numeric_cols_ndrange_kernel_fill(
     std::vector<double> out_flat;
     opencl_numeric_cols_kernel_runner(
         build_rmath_program_indexed(kernel_rel_path),
-        kernel_temp_name,
+        kernel_name,
         len,
         arg_cols,
         out_flat);

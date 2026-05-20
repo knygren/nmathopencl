@@ -11,7 +11,7 @@
 #' @param size Dispersion/size parameter (must be >= 0).
 #' @param prob Probability of success in \code{[0, 1]}.
 #' @param mu Mean parameter (must be >= 0).
-#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. Density wrappers (\code{dnbinom_opencl}, \code{dnbinom_mu_opencl}) default \code{FALSE}; \code{pnbinom_opencl}/\code{pnbinom_mu_opencl} default \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}); quantiles and random wrappers default \code{FALSE}.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. Density wrappers (\code{dnbinom_opencl}, \code{dnbinom_mu_opencl}) default \code{FALSE}; \code{pnbinom_opencl}/\code{pnbinom_mu_opencl} default \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md}); quantiles and random wrappers default \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}

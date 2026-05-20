@@ -54,7 +54,7 @@ rt_opencl(n, df, fallback = FALSE, verbose = FALSE)
 wrappers on this page; parallel kernels reserved.}
 
 \item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
-Ignored when the runtime reports no OpenCL. \code{dt_opencl} defaults \code{FALSE}; \code{pt_opencl}, \code{qt_opencl}, and \code{rt_opencl} default \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}).}
+Ignored when the runtime reports no OpenCL. \code{dt_opencl} defaults \code{FALSE}; \code{pt_opencl}, \code{qt_opencl}, and \code{rt_opencl} default \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md}).}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 

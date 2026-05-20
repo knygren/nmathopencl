@@ -53,7 +53,7 @@ rchisq_opencl(n, df, ncp = 0, fallback = FALSE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. \code{dchisq_opencl} defaults \code{FALSE}; distribution/quantile and \code{rchisq_opencl} remain \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}); pass explicit \code{fallback} to override.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. \code{dchisq_opencl} defaults \code{FALSE}; distribution/quantile and \code{rchisq_opencl} remain \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md}); pass explicit \code{fallback} to override.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 

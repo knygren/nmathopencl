@@ -18,7 +18,7 @@
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for
 #'   \code{pgamma_opencl}/\code{qgamma_opencl}; parallel dispatch reserved.
 #' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
-#' Ignored when the runtime reports no OpenCL. \code{dgamma_opencl} defaults \code{FALSE}; distribution/quantile wrappers follow \file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}. Pass explicit \code{fallback} where needed.
+#' Ignored when the runtime reports no OpenCL. \code{dgamma_opencl} defaults \code{FALSE}; distribution/quantile wrappers follow \file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md}. Pass explicit \code{fallback} where needed.
 #' @param verbose Logical; print informational fallback messages.
 #'
 #' @details

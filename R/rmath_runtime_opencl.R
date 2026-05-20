@@ -8,7 +8,7 @@
 #'   (recycled against \code{x}).
 #' @param n_exp Integer vector for \code{r_pow_di_opencl}, recycled against \code{x}.
 #' @param logx,logy Numeric vectors for log-space combination helpers (recycled together).
-#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). For \code{log1pmx_opencl}, \code{lgamma1p_opencl}, \code{pow1p_opencl}, and the \code{logspace_*} wrappers, defaults to \code{TRUE} temporarily while \code{pgamma_utils}-stitching kernels are stabilized; see \file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). For \code{log1pmx_opencl}, \code{lgamma1p_opencl}, \code{pow1p_opencl}, and the \code{logspace_*} wrappers, defaults to \code{TRUE} temporarily while \code{pgamma_utils}-stitching kernels are stabilized; see \file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #'
 #' @return Numeric vector of the recycled common length (see Details).

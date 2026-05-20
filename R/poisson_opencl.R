@@ -8,7 +8,7 @@
 #' @param q Numeric vector of quantiles for \code{ppois_opencl}; recycled like \code{stats::ppois}.
 #' @param p Numeric vector of probabilities for \code{qpois_opencl} (like \code{stats::qpois}).
 #' @param lambda Mean/rate parameter (must be >= 0).
-#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. Density \code{dpois_*} wrappers default \code{FALSE}; \code{ppois_opencl} defaults \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}); \code{qpois_opencl} and \code{rpois_opencl} default \code{FALSE}.
+#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. Density \code{dpois_*} wrappers default \code{FALSE}; \code{ppois_opencl} defaults \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md}); \code{qpois_opencl} and \code{rpois_opencl} default \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}

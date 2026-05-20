@@ -91,7 +91,7 @@ rnbinom_mu_opencl(n, size, mu, fallback = FALSE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. Density wrappers (\code{dnbinom_opencl}, \code{dnbinom_mu_opencl}) default \code{FALSE}; \code{pnbinom_opencl}/\code{pnbinom_mu_opencl} default \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK_TEMP.md}); quantiles and random wrappers default \code{FALSE}.}
+\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. Density wrappers (\code{dnbinom_opencl}, \code{dnbinom_mu_opencl}) default \code{FALSE}; \code{pnbinom_opencl}/\code{pnbinom_mu_opencl} default \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md}); quantiles and random wrappers default \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
