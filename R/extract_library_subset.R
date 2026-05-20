@@ -37,9 +37,9 @@
 #'   are not overwritten --- the copy is skipped and `copied = FALSE` in the
 #'   returned data frame.
 #'
-#' @return A data frame (returned invisibly) with one row per copied file
-#'   (`.cl` files in dependency order, followed by
-#'   `kernel_dependency_index.rds`) and columns:
+#' @return A \verb{nmathopencl_lib_extract_df} subclass of \verb{data.frame}
+#'   with one row per copied file (`.cl` files in dependency order, followed by
+#'   companion index shards when present) and columns:
 #'   \describe{
 #'     \item{`stem`}{Stem name (filename without `.cl`), or
 #'       `"kernel_dependency_index.rds"` for the index.}
@@ -49,6 +49,7 @@
 #'       existed and `overwrite = FALSE`.}
 #'   }
 #'
+#' @seealso \link[=kernel_lib_subset_printing]{printing methods}
 #' @seealso [load_library_for_kernel()]
 #' @seealso [write_kernel_dependency_index()]
 #' @family OpenCL kernel library subsets
@@ -68,13 +69,25 @@ extract_library_subset <- function(kernel_paths,
                stringsAsFactors = FALSE)
   }
 
+  kernel_paths_norm <- suppressWarnings(
+    normalizePath(kernel_paths, winslash = "/", mustWork = FALSE))
+  lib_dir_norm <- suppressWarnings(
+    normalizePath(library_dir, winslash = "/", mustWork = FALSE))
+  dest_norm <- if (dir.exists(dest_dir)) {
+    suppressWarnings(normalizePath(dest_dir, winslash = "/", mustWork = FALSE))
+  } else {
+    NA_character_
+  }
+
   if (!dir.exists(library_dir)) {
     stop("`library_dir` does not exist: ", library_dir, call. = FALSE)
   }
   if (!dir.exists(dest_dir)) {
     warning("`dest_dir` does not exist: ", dest_dir,
             ". No files were copied.", call. = FALSE)
-    return(invisible(empty_df()))
+    out <- .cl_attach_extract_attrs(empty_df(), kernel_paths_norm,
+                                    lib_dir_norm, dest_norm, depends_tag)
+    return(invisible(out))
   }
 
   missing_kernels <- kernel_paths[!file.exists(kernel_paths)]
@@ -95,12 +108,16 @@ extract_library_subset <- function(kernel_paths,
   if (length(all_needed) == 0L) {
     message("No `@", depends_tag, "` annotations found in any kernel file. ",
             "Nothing to copy.")
-    return(invisible(empty_df()))
+    out <- .cl_attach_extract_attrs(empty_df(), kernel_paths_norm,
+                                    lib_dir_norm, dest_norm, depends_tag)
+    return(invisible(out))
   }
 
   stems_to_copy <- .cl_filter_stems(all_needed, index, depends_tag)
   if (length(stems_to_copy) == 0L) {
-    return(invisible(empty_df()))
+    out <- .cl_attach_extract_attrs(empty_df(), kernel_paths_norm,
+                                    lib_dir_norm, dest_norm, depends_tag)
+    return(invisible(out))
   }
 
   stems_to_copy <- stems_to_copy[order(index$load_order[stems_to_copy])]
@@ -143,5 +160,7 @@ extract_library_subset <- function(kernel_paths,
   })
 
   result <- do.call(rbind, c(result_rows, Filter(Negate(is.null), index_rows)))
-  invisible(result)
+  out <- .cl_attach_extract_attrs(result, kernel_paths_norm,
+                                  lib_dir_norm, dest_norm, depends_tag)
+  invisible(out)
 }

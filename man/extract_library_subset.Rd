@@ -38,9 +38,9 @@ are not overwritten --- the copy is skipped and \code{copied = FALSE} in the
 returned data frame.}
 }
 \value{
-A data frame (returned invisibly) with one row per copied file
-(\code{.cl} files in dependency order, followed by
-\code{kernel_dependency_index.rds}) and columns:
+A \verb{nmathopencl_lib_extract_df} subclass of \verb{data.frame}
+with one row per copied file (\code{.cl} files in dependency order, followed by
+companion index shards when present) and columns:
 \describe{
 \item{\code{stem}}{Stem name (filename without \code{.cl}), or
 \code{"kernel_dependency_index.rds"} for the index.}
@@ -88,6 +88,7 @@ df <- extract_library_subset(
   depends_tag = "all_depends_nmath",
   index = idx
 )
+print(df)
 sum(df$copied)
 }
 
@@ -96,6 +97,8 @@ sum(df$copied)
 ###############################################################################
 }
 \seealso{
+\link[=kernel_lib_subset_printing]{printing methods}
+
 \code{\link[=load_library_for_kernel]{load_library_for_kernel()}}
 
 \code{\link[=write_kernel_dependency_index]{write_kernel_dependency_index()}}

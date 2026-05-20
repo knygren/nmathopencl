@@ -15,6 +15,7 @@ df <- extract_library_subset(
   depends_tag = "all_depends_nmath",
   index = idx
 )
+print(df)
 sum(df$copied)
 }
 

@@ -12,6 +12,7 @@ src <- load_library_for_kernel(
   depends_tag = "all_depends_nmath",
   index = idx
 )
+print(src)
 nzchar(src)
 }
 

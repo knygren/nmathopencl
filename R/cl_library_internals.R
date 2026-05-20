@@ -33,3 +33,19 @@
   }
   intersect(needed, known)
 }
+
+
+.cl_concat_result <- function(text, stems_requested, stems_loaded,
+                              kernel_path, library_dir, depends_tag,
+                              nbytes_concatenated) {
+  structure(
+    text,
+    class = c("nmathopencl_concatenated_lib", "character"),
+    stems_requested = stems_requested,
+    stems_loaded = stems_loaded,
+    kernel_path = kernel_path,
+    library_dir = library_dir,
+    depends_tag = depends_tag,
+    nbytes_concatenated = as.integer(nbytes_concatenated)[1]
+  )
+}

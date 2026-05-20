@@ -26,11 +26,10 @@ kernels annotated with \verb{@all_depends_nmath}, pass
 \item{index}{Optional RDS list; \code{NULL} triggers lazy reads.}
 }
 \value{
-A single character string: the concatenated source of all required
-library files in dependency order, separated by a blank line.  Returns
-\code{""} invisibly when the kernel file carries no \verb{@\{depends_tag\}}
-annotation, so it can be safely passed to \code{paste()} or included in a
-larger program assembly without special-casing.
+A character vector subclass \verb{nmathopencl_concatenated_lib} holding
+concatenated sources (often length 1; blank annotations yield length-zero
+concatenation). Attachments describe requested and loaded library stems,
+paths, and byte size; see \link[=kernel_lib_subset_printing]{print methods}.
 }
 \description{
 Given a single kernel \code{.cl} file and a library directory (with an associated
@@ -63,6 +62,7 @@ src <- load_library_for_kernel(
   depends_tag = "all_depends_nmath",
   index = idx
 )
+print(src)
 nzchar(src)
 }
 
@@ -72,6 +72,8 @@ nzchar(src)
 }
 \seealso{
 \code{\link[=extract_library_subset]{extract_library_subset()}}
+
+\link[=kernel_lib_subset_printing]{printing methods}
 
 \code{\link[=write_kernel_dependency_index]{write_kernel_dependency_index()}}
 

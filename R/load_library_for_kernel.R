@@ -25,13 +25,13 @@
 #'   `depends_tag = "all_depends_nmath"`.
 #' @param index Optional RDS list; \code{NULL} triggers lazy reads.
 #'
-#' @return A single character string: the concatenated source of all required
-#'   library files in dependency order, separated by a blank line.  Returns
-#'   `""` invisibly when the kernel file carries no `@{depends_tag}`
-#'   annotation, so it can be safely passed to `paste()` or included in a
-#'   larger program assembly without special-casing.
+#' @return A character vector subclass \verb{nmathopencl_concatenated_lib} holding
+#'   concatenated sources (often length 1; blank annotations yield length-zero
+#'   concatenation). Attachments describe requested and loaded library stems,
+#'   paths, and byte size; see \link[=kernel_lib_subset_printing]{print methods}.
 #'
 #' @seealso [extract_library_subset()]
+#' @seealso \link[=kernel_lib_subset_printing]{printing methods}
 #' @seealso [write_kernel_dependency_index()]
 #' @family OpenCL kernel library subsets
 #'
@@ -49,18 +49,27 @@ load_library_for_kernel <- function(kernel_path,
     stop("`library_dir` does not exist: ", library_dir, call. = FALSE)
   }
 
+  kpath_norm <- suppressWarnings(
+    normalizePath(kernel_path, winslash = "/", mustWork = FALSE))
+  lib_norm <- suppressWarnings(
+    normalizePath(library_dir, winslash = "/", mustWork = FALSE))
+
   index <- .cl_load_index(index, library_dir)
 
-  lines  <- readLines(kernel_path, warn = FALSE)
+  lines <- readLines(kernel_path, warn = FALSE)
   needed <- parse_port_annotation(lines, depends_tag)
 
   if (length(needed) == 0L) {
-    return(invisible(""))
+    out <- .cl_concat_result("", character(), character(),
+                             kpath_norm, lib_norm, depends_tag, 0L)
+    return(invisible(out))
   }
 
   stems_to_load <- .cl_filter_stems(needed, index, depends_tag)
   if (length(stems_to_load) == 0L) {
-    return(invisible(""))
+    out <- .cl_concat_result("", needed, character(),
+                             kpath_norm, lib_norm, depends_tag, 0L)
+    return(invisible(out))
   }
 
   stems_to_load <- stems_to_load[order(index$load_order[stems_to_load])]
@@ -75,5 +84,14 @@ load_library_for_kernel <- function(kernel_path,
     paste(readLines(path, warn = FALSE), collapse = "\n")
   }, character(1L))
 
-  paste(parts[nzchar(parts)], collapse = "\n\n")
+  merged <- paste(parts[nzchar(parts)], collapse = "\n\n")
+  stems_loaded <- stems_to_load[nzchar(parts)]
+  nbytes <- if (nzchar(merged)) {
+    nchar(enc2utf8(merged), type = "bytes")
+  } else {
+    0L
+  }
+  out <- .cl_concat_result(merged, stems_to_load, stems_loaded,
+                           kpath_norm, lib_norm, depends_tag, nbytes)
+  invisible(out)
 }
