@@ -20,7 +20,7 @@ static void opencl_serial_scalar_draws(
     int n_out,
     Rcpp::NumericVector& out,
     bool verbose);
-static void d_givelog_ndrange_kernel_temp_fill(
+static void d_givelog_ndrange_kernel_fill(
     const char* kernel_rel_path,
     const char* kernel_temp_name,
     int len,
@@ -28,7 +28,7 @@ static void d_givelog_ndrange_kernel_temp_fill(
     const Rcpp::IntegerVector& give_log,
     Rcpp::NumericVector& out,
     bool verbose);
-static void pq_tail_ndrange_kernel_temp_fill(
+static void pq_tail_ndrange_kernel_fill(
     const char* kernel_rel_path,
     const char* kernel_temp_name,
     int len,
@@ -37,7 +37,7 @@ static void pq_tail_ndrange_kernel_temp_fill(
     const Rcpp::IntegerVector& log_p,
     Rcpp::NumericVector& out,
     bool verbose);
-static void numeric_cols_ndrange_kernel_temp_fill(
+static void numeric_cols_ndrange_kernel_fill(
     const char*                                          kernel_rel_path,
     const char*                                          kernel_temp_name,
     int                                                  len,
@@ -61,7 +61,7 @@ Rcpp::NumericVector dnorm_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dnorm_kernel.cl",
         "dnorm_kernel",
         len,
@@ -242,7 +242,7 @@ static void opencl_serial_scalar_draws(
 }
 
 // NDRange helpers for p*/q* (lower.tail / log.p as int columns).
-static std::vector<std::vector<double>> pq_pack_numeric_cols_for_tail_temp(
+static std::vector<std::vector<double>> pq_pack_numeric_cols_for_tail(
     const std::vector<const Rcpp::NumericVector*>& cols
 ) {
   std::vector<std::vector<double>> out;
@@ -253,7 +253,7 @@ static std::vector<std::vector<double>> pq_pack_numeric_cols_for_tail_temp(
   return out;
 }
 
-static void pq_tail_ndrange_kernel_temp_fill(
+static void pq_tail_ndrange_kernel_fill(
     const char* kernel_rel_path,
     const char* kernel_temp_name,
     int len,
@@ -265,7 +265,7 @@ static void pq_tail_ndrange_kernel_temp_fill(
 ) {
   (void)verbose;
   std::vector<std::vector<double>> arg_cols =
-      pq_pack_numeric_cols_for_tail_temp(numeric_args);
+      pq_pack_numeric_cols_for_tail(numeric_args);
   std::vector<int> lt(lower_tail.begin(), lower_tail.end());
   std::vector<int> lp(log_p.begin(), log_p.end());
   std::vector<double> out_flat;
@@ -282,7 +282,7 @@ static void pq_tail_ndrange_kernel_temp_fill(
   }
 }
 
-static void d_givelog_ndrange_kernel_temp_fill(
+static void d_givelog_ndrange_kernel_fill(
     const char*                                            kernel_rel_path,
     const char*                                            kernel_temp_name,
     int                                                    len,
@@ -293,7 +293,7 @@ static void d_givelog_ndrange_kernel_temp_fill(
 ) {
   (void)verbose;
   std::vector<std::vector<double>> arg_cols =
-      pq_pack_numeric_cols_for_tail_temp(numeric_args);
+      pq_pack_numeric_cols_for_tail(numeric_args);
   std::vector<int> gl(give_log.begin(), give_log.end());
   std::vector<double> out_flat;
   opencl_d_givelog_kernel_runner(
@@ -308,7 +308,7 @@ static void d_givelog_ndrange_kernel_temp_fill(
   }
 }
 
-static void numeric_cols_ndrange_kernel_temp_fill(
+static void numeric_cols_ndrange_kernel_fill(
     const char*                                           kernel_rel_path,
     const char*                                           kernel_temp_name,
     int                                                   len,
@@ -318,7 +318,7 @@ static void numeric_cols_ndrange_kernel_temp_fill(
 ) {
   try {
     std::vector<std::vector<double>> arg_cols =
-        pq_pack_numeric_cols_for_tail_temp(numeric_args);
+        pq_pack_numeric_cols_for_tail(numeric_args);
     std::vector<double> out_flat;
     opencl_numeric_cols_kernel_runner(
         build_rmath_program_indexed(kernel_rel_path),
@@ -404,7 +404,7 @@ static void pq_mixed_ncp_three_four_ndrange_twopass(
     Rcpp::IntegerVector ltz = gather_int_at_ix(iz, lower_tail);
     Rcpp::IntegerVector lpz = gather_int_at_ix(iz, log_p);
     Rcpp::NumericVector oz(nz);
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         path_z, ker_z, nz, {&az, &bz, &cz}, ltz, lpz, oz, verbose);
     for (int j = 0; j < nz; ++j) out[iz[static_cast<size_t>(j)]] = oz[j];
   }
@@ -416,7 +416,7 @@ static void pq_mixed_ncp_three_four_ndrange_twopass(
     Rcpp::IntegerVector ltn = gather_int_at_ix(in_, lower_tail);
     Rcpp::IntegerVector lpn = gather_int_at_ix(in_, log_p);
     Rcpp::NumericVector on(nn);
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         path_n, ker_n, nn, {&an, &bn, &cn, &nnv}, ltn, lpn, on, verbose);
     for (int j = 0; j < nn; ++j) out[in_[static_cast<size_t>(j)]] = on[j];
   }
@@ -449,7 +449,7 @@ static void pq_mixed_ncp_two_three_ndrange_twopass(
     Rcpp::IntegerVector ltz = gather_int_at_ix(iz, lower_tail);
     Rcpp::IntegerVector lpz = gather_int_at_ix(iz, log_p);
     Rcpp::NumericVector oz(nz);
-    pq_tail_ndrange_kernel_temp_fill(path_z, ker_z, nz, {&az, &bz}, ltz, lpz, oz, verbose);
+    pq_tail_ndrange_kernel_fill(path_z, ker_z, nz, {&az, &bz}, ltz, lpz, oz, verbose);
     for (int j = 0; j < nz; ++j) out[iz[static_cast<size_t>(j)]] = oz[j];
   }
   if (nn > 0) {
@@ -459,7 +459,7 @@ static void pq_mixed_ncp_two_three_ndrange_twopass(
     Rcpp::IntegerVector ltn = gather_int_at_ix(in_, lower_tail);
     Rcpp::IntegerVector lpn = gather_int_at_ix(in_, log_p);
     Rcpp::NumericVector on(nn);
-    pq_tail_ndrange_kernel_temp_fill(path_n, ker_n, nn, {&an, &bn, &nnv}, ltn, lpn, on, verbose);
+    pq_tail_ndrange_kernel_fill(path_n, ker_n, nn, {&an, &bn, &nnv}, ltn, lpn, on, verbose);
     for (int j = 0; j < nn; ++j) out[in_[static_cast<size_t>(j)]] = on[j];
   }
 }
@@ -489,7 +489,7 @@ static void dg_mixed_ncp_two_three_ndrange_twopass(
     Rcpp::NumericVector bz = gather_num_at_ix(iz, v1);
     Rcpp::IntegerVector glz = gather_int_at_ix(iz, give_log);
     Rcpp::NumericVector oz(nz);
-    d_givelog_ndrange_kernel_temp_fill(path_z, ker_z, nz, {&az, &bz}, glz, oz, verbose);
+    d_givelog_ndrange_kernel_fill(path_z, ker_z, nz, {&az, &bz}, glz, oz, verbose);
     for (int j = 0; j < nz; ++j) out[iz[static_cast<size_t>(j)]] = oz[j];
   }
   if (nn > 0) {
@@ -498,7 +498,7 @@ static void dg_mixed_ncp_two_three_ndrange_twopass(
     Rcpp::NumericVector nc = gather_num_at_ix(in_, ncp);
     Rcpp::IntegerVector gln = gather_int_at_ix(in_, give_log);
     Rcpp::NumericVector on(nn);
-    d_givelog_ndrange_kernel_temp_fill(path_n, ker_n, nn, {&an, &bn, &nc}, gln, on, verbose);
+    d_givelog_ndrange_kernel_fill(path_n, ker_n, nn, {&an, &bn, &nc}, gln, on, verbose);
     for (int j = 0; j < nn; ++j) out[in_[static_cast<size_t>(j)]] = on[j];
   }
 }
@@ -526,7 +526,7 @@ static void df_nf_mixed_ncp_ndrange_twopass(
     Rcpp::NumericVector df2z = gather_num_at_ix(iz, df2);
     Rcpp::IntegerVector glz = gather_int_at_ix(iz, give_log);
     Rcpp::NumericVector oz(nz);
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/df_kernel.cl", "df_kernel", nz, {&xz, &df1z, &df2z}, glz, oz, verbose);
     for (int j = 0; j < nz; ++j) out[iz[static_cast<size_t>(j)]] = oz[j];
   }
@@ -537,7 +537,7 @@ static void df_nf_mixed_ncp_ndrange_twopass(
     Rcpp::NumericVector ncn = gather_num_at_ix(in_, ncp);
     Rcpp::IntegerVector gln = gather_int_at_ix(in_, give_log);
     Rcpp::NumericVector on(nn);
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dnf_kernel.cl",
         "dnf_kernel",
         nn,
@@ -566,7 +566,7 @@ Rcpp::NumericVector r_pow_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/r_pow_kernel.cl",
       "r_pow_kernel",
       len,
@@ -596,7 +596,7 @@ Rcpp::NumericVector r_pow_di_opencl(
   for (int i = 0; i < len; ++i) {
     n_exp_d[i] = static_cast<double>(n_exp[i]);
   }
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/r_pow_di_kernel.cl",
       "r_pow_di_kernel",
       len,
@@ -612,7 +612,7 @@ Rcpp::NumericVector log1pmx_opencl(const Rcpp::NumericVector& x, bool verbose) {
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl() || len == 0) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/log1pmx_kernel.cl",
       "log1pmx_kernel",
       len,
@@ -628,7 +628,7 @@ Rcpp::NumericVector log1pexp_opencl(const Rcpp::NumericVector& x, bool verbose) 
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl() || len == 0) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/log1pexp_kernel.cl",
       "log1pexp_kernel",
       len,
@@ -644,7 +644,7 @@ Rcpp::NumericVector log1mexp_opencl(const Rcpp::NumericVector& x, bool verbose) 
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl() || len == 0) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/log1mexp_kernel.cl",
       "log1mexp_kernel",
       len,
@@ -660,7 +660,7 @@ Rcpp::NumericVector lgamma1p_opencl(const Rcpp::NumericVector& x, bool verbose) 
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl() || len == 0) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/lgamma1p_kernel.cl",
       "lgamma1p_kernel",
       len,
@@ -686,7 +686,7 @@ Rcpp::NumericVector pow1p_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/pow1p_kernel.cl",
       "pow1p_kernel",
       len,
@@ -712,7 +712,7 @@ Rcpp::NumericVector logspace_add_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/logspace_add_kernel.cl",
       "logspace_add_kernel",
       len,
@@ -738,7 +738,7 @@ Rcpp::NumericVector logspace_sub_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/logspace_sub_kernel.cl",
       "logspace_sub_kernel",
       len,
@@ -764,7 +764,7 @@ Rcpp::NumericVector logspace_sum_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/logspace_sum_kernel.cl",
       "logspace_sum_kernel",
       len,
@@ -851,7 +851,7 @@ Rcpp::NumericVector pnorm_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/pnorm_kernel.cl",
         "pnorm_kernel",
         len,
@@ -884,7 +884,7 @@ Rcpp::NumericVector qnorm_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/qnorm_kernel.cl",
         "qnorm_kernel",
         len,
@@ -916,7 +916,7 @@ Rcpp::NumericVector dunif_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dunif_kernel.cl",
         "dunif_kernel",
         len,
@@ -948,7 +948,7 @@ Rcpp::NumericVector punif_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/punif_kernel.cl",
         "punif_kernel",
         len,
@@ -981,7 +981,7 @@ Rcpp::NumericVector qunif_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/qunif_kernel.cl",
         "qunif_kernel",
         len,
@@ -1013,7 +1013,7 @@ Rcpp::NumericVector dgamma_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dgamma_kernel.cl",
         "dgamma_kernel",
         len,
@@ -1045,7 +1045,7 @@ Rcpp::NumericVector pgamma_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/pgamma_kernel.cl",
         "pgamma_kernel",
         len,
@@ -1078,7 +1078,7 @@ Rcpp::NumericVector qgamma_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/qgamma_kernel.cl",
         "qgamma_kernel",
         len,
@@ -1125,7 +1125,7 @@ Rcpp::NumericVector dbeta_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dbeta_kernel.cl",
         "dbeta_kernel",
         len,
@@ -1169,7 +1169,7 @@ Rcpp::NumericVector pbeta_opencl(
 
   try {
     if (all_ncp_zero) {
-      pq_tail_ndrange_kernel_temp_fill(
+      pq_tail_ndrange_kernel_fill(
           "src/pbeta_kernel.cl",
           "pbeta_kernel",
           len,
@@ -1179,7 +1179,7 @@ Rcpp::NumericVector pbeta_opencl(
           out,
           verbose);
     } else if (!any_ncp_zero) {
-      pq_tail_ndrange_kernel_temp_fill(
+      pq_tail_ndrange_kernel_fill(
           "src/pnbeta_kernel.cl",
           "pnbeta_kernel",
           len,
@@ -1240,7 +1240,7 @@ Rcpp::NumericVector qbeta_opencl(
 
   try {
     if (all_ncp_zero) {
-      pq_tail_ndrange_kernel_temp_fill(
+      pq_tail_ndrange_kernel_fill(
           "src/qbeta_kernel.cl",
           "qbeta_kernel",
           len,
@@ -1250,7 +1250,7 @@ Rcpp::NumericVector qbeta_opencl(
           out,
           verbose);
     } else if (!any_ncp_zero) {
-      pq_tail_ndrange_kernel_temp_fill(
+      pq_tail_ndrange_kernel_fill(
           "src/qnbeta_kernel.cl",
           "qnbeta_kernel",
           len,
@@ -1313,7 +1313,7 @@ Rcpp::NumericVector dlnorm_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dlnorm_kernel.cl",
         "dlnorm_kernel",
         len,
@@ -1345,7 +1345,7 @@ Rcpp::NumericVector plnorm_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/plnorm_kernel.cl",
         "plnorm_kernel",
         len,
@@ -1378,7 +1378,7 @@ Rcpp::NumericVector qlnorm_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/qlnorm_kernel.cl",
         "qlnorm_kernel",
         len,
@@ -1436,7 +1436,7 @@ Rcpp::NumericVector dchisq_opencl(
 
   try {
     if (all_ncp_zero) {
-      d_givelog_ndrange_kernel_temp_fill(
+      d_givelog_ndrange_kernel_fill(
           "src/dchisq_kernel.cl",
           "dchisq_kernel",
           len,
@@ -1445,7 +1445,7 @@ Rcpp::NumericVector dchisq_opencl(
           out,
           verbose);
     } else if (!any_ncp_zero) {
-      d_givelog_ndrange_kernel_temp_fill(
+      d_givelog_ndrange_kernel_fill(
           "src/dnchisq_kernel.cl",
           "dnchisq_kernel",
           len,
@@ -1502,7 +1502,7 @@ Rcpp::NumericVector pchisq_opencl(
 
   try {
     if (all_ncp_zero) {
-      pq_tail_ndrange_kernel_temp_fill(
+      pq_tail_ndrange_kernel_fill(
           "src/pchisq_kernel.cl",
           "pchisq_kernel",
           len,
@@ -1512,7 +1512,7 @@ Rcpp::NumericVector pchisq_opencl(
           out,
           verbose);
     } else if (!any_ncp_zero) {
-      pq_tail_ndrange_kernel_temp_fill(
+      pq_tail_ndrange_kernel_fill(
           "src/pnchisq_kernel.cl",
           "pnchisq_kernel",
           len,
@@ -1571,7 +1571,7 @@ Rcpp::NumericVector qchisq_opencl(
 
   try {
     if (all_ncp_zero) {
-      pq_tail_ndrange_kernel_temp_fill(
+      pq_tail_ndrange_kernel_fill(
           "src/qchisq_kernel.cl",
           "qchisq_kernel",
           len,
@@ -1581,7 +1581,7 @@ Rcpp::NumericVector qchisq_opencl(
           out,
           verbose);
     } else if (!any_ncp_zero) {
-      pq_tail_ndrange_kernel_temp_fill(
+      pq_tail_ndrange_kernel_fill(
           "src/qnchisq_kernel.cl",
           "qnchisq_kernel",
           len,
@@ -1670,7 +1670,7 @@ Rcpp::NumericVector df_opencl(
 
   try {
     if (all_ncp_zero) {
-      d_givelog_ndrange_kernel_temp_fill(
+      d_givelog_ndrange_kernel_fill(
           "src/df_kernel.cl",
           "df_kernel",
           len,
@@ -1679,7 +1679,7 @@ Rcpp::NumericVector df_opencl(
           out,
           verbose);
     } else if (!any_ncp_zero) {
-      d_givelog_ndrange_kernel_temp_fill(
+      d_givelog_ndrange_kernel_fill(
           "src/dnf_kernel.cl",
           "dnf_kernel",
           len,
@@ -1726,7 +1726,7 @@ Rcpp::NumericVector pf_opencl(
 
   try {
     if (all_ncp_zero) {
-      pq_tail_ndrange_kernel_temp_fill(
+      pq_tail_ndrange_kernel_fill(
           "src/pf_kernel.cl",
           "pf_kernel",
           len,
@@ -1736,7 +1736,7 @@ Rcpp::NumericVector pf_opencl(
           out,
           verbose);
     } else if (!any_ncp_zero) {
-      pq_tail_ndrange_kernel_temp_fill(
+      pq_tail_ndrange_kernel_fill(
           "src/pnf_kernel.cl",
           "pnf_kernel",
           len,
@@ -1797,7 +1797,7 @@ Rcpp::NumericVector qf_opencl(
 
   try {
     if (all_ncp_zero) {
-      pq_tail_ndrange_kernel_temp_fill(
+      pq_tail_ndrange_kernel_fill(
           "src/qf_kernel.cl",
           "qf_kernel",
           len,
@@ -1807,7 +1807,7 @@ Rcpp::NumericVector qf_opencl(
           out,
           verbose);
     } else if (!any_ncp_zero) {
-      pq_tail_ndrange_kernel_temp_fill(
+      pq_tail_ndrange_kernel_fill(
           "src/qnf_kernel.cl",
           "qnf_kernel",
           len,
@@ -1881,7 +1881,7 @@ Rcpp::NumericVector dt_opencl(
 
   try {
     if (all_ncp_zero) {
-      d_givelog_ndrange_kernel_temp_fill(
+      d_givelog_ndrange_kernel_fill(
           "src/dt_kernel.cl",
           "dt_kernel",
           len,
@@ -1890,7 +1890,7 @@ Rcpp::NumericVector dt_opencl(
           out,
           verbose);
     } else if (!any_ncp_zero) {
-      d_givelog_ndrange_kernel_temp_fill(
+      d_givelog_ndrange_kernel_fill(
           "src/dnt_kernel.cl",
           "dnt_kernel",
           len,
@@ -1947,7 +1947,7 @@ Rcpp::NumericVector pt_opencl(
 
   try {
     if (all_ncp_zero) {
-      pq_tail_ndrange_kernel_temp_fill(
+      pq_tail_ndrange_kernel_fill(
           "src/pt_kernel.cl",
           "pt_kernel",
           len,
@@ -1957,7 +1957,7 @@ Rcpp::NumericVector pt_opencl(
           out,
           verbose);
     } else if (!any_ncp_zero) {
-      pq_tail_ndrange_kernel_temp_fill(
+      pq_tail_ndrange_kernel_fill(
           "src/pnt_kernel.cl",
           "pnt_kernel",
           len,
@@ -2016,7 +2016,7 @@ Rcpp::NumericVector qt_opencl(
 
   try {
     if (all_ncp_zero) {
-      pq_tail_ndrange_kernel_temp_fill(
+      pq_tail_ndrange_kernel_fill(
           "src/qt_kernel.cl",
           "qt_kernel",
           len,
@@ -2026,7 +2026,7 @@ Rcpp::NumericVector qt_opencl(
           out,
           verbose);
     } else if (!any_ncp_zero) {
-      pq_tail_ndrange_kernel_temp_fill(
+      pq_tail_ndrange_kernel_fill(
           "src/qnt_kernel.cl",
           "qnt_kernel",
           len,
@@ -2089,7 +2089,7 @@ Rcpp::NumericVector dbinom_raw_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dbinom_raw_kernel.cl",
         "dbinom_raw_kernel",
         len,
@@ -2120,7 +2120,7 @@ Rcpp::NumericVector dbinom_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dbinom_kernel.cl",
         "dbinom_kernel",
         len,
@@ -2152,7 +2152,7 @@ Rcpp::NumericVector pbinom_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/pbinom_kernel.cl",
         "pbinom_kernel",
         len,
@@ -2184,7 +2184,7 @@ Rcpp::NumericVector dnbinom_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dnbinom_kernel.cl",
         "dnbinom_kernel",
         len,
@@ -2216,7 +2216,7 @@ Rcpp::NumericVector pnbinom_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/pnbinom_kernel.cl",
         "pnbinom_kernel",
         len,
@@ -2249,7 +2249,7 @@ Rcpp::NumericVector qnbinom_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/qnbinom_kernel.cl",
         "qnbinom_kernel",
         len,
@@ -2296,7 +2296,7 @@ Rcpp::NumericVector dnbinom_mu_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dnbinom_mu_kernel.cl",
         "dnbinom_mu_kernel",
         len,
@@ -2328,7 +2328,7 @@ Rcpp::NumericVector pnbinom_mu_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/pnbinom_mu_kernel.cl",
         "pnbinom_mu_kernel",
         len,
@@ -2375,7 +2375,7 @@ Rcpp::NumericVector dcauchy_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dcauchy_kernel.cl",
         "dcauchy_kernel",
         len,
@@ -2407,7 +2407,7 @@ Rcpp::NumericVector pcauchy_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/pcauchy_kernel.cl",
         "pcauchy_kernel",
         len,
@@ -2440,7 +2440,7 @@ Rcpp::NumericVector qcauchy_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/qcauchy_kernel.cl",
         "qcauchy_kernel",
         len,
@@ -2486,7 +2486,7 @@ Rcpp::NumericVector dexp_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dexp_kernel.cl",
         "dexp_kernel",
         len,
@@ -2517,7 +2517,7 @@ Rcpp::NumericVector pexp_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/pexp_kernel.cl",
         "pexp_kernel",
         len,
@@ -2549,7 +2549,7 @@ Rcpp::NumericVector qexp_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/qexp_kernel.cl",
         "qexp_kernel",
         len,
@@ -2580,7 +2580,7 @@ Rcpp::NumericVector dgeom_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dgeom_kernel.cl",
         "dgeom_kernel",
         len,
@@ -2611,7 +2611,7 @@ Rcpp::NumericVector pgeom_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/pgeom_kernel.cl",
         "pgeom_kernel",
         len,
@@ -2643,7 +2643,7 @@ Rcpp::NumericVector qgeom_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/qgeom_kernel.cl",
         "qgeom_kernel",
         len,
@@ -2691,7 +2691,7 @@ Rcpp::NumericVector dhyper_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dhyper_kernel.cl",
         "dhyper_kernel",
         len,
@@ -2724,7 +2724,7 @@ Rcpp::NumericVector phyper_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/phyper_kernel.cl",
         "phyper_kernel",
         len,
@@ -2758,7 +2758,7 @@ Rcpp::NumericVector qhyper_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/qhyper_kernel.cl",
         "qhyper_kernel",
         len,
@@ -2806,7 +2806,7 @@ Rcpp::NumericVector qbinom_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/qbinom_kernel.cl",
         "qbinom_kernel",
         len,
@@ -2838,7 +2838,7 @@ Rcpp::NumericVector qpois_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/qpois_kernel.cl",
         "qpois_kernel",
         len,
@@ -2869,7 +2869,7 @@ Rcpp::NumericVector dpois_raw_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dpois_raw_kernel.cl",
         "dpois_raw_kernel",
         len,
@@ -2899,7 +2899,7 @@ Rcpp::NumericVector dpois_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dpois_kernel.cl",
         "dpois_kernel",
         len,
@@ -2930,7 +2930,7 @@ Rcpp::NumericVector ppois_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/ppois_kernel.cl",
         "ppois_kernel",
         len,
@@ -2963,7 +2963,7 @@ Rcpp::NumericVector qnbinom_mu_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/qnbinom_mu_kernel.cl",
         "qnbinom_mu_kernel",
         len,
@@ -3025,7 +3025,7 @@ Rcpp::NumericVector dweibull_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dweibull_kernel.cl",
         "dweibull_kernel",
         len,
@@ -3057,7 +3057,7 @@ Rcpp::NumericVector pweibull_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/pweibull_kernel.cl",
         "pweibull_kernel",
         len,
@@ -3090,7 +3090,7 @@ Rcpp::NumericVector qweibull_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/qweibull_kernel.cl",
         "qweibull_kernel",
         len,
@@ -3137,7 +3137,7 @@ Rcpp::NumericVector dlogis_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dlogis_kernel.cl",
         "dlogis_kernel",
         len,
@@ -3169,7 +3169,7 @@ Rcpp::NumericVector plogis_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/plogis_kernel.cl",
         "plogis_kernel",
         len,
@@ -3202,7 +3202,7 @@ Rcpp::NumericVector qlogis_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/qlogis_kernel.cl",
         "qlogis_kernel",
         len,
@@ -3250,7 +3250,7 @@ Rcpp::NumericVector dnbeta_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dnbeta_kernel.cl",
         "dnbeta_kernel",
         len,
@@ -3283,7 +3283,7 @@ Rcpp::NumericVector ptukey_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/ptukey_kernel.cl",
         "ptukey_kernel",
         len,
@@ -3317,7 +3317,7 @@ Rcpp::NumericVector qtukey_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/qtukey_kernel.cl",
         "qtukey_kernel",
         len,
@@ -3349,7 +3349,7 @@ Rcpp::NumericVector dwilcox_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dwilcox_kernel.cl",
         "dwilcox_kernel",
         len,
@@ -3381,7 +3381,7 @@ Rcpp::NumericVector pwilcox_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/pwilcox_kernel.cl",
         "pwilcox_kernel",
         len,
@@ -3414,7 +3414,7 @@ Rcpp::NumericVector qwilcox_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/qwilcox_kernel.cl",
         "qwilcox_kernel",
         len,
@@ -3445,7 +3445,7 @@ Rcpp::NumericVector dsignrank_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    d_givelog_ndrange_kernel_temp_fill(
+    d_givelog_ndrange_kernel_fill(
         "src/dsignrank_kernel.cl",
         "dsignrank_kernel",
         len,
@@ -3476,7 +3476,7 @@ Rcpp::NumericVector psignrank_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/psignrank_kernel.cl",
         "psignrank_kernel",
         len,
@@ -3508,7 +3508,7 @@ Rcpp::NumericVector qsignrank_opencl(
   if (!has_opencl() || len == 0) return out;
 
   try {
-    pq_tail_ndrange_kernel_temp_fill(
+    pq_tail_ndrange_kernel_fill(
         "src/qsignrank_kernel.cl",
         "qsignrank_kernel",
         len,
@@ -3545,7 +3545,7 @@ Rcpp::NumericVector gammafn_opencl(const Rcpp::NumericVector& x, bool verbose) {
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl() || len == 0) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/gammafn_kernel.cl",
       "gammafn_kernel",
       len,
@@ -3561,7 +3561,7 @@ Rcpp::NumericVector lgammafn_opencl(const Rcpp::NumericVector& x, bool verbose) 
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl() || len == 0) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/lgammafn_kernel.cl",
       "lgammafn_kernel",
       len,
@@ -3577,7 +3577,7 @@ Rcpp::NumericVector lgammafn_sign_opencl(const Rcpp::NumericVector& x, bool verb
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl() || len == 0) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/lgammafn_sign_kernel.cl",
       "lgammafn_sign_kernel",
       len,
@@ -3606,7 +3606,7 @@ Rcpp::NumericVector dpsifn_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/dpsifn_kernel.cl",
       "dpsifn_kernel",
       len,
@@ -3632,7 +3632,7 @@ Rcpp::NumericVector psigamma_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/psigamma_kernel.cl",
       "psigamma_kernel",
       len,
@@ -3648,7 +3648,7 @@ Rcpp::NumericVector digamma_opencl(const Rcpp::NumericVector& x, bool verbose) {
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl() || len == 0) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/digamma_kernel.cl",
       "digamma_kernel",
       len,
@@ -3664,7 +3664,7 @@ Rcpp::NumericVector trigamma_opencl(const Rcpp::NumericVector& x, bool verbose) 
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl() || len == 0) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/trigamma_kernel.cl",
       "trigamma_kernel",
       len,
@@ -3680,7 +3680,7 @@ Rcpp::NumericVector tetragamma_opencl(const Rcpp::NumericVector& x, bool verbose
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl() || len == 0) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/tetragamma_kernel.cl",
       "tetragamma_kernel",
       len,
@@ -3696,7 +3696,7 @@ Rcpp::NumericVector pentagamma_opencl(const Rcpp::NumericVector& x, bool verbose
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl() || len == 0) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/pentagamma_kernel.cl",
       "pentagamma_kernel",
       len,
@@ -3722,7 +3722,7 @@ Rcpp::NumericVector beta_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/beta_special_kernel.cl",
       "beta_special_kernel",
       len,
@@ -3748,7 +3748,7 @@ Rcpp::NumericVector lbeta_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/lbeta_special_kernel.cl",
       "lbeta_special_kernel",
       len,
@@ -3774,7 +3774,7 @@ Rcpp::NumericVector choose_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/choose_special_kernel.cl",
       "choose_special_kernel",
       len,
@@ -3800,7 +3800,7 @@ Rcpp::NumericVector lchoose_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/lchoose_special_kernel.cl",
       "lchoose_special_kernel",
       len,
@@ -3827,7 +3827,7 @@ Rcpp::NumericVector bessel_i_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/bessel_i_kernel.cl",
       "bessel_i_kernel",
       len,
@@ -3853,7 +3853,7 @@ Rcpp::NumericVector bessel_j_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/bessel_j_kernel.cl",
       "bessel_j_kernel",
       len,
@@ -3880,7 +3880,7 @@ Rcpp::NumericVector bessel_k_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/bessel_k_kernel.cl",
       "bessel_k_kernel",
       len,
@@ -3906,7 +3906,7 @@ Rcpp::NumericVector bessel_y_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/bessel_y_kernel.cl",
       "bessel_y_kernel",
       len,
@@ -3933,7 +3933,7 @@ Rcpp::NumericVector bessel_i_ex_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/bessel_i_ex_kernel.cl",
       "bessel_i_ex_kernel",
       len,
@@ -3959,7 +3959,7 @@ Rcpp::NumericVector bessel_j_ex_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/bessel_j_ex_kernel.cl",
       "bessel_j_ex_kernel",
       len,
@@ -3986,7 +3986,7 @@ Rcpp::NumericVector bessel_k_ex_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/bessel_k_ex_kernel.cl",
       "bessel_k_ex_kernel",
       len,
@@ -4012,7 +4012,7 @@ Rcpp::NumericVector bessel_y_ex_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/bessel_y_ex_kernel.cl",
       "bessel_y_ex_kernel",
       len,
@@ -4038,7 +4038,7 @@ Rcpp::NumericVector imax2_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/imax2_kernel.cl",
       "imax2_kernel",
       len,
@@ -4064,7 +4064,7 @@ Rcpp::NumericVector imin2_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/imin2_kernel.cl",
       "imin2_kernel",
       len,
@@ -4090,7 +4090,7 @@ Rcpp::NumericVector fmax2_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/fmax2_kernel.cl",
       "fmax2_kernel",
       len,
@@ -4116,7 +4116,7 @@ Rcpp::NumericVector fmin2_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/fmin2_kernel.cl",
       "fmin2_kernel",
       len,
@@ -4132,7 +4132,7 @@ Rcpp::NumericVector sign_opencl(const Rcpp::NumericVector& x, bool verbose) {
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl() || len == 0) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/sign_kernel.cl",
       "sign_kernel",
       len,
@@ -4158,7 +4158,7 @@ Rcpp::NumericVector fprec_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/fprec_kernel.cl",
       "fprec_kernel",
       len,
@@ -4184,7 +4184,7 @@ Rcpp::NumericVector fround_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/fround_kernel.cl",
       "fround_kernel",
       len,
@@ -4210,7 +4210,7 @@ Rcpp::NumericVector fsign_opencl(
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/fsign_kernel.cl",
       "fsign_kernel",
       len,
@@ -4226,7 +4226,7 @@ Rcpp::NumericVector ftrunc_opencl(const Rcpp::NumericVector& x, bool verbose) {
   Rcpp::NumericVector out(len);
 #ifdef USE_OPENCL
   if (!has_opencl() || len == 0) return out;
-  numeric_cols_ndrange_kernel_temp_fill(
+  numeric_cols_ndrange_kernel_fill(
       "src/ftrunc_kernel.cl",
       "ftrunc_kernel",
       len,
