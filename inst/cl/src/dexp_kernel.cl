@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void dexp_kernel_temp(
+__kernel void dexp_kernel(
     __global const double* x,
     __global const double* rate,
     __global const int* give_log,

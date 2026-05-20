@@ -6,7 +6,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void dpois_raw_kernel_temp(
+__kernel void dpois_raw_kernel(
     __global const double* x,
     __global const double* lambda,
     __global const int* give_log,

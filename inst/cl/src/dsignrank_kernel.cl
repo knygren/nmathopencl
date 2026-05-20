@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void dsignrank_kernel_temp(
+__kernel void dsignrank_kernel(
     __global const double* x,
     __global const double* nsize,
     __global const int* give_log,

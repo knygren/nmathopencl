@@ -6,7 +6,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void dbinom_raw_kernel_temp(
+__kernel void dbinom_raw_kernel(
     __global const double* x,
     __global const double* n_size,
     __global const double* prob,

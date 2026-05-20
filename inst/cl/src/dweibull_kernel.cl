@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void dweibull_kernel_temp(
+__kernel void dweibull_kernel(
     __global const double* x,
     __global const double* shape,
     __global const double* scale,

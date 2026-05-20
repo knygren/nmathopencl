@@ -63,7 +63,7 @@ Rcpp::NumericVector dnorm_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dnorm_kernel.cl",
-        "dnorm_kernel_temp",
+        "dnorm_kernel",
         len,
         {&x, &mean, &sd},
         give_log,
@@ -527,7 +527,7 @@ static void df_nf_mixed_ncp_ndrange_twopass(
     Rcpp::IntegerVector glz = gather_int_at_ix(iz, give_log);
     Rcpp::NumericVector oz(nz);
     d_givelog_ndrange_kernel_temp_fill(
-        "src/df_kernel.cl", "df_kernel_temp", nz, {&xz, &df1z, &df2z}, glz, oz, verbose);
+        "src/df_kernel.cl", "df_kernel", nz, {&xz, &df1z, &df2z}, glz, oz, verbose);
     for (int j = 0; j < nz; ++j) out[iz[static_cast<size_t>(j)]] = oz[j];
   }
   if (nn > 0) {
@@ -539,7 +539,7 @@ static void df_nf_mixed_ncp_ndrange_twopass(
     Rcpp::NumericVector on(nn);
     d_givelog_ndrange_kernel_temp_fill(
         "src/dnf_kernel.cl",
-        "dnf_kernel_temp",
+        "dnf_kernel",
         nn,
         {&xn, &df1n, &ncn, &df2n},
         gln,
@@ -918,7 +918,7 @@ Rcpp::NumericVector dunif_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dunif_kernel.cl",
-        "dunif_kernel_temp",
+        "dunif_kernel",
         len,
         {&x, &min, &max},
         give_log,
@@ -1015,7 +1015,7 @@ Rcpp::NumericVector dgamma_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dgamma_kernel.cl",
-        "dgamma_kernel_temp",
+        "dgamma_kernel",
         len,
         {&x, &shape, &scale},
         give_log,
@@ -1127,7 +1127,7 @@ Rcpp::NumericVector dbeta_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dbeta_kernel.cl",
-        "dbeta_kernel_temp",
+        "dbeta_kernel",
         len,
         {&x, &shape1, &shape2},
         give_log,
@@ -1315,7 +1315,7 @@ Rcpp::NumericVector dlnorm_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dlnorm_kernel.cl",
-        "dlnorm_kernel_temp",
+        "dlnorm_kernel",
         len,
         {&x, &meanlog, &sdlog},
         give_log,
@@ -1438,7 +1438,7 @@ Rcpp::NumericVector dchisq_opencl(
     if (all_ncp_zero) {
       d_givelog_ndrange_kernel_temp_fill(
           "src/dchisq_kernel.cl",
-          "dchisq_kernel_temp",
+          "dchisq_kernel",
           len,
           {&x, &df},
           give_log,
@@ -1447,7 +1447,7 @@ Rcpp::NumericVector dchisq_opencl(
     } else if (!any_ncp_zero) {
       d_givelog_ndrange_kernel_temp_fill(
           "src/dnchisq_kernel.cl",
-          "dnchisq_kernel_temp",
+          "dnchisq_kernel",
           len,
           {&x, &df, &ncp},
           give_log,
@@ -1456,9 +1456,9 @@ Rcpp::NumericVector dchisq_opencl(
     } else {
       dg_mixed_ncp_two_three_ndrange_twopass(
           "src/dchisq_kernel.cl",
-          "dchisq_kernel_temp",
+          "dchisq_kernel",
           "src/dnchisq_kernel.cl",
-          "dnchisq_kernel_temp",
+          "dnchisq_kernel",
           len,
           ncp,
           x,
@@ -1672,7 +1672,7 @@ Rcpp::NumericVector df_opencl(
     if (all_ncp_zero) {
       d_givelog_ndrange_kernel_temp_fill(
           "src/df_kernel.cl",
-          "df_kernel_temp",
+          "df_kernel",
           len,
           {&x, &df1, &df2},
           give_log,
@@ -1681,7 +1681,7 @@ Rcpp::NumericVector df_opencl(
     } else if (!any_ncp_zero) {
       d_givelog_ndrange_kernel_temp_fill(
           "src/dnf_kernel.cl",
-          "dnf_kernel_temp",
+          "dnf_kernel",
           len,
           {&x, &df1, &ncp, &df2},
           give_log,
@@ -1883,7 +1883,7 @@ Rcpp::NumericVector dt_opencl(
     if (all_ncp_zero) {
       d_givelog_ndrange_kernel_temp_fill(
           "src/dt_kernel.cl",
-          "dt_kernel_temp",
+          "dt_kernel",
           len,
           {&x, &df},
           give_log,
@@ -1892,7 +1892,7 @@ Rcpp::NumericVector dt_opencl(
     } else if (!any_ncp_zero) {
       d_givelog_ndrange_kernel_temp_fill(
           "src/dnt_kernel.cl",
-          "dnt_kernel_temp",
+          "dnt_kernel",
           len,
           {&x, &df, &ncp},
           give_log,
@@ -1901,9 +1901,9 @@ Rcpp::NumericVector dt_opencl(
     } else {
       dg_mixed_ncp_two_three_ndrange_twopass(
           "src/dt_kernel.cl",
-          "dt_kernel_temp",
+          "dt_kernel",
           "src/dnt_kernel.cl",
-          "dnt_kernel_temp",
+          "dnt_kernel",
           len,
           ncp,
           x,
@@ -2091,7 +2091,7 @@ Rcpp::NumericVector dbinom_raw_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dbinom_raw_kernel.cl",
-        "dbinom_raw_kernel_temp",
+        "dbinom_raw_kernel",
         len,
         {&x, &n_size, &prob, &qprob},
         give_log,
@@ -2122,7 +2122,7 @@ Rcpp::NumericVector dbinom_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dbinom_kernel.cl",
-        "dbinom_kernel_temp",
+        "dbinom_kernel",
         len,
         {&x, &size, &prob},
         give_log,
@@ -2186,7 +2186,7 @@ Rcpp::NumericVector dnbinom_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dnbinom_kernel.cl",
-        "dnbinom_kernel_temp",
+        "dnbinom_kernel",
         len,
         {&x, &size, &prob},
         give_log,
@@ -2298,7 +2298,7 @@ Rcpp::NumericVector dnbinom_mu_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dnbinom_mu_kernel.cl",
-        "dnbinom_mu_kernel_temp",
+        "dnbinom_mu_kernel",
         len,
         {&x, &size, &mu},
         give_log,
@@ -2377,7 +2377,7 @@ Rcpp::NumericVector dcauchy_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dcauchy_kernel.cl",
-        "dcauchy_kernel_temp",
+        "dcauchy_kernel",
         len,
         {&x, &location, &scale},
         give_log,
@@ -2488,7 +2488,7 @@ Rcpp::NumericVector dexp_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dexp_kernel.cl",
-        "dexp_kernel_temp",
+        "dexp_kernel",
         len,
         {&x, &rate},
         give_log,
@@ -2582,7 +2582,7 @@ Rcpp::NumericVector dgeom_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dgeom_kernel.cl",
-        "dgeom_kernel_temp",
+        "dgeom_kernel",
         len,
         {&x, &prob},
         give_log,
@@ -2693,7 +2693,7 @@ Rcpp::NumericVector dhyper_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dhyper_kernel.cl",
-        "dhyper_kernel_temp",
+        "dhyper_kernel",
         len,
         {&x, &r, &b, &n1},
         give_log,
@@ -2871,7 +2871,7 @@ Rcpp::NumericVector dpois_raw_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dpois_raw_kernel.cl",
-        "dpois_raw_kernel_temp",
+        "dpois_raw_kernel",
         len,
         {&x, &lambda},
         give_log,
@@ -2901,7 +2901,7 @@ Rcpp::NumericVector dpois_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dpois_kernel.cl",
-        "dpois_kernel_temp",
+        "dpois_kernel",
         len,
         {&x, &lambda},
         give_log,
@@ -3027,7 +3027,7 @@ Rcpp::NumericVector dweibull_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dweibull_kernel.cl",
-        "dweibull_kernel_temp",
+        "dweibull_kernel",
         len,
         {&x, &shape, &scale},
         give_log,
@@ -3139,7 +3139,7 @@ Rcpp::NumericVector dlogis_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dlogis_kernel.cl",
-        "dlogis_kernel_temp",
+        "dlogis_kernel",
         len,
         {&x, &location, &scale},
         give_log,
@@ -3252,7 +3252,7 @@ Rcpp::NumericVector dnbeta_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dnbeta_kernel.cl",
-        "dnbeta_kernel_temp",
+        "dnbeta_kernel",
         len,
         {&x, &shape1, &ncp, &shape2},
         give_log,
@@ -3351,7 +3351,7 @@ Rcpp::NumericVector dwilcox_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dwilcox_kernel.cl",
-        "dwilcox_kernel_temp",
+        "dwilcox_kernel",
         len,
         {&x, &m, &n2},
         give_log,
@@ -3447,7 +3447,7 @@ Rcpp::NumericVector dsignrank_opencl(
   try {
     d_givelog_ndrange_kernel_temp_fill(
         "src/dsignrank_kernel.cl",
-        "dsignrank_kernel_temp",
+        "dsignrank_kernel",
         len,
         {&x, &nsize},
         give_log,

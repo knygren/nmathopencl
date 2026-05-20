@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void dnt_kernel_temp(
+__kernel void dnt_kernel(
     __global const double* x,
     __global const double* df,
     __global const double* ncp,

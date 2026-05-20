@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void dgeom_kernel_temp(
+__kernel void dgeom_kernel(
     __global const double* x,
     __global const double* prob,
     __global const int* give_log,
