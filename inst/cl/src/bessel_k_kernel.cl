@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void bessel_k_kernel_temp(
+__kernel void bessel_k_kernel(
     __global const double* xv,
     __global const double* nu_col,
     __global const double* expo_scaled,

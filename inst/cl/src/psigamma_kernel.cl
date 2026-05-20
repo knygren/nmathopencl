@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void psigamma_kernel_temp(
+__kernel void psigamma_kernel(
     __global const double* xv,
     __global const double* deriv,
     __global double* out,

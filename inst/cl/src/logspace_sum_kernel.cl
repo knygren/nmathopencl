@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void logspace_sum_kernel_temp(
+__kernel void logspace_sum_kernel(
     __global const double* logxv,
     __global const double* logyv,
     __global double* out,

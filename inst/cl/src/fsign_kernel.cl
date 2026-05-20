@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void fsign_kernel_temp(
+__kernel void fsign_kernel(
     __global const double* xv,
     __global const double* yv,
     __global double* out,

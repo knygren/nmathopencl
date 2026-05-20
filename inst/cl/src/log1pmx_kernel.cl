@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void log1pmx_kernel_temp(
+__kernel void log1pmx_kernel(
     __global const double* x,
     __global double* out,
     const int len

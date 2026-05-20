@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void choose_special_kernel_temp(
+__kernel void choose_special_kernel(
     __global const double* n_col,
     __global const double* kv,
     __global double* out,

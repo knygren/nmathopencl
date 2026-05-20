@@ -241,7 +241,7 @@ static void opencl_serial_scalar_draws(
   }
 }
 
-// NDRange *_kernel_temp helpers (lower.tail / log.p as int columns).
+// NDRange helpers for p*/q* (lower.tail / log.p as int columns).
 static std::vector<std::vector<double>> pq_pack_numeric_cols_for_tail_temp(
     const std::vector<const Rcpp::NumericVector*>& cols
 ) {
@@ -336,7 +336,7 @@ static void numeric_cols_ndrange_kernel_temp_fill(
 }
 
 // Mixed ncp (some rows central, some non-central): partition rows, run up to two
-// vectored *_kernel_temp enqueues on packed buffers, scatter back into full `out`.
+// vectored *_kernel enqueues on packed buffers, scatter back into full `out`.
 static Rcpp::IntegerVector gather_int_at_ix(
     const std::vector<int>& ix, const Rcpp::IntegerVector& v
 ) {
@@ -614,7 +614,7 @@ Rcpp::NumericVector log1pmx_opencl(const Rcpp::NumericVector& x, bool verbose) {
   if (!has_opencl() || len == 0) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/log1pmx_kernel.cl",
-      "log1pmx_kernel_temp",
+      "log1pmx_kernel",
       len,
       {&x},
       out,
@@ -630,7 +630,7 @@ Rcpp::NumericVector log1pexp_opencl(const Rcpp::NumericVector& x, bool verbose) 
   if (!has_opencl() || len == 0) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/log1pexp_kernel.cl",
-      "log1pexp_kernel_temp",
+      "log1pexp_kernel",
       len,
       {&x},
       out,
@@ -646,7 +646,7 @@ Rcpp::NumericVector log1mexp_opencl(const Rcpp::NumericVector& x, bool verbose) 
   if (!has_opencl() || len == 0) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/log1mexp_kernel.cl",
-      "log1mexp_kernel_temp",
+      "log1mexp_kernel",
       len,
       {&x},
       out,
@@ -662,7 +662,7 @@ Rcpp::NumericVector lgamma1p_opencl(const Rcpp::NumericVector& x, bool verbose) 
   if (!has_opencl() || len == 0) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/lgamma1p_kernel.cl",
-      "lgamma1p_kernel_temp",
+      "lgamma1p_kernel",
       len,
       {&x},
       out,
@@ -688,7 +688,7 @@ Rcpp::NumericVector pow1p_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/pow1p_kernel.cl",
-      "pow1p_kernel_temp",
+      "pow1p_kernel",
       len,
       {&x, &y},
       out,
@@ -714,7 +714,7 @@ Rcpp::NumericVector logspace_add_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/logspace_add_kernel.cl",
-      "logspace_add_kernel_temp",
+      "logspace_add_kernel",
       len,
       {&logx, &logy},
       out,
@@ -740,7 +740,7 @@ Rcpp::NumericVector logspace_sub_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/logspace_sub_kernel.cl",
-      "logspace_sub_kernel_temp",
+      "logspace_sub_kernel",
       len,
       {&logx, &logy},
       out,
@@ -766,7 +766,7 @@ Rcpp::NumericVector logspace_sum_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/logspace_sum_kernel.cl",
-      "logspace_sum_kernel_temp",
+      "logspace_sum_kernel",
       len,
       {&logx, &logy},
       out,
@@ -3547,7 +3547,7 @@ Rcpp::NumericVector gammafn_opencl(const Rcpp::NumericVector& x, bool verbose) {
   if (!has_opencl() || len == 0) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/gammafn_kernel.cl",
-      "gammafn_kernel_temp",
+      "gammafn_kernel",
       len,
       {&x},
       out,
@@ -3563,7 +3563,7 @@ Rcpp::NumericVector lgammafn_opencl(const Rcpp::NumericVector& x, bool verbose) 
   if (!has_opencl() || len == 0) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/lgammafn_kernel.cl",
-      "lgammafn_kernel_temp",
+      "lgammafn_kernel",
       len,
       {&x},
       out,
@@ -3579,7 +3579,7 @@ Rcpp::NumericVector lgammafn_sign_opencl(const Rcpp::NumericVector& x, bool verb
   if (!has_opencl() || len == 0) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/lgammafn_sign_kernel.cl",
-      "lgammafn_sign_kernel_temp",
+      "lgammafn_sign_kernel",
       len,
       {&x},
       out,
@@ -3608,7 +3608,7 @@ Rcpp::NumericVector dpsifn_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/dpsifn_kernel.cl",
-      "dpsifn_kernel_temp",
+      "dpsifn_kernel",
       len,
       {&x, &n_deriv, &kode, &m},
       out,
@@ -3634,7 +3634,7 @@ Rcpp::NumericVector psigamma_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/psigamma_kernel.cl",
-      "psigamma_kernel_temp",
+      "psigamma_kernel",
       len,
       {&x, &deriv},
       out,
@@ -3650,7 +3650,7 @@ Rcpp::NumericVector digamma_opencl(const Rcpp::NumericVector& x, bool verbose) {
   if (!has_opencl() || len == 0) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/digamma_kernel.cl",
-      "digamma_kernel_temp",
+      "digamma_kernel",
       len,
       {&x},
       out,
@@ -3666,7 +3666,7 @@ Rcpp::NumericVector trigamma_opencl(const Rcpp::NumericVector& x, bool verbose) 
   if (!has_opencl() || len == 0) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/trigamma_kernel.cl",
-      "trigamma_kernel_temp",
+      "trigamma_kernel",
       len,
       {&x},
       out,
@@ -3682,7 +3682,7 @@ Rcpp::NumericVector tetragamma_opencl(const Rcpp::NumericVector& x, bool verbose
   if (!has_opencl() || len == 0) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/tetragamma_kernel.cl",
-      "tetragamma_kernel_temp",
+      "tetragamma_kernel",
       len,
       {&x},
       out,
@@ -3698,7 +3698,7 @@ Rcpp::NumericVector pentagamma_opencl(const Rcpp::NumericVector& x, bool verbose
   if (!has_opencl() || len == 0) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/pentagamma_kernel.cl",
-      "pentagamma_kernel_temp",
+      "pentagamma_kernel",
       len,
       {&x},
       out,
@@ -3724,7 +3724,7 @@ Rcpp::NumericVector beta_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/beta_special_kernel.cl",
-      "beta_special_kernel_temp",
+      "beta_special_kernel",
       len,
       {&a, &b},
       out,
@@ -3750,7 +3750,7 @@ Rcpp::NumericVector lbeta_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/lbeta_special_kernel.cl",
-      "lbeta_special_kernel_temp",
+      "lbeta_special_kernel",
       len,
       {&a, &b},
       out,
@@ -3776,7 +3776,7 @@ Rcpp::NumericVector choose_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/choose_special_kernel.cl",
-      "choose_special_kernel_temp",
+      "choose_special_kernel",
       len,
       {&n_val, &k},
       out,
@@ -3802,7 +3802,7 @@ Rcpp::NumericVector lchoose_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/lchoose_special_kernel.cl",
-      "lchoose_special_kernel_temp",
+      "lchoose_special_kernel",
       len,
       {&n_val, &k},
       out,
@@ -3829,7 +3829,7 @@ Rcpp::NumericVector bessel_i_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/bessel_i_kernel.cl",
-      "bessel_i_kernel_temp",
+      "bessel_i_kernel",
       len,
       {&x, &nu, &expo_scaled},
       out,
@@ -3855,7 +3855,7 @@ Rcpp::NumericVector bessel_j_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/bessel_j_kernel.cl",
-      "bessel_j_kernel_temp",
+      "bessel_j_kernel",
       len,
       {&x, &nu},
       out,
@@ -3882,7 +3882,7 @@ Rcpp::NumericVector bessel_k_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/bessel_k_kernel.cl",
-      "bessel_k_kernel_temp",
+      "bessel_k_kernel",
       len,
       {&x, &nu, &expo_scaled},
       out,
@@ -3908,7 +3908,7 @@ Rcpp::NumericVector bessel_y_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/bessel_y_kernel.cl",
-      "bessel_y_kernel_temp",
+      "bessel_y_kernel",
       len,
       {&x, &nu},
       out,
@@ -3935,7 +3935,7 @@ Rcpp::NumericVector bessel_i_ex_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/bessel_i_ex_kernel.cl",
-      "bessel_i_ex_kernel_temp",
+      "bessel_i_ex_kernel",
       len,
       {&x, &nu, &expo},
       out,
@@ -3961,7 +3961,7 @@ Rcpp::NumericVector bessel_j_ex_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/bessel_j_ex_kernel.cl",
-      "bessel_j_ex_kernel_temp",
+      "bessel_j_ex_kernel",
       len,
       {&x, &nu},
       out,
@@ -3988,7 +3988,7 @@ Rcpp::NumericVector bessel_k_ex_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/bessel_k_ex_kernel.cl",
-      "bessel_k_ex_kernel_temp",
+      "bessel_k_ex_kernel",
       len,
       {&x, &nu, &expo},
       out,
@@ -4014,7 +4014,7 @@ Rcpp::NumericVector bessel_y_ex_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/bessel_y_ex_kernel.cl",
-      "bessel_y_ex_kernel_temp",
+      "bessel_y_ex_kernel",
       len,
       {&x, &nu},
       out,
@@ -4040,7 +4040,7 @@ Rcpp::NumericVector imax2_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/imax2_kernel.cl",
-      "imax2_kernel_temp",
+      "imax2_kernel",
       len,
       {&x, &y},
       out,
@@ -4066,7 +4066,7 @@ Rcpp::NumericVector imin2_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/imin2_kernel.cl",
-      "imin2_kernel_temp",
+      "imin2_kernel",
       len,
       {&x, &y},
       out,
@@ -4092,7 +4092,7 @@ Rcpp::NumericVector fmax2_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/fmax2_kernel.cl",
-      "fmax2_kernel_temp",
+      "fmax2_kernel",
       len,
       {&x, &y},
       out,
@@ -4118,7 +4118,7 @@ Rcpp::NumericVector fmin2_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/fmin2_kernel.cl",
-      "fmin2_kernel_temp",
+      "fmin2_kernel",
       len,
       {&x, &y},
       out,
@@ -4134,7 +4134,7 @@ Rcpp::NumericVector sign_opencl(const Rcpp::NumericVector& x, bool verbose) {
   if (!has_opencl() || len == 0) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/sign_kernel.cl",
-      "sign_kernel_temp",
+      "sign_kernel",
       len,
       {&x},
       out,
@@ -4160,7 +4160,7 @@ Rcpp::NumericVector fprec_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/fprec_kernel.cl",
-      "fprec_kernel_temp",
+      "fprec_kernel",
       len,
       {&x, &digits},
       out,
@@ -4186,7 +4186,7 @@ Rcpp::NumericVector fround_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/fround_kernel.cl",
-      "fround_kernel_temp",
+      "fround_kernel",
       len,
       {&x, &digits},
       out,
@@ -4212,7 +4212,7 @@ Rcpp::NumericVector fsign_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/fsign_kernel.cl",
-      "fsign_kernel_temp",
+      "fsign_kernel",
       len,
       {&x, &y},
       out,
@@ -4228,7 +4228,7 @@ Rcpp::NumericVector ftrunc_opencl(const Rcpp::NumericVector& x, bool verbose) {
   if (!has_opencl() || len == 0) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/ftrunc_kernel.cl",
-      "ftrunc_kernel_temp",
+      "ftrunc_kernel",
       len,
       {&x},
       out,

@@ -210,7 +210,7 @@ void opencl_dbl_scalar_kernel_runner(
 );
 
 // NDRange-over-len for p*/q* kernels using lower.tail / log.p as int buffers:
-// OpenCL entry points *_kernel_temp take arg_cols[] (__global double each), then tails, out, len.
+// OpenCL entry points *_kernel take arg_cols[] (__global double each), then tails, out, len.
 void opencl_pq_tail_kernel_runner_temp(
     const std::string&               kernel_source,
     const char*                      kernel_name,
@@ -221,7 +221,7 @@ void opencl_pq_tail_kernel_runner_temp(
     std::vector<double>&             out_flat);
 
 // NDRange-over-len for d* kernels using give_log as int buffer:
-// OpenCL entry points *_kernel_temp take arg_cols[] (__global double each), give_log, out, len.
+// OpenCL entry points *_kernel take arg_cols[] (__global double each), give_log, out, len.
 void opencl_d_givelog_kernel_runner_temp(
     const std::string&                     kernel_source,
     const char*                            kernel_name,
@@ -230,7 +230,7 @@ void opencl_d_givelog_kernel_runner_temp(
     const std::vector<int>&                give_log,
     std::vector<double>&                   out_flat);
 
-// NDRange-over-len for numeric-only kernels: *_kernel_temp takes one __global column per
+// NDRange-over-len for numeric-only kernels: *_kernel takes one __global column per
 // numeric argument (__global double* each), then out, len — no tails / give_log integers.
 void opencl_numeric_cols_kernel_runner_temp(
     const std::string&                     kernel_source,

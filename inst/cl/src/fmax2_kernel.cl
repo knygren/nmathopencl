@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void fmax2_kernel_temp(
+__kernel void fmax2_kernel(
     __global const double* xv,
     __global const double* yv,
     __global double* out,

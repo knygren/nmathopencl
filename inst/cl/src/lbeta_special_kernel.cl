@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void lbeta_special_kernel_temp(
+__kernel void lbeta_special_kernel(
     __global const double* av,
     __global const double* bv,
     __global double* out,
