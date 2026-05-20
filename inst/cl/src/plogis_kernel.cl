@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void plogis_kernel_temp(
+__kernel void plogis_kernel(
     __global const double* q,
     __global const double* location,
     __global const double* scale,

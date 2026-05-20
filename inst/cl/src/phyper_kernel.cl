@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void phyper_kernel_temp(
+__kernel void phyper_kernel(
     __global const double* q,
     __global const double* m,
     __global const double* n_black,

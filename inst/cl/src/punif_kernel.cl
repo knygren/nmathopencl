@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void punif_kernel_temp(
+__kernel void punif_kernel(
     __global const double* q,
     __global const double* min_v,
     __global const double* max_v,

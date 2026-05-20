@@ -6,7 +6,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void pgamma_kernel_temp(
+__kernel void pgamma_kernel(
     __global const double* q,
     __global const double* shape,
     __global const double* scale,

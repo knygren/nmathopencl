@@ -7,7 +7,7 @@
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 // Indexed by work-item id (cf. ex_glmbayes f2_f3_* kernels).
-__kernel void pnorm_kernel_temp(
+__kernel void pnorm_kernel(
     __global const double* q,
     __global const double* mean,
     __global const double* sd,

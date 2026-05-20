@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void pexp_kernel_temp(
+__kernel void pexp_kernel(
     __global const double* q,
     __global const double* rate,
     __global const int* lower_tail,
