@@ -31,6 +31,12 @@
 #'   `depends_tag = "all_depends_nmath"`.
 #' @param index Optional RDS list; \code{NULL} triggers lazy reads.
 #'
+#' @details When \code{depends_tag = "all_depends_nmath"} and
+#' \code{basename(normalizePath(library_dir))} is \code{nmath}, some launchers match
+#' assembler rules in \verb{inst/extdata/opencl_full_nmath_stopgap.json}: a brief
+#' \code{\link{message}} prints and every indexed \verb{.cl} shard listed in the
+#' library index is concatenated, not only the stems from the kernel's annotations.
+#'
 #' @return A character vector subclass \verb{nmathopencl_concatenated_lib} holding
 #'   concatenated sources (often length 1; blank annotations yield length-zero
 #'   concatenation). Attachments describe requested and loaded library stems,
@@ -65,20 +71,39 @@ load_library_for_kernel <- function(kernel_path,
   lines <- readLines(kernel_path, warn = FALSE)
   needed <- parse_port_annotation(lines, depends_tag)
 
-  if (length(needed) == 0L) {
+  sg_ids <- .cl_nmath_stopgap_matching_trigger_ids(
+    kernel_path, depends_tag, library_dir)
+  use_full_nmath <- .cl_nmath_use_full_library_from_stopgap(sg_ids)
+
+  if (!use_full_nmath && length(needed) == 0L) {
     out <- .cl_concat_result("", character(), character(),
                              kpath_norm, lib_norm, depends_tag, 0L)
     return(invisible(out))
   }
 
-  stems_to_load <- .cl_filter_stems(needed, index, depends_tag)
-  if (length(stems_to_load) == 0L) {
-    out <- .cl_concat_result("", needed, character(),
-                             kpath_norm, lib_norm, depends_tag, 0L)
-    return(invisible(out))
-  }
+  if (use_full_nmath) {
+    message(
+      "Note: full `nmath` library stopgap (",
+      paste(sg_ids, collapse = ", "),
+      "). Using every indexed .cl shard in `library_dir` (see ",
+      "`extdata/opencl_full_nmath_stopgap.json` and assembler parity)."
+    )
 
-  stems_to_load <- stems_to_load[order(index$load_order[stems_to_load])]
+    stems_to_load <- .cl_index_stems_all_ordered(index)
+    stems_to_load <- stems_to_load[!is.na(stems_to_load) & nzchar(stems_to_load)]
+    lo_nm <- names(index$load_order)
+    stems_to_load <- stems_to_load[stems_to_load %in% lo_nm]
+    stems_to_load <- stems_to_load[order(index$load_order[stems_to_load])]
+  } else {
+    stems_to_load <- .cl_filter_stems(needed, index, depends_tag)
+    if (length(stems_to_load) == 0L) {
+      out <- .cl_concat_result("", needed, character(),
+                               kpath_norm, lib_norm, depends_tag, 0L)
+      return(invisible(out))
+    }
+
+    stems_to_load <- stems_to_load[order(index$load_order[stems_to_load])]
+  }
 
   parts <- vapply(stems_to_load, function(stem) {
     path <- file.path(library_dir, paste0(stem, ".cl"))

@@ -45,6 +45,13 @@
 #'   are not overwritten --- the copy is skipped and `copied = FALSE` in the
 #'   returned data frame.
 #'
+#' @details The same assembler stopgap as \code{\link{load_library_for_kernel}}
+#' (\verb{inst/extdata/opencl_full_nmath_stopgap.json}) can apply when
+#' \code{depends_tag = "all_depends_nmath"} and the library directory basename is
+#' \verb{nmath}: if any launcher in \code{kernel_paths} triggers it,
+#' \code{\link{message}(...)} notes that every indexed \verb{.cl} shard is copied,
+#' not only the union of annotated stems.
+#'
 #' @return A \verb{nmathopencl_lib_extract_df} subclass of \verb{data.frame}
 #'   with one row per library shard (\code{.cl} files in dependency order, followed by
 #'   companion index files when planned or copied) and columns:
@@ -102,6 +109,10 @@ extract_library_subset <- function(kernel_paths,
 
   index <- .cl_load_index(index, library_dir)
 
+  sg_ids <- .cl_nmath_stopgap_matching_trigger_ids(
+    kernel_paths, depends_tag, library_dir)
+  use_full_nmath <- .cl_nmath_use_full_library_from_stopgap(sg_ids)
+
   all_needed <- character()
   for (kpath in kernel_paths) {
     lines <- readLines(kpath, warn = FALSE)
@@ -109,7 +120,7 @@ extract_library_subset <- function(kernel_paths,
     all_needed <- union(all_needed, stems)
   }
 
-  if (length(all_needed) == 0L) {
+  if (!use_full_nmath && length(all_needed) == 0L) {
     message("No `@", depends_tag, "` annotations found in any kernel file. ",
             "Nothing to copy.")
     out <- .cl_attach_extract_attrs(empty_df(), kernel_paths_norm,
@@ -118,15 +129,30 @@ extract_library_subset <- function(kernel_paths,
     return(invisible(out))
   }
 
-  stems_to_copy <- .cl_filter_stems(all_needed, index, depends_tag)
-  if (length(stems_to_copy) == 0L) {
-    out <- .cl_attach_extract_attrs(empty_df(), kernel_paths_norm,
-                                    lib_dir_norm, dest_norm, depends_tag,
-                                    manifest_only = !dest_ok)
-    return(invisible(out))
-  }
+  if (use_full_nmath) {
+    message(
+      "Note: full `nmath` library stopgap (",
+      paste(sg_ids, collapse = ", "),
+      "). Using every indexed .cl shard in `library_dir` (see ",
+      "`extdata/opencl_full_nmath_stopgap.json` and assembler parity)."
+    )
 
-  stems_to_copy <- stems_to_copy[order(index$load_order[stems_to_copy])]
+    stems_to_copy <- .cl_index_stems_all_ordered(index)
+    stems_to_copy <- stems_to_copy[!is.na(stems_to_copy) & nzchar(stems_to_copy)]
+    lo_nm <- names(index$load_order)
+    stems_to_copy <- stems_to_copy[stems_to_copy %in% lo_nm]
+    stems_to_copy <- stems_to_copy[order(index$load_order[stems_to_copy])]
+  } else {
+    stems_to_copy <- .cl_filter_stems(all_needed, index, depends_tag)
+    if (length(stems_to_copy) == 0L) {
+      out <- .cl_attach_extract_attrs(empty_df(), kernel_paths_norm,
+                                      lib_dir_norm, dest_norm, depends_tag,
+                                      manifest_only = !dest_ok)
+      return(invisible(out))
+    }
+
+    stems_to_copy <- stems_to_copy[order(index$load_order[stems_to_copy])]
+  }
 
   if (!dest_ok) {
     warning("`dest_dir` does not exist: ", dest_dir,

@@ -52,6 +52,12 @@ src <- load_library_for_kernel(
   kpath, lib_dir,
   depends_tag = "all_depends_nmath")
 }\if{html}{\out{</div>}}
+
+When \code{depends_tag = "all_depends_nmath"} and
+\code{basename(normalizePath(library_dir))} is \code{nmath}, some launchers match
+assembler rules in \verb{inst/extdata/opencl_full_nmath_stopgap.json}: a brief
+\code{\link{message}} prints and every indexed \verb{.cl} shard listed in the
+library index is concatenated, not only the stems from the kernel's annotations.
 }
 \examples{
 ############################ Start of load_library_for_kernel example ########################

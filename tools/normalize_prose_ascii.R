@@ -79,6 +79,7 @@ r_extra <- file.path(root, "R", c(
   "rcpp_wrappers.R",
   "cl_library_internals.R",
   "kernel_lib_subset_methods.R",
+  "kernel_nmath_stopgap.R",
   "extract_library_subset.R",
   "load_library_for_kernel.R"
 ))

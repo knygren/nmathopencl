@@ -77,6 +77,13 @@ result <- extract_library_subset(
   kernel_paths, lib_dir, dest_dir,
   depends_tag = "all_depends_nmath")
 }\if{html}{\out{</div>}}
+
+The same assembler stopgap as \code{\link{load_library_for_kernel}}
+(\verb{inst/extdata/opencl_full_nmath_stopgap.json}) can apply when
+\code{depends_tag = "all_depends_nmath"} and the library directory basename is
+\verb{nmath}: if any launcher in \code{kernel_paths} triggers it,
+\code{\link{message}(...)} notes that every indexed \verb{.cl} shard is copied,
+not only the union of annotated stems.
 }
 \examples{
 ############################ Start of extract_library_subset example #########################
