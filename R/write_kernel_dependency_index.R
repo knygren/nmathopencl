@@ -31,6 +31,9 @@
 #'     consistent with global load order).
 #'   - `n_files`: file count.
 #'
+#' @seealso [load_library_for_kernel()], [extract_library_subset()]
+#' @family OpenCL kernel library subsets
+#'
 #' @export
 write_kernel_dependency_index <- function(
     library_dir = NULL,

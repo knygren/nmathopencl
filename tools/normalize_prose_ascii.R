@@ -77,7 +77,9 @@ r_extra <- file.path(root, "R", c(
   "load_kernel_library.R",
   "internal_rcppparallel.R",
   "rcpp_wrappers.R",
-  "cl_library_utils.R"
+  "cl_library_internals.R",
+  "extract_library_subset.R",
+  "load_library_for_kernel.R"
 ))
 paths <- c(paths, r_extra[file.exists(r_extra)])
 

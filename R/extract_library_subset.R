@@ -1,81 +1,3 @@
-#' Load a Minimal OpenCL Library Subset for a Single Kernel
-#'
-#' Given a single kernel `.cl` file and a library directory (with an associated
-#' dependency index), reads the annotation tag that lists needed library files
-#' and returns their source code concatenated in the correct dependency order.
-#'
-#' It is strongly recommended to supply a pre-loaded `index` rather than
-#' letting the function read from disk on every call.  Load the index once
-#' and reuse it across all kernel calls:
-#'
-#' ```r
-#' idx <- readRDS(
-#'   system.file(
-#'     "cl/nmath/kernel_dependency_index.rds",
-#'     package = "nmathopencl"))
-#' src <- load_library_for_kernel(kernel_path, nmath_dir, index = idx)
-#' ```
-#'
-#' @param kernel_path Path to a single `.cl` kernel file.  The file is scanned
-#'   for the annotation tag given by `depends_tag`.
-#' @param library_dir Path to the library directory containing the `.cl` source
-#'   files (e.g. `system.file("cl/nmath", package = "nmathopencl")`).
-#' @param depends_tag Name of the annotation tag in the kernel file that lists
-#'   the required library file stems.  Defaults to `"all_depends"`.  For
-#'   kernels annotated with `@all_depends_nmath`, pass
-#'   `depends_tag = "all_depends_nmath"`.
-#' @param index Optional RDS list; \code{NULL} triggers lazy reads.
-#'
-#' @return A single character string: the concatenated source of all required
-#'   library files in dependency order, separated by a blank line.  Returns
-#'   `""` invisibly when the kernel file carries no `@{depends_tag}`
-#'   annotation, so it can be safely passed to `paste()` or included in a
-#'   larger program assembly without special-casing.
-#'
-#' @seealso \link{extract_library_subset}
-#' @seealso \link{write_kernel_dependency_index}
-#' @export
-load_library_for_kernel <- function(kernel_path,
-                                    library_dir,
-                                    depends_tag = "all_depends",
-                                    index = NULL) {
-  if (!file.exists(kernel_path)) {
-    stop("`kernel_path` does not exist: ", kernel_path, call. = FALSE)
-  }
-  if (!dir.exists(library_dir)) {
-    stop("`library_dir` does not exist: ", library_dir, call. = FALSE)
-  }
-
-  index <- .cl_load_index(index, library_dir)
-
-  lines  <- readLines(kernel_path, warn = FALSE)
-  needed <- parse_port_annotation(lines, depends_tag)
-
-  if (length(needed) == 0L) {
-    return(invisible(""))
-  }
-
-  stems_to_load <- .cl_filter_stems(needed, index, depends_tag)
-  if (length(stems_to_load) == 0L) {
-    return(invisible(""))
-  }
-
-  stems_to_load <- stems_to_load[order(index$load_order[stems_to_load])]
-
-  parts <- vapply(stems_to_load, function(stem) {
-    path <- file.path(library_dir, paste0(stem, ".cl"))
-    if (!file.exists(path)) {
-      warning("Library file not found for stem '", stem, "': ", path,
-              call. = FALSE)
-      return("")
-    }
-    paste(readLines(path, warn = FALSE), collapse = "\n")
-  }, character(1L))
-
-  paste(parts[nzchar(parts)], collapse = "\n\n")
-}
-
-
 #' Extract a Minimal Library Subset for a Set of Kernels
 #'
 #' Given one or more kernel `.cl` files and a library directory, determines the
@@ -90,12 +12,11 @@ load_library_for_kernel <- function(kernel_path,
 #' It is strongly recommended to supply a pre-loaded `index`:
 #'
 #' ```r
-#' idx <- readRDS(
-#'   system.file(
-#'     "cl/nmath/kernel_dependency_index.rds",
-#'     package = "nmathopencl"))
+#' lib_dir <- system.file("cl/ex_glmbayes_nmath", package = "nmathopencl")
+#' idx <- write_kernel_dependency_index(library_dir = lib_dir, write = FALSE)
 #' result <- extract_library_subset(
-#'   kernel_paths, nmath_dir, dest_dir, index = idx)
+#'   kernel_paths, lib_dir, dest_dir,
+#'   depends_tag = "all_depends_nmath", index = idx)
 #' ```
 #'
 #' @param kernel_paths Character vector of paths to kernel `.cl` files.  Each
@@ -128,8 +49,12 @@ load_library_for_kernel <- function(kernel_path,
 #'       existed and `overwrite = FALSE`.}
 #'   }
 #'
-#' @seealso \link{load_library_for_kernel}
-#' @seealso \link{write_kernel_dependency_index}
+#' @seealso [load_library_for_kernel()]
+#' @seealso [write_kernel_dependency_index()]
+#' @family OpenCL kernel library subsets
+#'
+#' @example inst/examples/Ex_extract_library_subset.R
+#'
 #' @export
 extract_library_subset <- function(kernel_paths,
                                    library_dir,
@@ -219,39 +144,4 @@ extract_library_subset <- function(kernel_paths,
 
   result <- do.call(rbind, c(result_rows, Filter(Negate(is.null), index_rows)))
   invisible(result)
-}
-
-
-.cl_load_index <- function(index, library_dir) {
-  if (!is.null(index)) {
-    return(index)
-  }
-  idx_path <- file.path(library_dir, "kernel_dependency_index.rds")
-  if (!file.exists(idx_path)) {
-    stop(
-      "No `kernel_dependency_index.rds` found in `library_dir` (", library_dir,
-      "). Run `write_kernel_dependency_index()` first, or supply `index =`.",
-      call. = FALSE
-    )
-  }
-  message(
-    "No `index` supplied; reading kernel_dependency_index.rds from disk. ",
-    "For better performance, load the index once and pass it via `index =`."
-  )
-  readRDS(idx_path)
-}
-
-
-.cl_filter_stems <- function(needed, index, depends_tag) {
-  known   <- names(index$load_order)
-  unknown <- setdiff(needed, known)
-  if (length(unknown) > 0L) {
-    warning(
-      "The following stems from @", depends_tag,
-      " were not found in the index and will be skipped: ",
-      paste(unknown, collapse = ", "),
-      call. = FALSE
-    )
-  }
-  intersect(needed, known)
 }
