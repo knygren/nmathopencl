@@ -11,7 +11,7 @@
       "r_wrappers": ["qbeta_opencl"],
       "device_kernel_names": ["qbeta_kernel"],
       "entry_kernels_package_relative": ["cl/src/qbeta_kernel.cl"],
-      "nmath_stems": [],
+      "nmath_stems": ["qbeta"],
       "typical_symptom": "ptxas fatal : Unresolved extern function 'Rf_lbeta'",
       "cause_summary": "NVPTX/OpenCL device link references host-only RMath symbol Rf_lbeta (lbeta nmath tail).",
       "references": ["inst/OPENCL_KERNEL_KNOWN_FAILURES.md"]
@@ -22,7 +22,7 @@
       "r_wrappers": ["qgamma_opencl"],
       "device_kernel_names": ["qgamma_kernel"],
       "entry_kernels_package_relative": ["cl/src/qgamma_kernel.cl"],
-      "nmath_stems": [],
+      "nmath_stems": ["qgamma"],
       "typical_symptom": "ptxas fatal : Unresolved extern function 'stirlerr_cycle_free'",
       "cause_summary": "Device link sees Stirling/Stirlerr helper not defined for NVPTX-class targets.",
       "references": ["inst/OPENCL_KERNEL_KNOWN_FAILURES.md"]
@@ -44,7 +44,7 @@
       "r_wrappers": ["qt_opencl"],
       "device_kernel_names": ["qnt_kernel"],
       "entry_kernels_package_relative": ["cl/src/qnt_kernel.cl"],
-      "nmath_stems": [],
+      "nmath_stems": ["nt"],
       "typical_symptom": "ptxas fatal : Unresolved extern function 'Rf_qnt'",
       "cause_summary": "RMath maps qnt to Rf_qnt; OpenCL entry uses qnt_kernel; NVPTX has no device Rf_qnt.",
       "references": ["inst/OPENCL_KERNEL_KNOWN_FAILURES.md"]

@@ -36,6 +36,8 @@
 #' assembler rules in \verb{inst/extdata/opencl_full_nmath_stopgap.json}: a brief
 #' \code{\link{message}} prints and every indexed \verb{.cl} shard listed in the
 #' library index is concatenated, not only the stems from the kernel's annotations.
+#' When \verb{inst/extdata/opencl_known_failures.json} matches the launcher path or
+#' the declared / loaded stems, \code{\link{warning}(...)} points to fragile ports.
 #'
 #' @return A character vector subclass \verb{nmathopencl_concatenated_lib} holding
 #'   concatenated sources (often length 1; blank annotations yield length-zero
@@ -76,6 +78,11 @@ load_library_for_kernel <- function(kernel_path,
   use_full_nmath <- .cl_nmath_use_full_library_from_stopgap(sg_ids)
 
   if (!use_full_nmath && length(needed) == 0L) {
+    .cl_maybe_warn_opencl_known_failures(
+      kpath_norm, needed,
+      stems_loaded_optional = character(),
+      warn_on_loaded_mesh = TRUE
+    )
     out <- .cl_concat_result("", character(), character(),
                              kpath_norm, lib_norm, depends_tag, 0L)
     return(invisible(out))
@@ -97,6 +104,11 @@ load_library_for_kernel <- function(kernel_path,
   } else {
     stems_to_load <- .cl_filter_stems(needed, index, depends_tag)
     if (length(stems_to_load) == 0L) {
+      .cl_maybe_warn_opencl_known_failures(
+        kpath_norm, needed,
+        stems_loaded_optional = character(),
+        warn_on_loaded_mesh = TRUE
+      )
       out <- .cl_concat_result("", needed, character(),
                                kpath_norm, lib_norm, depends_tag, 0L)
       return(invisible(out))
@@ -104,6 +116,12 @@ load_library_for_kernel <- function(kernel_path,
 
     stems_to_load <- stems_to_load[order(index$load_order[stems_to_load])]
   }
+
+  .cl_maybe_warn_opencl_known_failures(
+    kpath_norm, needed,
+    stems_loaded_optional = stems_to_load,
+    warn_on_loaded_mesh = TRUE
+  )
 
   parts <- vapply(stems_to_load, function(stem) {
     path <- file.path(library_dir, paste0(stem, ".cl"))

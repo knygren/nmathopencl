@@ -83,7 +83,10 @@ The same assembler stopgap as \code{\link{load_library_for_kernel}}
 \code{depends_tag = "all_depends_nmath"} and the library directory basename is
 \verb{nmath}: if any launcher in \code{kernel_paths} triggers it,
 \code{\link{message}(...)} notes that every indexed \verb{.cl} shard is copied,
-not only the union of annotated stems.
+not only the union of annotated stems. \verb{extract_library_subset()}
+evaluates \verb{inst/extdata/opencl_known_failures.json} against the union of
+\code{depends_tag} annotations and launcher basenames (\code{\link{warning}(...)}
+omits parity with stems implied only by the full-library stopgap).
 }
 \examples{
 ############################ Start of extract_library_subset example #########################

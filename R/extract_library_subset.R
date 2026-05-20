@@ -50,7 +50,10 @@
 #' \code{depends_tag = "all_depends_nmath"} and the library directory basename is
 #' \verb{nmath}: if any launcher in \code{kernel_paths} triggers it,
 #' \code{\link{message}(...)} notes that every indexed \verb{.cl} shard is copied,
-#' not only the union of annotated stems.
+#' not only the union of annotated stems. \verb{extract_library_subset()}
+#' evaluates \verb{inst/extdata/opencl_known_failures.json} against the union of
+#' \code{depends_tag} annotations and launcher basenames (\code{\link{warning}(...)}
+#' omits parity with stems implied only by the full-library stopgap).
 #'
 #' @return A \verb{nmathopencl_lib_extract_df} subclass of \verb{data.frame}
 #'   with one row per library shard (\code{.cl} files in dependency order, followed by
@@ -119,6 +122,12 @@ extract_library_subset <- function(kernel_paths,
     stems <- parse_port_annotation(lines, depends_tag)
     all_needed <- union(all_needed, stems)
   }
+
+  .cl_maybe_warn_opencl_known_failures(
+    kernel_paths_norm, all_needed,
+    stems_loaded_optional = NULL,
+    warn_on_loaded_mesh = FALSE
+  )
 
   if (!use_full_nmath && length(all_needed) == 0L) {
     message("No `@", depends_tag, "` annotations found in any kernel file. ",

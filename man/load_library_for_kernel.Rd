@@ -58,6 +58,8 @@ When \code{depends_tag = "all_depends_nmath"} and
 assembler rules in \verb{inst/extdata/opencl_full_nmath_stopgap.json}: a brief
 \code{\link{message}} prints and every indexed \verb{.cl} shard listed in the
 library index is concatenated, not only the stems from the kernel's annotations.
+When \verb{inst/extdata/opencl_known_failures.json} matches the launcher path or
+the declared / loaded stems, \code{\link{warning}(...)} points to fragile ports.
 }
 \examples{
 ############################ Start of load_library_for_kernel example ########################
