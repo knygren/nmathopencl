@@ -7,7 +7,7 @@
 
 
 
-__kernel void r_unif_index_kernel_temp(
+__kernel void r_unif_index_kernel(
     const double a,
     const double b,
     const double index_upper,

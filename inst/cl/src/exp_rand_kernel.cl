@@ -6,7 +6,7 @@
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 // NDRange-style name for host batch path (serial RNG: single gid==0 work-item).
-__kernel void exp_rand_kernel_temp(
+__kernel void exp_rand_kernel(
     const double a,
     const double b,
     const double index_upper,

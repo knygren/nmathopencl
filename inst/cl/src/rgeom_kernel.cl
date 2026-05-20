@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void rgeom_kernel_temp(
+__kernel void rgeom_kernel(
     const double prob,
     const double unused_b,
     const double unused_c,

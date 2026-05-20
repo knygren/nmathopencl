@@ -4,7 +4,7 @@
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 
-__kernel void r_pow_kernel_temp(
+__kernel void r_pow_kernel(
     __global const double* xv,
     __global const double* yv,
     __global double* out,

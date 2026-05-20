@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void rhyper_kernel_temp(
+__kernel void rhyper_kernel(
     const double r,
     const double b,
     const double n1,

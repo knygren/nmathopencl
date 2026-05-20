@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void rweibull_kernel_temp(
+__kernel void rweibull_kernel(
     const double shape,
     const double scale,
     const double unused_c,

@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void rcauchy_kernel_temp(
+__kernel void rcauchy_kernel(
     const double location,
     const double scale,
     const double unused_c,

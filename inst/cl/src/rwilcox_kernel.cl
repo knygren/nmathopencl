@@ -8,7 +8,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void rwilcox_kernel_temp(
+__kernel void rwilcox_kernel(
     const double m,
     const double n2,
     __global double* out,

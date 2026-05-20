@@ -88,7 +88,7 @@ Rcpp::NumericVector runif_opencl(
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
   try {
-    opencl_serial_scalar_draws("src/runif_kernel.cl", "runif_kernel_temp", {a, b}, n, out, verbose);
+    opencl_serial_scalar_draws("src/runif_kernel.cl", "runif_kernel", {a, b}, n, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -108,7 +108,7 @@ Rcpp::NumericVector rnorm_opencl(
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
   try {
-    opencl_serial_scalar_draws("src/rnorm_kernel.cl", "rnorm_kernel_temp", {mu, sigma}, n, out, verbose);
+    opencl_serial_scalar_draws("src/rnorm_kernel.cl", "rnorm_kernel", {mu, sigma}, n, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -127,7 +127,7 @@ Rcpp::NumericVector rexp_opencl(
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
   try {
-    opencl_serial_scalar_draws("src/rexp_kernel.cl", "rexp_kernel_temp", {scale}, n, out, verbose);
+    opencl_serial_scalar_draws("src/rexp_kernel.cl", "rexp_kernel", {scale}, n, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -147,7 +147,7 @@ Rcpp::NumericVector rwilcox_opencl(
 #ifdef USE_OPENCL
   if (!has_opencl()) return out;
   try {
-    opencl_serial_scalar_draws("src/rwilcox_kernel.cl", "rwilcox_kernel_temp", {m, n2}, n_out, out, verbose);
+    opencl_serial_scalar_draws("src/rwilcox_kernel.cl", "rwilcox_kernel", {m, n2}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -168,7 +168,7 @@ Rcpp::NumericVector rbinom_opencl(
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rbinom_kernel.cl", "rbinom_kernel_temp", {size, prob}, n_out, out, verbose);
+        "src/rbinom_kernel.cl", "rbinom_kernel", {size, prob}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -210,7 +210,7 @@ static std::string build_rmath_program_indexed(const std::string& kernel_rel_pat
     "\n" + load_kernel_source(kernel_rel_path);
 }
 
-// Match d/p/q: build program once, then *_kernel_temp (serial RNG inner loop).
+// Match d/p/q: build program once, then enqueue the canonical *_kernel (serial RNG inner loop).
 static void opencl_serial_scalar_draws(
     const std::string& kernel_rel_path,
     const char* kernel_temp_name,
@@ -568,7 +568,7 @@ Rcpp::NumericVector r_pow_opencl(
   if (!has_opencl()) return out;
   numeric_cols_ndrange_kernel_temp_fill(
       "src/r_pow_kernel.cl",
-      "r_pow_kernel_temp",
+      "r_pow_kernel",
       len,
       {&x, &y},
       out,
@@ -598,7 +598,7 @@ Rcpp::NumericVector r_pow_di_opencl(
   }
   numeric_cols_ndrange_kernel_temp_fill(
       "src/r_pow_di_kernel.cl",
-      "r_pow_di_kernel_temp",
+      "r_pow_di_kernel",
       len,
       {&x, &n_exp_d},
       out,
@@ -781,7 +781,7 @@ Rcpp::NumericVector norm_rand_opencl(int n_out, bool verbose) {
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/norm_rand_kernel.cl", "norm_rand_kernel_temp", {0.0, 1.0, 1.0}, n_out, out, verbose);
+        "src/norm_rand_kernel.cl", "norm_rand_kernel", {0.0, 1.0, 1.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -796,7 +796,7 @@ Rcpp::NumericVector unif_rand_opencl(int n_out, bool verbose) {
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/unif_rand_kernel.cl", "unif_rand_kernel_temp", {0.0, 1.0, 1.0}, n_out, out, verbose);
+        "src/unif_rand_kernel.cl", "unif_rand_kernel", {0.0, 1.0, 1.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -811,7 +811,7 @@ Rcpp::NumericVector r_unif_index_opencl(int n_out, double dn, bool verbose) {
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/r_unif_index_kernel.cl", "r_unif_index_kernel_temp", {0.0, 1.0, dn}, n_out, out, verbose);
+        "src/r_unif_index_kernel.cl", "r_unif_index_kernel", {0.0, 1.0, dn}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -826,7 +826,7 @@ Rcpp::NumericVector exp_rand_opencl(int n_out, bool verbose) {
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/exp_rand_kernel.cl", "exp_rand_kernel_temp", {0.0, 1.0, 1.0}, n_out, out, verbose);
+        "src/exp_rand_kernel.cl", "exp_rand_kernel", {0.0, 1.0, 1.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -1101,7 +1101,7 @@ Rcpp::NumericVector rgamma_opencl(int n_out, double shape, double scale, bool ve
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rgamma_kernel.cl", "rgamma_kernel_temp", {shape, scale, 0.0, 0.0, 0.0}, n_out, out, verbose);
+        "src/rgamma_kernel.cl", "rgamma_kernel", {shape, scale, 0.0, 0.0, 0.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -1289,7 +1289,7 @@ Rcpp::NumericVector rbeta_opencl(int n_out, double a, double b, bool verbose) {
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rbeta_kernel.cl", "rbeta_kernel_temp", {a, b, 0.0, 0.0, 0.0}, n_out, out, verbose);
+        "src/rbeta_kernel.cl", "rbeta_kernel", {a, b, 0.0, 0.0, 0.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -1401,7 +1401,7 @@ Rcpp::NumericVector rlnorm_opencl(int n_out, double meanlog, double sdlog, bool 
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rlnorm_kernel.cl", "rlnorm_kernel_temp", {meanlog, sdlog, 0.0, 0.0, 0.0}, n_out, out, verbose);
+        "src/rlnorm_kernel.cl", "rlnorm_kernel", {meanlog, sdlog, 0.0, 0.0, 0.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -1619,7 +1619,7 @@ Rcpp::NumericVector rchisq_opencl(int n_out, double df, bool verbose) {
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rchisq_kernel.cl", "rchisq_kernel_temp", {df, 0.0, 0.0, 0.0, 0.0}, n_out, out, verbose);
+        "src/rchisq_kernel.cl", "rchisq_kernel", {df, 0.0, 0.0, 0.0, 0.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -1634,7 +1634,7 @@ Rcpp::NumericVector rnchisq_opencl(int n_out, double df, double ncp, bool verbos
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rnchisq_kernel.cl", "rnchisq_kernel_temp", {df, ncp, 0.0, 0.0, 0.0}, n_out, out, verbose);
+        "src/rnchisq_kernel.cl", "rnchisq_kernel", {df, ncp, 0.0, 0.0, 0.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -1846,7 +1846,7 @@ Rcpp::NumericVector rf_opencl(int n_out, double df1, double df2, bool verbose) {
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rf_kernel.cl", "rf_kernel_temp", {df1, df2, 0.0, 0.0, 0.0}, n_out, out, verbose);
+        "src/rf_kernel.cl", "rf_kernel", {df1, df2, 0.0, 0.0, 0.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -2064,7 +2064,7 @@ Rcpp::NumericVector rt_opencl(int n_out, double df, bool verbose) {
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rt_kernel.cl", "rt_kernel_temp", {df, 0.0, 0.0, 0.0, 0.0}, n_out, out, verbose);
+        "src/rt_kernel.cl", "rt_kernel", {df, 0.0, 0.0, 0.0, 0.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -2272,7 +2272,7 @@ Rcpp::NumericVector rnbinom_opencl(int n_out, double size, double prob, bool ver
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rnbinom_kernel.cl", "rnbinom_kernel_temp", {size, prob, 0.0, 0.0, 0.0}, n_out, out, verbose);
+        "src/rnbinom_kernel.cl", "rnbinom_kernel", {size, prob, 0.0, 0.0, 0.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -2351,7 +2351,7 @@ Rcpp::NumericVector rmultinom_opencl(int n_out, double size, double prob, bool v
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rmultinom_kernel.cl", "rmultinom_kernel_temp", {size, prob, 0.0, 0.0, 0.0}, n_out, out, verbose);
+        "src/rmultinom_kernel.cl", "rmultinom_kernel", {size, prob, 0.0, 0.0, 0.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -2463,7 +2463,7 @@ Rcpp::NumericVector rcauchy_opencl(int n_out, double location, double scale, boo
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rcauchy_kernel.cl", "rcauchy_kernel_temp", {location, scale, 0.0, 0.0, 0.0}, n_out, out, verbose);
+        "src/rcauchy_kernel.cl", "rcauchy_kernel", {location, scale, 0.0, 0.0, 0.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -2666,7 +2666,7 @@ Rcpp::NumericVector rgeom_opencl(int n_out, double prob, bool verbose) {
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rgeom_kernel.cl", "rgeom_kernel_temp", {prob, 0.0, 0.0, 0.0, 0.0}, n_out, out, verbose);
+        "src/rgeom_kernel.cl", "rgeom_kernel", {prob, 0.0, 0.0, 0.0, 0.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -2781,7 +2781,7 @@ Rcpp::NumericVector rhyper_opencl(int n_out, double r, double b, double n1, bool
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rhyper_kernel.cl", "rhyper_kernel_temp", {r, b, n1, 0.0, 0.0}, n_out, out, verbose);
+        "src/rhyper_kernel.cl", "rhyper_kernel", {r, b, n1, 0.0, 0.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -2986,7 +2986,7 @@ Rcpp::NumericVector rpois_opencl(int n_out, double lambda, bool verbose) {
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rpois_kernel.cl", "rpois_kernel_temp", {0.0, 0.0, 0.0, lambda}, n_out, out, verbose);
+        "src/rpois_kernel.cl", "rpois_kernel", {0.0, 0.0, 0.0, lambda}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -3001,7 +3001,7 @@ Rcpp::NumericVector rnbinom_mu_opencl(int n_out, double size, double mu, bool ve
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rnbinom_mu_kernel.cl", "rnbinom_mu_kernel_temp", {size, mu, 0.0, 0.0, 0.0}, n_out, out, verbose);
+        "src/rnbinom_mu_kernel.cl", "rnbinom_mu_kernel", {size, mu, 0.0, 0.0, 0.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -3113,7 +3113,7 @@ Rcpp::NumericVector rweibull_opencl(int n_out, double shape, double scale, bool 
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rweibull_kernel.cl", "rweibull_kernel_temp", {shape, scale, 0.0, 0.0, 0.0}, n_out, out, verbose);
+        "src/rweibull_kernel.cl", "rweibull_kernel", {shape, scale, 0.0, 0.0, 0.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -3225,7 +3225,7 @@ Rcpp::NumericVector rlogis_opencl(int n_out, double location, double scale, bool
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rlogis_kernel.cl", "rlogis_kernel_temp", {location, scale, 0.0, 0.0, 0.0}, n_out, out, verbose);
+        "src/rlogis_kernel.cl", "rlogis_kernel", {location, scale, 0.0, 0.0, 0.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -3531,7 +3531,7 @@ Rcpp::NumericVector rsignrank_opencl(int n_out, double nsize, bool verbose) {
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/rsignrank_kernel.cl", "rsignrank_kernel_temp", {nsize, 0.0, 0.0, 0.0, 0.0}, n_out, out, verbose);
+        "src/rsignrank_kernel.cl", "rsignrank_kernel", {nsize, 0.0, 0.0, 0.0, 0.0}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -4243,7 +4243,7 @@ Rcpp::NumericVector r_check_user_interrupt_opencl(int n_out, bool verbose) {
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/r_check_user_interrupt_kernel.cl", "r_check_user_interrupt_kernel_temp", {}, n_out, out, verbose);
+        "src/r_check_user_interrupt_kernel.cl", "r_check_user_interrupt_kernel", {}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;
@@ -4258,7 +4258,7 @@ Rcpp::NumericVector r_check_stack_opencl(int n_out, bool verbose) {
   if (!has_opencl()) return out;
   try {
     opencl_serial_scalar_draws(
-        "src/r_check_stack_kernel.cl", "r_check_stack_kernel_temp", {}, n_out, out, verbose);
+        "src/r_check_stack_kernel.cl", "r_check_stack_kernel", {}, n_out, out, verbose);
   } catch (const std::exception& e) {
     if (verbose) Rcpp::Rcout << e.what() << "\n";
     throw;

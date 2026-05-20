@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void rt_kernel_temp(
+__kernel void rt_kernel(
     const double df,
     const double unused_b,
     const double unused_c,

@@ -5,7 +5,7 @@
 
 
 
-__kernel void r_check_stack_kernel_temp(
+__kernel void r_check_stack_kernel(
     __global double* out,
     const int n
 ) {

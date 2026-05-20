@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void rlnorm_kernel_temp(
+__kernel void rlnorm_kernel(
     const double meanlog,
     const double sdlog,
     const double unused_c,

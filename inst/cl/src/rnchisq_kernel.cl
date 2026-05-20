@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void rnchisq_kernel_temp(
+__kernel void rnchisq_kernel(
     const double df,
     const double ncp,
     const double unused_c,

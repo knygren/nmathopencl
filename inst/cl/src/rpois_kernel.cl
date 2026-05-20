@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void rpois_kernel_temp(
+__kernel void rpois_kernel(
     const double unused_size,
     const double unused_prob,
     const double unused_lambda_p,
