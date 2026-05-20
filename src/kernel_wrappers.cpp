@@ -269,7 +269,7 @@ static void pq_tail_ndrange_kernel_temp_fill(
   std::vector<int> lt(lower_tail.begin(), lower_tail.end());
   std::vector<int> lp(log_p.begin(), log_p.end());
   std::vector<double> out_flat;
-  opencl_pq_tail_kernel_runner_temp(
+  opencl_pq_tail_kernel_runner(
       build_rmath_program_indexed(kernel_rel_path),
       kernel_temp_name,
       len,
@@ -296,7 +296,7 @@ static void d_givelog_ndrange_kernel_temp_fill(
       pq_pack_numeric_cols_for_tail_temp(numeric_args);
   std::vector<int> gl(give_log.begin(), give_log.end());
   std::vector<double> out_flat;
-  opencl_d_givelog_kernel_runner_temp(
+  opencl_d_givelog_kernel_runner(
       build_rmath_program_indexed(kernel_rel_path),
       kernel_temp_name,
       len,
@@ -320,7 +320,7 @@ static void numeric_cols_ndrange_kernel_temp_fill(
     std::vector<std::vector<double>> arg_cols =
         pq_pack_numeric_cols_for_tail_temp(numeric_args);
     std::vector<double> out_flat;
-    opencl_numeric_cols_kernel_runner_temp(
+    opencl_numeric_cols_kernel_runner(
         build_rmath_program_indexed(kernel_rel_path),
         kernel_temp_name,
         len,

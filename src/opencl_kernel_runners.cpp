@@ -139,7 +139,7 @@ void opencl_dbl_scalar_kernel_runner(
   }
 }
 
-void opencl_pq_tail_kernel_runner_temp(
+void opencl_pq_tail_kernel_runner(
     const std::string&                     kernel_source,
     const char*                            kernel_name,
     int                                    len,
@@ -153,16 +153,16 @@ void opencl_pq_tail_kernel_runner_temp(
 
   const int k = static_cast<int>(arg_cols.size());
   if (k < 1) {
-    throw std::runtime_error("opencl_pq_tail_kernel_runner_temp: arg_cols must be non-empty.");
+    throw std::runtime_error("opencl_pq_tail_kernel_runner: arg_cols must be non-empty.");
   }
   for (int j = 0; j < k; ++j) {
     if ((int)arg_cols[static_cast<size_t>(j)].size() != len) {
-      throw std::runtime_error("opencl_pq_tail_kernel_runner_temp: argument column size mismatch.");
+      throw std::runtime_error("opencl_pq_tail_kernel_runner: argument column size mismatch.");
     }
   }
   if ((int)lower_tail.size() != len || (int)log_p.size() != len) {
     throw std::runtime_error(
-        "opencl_pq_tail_kernel_runner_temp: lower_tail / log_p size mismatch.");
+        "opencl_pq_tail_kernel_runner: lower_tail / log_p size mismatch.");
   }
 
   cl_int status = 0;
@@ -322,7 +322,7 @@ void opencl_pq_tail_kernel_runner_temp(
   }
 }
 
-void opencl_d_givelog_kernel_runner_temp(
+void opencl_d_givelog_kernel_runner(
     const std::string&                     kernel_source,
     const char*                            kernel_name,
     int                                    len,
@@ -335,15 +335,15 @@ void opencl_d_givelog_kernel_runner_temp(
 
   const int k = static_cast<int>(arg_cols.size());
   if (k < 1) {
-    throw std::runtime_error("opencl_d_givelog_kernel_runner_temp: arg_cols must be non-empty.");
+    throw std::runtime_error("opencl_d_givelog_kernel_runner: arg_cols must be non-empty.");
   }
   for (int j = 0; j < k; ++j) {
     if ((int)arg_cols[static_cast<size_t>(j)].size() != len) {
-      throw std::runtime_error("opencl_d_givelog_kernel_runner_temp: argument column size mismatch.");
+      throw std::runtime_error("opencl_d_givelog_kernel_runner: argument column size mismatch.");
     }
   }
   if ((int)give_log.size() != len) {
-    throw std::runtime_error("opencl_d_givelog_kernel_runner_temp: give_log size mismatch.");
+    throw std::runtime_error("opencl_d_givelog_kernel_runner: give_log size mismatch.");
   }
 
   cl_int status = 0;
@@ -492,7 +492,7 @@ void opencl_d_givelog_kernel_runner_temp(
   }
 }
 
-void opencl_numeric_cols_kernel_runner_temp(
+void opencl_numeric_cols_kernel_runner(
     const std::string&                     kernel_source,
     const char*                            kernel_name,
     int                                    len,
@@ -504,11 +504,11 @@ void opencl_numeric_cols_kernel_runner_temp(
 
   const int k = static_cast<int>(arg_cols.size());
   if (k < 1) {
-    throw std::runtime_error("opencl_numeric_cols_kernel_runner_temp: arg_cols must be non-empty.");
+    throw std::runtime_error("opencl_numeric_cols_kernel_runner: arg_cols must be non-empty.");
   }
   for (int j = 0; j < k; ++j) {
     if ((int)arg_cols[static_cast<size_t>(j)].size() != len) {
-      throw std::runtime_error("opencl_numeric_cols_kernel_runner_temp: argument column size mismatch.");
+      throw std::runtime_error("opencl_numeric_cols_kernel_runner: argument column size mismatch.");
     }
   }
 
@@ -646,7 +646,7 @@ void opencl_numeric_cols_kernel_runner_temp(
   }
 }
 
-void opencl_pnorm_kernel_runner_temp(
+void opencl_pnorm_kernel_runner(
     const std::string&         kernel_source,
     const char*                kernel_name,
     int                        len,
@@ -657,7 +657,7 @@ void opencl_pnorm_kernel_runner_temp(
     const std::vector<int>&    log_p,
     std::vector<double>&       out_flat
 ) {
-  opencl_pq_tail_kernel_runner_temp(
+  opencl_pq_tail_kernel_runner(
       kernel_source,
       kernel_name,
       len,

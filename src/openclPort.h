@@ -211,7 +211,7 @@ void opencl_dbl_scalar_kernel_runner(
 
 // NDRange-over-len for p*/q* kernels using lower.tail / log.p as int buffers:
 // OpenCL entry points *_kernel take arg_cols[] (__global double each), then tails, out, len.
-void opencl_pq_tail_kernel_runner_temp(
+void opencl_pq_tail_kernel_runner(
     const std::string&               kernel_source,
     const char*                      kernel_name,
     int                              len,
@@ -222,7 +222,7 @@ void opencl_pq_tail_kernel_runner_temp(
 
 // NDRange-over-len for d* kernels using give_log as int buffer:
 // OpenCL entry points *_kernel take arg_cols[] (__global double each), give_log, out, len.
-void opencl_d_givelog_kernel_runner_temp(
+void opencl_d_givelog_kernel_runner(
     const std::string&                     kernel_source,
     const char*                            kernel_name,
     int                                    len,
@@ -232,15 +232,15 @@ void opencl_d_givelog_kernel_runner_temp(
 
 // NDRange-over-len for numeric-only kernels: *_kernel takes one __global column per
 // numeric argument (__global double* each), then out, len — no tails / give_log integers.
-void opencl_numeric_cols_kernel_runner_temp(
+void opencl_numeric_cols_kernel_runner(
     const std::string&                     kernel_source,
     const char*                            kernel_name,
     int                                    len,
     const std::vector<std::vector<double>>& arg_cols,
     std::vector<double>&                   out_flat);
 
-// Convenience wrapper for pnorm-shaped arguments (delegates to opencl_pq_tail_kernel_runner_temp).
-void opencl_pnorm_kernel_runner_temp(
+// Convenience wrapper for pnorm-shaped arguments (delegates to opencl_pq_tail_kernel_runner).
+void opencl_pnorm_kernel_runner(
     const std::string&         kernel_source,
     const char*                kernel_name,
     int                        len,
