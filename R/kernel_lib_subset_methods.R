@@ -8,16 +8,23 @@
 #' subclassing \code{data.frame}, with paths and tag metadata attached.
 #'
 #' @param x From \link{load_library_for_kernel} or \link{extract_library_subset}.
-#' @param ... For the extract data frame printer: forwarded to \code{print.data.frame}
-#'   when previewing rows.
-#' @param max_df_rows Number of preview rows (\code{head}) after stem listing (default \code{6}).
+#' @param ... Reserved; the extract \code{data.frame} printer does not forward to
+#'   \code{print.data.frame} by default (use \code{print(as.data.frame(x), ...)}
+#'   for a full preview).
+#' @param max_provides_symbols_per_shard For \code{print.nmathopencl_concatenated_lib}:
+#'   maximum \code{//@provides} symbols printed per algorithm-style shard
+#'   (default \code{80}). For shards \code{dpq}, \code{Rmath}, \code{nmath}, and
+#'   \code{refactored}, only a one-line count is shown (header / internals-style
+#'   \verb{//@provides}).
+#'   Use \code{NA_integer_} or a negative value for no cap on algorithm shards.
 #'
 #' @name kernel_lib_subset_printing
 
 
 #' @rdname kernel_lib_subset_printing
 #' @export
-print.nmathopencl_concatenated_lib <- function(x, ...) {
+print.nmathopencl_concatenated_lib <- function(x, ...,
+                                               max_provides_symbols_per_shard = 80L) {
   stems_req <- attr(x, "stems_requested", exact = TRUE)
   stems_ld <- attr(x, "stems_loaded", exact = TRUE)
   kpath <- attr(x, "kernel_path", exact = TRUE)
@@ -59,6 +66,60 @@ print.nmathopencl_concatenated_lib <- function(x, ...) {
       length(sl), "):\n", sep = "")
   .cl_print_stems_numbered(sl)
 
+  if (!is.na(kp) && nzchar(as.character(kp)[1])) {
+    cat("\nOpenCL __kernel entry point(s):\n")
+    if (!file.exists(kp)) {
+      cat("  (kernel file missing or unreadable)\n")
+    } else {
+      kk <- .cl_parse_opencl_kernel_names(as.character(kp)[1])
+      if (!length(kk)) {
+        cat("  (none found)\n")
+      } else {
+        for (tj in seq_along(kk)) {
+          cat(sprintf(" %3d. %s\n", tj, kk[[tj]]))
+        }
+      }
+    }
+  }
+
+  caps_max <- suppressWarnings(as.integer(max_provides_symbols_per_shard))[1]
+
+  cat("\nSymbols from //@provides (library shards concatenated dependency order):\n")
+  if (!length(sl) || is.na(ld) || !nzchar(as.character(ld)[1])) {
+    cat("  (none)\n")
+  } else {
+    lib_root <- suppressWarnings(normalizePath(
+      as.character(ld)[1L], winslash = "/", mustWork = FALSE))
+    if (!nzchar(lib_root) || !dir.exists(lib_root)) {
+      cat("  (library directory missing)\n")
+    } else {
+      any_sym <- FALSE
+      for (j in seq_along(sl)) {
+        spp <- file.path(lib_root, paste0(sl[[j]], ".cl"))
+        if (!file.exists(spp))
+          next
+        sy <- .cl_parse_provides_symbols(spp)
+        if (!length(sy))
+          next
+        any_sym <- TRUE
+        ms <- caps_max
+        if (is.na(ms) || ms < 1L)
+          ms <- length(sy)
+        cat(sprintf("\n%s\n", basename(spp)))
+        if (.cl_is_header_style_lib_stem(sl[[j]])) {
+          cat(sprintf(
+            "  (%d //@provides symbols; header-style shard, list omitted)\n",
+            length(sy)))
+        } else {
+          .cl_print_truncated_symbols(
+            sy, indent = " ", max_show = ms, label = "symbol")
+        }
+      }
+      if (!any_sym)
+        cat("  (no //@provides lines found under library_dir)\n")
+    }
+  }
+
   merged <- paste(as.character(unclass(x)), collapse = "\n\n")
   nbytes_obs <- if (nzchar(merged)) {
     nchar(enc2utf8(merged), type = "bytes")
@@ -80,15 +141,20 @@ print.nmathopencl_concatenated_lib <- function(x, ...) {
 
 #' @rdname kernel_lib_subset_printing
 #' @export
-print.nmathopencl_lib_extract_df <- function(x, ..., max_df_rows = 6L) {
+print.nmathopencl_lib_extract_df <- function(x, ...) {
   kpaths <- attr(x, "kernel_paths", exact = TRUE)
   lib_dir <- attr(x, "library_dir", exact = TRUE)
   dest_dir <- attr(x, "dest_dir", exact = TRUE)
   tag <- attr(x, "depends_tag", exact = TRUE)
+  mo <- isTRUE(attr(x, "manifest_only", exact = TRUE))
 
   cat("<nmathopencl_lib_extract_df>\n")
 
-  nk <- ifelse(!is.null(kpaths), length(as.character(kpaths)), 0L)
+  if (mo) {
+    cat("Note: Planned extraction manifest only (destination did not exist; ",
+        "nothing was copied).", fill = TRUE)
+  }
+
   tc <- ifelse(!is.null(tag), as.character(tag[1L]), NA_character_)
 
   cat("Depends tag:",
@@ -104,44 +170,46 @@ print.nmathopencl_lib_extract_df <- function(x, ..., max_df_rows = 6L) {
         fill = TRUE)
   }
   if (!is.na(dest_dir) && nzchar(as.character(dest_dir))) {
-    cat("Destination:",
-        suppressWarnings(normalizePath(as.character(dest_dir)[1],
-                                       winslash = "/", mustWork = FALSE)),
-        fill = TRUE)
+    dn <- suppressWarnings(normalizePath(as.character(dest_dir)[1],
+                                         winslash = "/", mustWork = FALSE))
+    dest_lbl <- if (mo && !suppressWarnings(dir.exists(dn))) {
+      "Requested destination (directory missing):"
+    } else {
+      "Destination:"
+    }
+    cat(dest_lbl, dn, fill = TRUE)
   }
 
-  if (!is.null(kpaths) && length(as.character(kpaths))) {
-    kp <- suppressWarnings(normalizePath(as.character(kpaths),
-                                         winslash = "/", mustWork = FALSE))
-    cat("Kernel .cl paths (", nk, "):\n", sep = "")
-    cat(paste(sprintf(" %2d. %s", seq_along(kp), kp), collapse = "\n"), sep = "", fill = TRUE)
-    cat(fill = TRUE)
+  nk <- ifelse(!is.null(kpaths), length(as.character(kpaths)), 0L)
+  if (!is.null(kpaths) && nk > 0L) {
+    cat("Kernels:", nk, fill = TRUE)
   }
 
   is_idx <- x$stem %in% c("kernel_dependency_index.rds", "kernel_dependency_index.tsv")
   lib_ix <- seq_len(nrow(x))[!is_idx]
-  ix_ix <- seq_len(nrow(x))[ is_idx]
 
-  cat("Library stems copied (.cl dependency order):", length(lib_ix), fill = TRUE)
+  stem_hdr <- if (mo) {
+    "Library stems (.cl dependency order; manifest only):"
+  } else {
+    "Library stems copied (.cl dependency order):"
+  }
+  cat(stem_hdr, length(lib_ix), fill = TRUE)
   for (jn in seq_along(lib_ix)) {
     r <- lib_ix[jn]
     ds <- ifelse(!is.na(x$dest[r]), basename(as.character(x$dest[r])), "?")
-    fl <- ifelse(isTRUE(as.logical(x$copied[r])), "copied", "skipped(existing)")
+    fl <- if (isTRUE(as.logical(x$copied[r]))) {
+      "copied"
+    } else if (mo) {
+      "plan only"
+    } else {
+      "skipped(existing)"
+    }
     cat(sprintf(" %3d. %-30s %-12s [%s]\n", jn, paste0(as.character(x$stem[r]), ".cl"),
                 fl, ds))
   }
   if (!length(lib_ix))
     cat("  (none)\n")
 
-  if (length(ix_ix)) {
-    aux <- paste(as.character(unique(x$stem[ix_ix])), collapse = ", ")
-    cat("\nIndex helpers:", aux, fill = TRUE)
-  }
-
-  md <- suppressWarnings(utils::head(x, max_df_rows))
-  cat("\nData frame preview (first", min(max_df_rows, nrow(x)),
-      "rows of ", nrow(x), "):\n", sep = "")
-  print.data.frame(md, ...)
   invisible(x)
 }
 
@@ -165,11 +233,13 @@ print.nmathopencl_lib_extract_df <- function(x, ..., max_df_rows = 6L) {
 #'
 #' @noRd
 .cl_attach_extract_attrs <- function(df, kernel_paths, library_dir,
-                                     dest_dir, depends_tag) {
+                                     dest_dir, depends_tag,
+                                     manifest_only = FALSE) {
   attr(df, "kernel_paths") <- as.character(kernel_paths)
   attr(df, "library_dir") <- as.character(library_dir)[1]
   attr(df, "dest_dir") <- as.character(dest_dir)[1]
   attr(df, "depends_tag") <- as.character(depends_tag)[1]
+  attr(df, "manifest_only") <- isTRUE(manifest_only)
   class(df) <- c("nmathopencl_lib_extract_df", "data.frame")
   invisible(df)
 }

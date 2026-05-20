@@ -6,17 +6,23 @@
 \alias{print.nmathopencl_lib_extract_df}
 \title{Printing results from minimal kernel-library subset loaders}
 \usage{
-\method{print}{nmathopencl_concatenated_lib}(x, ...)
+\method{print}{nmathopencl_concatenated_lib}(x, ..., max_provides_symbols_per_shard = 80L)
 
-\method{print}{nmathopencl_lib_extract_df}(x, ..., max_df_rows = 6L)
+\method{print}{nmathopencl_lib_extract_df}(x, ...)
 }
 \arguments{
 \item{x}{From \link{load_library_for_kernel} or \link{extract_library_subset}.}
 
-\item{...}{For the extract data frame printer: forwarded to \code{print.data.frame}
-when previewing rows.}
+\item{...}{Reserved; the extract \code{data.frame} printer does not forward to
+\code{print.data.frame} by default (use \code{print(as.data.frame(x), ...)}
+for a full preview).}
 
-\item{max_df_rows}{Number of preview rows (\code{head}) after stem listing (default \code{6}).}
+\item{max_provides_symbols_per_shard}{For \code{print.nmathopencl_concatenated_lib}:
+maximum \code{//@provides} symbols printed per algorithm-style shard
+(default \code{80}). For shards \code{dpq}, \code{Rmath}, \code{nmath}, and
+\code{refactored}, only a one-line count is shown (header / internals-style
+\verb{//@provides}).
+Use \code{NA_integer_} or a negative value for no cap on algorithm shards.}
 }
 \description{
 \link{load_library_for_kernel} returns a concatenated OpenCL-sources string

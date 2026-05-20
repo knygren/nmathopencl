@@ -4,15 +4,21 @@
 #' dependency index), reads the annotation tag that lists needed library files
 #' and returns their source code concatenated in the correct dependency order.
 #'
-#' It is strongly recommended to supply a pre-loaded `index` rather than
-#' letting the function read from disk on every call.  Load the index once
-#' and reuse it across all kernel calls:
+#' For repeated calls in R code, loading \code{kernel_dependency_index.rds} once
+#' and passing \code{index =} avoids redundant disk reads.  The bundled
+#' \verb{cl/nmath} directory ships \code{kernel_dependency_index.rds} beside the
+#' \code{.cl} files; use \link{write_kernel_dependency_index} to regenerate it after
+#' porting (for example via \verb{tools/port_inst_cl_nmath_from_src.R}).
 #'
 #' ```r
-#' lib_dir <- system.file("cl/ex_glmbayes_nmath", package = "nmathopencl")
-#' idx <- write_kernel_dependency_index(library_dir = lib_dir, write = FALSE)
+#' lib_dir <- system.file("cl/nmath", package = "nmathopencl")
+#' kpath <- system.file(
+#'   "cl/ex_glmbayes_src/f2_f3_binomial_logit.cl",
+#'   package = "nmathopencl"
+#' )
 #' src <- load_library_for_kernel(
-#'   kernel_path, lib_dir, depends_tag = "all_depends_nmath", index = idx)
+#'   kpath, lib_dir,
+#'   depends_tag = "all_depends_nmath")
 #' ```
 #'
 #' @param kernel_path Path to a single `.cl` kernel file.  The file is scanned

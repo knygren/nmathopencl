@@ -2,6 +2,8 @@
 #
 # Overwrites stems that exist in src/nmath. Extra .cl files under inst/cl/nmath
 # that lack a ported source twin are left unchanged (manual splits / shims).
+# After porting, this script refreshes kernel_dependency_index.{rds,tsv} via
+# nmathopencl::write_kernel_dependency_index().
 #
 # Run from the package root, or pass the root explicitly:
 #   Rscript tools/port_inst_cl_nmath_from_src.R
@@ -98,3 +100,9 @@ report <- port_kernel_library_subdirs(
   header_symbol_depends = FALSE
 )
 message("Ported ", nrow(report), " file(s); see data frame `report` when sourcing interactively.")
+
+# Refresh kernel_dependency_index.{rds,tsv} for loaders (needs nmathopencl on the path).
+suppressMessages(pkgload::load_all(pkg_dir, quiet = TRUE))
+lib_nmath <- normalizePath(file.path(pkg_dir, "inst", "cl", "nmath"),
+                           winslash = "/", mustWork = TRUE)
+write_kernel_dependency_index(library_dir = lib_nmath, write = TRUE, verbose = TRUE)

@@ -1,16 +1,14 @@
 ############################ Start of load_library_for_kernel example ########################
 
 \donttest{
-lib_dir <- system.file("cl/ex_glmbayes_nmath", package = "nmathopencl")
+lib_dir <- system.file("cl/nmath", package = "nmathopencl")
 kpath <- system.file(
-  "cl/ex_glmbayes_src/f2_f3_gaussian.cl",
+  "cl/ex_glmbayes_src/f2_f3_binomial_logit.cl",
   package = "nmathopencl"
 )
-idx <- write_kernel_dependency_index(library_dir = lib_dir, write = FALSE)
 src <- load_library_for_kernel(
   kpath, lib_dir,
-  depends_tag = "all_depends_nmath",
-  index = idx
+  depends_tag = "all_depends_nmath"
 )
 print(src)
 nzchar(src)

@@ -9,24 +9,32 @@
 #' actually needed by your kernels.  The result can then be committed alongside
 #' your kernel files, removing a runtime dependency on the full library.
 #'
-#' It is strongly recommended to supply a pre-loaded `index`:
+#' Bundled libraries such as \verb{inst/cl/nmath} ship
+#' \code{kernel_dependency_index.rds} next to their \code{.cl} shards.  Pass
+#' \code{index =} when you preload that object to avoid redundant reads; regenerate
+#' the files with \link{write_kernel_dependency_index}, for example after porting via
+#' \verb{tools/port_inst_cl_nmath_from_src.R}.
 #'
 #' ```r
-#' lib_dir <- system.file("cl/ex_glmbayes_nmath", package = "nmathopencl")
-#' idx <- write_kernel_dependency_index(library_dir = lib_dir, write = FALSE)
+#' lib_dir <- system.file("cl/nmath", package = "nmathopencl")
+#' src_dir <- system.file("cl/ex_glmbayes_src", package = "nmathopencl")
+#' kernel_paths <- sort(Sys.glob(file.path(src_dir, "*.cl")))
+#' dest_dir <- tempfile("ex_subset"); dir.create(dest_dir)
+#' ## on.exit(unlink(dest_dir, recursive = TRUE), add = TRUE)
 #' result <- extract_library_subset(
 #'   kernel_paths, lib_dir, dest_dir,
-#'   depends_tag = "all_depends_nmath", index = idx)
+#'   depends_tag = "all_depends_nmath")
 #' ```
 #'
 #' @param kernel_paths Character vector of paths to kernel `.cl` files.  Each
 #'   file is scanned for the annotation tag given by `depends_tag`.
 #' @param library_dir Path to the source library directory.
-#' @param dest_dir Path to the destination directory.  Must already exist; a
-#'   warning is issued and the function returns invisibly if it does not.
-#'   In addition to the `.cl` files, `kernel_dependency_index.rds` is copied
-#'   here so the extracted subset can be used immediately with a pre-loaded
-#'   index.
+#' @param dest_dir Path where files would be written.  Must already exist for any
+#'   copying to occur.  If absent, a warning is issued, no directories are created,
+#'   and nothing is copied; the returned \code{data.frame} still describes the planned
+#'   subset (sources, intended destinations, \code{copied = FALSE}).
+#'   In addition to the `.cl` files, \code{kernel_dependency_index.rds} is copied
+#'   here when copying runs so the extracted subset can be used with a pre-loaded index.
 #' @param depends_tag Name of the annotation tag listing library file stems.
 #'   Defaults to `"all_depends"`.  Pass `"all_depends_nmath"` for kernels that
 #'   annotate their nmath dependencies with that tag.
@@ -38,15 +46,15 @@
 #'   returned data frame.
 #'
 #' @return A \verb{nmathopencl_lib_extract_df} subclass of \verb{data.frame}
-#'   with one row per copied file (`.cl` files in dependency order, followed by
-#'   companion index shards when present) and columns:
+#'   with one row per library shard (\code{.cl} files in dependency order, followed by
+#'   companion index files when planned or copied) and columns:
 #'   \describe{
-#'     \item{`stem`}{Stem name (filename without `.cl`), or
-#'       `"kernel_dependency_index.rds"` for the index.}
-#'     \item{`source`}{Full path to the source file in `library_dir`.}
-#'     \item{`dest`}{Full path to the destination file in `dest_dir`.}
-#'     \item{`copied`}{`TRUE` if the file was copied; `FALSE` if it already
-#'       existed and `overwrite = FALSE`.}
+#'     \item{`stem`}{Stem name (filename without `.cl`), or index filenames.}
+#'     \item{`source`}{Full path to the source file under \code{library_dir}.}
+#'     \item{`dest`}{Intended destination path under \code{dest_dir}.}
+#'     \item{`copied`}{\code{TRUE} if copied; otherwise \code{FALSE} including when
+#'       \code{dest_dir} is missing (\code{copied = FALSE} for every row),
+#'       a source path is missing, or an existing destination was skipped.}
 #'   }
 #'
 #' @seealso \link[=kernel_lib_subset_printing]{printing methods}
@@ -73,21 +81,17 @@ extract_library_subset <- function(kernel_paths,
     normalizePath(kernel_paths, winslash = "/", mustWork = FALSE))
   lib_dir_norm <- suppressWarnings(
     normalizePath(library_dir, winslash = "/", mustWork = FALSE))
-  dest_norm <- if (dir.exists(dest_dir)) {
+  dest_ok <- dir.exists(dest_dir)
+
+  dest_norm <- if (dest_ok) {
     suppressWarnings(normalizePath(dest_dir, winslash = "/", mustWork = FALSE))
   } else {
-    NA_character_
+    suppressWarnings(normalizePath(
+      as.character(dest_dir)[1L], winslash = "/", mustWork = FALSE))
   }
 
   if (!dir.exists(library_dir)) {
     stop("`library_dir` does not exist: ", library_dir, call. = FALSE)
-  }
-  if (!dir.exists(dest_dir)) {
-    warning("`dest_dir` does not exist: ", dest_dir,
-            ". No files were copied.", call. = FALSE)
-    out <- .cl_attach_extract_attrs(empty_df(), kernel_paths_norm,
-                                    lib_dir_norm, dest_norm, depends_tag)
-    return(invisible(out))
   }
 
   missing_kernels <- kernel_paths[!file.exists(kernel_paths)]
@@ -109,18 +113,26 @@ extract_library_subset <- function(kernel_paths,
     message("No `@", depends_tag, "` annotations found in any kernel file. ",
             "Nothing to copy.")
     out <- .cl_attach_extract_attrs(empty_df(), kernel_paths_norm,
-                                    lib_dir_norm, dest_norm, depends_tag)
+                                    lib_dir_norm, dest_norm, depends_tag,
+                                    manifest_only = !dest_ok)
     return(invisible(out))
   }
 
   stems_to_copy <- .cl_filter_stems(all_needed, index, depends_tag)
   if (length(stems_to_copy) == 0L) {
     out <- .cl_attach_extract_attrs(empty_df(), kernel_paths_norm,
-                                    lib_dir_norm, dest_norm, depends_tag)
+                                    lib_dir_norm, dest_norm, depends_tag,
+                                    manifest_only = !dest_ok)
     return(invisible(out))
   }
 
   stems_to_copy <- stems_to_copy[order(index$load_order[stems_to_copy])]
+
+  if (!dest_ok) {
+    warning("`dest_dir` does not exist: ", dest_dir,
+            ". Showing planned extraction only (no directories created; ",
+            "no files copied).", call. = FALSE)
+  }
 
   result_rows <- lapply(stems_to_copy, function(stem) {
     src <- file.path(library_dir, paste0(stem, ".cl"))
@@ -129,6 +141,11 @@ extract_library_subset <- function(kernel_paths,
     if (!file.exists(src)) {
       warning("Source file not found for stem '", stem, "': ", src,
               call. = FALSE)
+      return(data.frame(stem = stem, source = src, dest = dst,
+                        copied = FALSE, stringsAsFactors = FALSE))
+    }
+
+    if (!dest_ok) {
       return(data.frame(stem = stem, source = src, dest = dst,
                         copied = FALSE, stringsAsFactors = FALSE))
     }
@@ -151,6 +168,10 @@ extract_library_subset <- function(kernel_paths,
               call. = FALSE)
       return(NULL)
     }
+    if (!dest_ok) {
+      return(data.frame(stem = idx_name, source = src, dest = dst,
+                        copied = FALSE, stringsAsFactors = FALSE))
+    }
     do_copy <- isTRUE(overwrite) || !file.exists(dst)
     if (do_copy) {
       file.copy(src, dst, overwrite = overwrite)
@@ -161,6 +182,7 @@ extract_library_subset <- function(kernel_paths,
 
   result <- do.call(rbind, c(result_rows, Filter(Negate(is.null), index_rows)))
   out <- .cl_attach_extract_attrs(result, kernel_paths_norm,
-                                  lib_dir_norm, dest_norm, depends_tag)
+                                  lib_dir_norm, dest_norm, depends_tag,
+                                  manifest_only = !dest_ok)
   invisible(out)
 }

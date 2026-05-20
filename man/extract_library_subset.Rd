@@ -19,11 +19,12 @@ file is scanned for the annotation tag given by \code{depends_tag}.}
 
 \item{library_dir}{Path to the source library directory.}
 
-\item{dest_dir}{Path to the destination directory.  Must already exist; a
-warning is issued and the function returns invisibly if it does not.
+\item{dest_dir}{Path where files would be written.  Must already exist for any
+copying to occur.  If absent, a warning is issued, no directories are created,
+and nothing is copied; the returned \code{data.frame} still describes the planned
+subset (sources, intended destinations, \code{copied = FALSE}).
 In addition to the \code{.cl} files, \code{kernel_dependency_index.rds} is copied
-here so the extracted subset can be used immediately with a pre-loaded
-index.}
+here when copying runs so the extracted subset can be used with a pre-loaded index.}
 
 \item{depends_tag}{Name of the annotation tag listing library file stems.
 Defaults to \code{"all_depends"}.  Pass \code{"all_depends_nmath"} for kernels that
@@ -39,15 +40,15 @@ returned data frame.}
 }
 \value{
 A \verb{nmathopencl_lib_extract_df} subclass of \verb{data.frame}
-with one row per copied file (\code{.cl} files in dependency order, followed by
-companion index shards when present) and columns:
+with one row per library shard (\code{.cl} files in dependency order, followed by
+companion index files when planned or copied) and columns:
 \describe{
-\item{\code{stem}}{Stem name (filename without \code{.cl}), or
-\code{"kernel_dependency_index.rds"} for the index.}
-\item{\code{source}}{Full path to the source file in \code{library_dir}.}
-\item{\code{dest}}{Full path to the destination file in \code{dest_dir}.}
-\item{\code{copied}}{\code{TRUE} if the file was copied; \code{FALSE} if it already
-existed and \code{overwrite = FALSE}.}
+\item{\code{stem}}{Stem name (filename without \code{.cl}), or index filenames.}
+\item{\code{source}}{Full path to the source file under \code{library_dir}.}
+\item{\code{dest}}{Intended destination path under \code{dest_dir}.}
+\item{\code{copied}}{\code{TRUE} if copied; otherwise \code{FALSE} including when
+\code{dest_dir} is missing (\code{copied = FALSE} for every row),
+a source path is missing, or an existing destination was skipped.}
 }
 }
 \description{
@@ -61,32 +62,35 @@ Use this to populate a project-local copy containing only the library files
 actually needed by your kernels.  The result can then be committed alongside
 your kernel files, removing a runtime dependency on the full library.
 
-It is strongly recommended to supply a pre-loaded \code{index}:
+Bundled libraries such as \verb{inst/cl/nmath} ship
+\code{kernel_dependency_index.rds} next to their \code{.cl} shards.  Pass
+\code{index =} when you preload that object to avoid redundant reads; regenerate
+the files with \link{write_kernel_dependency_index}, for example after porting via
+\verb{tools/port_inst_cl_nmath_from_src.R}.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{lib_dir <- system.file("cl/ex_glmbayes_nmath", package = "nmathopencl")
-idx <- write_kernel_dependency_index(library_dir = lib_dir, write = FALSE)
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{lib_dir <- system.file("cl/nmath", package = "nmathopencl")
+src_dir <- system.file("cl/ex_glmbayes_src", package = "nmathopencl")
+kernel_paths <- sort(Sys.glob(file.path(src_dir, "*.cl")))
+dest_dir <- tempfile("ex_subset"); dir.create(dest_dir)
+## on.exit(unlink(dest_dir, recursive = TRUE), add = TRUE)
 result <- extract_library_subset(
   kernel_paths, lib_dir, dest_dir,
-  depends_tag = "all_depends_nmath", index = idx)
+  depends_tag = "all_depends_nmath")
 }\if{html}{\out{</div>}}
 }
 \examples{
 ############################ Start of extract_library_subset example #########################
 
 \donttest{
-lib_dir <- system.file("cl/ex_glmbayes_nmath", package = "nmathopencl")
-kpath <- system.file(
-  "cl/ex_glmbayes_src/f2_f3_gaussian.cl",
-  package = "nmathopencl"
-)
-idx <- write_kernel_dependency_index(library_dir = lib_dir, write = FALSE)
+lib_dir <- system.file("cl/nmath", package = "nmathopencl")
+src_dir <- system.file("cl/ex_glmbayes_src", package = "nmathopencl")
+kernel_paths <- sort(Sys.glob(file.path(src_dir, "*.cl")))
 dest_dir <- tempfile("exglmbsubset")
 dir.create(dest_dir)
 on.exit(unlink(dest_dir, recursive = TRUE), add = TRUE)
 df <- extract_library_subset(
-  kpath, lib_dir, dest_dir,
-  depends_tag = "all_depends_nmath",
-  index = idx
+  kernel_paths, lib_dir, dest_dir,
+  depends_tag = "all_depends_nmath"
 )
 print(df)
 sum(df$copied)
@@ -95,6 +99,7 @@ sum(df$copied)
 ###############################################################################
 ## End of extract_library_subset example
 ###############################################################################
+
 }
 \seealso{
 \link[=kernel_lib_subset_printing]{printing methods}
