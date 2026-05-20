@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "documentation": [
+    "src/kernel_wrappers.cpp",
+    "tools/refresh_src_kernel_nmath_tags.R"
+  ],
+  "description": "Kernels for which assemble_program uses load_kernel_library(\"nmath\", ...) concatenating every file under inst/cl/nmath/, because tagging @all_depends_nmath (indexed load via load_library_for_kernel) does not reliably include all symbols needed.",
+  "assembler": {
+    "function": "build_rmath_program_indexed",
+    "source_file_cpp": "src/kernel_wrappers.cpp"
+  },
+  "triggers": [
+    {
+      "id": "qDiscrete_search_token_in_all_depends_nmath",
+      "detection_kind": "all_depends_nmath_token",
+      "token": "qDiscrete_search",
+      "cause_summary": "Discrete quantile macros expand to p*-family callees; static @all_depends_nmath closure from the tag machinery can miss required stems. Runtime forces full inst/cl/nmath when this token appears on the launcher kernel's @all_depends_nmath line."
+    },
+    {
+      "id": "norm_rand_kernel_launcher_suffix",
+      "detection_kind": "launcher_relative_path_suffix",
+      "launcher_path_suffix": "norm_rand_kernel.cl",
+      "cause_summary": "Indexed subset omits dependencies such as sunif.cl; device link fails (e.g. R_unif_index on NVPTX). Runtime forces full inst/cl/nmath when the launcher path ends with this suffix."
+    }
+  ],
+  "entries": [
+    {
+      "trigger_ids": ["qDiscrete_search_token_in_all_depends_nmath"],
+      "device_kernel_names": ["qbinom_kernel"],
+      "entry_kernels_package_relative": ["cl/src/qbinom_kernel.cl"],
+      "r_wrappers_typical": ["qbinom_opencl"]
+    },
+    {
+      "trigger_ids": ["qDiscrete_search_token_in_all_depends_nmath"],
+      "device_kernel_names": ["qgeom_kernel"],
+      "entry_kernels_package_relative": ["cl/src/qgeom_kernel.cl"],
+      "r_wrappers_typical": ["qgeom_opencl"]
+    },
+    {
+      "trigger_ids": ["qDiscrete_search_token_in_all_depends_nmath"],
+      "device_kernel_names": ["qpois_kernel"],
+      "entry_kernels_package_relative": ["cl/src/qpois_kernel.cl"],
+      "r_wrappers_typical": ["qpois_opencl"]
+    },
+    {
+      "trigger_ids": ["qDiscrete_search_token_in_all_depends_nmath"],
+      "device_kernel_names": ["qnbinom_kernel"],
+      "entry_kernels_package_relative": ["cl/src/qnbinom_kernel.cl"],
+      "r_wrappers_typical": ["qnbinom_opencl"]
+    },
+    {
+      "trigger_ids": ["qDiscrete_search_token_in_all_depends_nmath"],
+      "device_kernel_names": ["qnbinom_mu_kernel"],
+      "entry_kernels_package_relative": ["cl/src/qnbinom_mu_kernel.cl"],
+      "r_wrappers_typical": ["qnbinom_mu_opencl"]
+    },
+    {
+      "trigger_ids": ["qDiscrete_search_token_in_all_depends_nmath"],
+      "device_kernel_names": ["rbinom_kernel"],
+      "entry_kernels_package_relative": ["cl/src/rbinom_kernel.cl"],
+      "r_wrappers_typical": ["rbinom_opencl"]
+    },
+    {
+      "trigger_ids": ["qDiscrete_search_token_in_all_depends_nmath"],
+      "device_kernel_names": ["rhyper_kernel"],
+      "entry_kernels_package_relative": ["cl/src/rhyper_kernel.cl"],
+      "r_wrappers_typical": ["rhyper_opencl"]
+    },
+    {
+      "trigger_ids": ["qDiscrete_search_token_in_all_depends_nmath"],
+      "device_kernel_names": ["rmultinom_kernel"],
+      "entry_kernels_package_relative": ["cl/src/rmultinom_kernel.cl"],
+      "r_wrappers_typical": ["rmultinom_opencl"]
+    },
+    {
+      "trigger_ids": ["norm_rand_kernel_launcher_suffix"],
+      "device_kernel_names": ["norm_rand_kernel"],
+      "entry_kernels_package_relative": ["cl/src/norm_rand_kernel.cl"],
+      "r_wrappers_typical": ["norm_rand_opencl"]
+    }
+  ]
+}

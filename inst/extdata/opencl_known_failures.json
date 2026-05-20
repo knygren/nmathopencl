@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "documentation": [
+    "inst/OPENCL_KERNEL_KNOWN_FAILURES.md",
+    "README.md"
+  ],
+  "entries": [
+    {
+      "id": "nvptx_unresolved_rf_lbeta_qbeta",
+      "class": "device_compile_link",
+      "r_wrappers": ["qbeta_opencl"],
+      "device_kernel_names": ["qbeta_kernel"],
+      "entry_kernels_package_relative": ["cl/src/qbeta_kernel.cl"],
+      "nmath_stems": [],
+      "typical_symptom": "ptxas fatal : Unresolved extern function 'Rf_lbeta'",
+      "cause_summary": "NVPTX/OpenCL device link references host-only RMath symbol Rf_lbeta (lbeta nmath tail).",
+      "references": ["inst/OPENCL_KERNEL_KNOWN_FAILURES.md"]
+    },
+    {
+      "id": "nvptx_unresolved_stirlerr_cycle_free_qgamma",
+      "class": "device_compile_link",
+      "r_wrappers": ["qgamma_opencl"],
+      "device_kernel_names": ["qgamma_kernel"],
+      "entry_kernels_package_relative": ["cl/src/qgamma_kernel.cl"],
+      "nmath_stems": [],
+      "typical_symptom": "ptxas fatal : Unresolved extern function 'stirlerr_cycle_free'",
+      "cause_summary": "Device link sees Stirling/Stirlerr helper not defined for NVPTX-class targets.",
+      "references": ["inst/OPENCL_KERNEL_KNOWN_FAILURES.md"]
+    },
+    {
+      "id": "nvptx_unresolved_rf_qlogis_qlogis",
+      "class": "device_compile_link",
+      "r_wrappers": ["qlogis_opencl"],
+      "device_kernel_names": ["qlogis_kernel"],
+      "entry_kernels_package_relative": ["cl/src/qlogis_kernel.cl"],
+      "nmath_stems": [],
+      "typical_symptom": "ptxas fatal : Unresolved extern function 'Rf_qlogis'",
+      "cause_summary": "RMath maps qlogis to Rf_qlogis at some sites; NVPTX linker has no device Rf_qlogis.",
+      "references": ["inst/OPENCL_KERNEL_KNOWN_FAILURES.md"]
+    },
+    {
+      "id": "nvptx_unresolved_rf_qnt_qt",
+      "class": "device_compile_link",
+      "r_wrappers": ["qt_opencl"],
+      "device_kernel_names": ["qnt_kernel"],
+      "entry_kernels_package_relative": ["cl/src/qnt_kernel.cl"],
+      "nmath_stems": [],
+      "typical_symptom": "ptxas fatal : Unresolved extern function 'Rf_qnt'",
+      "cause_summary": "RMath maps qnt to Rf_qnt; OpenCL entry uses qnt_kernel; NVPTX has no device Rf_qnt.",
+      "references": ["inst/OPENCL_KERNEL_KNOWN_FAILURES.md"]
+    },
+    {
+      "id": "nvptx_unresolved_rf_qunif_qunif",
+      "class": "device_compile_link",
+      "r_wrappers": ["qunif_opencl"],
+      "device_kernel_names": ["qunif_kernel"],
+      "entry_kernels_package_relative": ["cl/src/qunif_kernel.cl"],
+      "nmath_stems": [],
+      "typical_symptom": "ptxas fatal : Unresolved extern function 'Rf_qunif'",
+      "cause_summary": "RMath maps qunif to Rf_qunif; NVPTX linker has no device Rf_qunif.",
+      "references": ["inst/OPENCL_KERNEL_KNOWN_FAILURES.md"]
+    },
+    {
+      "id": "host_allocation_wilcox",
+      "class": "host_runtime_allocation",
+      "r_wrappers": [
+        "dwilcox_opencl",
+        "pwilcox_opencl",
+        "qwilcox_opencl",
+        "rwilcox_opencl"
+      ],
+      "device_kernel_names": [
+        "dwilcox_kernel",
+        "pwilcox_kernel",
+        "qwilcox_kernel",
+        "rwilcox_kernel"
+      ],
+      "entry_kernels_package_relative": [
+        "cl/src/dwilcox_kernel.cl",
+        "cl/src/pwilcox_kernel.cl",
+        "cl/src/qwilcox_kernel.cl",
+        "cl/src/rwilcox_kernel.cl"
+      ],
+      "nmath_stems": ["wilcox"],
+      "typical_symptom": "Link or runtime failures involving host allocators (e.g. calloc / R_chk_calloc) when used as GPU device code.",
+      "cause_summary": "wilcox.cl maintains dynamic caches assuming a host C/R allocator; documented as unsupported for direct GPU kernels without a device allocator.",
+      "references": ["README.md"]
+    },
+    {
+      "id": "host_allocation_signrank",
+      "class": "host_runtime_allocation",
+      "r_wrappers": [
+        "dsignrank_opencl",
+        "psignrank_opencl",
+        "qsignrank_opencl",
+        "rsignrank_opencl"
+      ],
+      "device_kernel_names": [
+        "dsignrank_kernel",
+        "psignrank_kernel",
+        "qsignrank_kernel",
+        "rsignrank_kernel"
+      ],
+      "entry_kernels_package_relative": [
+        "cl/src/dsignrank_kernel.cl",
+        "cl/src/psignrank_kernel.cl",
+        "cl/src/qsignrank_kernel.cl",
+        "cl/src/rsignrank_kernel.cl"
+      ],
+      "nmath_stems": ["signrank"],
+      "typical_symptom": "Link or runtime failures involving host allocators (e.g. calloc) when used as GPU device code.",
+      "cause_summary": "signrank.cl uses host-style dynamic allocation; documented as unsupported for direct GPU kernels without a device allocator.",
+      "references": ["README.md"]
+    },
+    {
+      "id": "host_allocation_bessel",
+      "class": "host_runtime_allocation",
+      "r_wrappers": [
+        "besselI_opencl",
+        "besselJ_opencl",
+        "besselK_opencl",
+        "besselY_opencl"
+      ],
+      "device_kernel_names": [
+        "bessel_i_kernel",
+        "bessel_j_kernel",
+        "bessel_k_kernel",
+        "bessel_y_kernel",
+        "bessel_i_ex_kernel",
+        "bessel_j_ex_kernel",
+        "bessel_k_ex_kernel",
+        "bessel_y_ex_kernel"
+      ],
+      "entry_kernels_package_relative": [
+        "cl/src/bessel_i_kernel.cl",
+        "cl/src/bessel_j_kernel.cl",
+        "cl/src/bessel_k_kernel.cl",
+        "cl/src/bessel_y_kernel.cl",
+        "cl/src/bessel_i_ex_kernel.cl",
+        "cl/src/bessel_j_ex_kernel.cl",
+        "cl/src/bessel_k_ex_kernel.cl",
+        "cl/src/bessel_y_ex_kernel.cl"
+      ],
+      "nmath_stems": [
+        "bessel",
+        "bessel_i",
+        "bessel_j",
+        "bessel_k",
+        "bessel_y"
+      ],
+      "typical_symptom": "Runtime failure when temporary workspace from R_alloc path is required; null-pointer shim is insufficient.",
+      "cause_summary": "Bessel nmath sources use R_alloc-style workspace; documented as unsafe for production GPU use until device workspace exists.",
+      "references": ["README.md", "R/bessel_opencl.R"]
+    }
+  ]
+}
