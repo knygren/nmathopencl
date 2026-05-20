@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void qunif_kernel_temp(
+__kernel void qunif_kernel(
     __global const double* p,
     __global const double* min_val,
     __global const double* max_val,

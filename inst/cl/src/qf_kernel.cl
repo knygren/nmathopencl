@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void qf_kernel_temp(
+__kernel void qf_kernel(
     __global const double* p,
     __global const double* df1,
     __global const double* df2,

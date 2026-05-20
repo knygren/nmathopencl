@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void qchisq_kernel_temp(
+__kernel void qchisq_kernel(
     __global const double* p,
     __global const double* df,
     __global const int* lower_tail,

@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void qnbinom_mu_kernel_temp(
+__kernel void qnbinom_mu_kernel(
     __global const double* p,
     __global const double* size,
     __global const double* mu,

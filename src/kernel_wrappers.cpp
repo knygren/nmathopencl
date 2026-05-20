@@ -886,7 +886,7 @@ Rcpp::NumericVector qnorm_opencl(
   try {
     pq_tail_ndrange_kernel_temp_fill(
         "src/qnorm_kernel.cl",
-        "qnorm_kernel_temp",
+        "qnorm_kernel",
         len,
         {&p, &mean, &sd},
         lower_tail,
@@ -983,7 +983,7 @@ Rcpp::NumericVector qunif_opencl(
   try {
     pq_tail_ndrange_kernel_temp_fill(
         "src/qunif_kernel.cl",
-        "qunif_kernel_temp",
+        "qunif_kernel",
         len,
         {&p, &min, &max},
         lower_tail,
@@ -1080,7 +1080,7 @@ Rcpp::NumericVector qgamma_opencl(
   try {
     pq_tail_ndrange_kernel_temp_fill(
         "src/qgamma_kernel.cl",
-        "qgamma_kernel_temp",
+        "qgamma_kernel",
         len,
         {&p, &shape, &scale},
         lower_tail,
@@ -1242,7 +1242,7 @@ Rcpp::NumericVector qbeta_opencl(
     if (all_ncp_zero) {
       pq_tail_ndrange_kernel_temp_fill(
           "src/qbeta_kernel.cl",
-          "qbeta_kernel_temp",
+          "qbeta_kernel",
           len,
           {&p, &shape1, &shape2},
           lower_tail,
@@ -1252,7 +1252,7 @@ Rcpp::NumericVector qbeta_opencl(
     } else if (!any_ncp_zero) {
       pq_tail_ndrange_kernel_temp_fill(
           "src/qnbeta_kernel.cl",
-          "qnbeta_kernel_temp",
+          "qnbeta_kernel",
           len,
           {&p, &shape1, &shape2, &ncp},
           lower_tail,
@@ -1262,9 +1262,9 @@ Rcpp::NumericVector qbeta_opencl(
     } else {
       pq_mixed_ncp_three_four_ndrange_twopass(
           "src/qbeta_kernel.cl",
-          "qbeta_kernel_temp",
+          "qbeta_kernel",
           "src/qnbeta_kernel.cl",
-          "qnbeta_kernel_temp",
+          "qnbeta_kernel",
           len,
           ncp,
           p,
@@ -1380,7 +1380,7 @@ Rcpp::NumericVector qlnorm_opencl(
   try {
     pq_tail_ndrange_kernel_temp_fill(
         "src/qlnorm_kernel.cl",
-        "qlnorm_kernel_temp",
+        "qlnorm_kernel",
         len,
         {&p, &meanlog, &sdlog},
         lower_tail,
@@ -1573,7 +1573,7 @@ Rcpp::NumericVector qchisq_opencl(
     if (all_ncp_zero) {
       pq_tail_ndrange_kernel_temp_fill(
           "src/qchisq_kernel.cl",
-          "qchisq_kernel_temp",
+          "qchisq_kernel",
           len,
           {&p, &df},
           lower_tail,
@@ -1583,7 +1583,7 @@ Rcpp::NumericVector qchisq_opencl(
     } else if (!any_ncp_zero) {
       pq_tail_ndrange_kernel_temp_fill(
           "src/qnchisq_kernel.cl",
-          "qnchisq_kernel_temp",
+          "qnchisq_kernel",
           len,
           {&p, &df, &ncp},
           lower_tail,
@@ -1593,9 +1593,9 @@ Rcpp::NumericVector qchisq_opencl(
     } else {
       pq_mixed_ncp_two_three_ndrange_twopass(
           "src/qchisq_kernel.cl",
-          "qchisq_kernel_temp",
+          "qchisq_kernel",
           "src/qnchisq_kernel.cl",
-          "qnchisq_kernel_temp",
+          "qnchisq_kernel",
           len,
           ncp,
           p,
@@ -1799,7 +1799,7 @@ Rcpp::NumericVector qf_opencl(
     if (all_ncp_zero) {
       pq_tail_ndrange_kernel_temp_fill(
           "src/qf_kernel.cl",
-          "qf_kernel_temp",
+          "qf_kernel",
           len,
           {&p, &df1, &df2},
           lower_tail,
@@ -1809,7 +1809,7 @@ Rcpp::NumericVector qf_opencl(
     } else if (!any_ncp_zero) {
       pq_tail_ndrange_kernel_temp_fill(
           "src/qnf_kernel.cl",
-          "qnf_kernel_temp",
+          "qnf_kernel",
           len,
           {&p, &df1, &df2, &ncp},
           lower_tail,
@@ -1819,9 +1819,9 @@ Rcpp::NumericVector qf_opencl(
     } else {
       pq_mixed_ncp_three_four_ndrange_twopass(
           "src/qf_kernel.cl",
-          "qf_kernel_temp",
+          "qf_kernel",
           "src/qnf_kernel.cl",
-          "qnf_kernel_temp",
+          "qnf_kernel",
           len,
           ncp,
           p,
@@ -2018,7 +2018,7 @@ Rcpp::NumericVector qt_opencl(
     if (all_ncp_zero) {
       pq_tail_ndrange_kernel_temp_fill(
           "src/qt_kernel.cl",
-          "qt_kernel_temp",
+          "qt_kernel",
           len,
           {&p, &df},
           lower_tail,
@@ -2028,7 +2028,7 @@ Rcpp::NumericVector qt_opencl(
     } else if (!any_ncp_zero) {
       pq_tail_ndrange_kernel_temp_fill(
           "src/qnt_kernel.cl",
-          "qnt_kernel_temp",
+          "qnt_kernel",
           len,
           {&p, &df, &ncp},
           lower_tail,
@@ -2038,9 +2038,9 @@ Rcpp::NumericVector qt_opencl(
     } else {
       pq_mixed_ncp_two_three_ndrange_twopass(
           "src/qt_kernel.cl",
-          "qt_kernel_temp",
+          "qt_kernel",
           "src/qnt_kernel.cl",
-          "qnt_kernel_temp",
+          "qnt_kernel",
           len,
           ncp,
           p,
@@ -2251,7 +2251,7 @@ Rcpp::NumericVector qnbinom_opencl(
   try {
     pq_tail_ndrange_kernel_temp_fill(
         "src/qnbinom_kernel.cl",
-        "qnbinom_kernel_temp",
+        "qnbinom_kernel",
         len,
         {&p, &size, &prob},
         lower_tail,
@@ -2442,7 +2442,7 @@ Rcpp::NumericVector qcauchy_opencl(
   try {
     pq_tail_ndrange_kernel_temp_fill(
         "src/qcauchy_kernel.cl",
-        "qcauchy_kernel_temp",
+        "qcauchy_kernel",
         len,
         {&p, &location, &scale},
         lower_tail,
@@ -2551,7 +2551,7 @@ Rcpp::NumericVector qexp_opencl(
   try {
     pq_tail_ndrange_kernel_temp_fill(
         "src/qexp_kernel.cl",
-        "qexp_kernel_temp",
+        "qexp_kernel",
         len,
         {&p, &rate},
         lower_tail,
@@ -2645,7 +2645,7 @@ Rcpp::NumericVector qgeom_opencl(
   try {
     pq_tail_ndrange_kernel_temp_fill(
         "src/qgeom_kernel.cl",
-        "qgeom_kernel_temp",
+        "qgeom_kernel",
         len,
         {&p, &prob},
         lower_tail,
@@ -2760,7 +2760,7 @@ Rcpp::NumericVector qhyper_opencl(
   try {
     pq_tail_ndrange_kernel_temp_fill(
         "src/qhyper_kernel.cl",
-        "qhyper_kernel_temp",
+        "qhyper_kernel",
         len,
         {&p, &r, &b, &n1},
         lower_tail,
@@ -2808,7 +2808,7 @@ Rcpp::NumericVector qbinom_opencl(
   try {
     pq_tail_ndrange_kernel_temp_fill(
         "src/qbinom_kernel.cl",
-        "qbinom_kernel_temp",
+        "qbinom_kernel",
         len,
         {&size, &prob, &p},
         lower_tail,
@@ -2840,7 +2840,7 @@ Rcpp::NumericVector qpois_opencl(
   try {
     pq_tail_ndrange_kernel_temp_fill(
         "src/qpois_kernel.cl",
-        "qpois_kernel_temp",
+        "qpois_kernel",
         len,
         {&p, &lambda},
         lower_tail,
@@ -2965,7 +2965,7 @@ Rcpp::NumericVector qnbinom_mu_opencl(
   try {
     pq_tail_ndrange_kernel_temp_fill(
         "src/qnbinom_mu_kernel.cl",
-        "qnbinom_mu_kernel_temp",
+        "qnbinom_mu_kernel",
         len,
         {&p, &size, &mu},
         lower_tail,
@@ -3092,7 +3092,7 @@ Rcpp::NumericVector qweibull_opencl(
   try {
     pq_tail_ndrange_kernel_temp_fill(
         "src/qweibull_kernel.cl",
-        "qweibull_kernel_temp",
+        "qweibull_kernel",
         len,
         {&p, &shape, &scale},
         lower_tail,
@@ -3204,7 +3204,7 @@ Rcpp::NumericVector qlogis_opencl(
   try {
     pq_tail_ndrange_kernel_temp_fill(
         "src/qlogis_kernel.cl",
-        "qlogis_kernel_temp",
+        "qlogis_kernel",
         len,
         {&p, &location, &scale},
         lower_tail,
@@ -3319,7 +3319,7 @@ Rcpp::NumericVector qtukey_opencl(
   try {
     pq_tail_ndrange_kernel_temp_fill(
         "src/qtukey_kernel.cl",
-        "qtukey_kernel_temp",
+        "qtukey_kernel",
         len,
         {&p, &nmeans, &df, &nranges},
         lower_tail,
@@ -3416,7 +3416,7 @@ Rcpp::NumericVector qwilcox_opencl(
   try {
     pq_tail_ndrange_kernel_temp_fill(
         "src/qwilcox_kernel.cl",
-        "qwilcox_kernel_temp",
+        "qwilcox_kernel",
         len,
         {&p, &m, &n2},
         lower_tail,
@@ -3510,7 +3510,7 @@ Rcpp::NumericVector qsignrank_opencl(
   try {
     pq_tail_ndrange_kernel_temp_fill(
         "src/qsignrank_kernel.cl",
-        "qsignrank_kernel_temp",
+        "qsignrank_kernel",
         len,
         {&p, &nsize},
         lower_tail,

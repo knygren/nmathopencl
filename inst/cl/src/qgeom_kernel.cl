@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void qgeom_kernel_temp(
+__kernel void qgeom_kernel(
     __global const double* p,
     __global const double* prob,
     __global const int* lower_tail,

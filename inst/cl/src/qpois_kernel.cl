@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void qpois_kernel_temp(
+__kernel void qpois_kernel(
     __global const double* p,
     __global const double* lambda,
     __global const int* lower_tail,

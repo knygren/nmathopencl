@@ -5,7 +5,7 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void qnorm_kernel_temp(
+__kernel void qnorm_kernel(
     __global const double* p,
     __global const double* mu,
     __global const double* sigma,
