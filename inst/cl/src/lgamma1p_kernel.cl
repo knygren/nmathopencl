@@ -5,21 +5,6 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void lgamma1p_kernel(
-    const double x,
-    const double unused_y,
-    const double unused_z,
-    __global double* out,
-    const int n
-) {
-    (void)unused_y;
-    (void)unused_z;
-    if (get_global_id(0) != 0) return;
-    for (int i = 0; i < n; ++i) {
-        out[i] = lgamma1p(x);
-    }
-}
-
 __kernel void lgamma1p_kernel_temp(
     __global const double* x,
     __global double* out,
