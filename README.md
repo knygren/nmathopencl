@@ -42,7 +42,48 @@ them in its own OpenCL program builds.
 
 ---
 
+## Audience and workflow (draft kernels to a downstream package)
+
+Downstream developers typically **port or rewrite kernels** from legacy CPU-oriented
+sources, keep **`*.cl` launchers inside their own package**, annotate them with structured
+dependency tags (`@depends_nmath`, `@all_depends_nmath`, broader `@depends`/`@provides`
+where applicable), then:
+
+1. **Validate** --- **`load_library_for_kernel(..., depends_tag = "all_depends_nmath")`** concatenates
+   the inferred minimal set of ported `inst/cl/nmath/` shards for a launcher. Related **`message()`** /
+   **`warning()`** output documents assembler parity (**`inst/extdata/opencl_full_nmath_stopgap.json`**)
+   and curated fragile subgraphs (**`inst/extdata/opencl_known_failures.json`**).
+
+2. **Optional materialisation** --- **`extract_library_subset()`** writes that subset (and index companions)
+   next to kernels you intend to vendor; regenerate **`kernel_dependency_index.rds`** alongside the library
+   with **`write_kernel_dependency_index()`** after substantive port edits.
+
+3. **Integrate** --- either (**a**) remain linked to **`nmathopencl`** via **`system.file(..., package =
+   "nmathopencl")`** and concatenate prelude + shim layers + `nmath` + your kernels yourself, or (**b**) ship only
+   the extracted shards. **`glmbayes`** shows the reference **runner + caches + host plumbing** atop that stack;
+   most authors still own compilation lifetimes and R exports until richer automation arrives for trivial launchers.
+
+---
+
+## Diagnostics and runtime checks
+
+Cheap probes before assembling large sources or diagnosing workstation issues:
+
+| Concern | R entry points |
+|---------|----------------|
+| Device present / built with OpenCL | **`has_opencl()`** |
+| Double-precision & device bookkeeping for fp64-heavy nmath kernels | **`opencl_fp64_available()`**, **`opencl_device_info()`**, **`opencl_reset_device_selection()`** |
+| Session sanity / environment | **`verify_opencl_runtime`**, **`check_runtime_env`** |
+
+Optional onboarding / inventory helpers (**`detect_compute_runtimes`**, **`detect_environment_and_gpus`**, **`detect_or_install_gpu_drivers`**, **`get_opencl_core_count`**, **`gpu_names`**).
+
+---
+
 ## The canonical example: glmbayes and EnvelopeEval
+
+The R helpers above let you sanity-check **`@all_depends_nmath` closures locally** before mirroring the
+full-layer OpenCL compilation pattern below (`load_kernel_library` / `load_kernel_source` stacking prelude,
+shims, and `nmath`).
 
 The most direct illustration of how `nmathopencl` is meant to be used is
 `glmbayes`. Bayesian GLM sampling via accept-reject methods requires evaluating
@@ -112,11 +153,13 @@ applies to any package that needs statistical math inside an OpenCL kernel.
 
 ## What "using nmathopencl as a backend" looks like
 
-The assembly of an OpenCL program is done in C++ using `load_kernel_source()`
-and `load_kernel_library()` from `glmbayes`. These functions handle file
-discovery, `@provides`/`@depends` annotation parsing, and dependency-ordered
-concatenation automatically --- you specify a library directory name, not
-individual files.
+The assembly of an OpenCL program is done in **C++** using **`load_kernel_source()`**
+and **`load_kernel_library()`**. **`glmbayes`** ships reference call sites (`f2_f3_opencl`, etc.);
+**`nmathopencl`** also exports **`load_kernel_library()`** / **`load_kernel_source()`**
+so sibling packages can **Import** **`nmathopencl`** directly while **`glmbayes` gradually
+drops duplicate loaders. Together they resolve file discovery under **`system.file("cl/", package = "nmathopencl")`**,
+parse **`@provides`** / **`@depends`**, and concatenate each requested subtree in dependency order ---
+you nominate a subdirectory name (**`nmath`**, **`System`**, …), not every filename.
 
 The full load order that `glmbayes` uses (reflected in `f2_f3_opencl`) is:
 
@@ -230,43 +273,83 @@ satisfied by the layered shim files in the other subdirectories.
 
 ---
 
-## Secondary feature: direct R wrappers
+## R helpers exported for kernel authors (`nmathopencl` vs duplication)
 
-In addition to the ported `.cl` files, `nmathopencl` includes a set of
-R-facing wrappers that call individual nmath functions as GPU kernels
-directly from R:
+Grouped by typical need for someone following **§ Audience and workflow**. Companion package
+**`openclport`** ultimately owns generic kernel-string assembly tooling; **`nmathopencl`**
+currently exports the overlapping entry points so kernel authors need not wait on every
+satellite hitting CRAN. **`glmbayes`** still ships parallel helpers for transitional
+compatibility --- target **`Imports: nmathopencl`** rather than sustaining duplicate loaders.
+
+### Tier A --- Subset authoring (primary CRAN-facing story)
+
+| Function | Purpose |
+|----------|---------|
+| **`load_library_for_kernel()`** | Minimal concatenated text for **one launcher** respecting **`@all_depends_nmath`**, assembler notes, curated warnings. |
+| **`extract_library_subset()`** | Materialise shards + indexes into another directory for vendoring subset trees. |
+| **`write_kernel_dependency_index()`** | Regenerate RDS/TSV index beside `inst/cl/nmath/` after substantive port tooling runs. |
+
+### Tier B --- Full-program stacking (mirror `glmbayes`/OpenCL prelude)
+
+| Function | Purpose |
+|----------|---------|
+| **`load_kernel_library()`** | Recursive dependency-aware concatenation of an `inst/cl/<subdir>/` subtree. |
+| **`load_kernel_source()`** | Load a standalone header/device file (often `OPENCL.cl`-style prelude). |
+
+### Tier C --- Device / fp64 utilities (stay with `nmathopencl`)
+
+| Function | Purpose |
+|----------|---------|
+| **`has_opencl()`**, **`opencl_fp64_available()`**, **`opencl_device_info()`**, **`opencl_reset_device_selection()`** | Host-side capability & fp64 probing tied to kernels shipped here. |
+
+### Tier D --- Optional environment / onboarding
+
+| Functions | Purpose |
+|-----------|---------|
+| **`verify_opencl_runtime`**, **`check_runtime_env`**, **`detect_compute_runtimes`**, **`detect_environment_and_gpus`**, **`detect_or_install_gpu_drivers`**, **`get_opencl_core_count`**, **`gpu_names`**, **`diagnose_glmbayes`** | Diagnostics and workstation inventory; overlaps generic tooling slated for tighter consolidation alongside **`openclport`**. |
+
+### Tier E --- Maintainer-only port plumbing
+
+Less common once bundles are annotated; prefer **`openclport`** internals when authoring new subgraphs.
+
+| Function | Purpose |
+|----------|---------|
+| **`stage_kernel_dependency_sort()`** | Offline ordering passes for regenerated trees. |
+| **`attach_kernel_dependency_tags()`**, **`attach_cross_library_tags()`** | Batch annotation tooling. |
+
+### Tier F --- POSIX/PATH ergonomics (`glmbayes` overlap)
+
+Developer helpers (**`add_to_path_linux()`**, **`add_to_path_windows()`**, **`add_to_libpath_linux()`**) for workstation PATH / library-path tweaks tied to GPU driver workflows; overlaps **`glmbayes`** until loaders consolidate.
+
+---
+
+## Secondary feature: bundled `*_opencl` wrappers (parity testing)
+
+Aside from authoring custom kernels (**§ Audience and workflow**), `nmathopencl` exposes
+many **`distribution_opencl()`**-style helpers that enqueue pre-built GPU launchers wrapping
+individual Mathlib calls. Treat them foremost as **numeric regression harnesses** verifying
+parity with `stats`/base before you trust inlined device code.
 
 ```r
 library(nmathopencl)
 
-# Evaluate the gamma PDF at a fixed parameter set, n times in parallel
+# Gamma PDF sanity check on device
 dgamma_opencl(n = 1e5, x = 2.5, shape = 3, scale = 1)
 
-# Draw random normals on the GPU
+# RNG smoke on device
 rnorm_opencl(n = 1e6, mean = 0, sd = 1)
 
-# Compute log-probabilities for a fixed Poisson parameter
+# Poisson log-probability grid
 dpois_opencl(n = 5e4, x = 3, lambda = 2.5, log = TRUE)
 ```
 
-These wrappers serve two purposes. First, they are useful for **testing and
-validation**: they let you verify that a particular ported function behaves
-correctly before embedding it inside a larger kernel. Second, they provide a
-convenient interface for cases where the entire bottleneck really is a large
-batch of identical distribution evaluations --- though as noted above, this is
-not the primary use case the package was designed around.
+They double as turnkey batched calculators when GPU dispatch already matches your bottleneck,
+yet the curated workflow remains **assemble your kernel + stitched nmath subgraph**.
 
-Each wrapper accepts `fallback`, default **`FALSE`** so GPU build/runtime faults
-surface. When **`fallback = TRUE`**, failures while OpenCL appears available
-recover quietly with the CPU `stats` analogue (silent when **`verbose`** is false).
-Machines **without OpenCL support** (`has_opencl()` false) use CPU routines
-regardless; the `fallback` flag only affects behavior after OpenCL dispatch is tried.
-
-To check OpenCL availability:
-
-```r
-has_opencl()
-```
+Each wrapper honours **`fallback`**, default **`FALSE`** --- GPU faults surface loudly.
+**`fallback = TRUE`** masks recoverable failures with CPU `stats` analogues whenever OpenCL
+appears available (see **`has_opencl()`**). Machines **without OpenCL support** always follow
+CPU paths regardless of **`fallback`**. Begin runtime probing with **§ Diagnostics and runtime checks**.
 
 ---
 
@@ -401,6 +484,8 @@ automatically if OpenCL is unavailable.
 
 ## Future plans
 
+- **Consolidated loader ownership.** Migrate overlapping `load_kernel_*` tooling to **`openclport`**
+  on CRAN while **`nmathopencl`** re-exports or thin-wraps until downstream packages switch imports.
 - **Minimal program assembly.** Dependency analysis to include only the
   source files actually required for each kernel, reducing JIT compilation
   cost on first call.
