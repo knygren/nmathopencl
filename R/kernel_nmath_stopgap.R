@@ -84,6 +84,100 @@
 }
 
 
+## Rows of `entries` as list-of-rows (handles jsonlite DF vs list).
+.cl_stopgap_entries_ll <- function(bun) {
+  if (is.null(bun) || is.null(bun$entries))
+    return(list())
+
+  ej <- bun$entries
+  if (is.data.frame(ej)) {
+    lapply(seq_len(nrow(ej)), function(i) as.list(ej[i, ]))
+  } else if (is.list(ej)) {
+    ej
+  } else {
+    list()
+  }
+}
+
+
+## Map exported `*_opencl` wrappers to readable names (drops `_opencl` suffix).
+.cl_stopgap_symbols_from_wrappers_typical <- function(wrappers) {
+  ww <- trimws(as.character(unlist(wrappers, use.names = FALSE)))
+  ww <- ww[!is.na(ww) & nzchar(ww)]
+  if (!length(ww))
+    return(character())
+  sub("_opencl$", "", ww, perl = TRUE)
+}
+
+
+## Fallback label from launcher path (e.g. `norm_rand_kernel.cl` -> `norm_rand`).
+.cl_stopgap_symbol_from_launcher_path <- function(kernel_path) {
+  b <- basename(as.character(kernel_path)[1L])
+  if (!nzchar(b))
+    return(character())
+  if (grepl("_kernel\\.cl$", b, perl = TRUE))
+    return(sub("_kernel\\.cl$", "", b))
+  ## Nonstandard launcher basename: stem without `.cl`.
+  bn <- basename(tools::file_path_sans_ext(kernel_path))
+  if (!nzchar(bn))
+    return(character())
+  bn
+}
+
+
+## Symbols to show beside the full-library stopgap note (bundled JSON + paths).
+.cl_nmath_stopgap_display_symbols <- function(kernel_paths,
+                                               depends_tag,
+                                               library_dir) {
+  ents_ll <- .cl_stopgap_entries_ll(.cl_read_opencl_full_stopgap_bundle())
+  if (!length(ents_ll))
+    return(character())
+
+  kpn <- suppressWarnings(normalizePath(
+    as.character(kernel_paths),
+    winslash = "/", mustWork = FALSE))
+
+  out <- character()
+  for (kp in kpn) {
+    if (!nzchar(kp))
+      next
+    sg_this <- .cl_nmath_stopgap_matching_trigger_ids(
+      kp, depends_tag, library_dir)
+    if (!length(sg_this))
+      next
+
+    bk <- basename(kp)
+    labeled <- FALSE
+    for (e in ents_ll) {
+      trig <- as.character(unlist(e$trigger_ids, use.names = FALSE))
+      if (!length(intersect(trig, sg_this)))
+        next
+
+      rel <- e$entry_kernels_package_relative
+      if (is.null(rel))
+        next
+      eb <- basename(trimws(as.character(unlist(rel, use.names = FALSE))))
+      eb <- eb[!is.na(eb) & nzchar(eb)]
+      if (!(bk %in% eb))
+        next
+
+      ww <- .cl_stopgap_symbols_from_wrappers_typical(e$r_wrappers_typical)
+      if (!length(ww))
+        ww <- .cl_stopgap_symbol_from_launcher_path(kp)
+      out <- c(out, ww)
+      labeled <- TRUE
+      break
+    }
+
+    if (!labeled)
+      out <- c(out, .cl_stopgap_symbol_from_launcher_path(kp))
+  }
+
+  out <- sort(unique(trimws(as.character(out))))
+  out[!is.na(out) & nzchar(out)]
+}
+
+
 ## Matching trigger IDs for any launcher in kernel_paths (path suffix or token stems).
 .cl_nmath_stopgap_matching_trigger_ids <- function(kernel_paths,
                                                     depends_tag,

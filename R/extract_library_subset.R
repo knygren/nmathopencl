@@ -49,7 +49,9 @@
 #' (\verb{inst/extdata/opencl_full_nmath_stopgap.json}) can apply when
 #' \code{depends_tag = "all_depends_nmath"} and the library directory basename is
 #' \verb{nmath}: if any launcher in \code{kernel_paths} triggers it,
-#' \code{\link{message}(...)} notes that every indexed \verb{.cl} shard is copied,
+#' \code{\link{message}(...)} names the involved R symbols (from
+#' \verb{r_wrappers_typical} in \verb{opencl_full_nmath_stopgap.json}, with
+#' \verb{_opencl} dropped) and every indexed \verb{.cl} shard is copied,
 #' not only the union of annotated stems. \verb{extract_library_subset()}
 #' evaluates \verb{inst/extdata/opencl_known_failures.json} against the union of
 #' \code{depends_tag} annotations and launcher basenames (\code{\link{warning}(...)}
@@ -139,12 +141,8 @@ extract_library_subset <- function(kernel_paths,
   }
 
   if (use_full_nmath) {
-    message(
-      "Note: full `nmath` library stopgap (",
-      paste(sg_ids, collapse = ", "),
-      "). Using every indexed .cl shard in `library_dir` (see ",
-      "`extdata/opencl_full_nmath_stopgap.json` and assembler parity)."
-    )
+    .cl_message_full_nmath_stopgap(.cl_nmath_stopgap_display_symbols(
+      kernel_paths, depends_tag, library_dir))
 
     stems_to_copy <- .cl_index_stems_all_ordered(index)
     stems_to_copy <- stems_to_copy[!is.na(stems_to_copy) & nzchar(stems_to_copy)]

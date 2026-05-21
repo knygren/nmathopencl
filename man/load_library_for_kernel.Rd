@@ -56,8 +56,10 @@ src <- load_library_for_kernel(
 When \code{depends_tag = "all_depends_nmath"} and
 \code{basename(normalizePath(library_dir))} is \code{nmath}, some launchers match
 assembler rules in \verb{inst/extdata/opencl_full_nmath_stopgap.json}: a brief
-\code{\link{message}} prints and every indexed \verb{.cl} shard listed in the
-library index is concatenated, not only the stems from the kernel's annotations.
+\code{\link{message}} names the involved R symbols (from
+\verb{r_wrappers_typical} in that JSON, with the \verb{_opencl} suffix dropped)
+and every indexed \verb{.cl} shard listed in the library index is concatenated,
+not only the stems from the kernel's annotations.
 When \verb{inst/extdata/opencl_known_failures.json} matches the launcher path or
 the declared / loaded stems, \code{\link{warning}(...)} points to fragile ports.
 }

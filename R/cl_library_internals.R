@@ -1,5 +1,88 @@
 # Shared helpers for `load_library_for_kernel()` and `extract_library_subset()`.
 
+## Target width for wrapped console output (`message` / `warning` text).
+.cl_console_text_width <- function() {
+  ow <- as.integer(getOption("width", 80L))
+  if (is.na(ow) || ow < 40L)
+    ow <- 80L
+  min(72L, max(48L, ow))
+}
+
+
+## Greedy wrap of comma-separated identifiers (`name1, name2, ...`) to fit `width`.
+.cl_wrap_comma_separated <- function(items, width, first_prefix, cont_prefix) {
+  if (!length(items))
+    return(character())
+  w <- max(20L, as.integer(width)[1L])
+  fp <- as.character(first_prefix)[1L]
+  cp <- as.character(cont_prefix)[1L]
+
+  lines <- character()
+  cur <- paste0(fp, as.character(items[[1L]]))
+
+  if (length(items) == 1L)
+    return(cur)
+
+  for (i in 2L:length(items)) {
+    nm <- as.character(items[[i]])
+    trial <- paste0(cur, ", ", nm)
+    if (nchar(trial) > w) {
+      lines <- c(lines, cur)
+      cur <- paste0(cp, nm)
+    } else {
+      cur <- trial
+    }
+  }
+
+  c(lines, cur)
+}
+
+
+## Multi-line `message()` when full bundled `inst/cl/nmath/` is concatenated.
+## `display_symbols` holds short names mapped from bundled JSON (`r_wrappers_typical`).
+.cl_message_full_nmath_stopgap <- function(display_symbols) {
+  lbl <- sort(unique(trimws(as.character(display_symbols))))
+  lbl <- lbl[!is.na(lbl) & nzchar(lbl)]
+  w <- .cl_console_text_width()
+  lines <- if (length(lbl)) {
+    paste(
+      .cl_wrap_comma_separated(lbl, w, first_prefix = "  ", cont_prefix = "  "),
+      collapse = "\n"
+    )
+  } else {
+    ""
+  }
+  msg <- paste0(
+    "Note: full `nmath` library stopgap.\n",
+    if (nzchar(lines)) {
+      paste0(
+        ## Match spirit of fragile-port warnings (base names, no `_opencl` / `.cl`).
+        "Symbols prompting this load:\n",
+        lines,
+        "\n"
+      )
+    } else {
+      ""
+    },
+    "Using every indexed .cl shard in `library_dir`.\n",
+    "See `extdata/opencl_full_nmath_stopgap.json` (assembler parity)."
+  )
+  message(msg)
+}
+
+
+## Multi-line `warning()` body when annotated stems are absent from the dependency index.
+.cl_format_unknown_stems_warning <- function(unknown, depends_tag) {
+  unk <- sort(unique(as.character(unknown)))
+  w <- .cl_console_text_width()
+  tag <- as.character(depends_tag)[1L]
+  h1 <- paste0("The following stems from `@", tag, "` were not found in")
+  h2 <- "the index and will be skipped:"
+  body <- .cl_wrap_comma_separated(unk, w, first_prefix = "  ", cont_prefix = "  ")
+  paste(c("", h1, h2, body, ""), collapse = "\n")
+}
+
+
 .cl_load_index <- function(index, library_dir) {
   if (!is.null(index)) {
     return(index)
@@ -25,9 +108,7 @@
   unknown <- setdiff(needed, known)
   if (length(unknown) > 0L) {
     warning(
-      "The following stems from @", depends_tag,
-      " were not found in the index and will be skipped: ",
-      paste(unknown, collapse = ", "),
+      .cl_format_unknown_stems_warning(unknown, depends_tag),
       call. = FALSE
     )
   }

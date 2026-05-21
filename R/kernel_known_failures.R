@@ -116,6 +116,33 @@
 }
 
 
+## Multi-line text for known-failure warnings (narrow console-friendly).
+.cl_format_opencl_known_failure_warning <- function(wrappers,
+                                                     line_width = NULL) {
+  if (is.null(line_width))
+    line_width <- .cl_console_text_width()
+
+  head <- "Calls to unported nmath function(s) found:"
+  suffix1 <- "Retain calls to CPU-based versions for these functions"
+  suffix2 <- "and revise kernels."
+  wr <- sort(unique(as.character(wrappers)))
+  if (!length(wr))
+    return(character())
+
+  body <- .cl_wrap_comma_separated(
+    wr,
+    width = line_width,
+    first_prefix = "  ",
+    cont_prefix = "  "
+  )
+
+  paste(
+    c("", head, body, "", suffix1, suffix2, ""),
+    collapse = "\n"
+  )
+}
+
+
 ## Optionally warn once per subset-load call (see docs on extract vs loader).
 .cl_maybe_warn_opencl_known_failures <- function(kernel_paths_norm,
                                                  annotated_stems,
@@ -151,10 +178,7 @@
 
   if (length(matched_wrappers)) {
     warning(
-      "Calls to unported nmath function(s) found: ",
-      paste(matched_wrappers, collapse = ", "),
-      ". Retain calls to CPU-based versions for these functions ",
-      "and revise kernels.",
+      .cl_format_opencl_known_failure_warning(matched_wrappers),
       call. = FALSE
     )
   }
