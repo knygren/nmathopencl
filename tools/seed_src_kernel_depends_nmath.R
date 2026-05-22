@@ -3,9 +3,16 @@
 #
 # Run from package root:
 #   Rscript tools/seed_src_kernel_depends_nmath.R
-# Or: Rscript tools/seed_src_kernel_depends_nmath.R /path/to/nmathopencl
+#   Rscript tools/seed_src_kernel_depends_nmath.R /path/to/nmathopencl
+#
+# Or: NMATHOPENCL_ROOT=/path/to/nmathopencl Rscript tools/seed_src_kernel_depends_nmath.R
 
 resolve_pkg_dir <- function() {
+  cand <- Sys.getenv("NMATHOPENCL_ROOT", "")
+  if (nzchar(cand)) {
+    return(normalizePath(cand, winslash = "/", mustWork = TRUE))
+  }
+
   argv <- suppressWarnings(commandArgs(trailingOnly = TRUE))
   argv <- argv[nzchar(argv)]
   if (length(argv) >= 1L) {

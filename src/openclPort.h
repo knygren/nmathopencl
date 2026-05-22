@@ -138,6 +138,28 @@ bool kernel_all_depends_nmath_includes_qDiscrete_search(
     const std::string& package = "nmathopencl");
 
 // -------------------------------------------------------------------------
+// Assemble prelude + sliced/full nmath + entry kernel OpenCL sources.
+// Mirrors glmbayes::opencl::load_likelihood_subgradient_program; entry is
+// identified by path under inst/cl/ (e.g. "src/dnorm_kernel.cl").
+// -------------------------------------------------------------------------
+
+enum class NmathBundleMode {
+  /// Indexed slice via load_library_for_kernel(..., "all_depends_nmath").
+  Indexed = 0,
+  /// Full load_kernel_library("nmath", ...).
+  Full = 1,
+  /// Default wrappers: indexed except when @all_depends_nmath lists
+  /// qDiscrete_search or kernel ends with norm_rand_kernel.cl (full nmath).
+  Production = 2
+};
+
+std::string build_rmath_opencl_program(
+    const std::string& kernel_relative_path,
+    const std::string& package                    = "nmathopencl",
+    NmathBundleMode     nmath_bundle              = NmathBundleMode::Production,
+    const std::string&  nmath_depends_annotation  = "all_depends_nmath");
+
+// -------------------------------------------------------------------------
 // fp64-capable OpenCL device selection (cached). Implemented in
 // opencl_device_selection.cpp; holds cl_platform_id / cl_device_id as void*
 // when USE_OPENCL.

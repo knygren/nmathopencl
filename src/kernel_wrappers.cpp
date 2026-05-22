@@ -12,7 +12,6 @@ using namespace openclPort;
 namespace nmathopencl {
 
 #ifdef USE_OPENCL
-static std::string build_rmath_program_indexed(const std::string& kernel_rel_path);
 static void opencl_serial_scalar_draws(
     const std::string& kernel_rel_path,
     const char* kernel_name,
@@ -178,39 +177,6 @@ Rcpp::NumericVector rbinom_opencl(
 }
 
 #ifdef USE_OPENCL
-// Assemble OpenCL program: infrastructure shims + `inst/cl/nmath` stems from
-// `@all_depends_nmath` via load_library_for_kernel() (kernel_dependency_index.tsv).
-// Exceptions — full `load_kernel_library("nmath", ...)`: (1) kernels whose tags list
-// `qDiscrete_search` (macro-expanded p* callees); (2) `norm_rand_kernel.cl` only
-// (indexed slice omits sunif.cl → unresolved R_unif_index on NVPTX until closure improves).
-static std::string build_rmath_program_indexed(const std::string& kernel_rel_path) {
-  static const char norm_rand_suf[] = "norm_rand_kernel.cl";
-  const std::size_t nrs = sizeof(norm_rand_suf) - 1;
-  const bool norm_rand_launcher =
-      kernel_rel_path.size() >= nrs &&
-      kernel_rel_path.compare(kernel_rel_path.size() - nrs, nrs, norm_rand_suf) == 0;
-
-  std::string nmath_src;
-  if (kernel_all_depends_nmath_includes_qDiscrete_search(kernel_rel_path,
-                                                          "nmathopencl") ||
-      norm_rand_launcher) {
-    nmath_src = load_kernel_library("nmath", "nmathopencl", false);
-  } else {
-    nmath_src = load_library_for_kernel(
-        kernel_rel_path, "nmath", "nmathopencl", "all_depends_nmath");
-  }
-  return load_kernel_source("OPENCL.cl") +
-    "\n" + load_kernel_library("libR_shims", "nmathopencl", false) +
-    "\n" + load_kernel_library("R_ext_types", "nmathopencl", false) +
-    "\n" + load_kernel_library("R_shims", "nmathopencl", false) +
-    "\n" + load_kernel_library("R_ext_runtime", "nmathopencl", false) +
-    "\n" + load_kernel_library("R_ext_internals", "nmathopencl", false) +
-    "\n" + load_kernel_library("System", "nmathopencl", false) +
-    "\n" + nmath_src +
-    "\n" + load_kernel_source(kernel_rel_path);
-}
-
-// Match d/p/q: build program once, then enqueue the canonical *_kernel (serial RNG inner loop).
 static void opencl_serial_scalar_draws(
     const std::string& kernel_rel_path,
     const char* kernel_name,
@@ -221,7 +187,7 @@ static void opencl_serial_scalar_draws(
 ) {
   if (n_out <= 0) return;
   try {
-    const std::string all_src = build_rmath_program_indexed(kernel_rel_path);
+    const std::string all_src = build_rmath_opencl_program(kernel_rel_path);
     /*
     Legacy path: one GPU session + compile + enqueue per scalar draw (slow).
     for (int i = 0; i < n_out; ++i) {
@@ -240,6 +206,7 @@ static void opencl_serial_scalar_draws(
     throw;
   }
 }
+#endif
 
 // NDRange helpers for p*/q* (lower.tail / log.p as int columns).
 static std::vector<std::vector<double>> pq_pack_numeric_cols_for_tail(
@@ -270,7 +237,7 @@ static void pq_tail_ndrange_kernel_fill(
   std::vector<int> lp(log_p.begin(), log_p.end());
   std::vector<double> out_flat;
   opencl_pq_tail_kernel_runner(
-      build_rmath_program_indexed(kernel_rel_path),
+      build_rmath_opencl_program(kernel_rel_path),
       kernel_name,
       len,
       arg_cols,
@@ -297,7 +264,7 @@ static void d_givelog_ndrange_kernel_fill(
   std::vector<int> gl(give_log.begin(), give_log.end());
   std::vector<double> out_flat;
   opencl_d_givelog_kernel_runner(
-      build_rmath_program_indexed(kernel_rel_path),
+      build_rmath_opencl_program(kernel_rel_path),
       kernel_name,
       len,
       arg_cols,
@@ -321,7 +288,7 @@ static void numeric_cols_ndrange_kernel_fill(
         pq_pack_numeric_cols_for_tail(numeric_args);
     std::vector<double> out_flat;
     opencl_numeric_cols_kernel_runner(
-        build_rmath_program_indexed(kernel_rel_path),
+        build_rmath_opencl_program(kernel_rel_path),
         kernel_name,
         len,
         arg_cols,
@@ -548,8 +515,6 @@ static void df_nf_mixed_ncp_ndrange_twopass(
     for (int j = 0; j < nn; ++j) out[in_[static_cast<size_t>(j)]] = on[j];
   }
 }
-
-#endif
 
 Rcpp::NumericVector r_pow_opencl(
     const Rcpp::NumericVector& x,

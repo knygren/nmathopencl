@@ -1,13 +1,14 @@
 {
   "schema_version": 1,
   "documentation": [
-    "src/kernel_wrappers.cpp",
+    "src/kernel_loader.cpp",
+    "src/openclPort.h",
     "tools/refresh_src_kernel_nmath_tags.R"
   ],
   "description": "Kernels for which assemble_program uses load_kernel_library(\"nmath\", ...) concatenating every file under inst/cl/nmath/, because tagging @all_depends_nmath (indexed load via load_library_for_kernel) does not reliably include all symbols needed.",
   "assembler": {
-    "function": "build_rmath_program_indexed",
-    "source_file_cpp": "src/kernel_wrappers.cpp"
+    "function": "build_rmath_opencl_program",
+    "source_file_cpp": "src/kernel_loader.cpp"
   },
   "triggers": [
     {
