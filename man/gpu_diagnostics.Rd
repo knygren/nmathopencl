@@ -47,11 +47,10 @@ contain the following elements:
 \item{intel}{A list with elements \code{present} (logical) and \code{names} (character).}
 }}
 
-\item{force}{If \code{TRUE}, rerun discovery even when a previous selection
-is cached.}
+\item{force}{If \code{TRUE}, rerun discovery even when a previous selection is cached.}
 
-\item{details}{If \code{TRUE}, include a \code{candidates} list describing
-every platform/device pair (extension flag and probe result per device).}
+\item{details}{If \code{TRUE}, include a \code{candidates} list describing every
+platform/device pair (extension flag and probe result per device).}
 
 \item{lib_dirs}{A list of OpenCL directories}
 
@@ -136,13 +135,11 @@ and/or \code{NMATHOPENCL_DEVICE_INDEX} (0-based; device index is within the
 platform's device list). Use \code{\link{opencl_reset_device_selection}()}
 to clear the cache (e.g. after driver changes).
 
-\item \code{opencl_fp64_available()}: Returns \code{TRUE} if a cached OpenCL device
-passes the \code{cl_khr_fp64} extension check and build probe used for
-\pkg{nmathopencl} double kernels.
+\item \code{opencl_fp64_available()}: Returns \code{TRUE} if a cached OpenCL device passes
+the \code{cl_khr_fp64} extension check and build probe used for double kernels.
 
-\item \code{opencl_reset_device_selection()}: Clears the process-local OpenCL device selection
-cache so the next kernel or \code{\link{opencl_device_info}()} run
-re-enumerates devices.
+\item \code{opencl_reset_device_selection()}: Clears the process-local OpenCL device selection cache
+so the next kernel or \code{\link{opencl_device_info}()} run re-enumerates devices.
 
 }}
 \section{High-level diagnostic}{
@@ -165,7 +162,8 @@ re-enumerates devices.
 
 \itemize{
 \item \code{has_opencl()} --- quick check for OpenCL support.
-\item \code{opencl_fp64_available()}, \code{opencl_device_info()} --- double-precision OpenCL device selection.
+\item \code{opencl_fp64_available()}, \code{opencl_device_info()} ---
+double-precision OpenCL device selection (cached probe).
 \item \code{verify_opencl_runtime()} --- probe OpenCL platform/device availability.
 \item \code{check_runtime_env()} --- validate PATH and library directories.
 }

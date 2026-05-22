@@ -2271,4 +2271,3 @@ bool opencl_fp64_available_cpp_export(bool force = false) {
 void opencl_reset_device_selection_cpp_export() {
   opencl_reset_fp64_selection();
 }
-

@@ -42,7 +42,7 @@
 #'   \item \code{\link{load_kernel_library}} — assemble the nmath `.cl` sources
 #'     into an OpenCL program string.
 #'   \item \code{\link{has_opencl}} — check whether an OpenCL runtime is present.
-#'   \item \code{\link{opencl_device_info}} — which device is used for fp64 kernels.
+#'   \item \code{\link{opencl_device_info}} --- which OpenCL device is used for fp64 kernels.
 #'   \item \code{\link{Ex_EnvelopeEval}} — worked example of a custom kernel built
 #'     on the ported nmath routines.
 #' }

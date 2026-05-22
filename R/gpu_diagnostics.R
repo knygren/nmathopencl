@@ -46,7 +46,8 @@
 #' @section OpenCL availability and runtime checks:
 #' \itemize{
 #'   \item \code{has_opencl()} --- quick check for OpenCL support.
-#'   \item \code{opencl_fp64_available()}, \code{opencl_device_info()} --- double-precision OpenCL device selection.
+#'   \item \code{opencl_fp64_available()}, \code{opencl_device_info()} ---
+#'     double-precision OpenCL device selection (cached probe).
 #'   \item \code{verify_opencl_runtime()} --- probe OpenCL platform/device availability.
 #'   \item \code{check_runtime_env()} --- validate PATH and library directories.
 #' }
@@ -891,10 +892,9 @@ has_opencl <- function() {
 #'   platform's device list). Use \code{\link{opencl_reset_device_selection}()}
 #'   to clear the cache (e.g. after driver changes).
 #'
-#' @param force If \code{TRUE}, rerun discovery even when a previous selection
-#'   is cached.
-#' @param details If \code{TRUE}, include a \code{candidates} list describing
-#'   every platform/device pair (extension flag and probe result per device).
+#' @param force If \code{TRUE}, rerun discovery even when a previous selection is cached.
+#' @param details If \code{TRUE}, include a \code{candidates} list describing every
+#'   platform/device pair (extension flag and probe result per device).
 #'
 #' @return \code{opencl_device_info} returns a list with \code{ok} (logical),
 #'   \code{reason} (character), indices, vendor/name strings, \code{device_type},
@@ -907,9 +907,8 @@ opencl_device_info <- function(force = FALSE, details = FALSE) {
   opencl_device_info_cpp_export(as.logical(force)[[1L]], as.logical(details)[[1L]])
 }
 
-#' @describeIn gpu_diagnostics Returns \code{TRUE} if a cached OpenCL device
-#'   passes the \code{cl_khr_fp64} extension check and build probe used for
-#'   \pkg{nmathopencl} double kernels.
+#' @describeIn gpu_diagnostics Returns \code{TRUE} if a cached OpenCL device passes
+#'   the \code{cl_khr_fp64} extension check and build probe used for double kernels.
 #'
 #' @export
 #' @order 8
@@ -917,9 +916,8 @@ opencl_fp64_available <- function(force = FALSE) {
   opencl_fp64_available_cpp_export(as.logical(force)[[1L]])
 }
 
-#' @describeIn gpu_diagnostics Clears the process-local OpenCL device selection
-#'   cache so the next kernel or \code{\link{opencl_device_info}()} run
-#'   re-enumerates devices.
+#' @describeIn gpu_diagnostics Clears the process-local OpenCL device selection cache
+#'   so the next kernel or \code{\link{opencl_device_info}()} run re-enumerates devices.
 #'
 #' @export
 #' @order 9

@@ -42,17 +42,16 @@
 #include <string>
 #include <vector>
 
-#ifdef USE_OPENCL
-
-// Ensure OpenCL types are available
-#define CL_TARGET_OPENCL_VERSION 300
-#include <CL/cl.h>
-#include <string>
-#endif 
-
 #ifdef __linux__
 #include <stdio.h>
 #include <stdlib.h>
+#endif
+
+#ifdef USE_OPENCL
+#define CL_TARGET_OPENCL_VERSION 300
+#include <CL/cl.h>
+#include <sstream>
+#include <stdexcept>
 #endif
 
 using namespace Rcpp;
@@ -132,6 +131,8 @@ std::string load_library_for_kernel(
     const std::string& depends_tag = "depends_nmath"
 );
 
+// True when the kernel's @all_depends_nmath: line lists qDiscrete_search
+// (full nmath bundle required vs indexed slice).
 bool kernel_all_depends_nmath_includes_qDiscrete_search(
     const std::string& kernel_relative_path,
     const std::string& package = "nmathopencl");
@@ -139,7 +140,7 @@ bool kernel_all_depends_nmath_includes_qDiscrete_search(
 // -------------------------------------------------------------------------
 // fp64-capable OpenCL device selection (cached). Implemented in
 // opencl_device_selection.cpp; holds cl_platform_id / cl_device_id as void*
-// when USE_OPENCL. Runners cast at use. See opencl_device_info().
+// when USE_OPENCL.
 // -------------------------------------------------------------------------
 struct OpenCLFp64DeviceCache {
   bool valid = false;
@@ -164,22 +165,13 @@ struct OpenCLFp64DeviceCache {
 bool opencl_ensure_fp64_selection(bool force);
 const OpenCLFp64DeviceCache& opencl_fp64_selection();
 void opencl_reset_fp64_selection();
-
 Rcpp::List opencl_device_info_rcpp(bool force = false, bool details = false);
 bool opencl_fp64_available_impl(bool force = false);
 
-// -------------------------------------------------------------------------
-// Conditional declarations: only available when USE_OPENCL is defined
-// -------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// Conditional OpenCL kernel runner API (requires USE_OPENCL at compile time).
+// -----------------------------------------------------------------------------
 #ifdef USE_OPENCL
-
-// Ensure OpenCL types are available
-#define CL_TARGET_OPENCL_VERSION 300
-#include <CL/cl.h>
-#include <string>
-#include <sstream>
-#include <stdexcept>
-
 
 struct OpenCLConfig {
   bool have_expm1;
