@@ -3,7 +3,7 @@
   "documentation": [
     "src/kernel_loader.cpp",
     "src/openclPort.h",
-    "tools/refresh_src_kernel_nmath_tags.R"
+    "openclport/nmathtools/refresh_src_kernel_nmath_tags.R"
   ],
   "description": "Kernels for which assemble_program uses load_kernel_library(\"nmath\", ...) concatenating every file under inst/cl/nmath/, because tagging @all_depends_nmath (indexed load via load_library_for_kernel) does not reliably include all symbols needed.",
   "assembler": {

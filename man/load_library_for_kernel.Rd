@@ -41,7 +41,8 @@ For repeated calls in R code, loading \code{kernel_dependency_index.rds} once
 and passing \code{index =} avoids redundant disk reads.  The bundled
 \verb{cl/nmath} directory ships \code{kernel_dependency_index.rds} beside the
 \code{.cl} files; use \link{write_kernel_dependency_index} to regenerate it after
-porting (for example via \verb{tools/port_inst_cl_nmath_from_src.R}).
+porting (for example via \verb{nmathtools/port_inst_cl_nmath_from_src.R} in the
+\code{openclport} package source tree).
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{lib_dir <- system.file("cl/nmath", package = "nmathopencl")
 kpath <- system.file(

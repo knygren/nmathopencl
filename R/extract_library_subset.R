@@ -13,7 +13,8 @@
 #' \code{kernel_dependency_index.rds} next to their \code{.cl} shards.  Pass
 #' \code{index =} when you preload that object to avoid redundant reads; regenerate
 #' the files with \link{write_kernel_dependency_index}, for example after porting via
-#' \verb{tools/port_inst_cl_nmath_from_src.R}.
+#' \verb{nmathtools/port_inst_cl_nmath_from_src.R} in the \code{openclport}
+#' package source tree.
 #'
 #' ```r
 #' lib_dir <- system.file("cl/nmath", package = "nmathopencl")
