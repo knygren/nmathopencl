@@ -208,6 +208,7 @@ static void opencl_serial_scalar_draws(
 }
 #endif
 
+#ifdef USE_OPENCL
 // NDRange helpers for p*/q* (lower.tail / log.p as int columns).
 static std::vector<std::vector<double>> pq_pack_numeric_cols_for_tail(
     const std::vector<const Rcpp::NumericVector*>& cols
@@ -515,6 +516,8 @@ static void df_nf_mixed_ncp_ndrange_twopass(
     for (int j = 0; j < nn; ++j) out[in_[static_cast<size_t>(j)]] = on[j];
   }
 }
+
+#endif
 
 Rcpp::NumericVector r_pow_opencl(
     const Rcpp::NumericVector& x,
