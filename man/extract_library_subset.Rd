@@ -109,9 +109,9 @@ sum(df$copied)
 \seealso{
 \link[=kernel_lib_subset_printing]{printing methods}
 
-\code{\link[=load_library_for_kernel]{load_library_for_kernel()}}
+\link[nmathopencl]{load_library_for_kernel}
 
-\code{\link[=write_kernel_dependency_index]{write_kernel_dependency_index()}}
+\link[nmathopencl]{write_kernel_dependency_index}
 
 Other OpenCL kernel library subsets: 
 \code{\link{load_library_for_kernel}()},

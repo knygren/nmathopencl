@@ -1,4 +1,4 @@
-﻿#' Envelope Evaluation Utilities
+#' Envelope Evaluation Utilities
 #'
 #' @description
 #' Core utilities for envelope-based posterior simulation using GPU-accelerated

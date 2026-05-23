@@ -1,4 +1,4 @@
-﻿#' @aliases nmathopencl
+#' @aliases nmathopencl
 #'
 #' @title nmathopencl: OpenCL-Ported R Math Library for GPU-Accelerated Packages
 #'

@@ -56,7 +56,9 @@ Both files encode the same information and are always written together so
 they remain in sync.
 }
 \seealso{
-\code{\link[=load_library_for_kernel]{load_library_for_kernel()}}, \code{\link[=extract_library_subset]{extract_library_subset()}}
+\link[nmathopencl]{load_library_for_kernel}
+
+\link[nmathopencl]{extract_library_subset}
 
 Other OpenCL kernel library subsets: 
 \code{\link{extract_library_subset}()},

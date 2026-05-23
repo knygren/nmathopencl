@@ -46,9 +46,9 @@
 #'   concatenation). Attachments describe requested and loaded library stems,
 #'   paths, and byte size; see \link[=kernel_lib_subset_printing]{print methods}.
 #'
-#' @seealso [extract_library_subset()]
+#' @seealso \link[nmathopencl]{extract_library_subset}
 #' @seealso \link[=kernel_lib_subset_printing]{printing methods}
-#' @seealso [write_kernel_dependency_index()]
+#' @seealso \link[nmathopencl]{write_kernel_dependency_index}
 #' @family OpenCL kernel library subsets
 #'
 #' @example inst/examples/Ex_load_library_for_kernel.R

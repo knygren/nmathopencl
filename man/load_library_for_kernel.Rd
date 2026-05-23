@@ -85,11 +85,11 @@ nzchar(src)
 ###############################################################################
 }
 \seealso{
-\code{\link[=extract_library_subset]{extract_library_subset()}}
+\link[nmathopencl]{extract_library_subset}
 
 \link[=kernel_lib_subset_printing]{printing methods}
 
-\code{\link[=write_kernel_dependency_index]{write_kernel_dependency_index()}}
+\link[nmathopencl]{write_kernel_dependency_index}
 
 Other OpenCL kernel library subsets: 
 \code{\link{extract_library_subset}()},

@@ -1,4 +1,4 @@
-﻿############################### Start of Ex_EnvelopeEval example ####################
+############################### Start of Ex_EnvelopeEval example ####################
 
 # This example demonstrates Ex_EnvelopeEval in isolation. Ex_EnvelopeEval evaluates
 # the negative log-likelihood and gradients at a grid of parameter values.

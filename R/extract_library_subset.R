@@ -63,8 +63,8 @@
 #'   }
 #'
 #' @seealso \link[=kernel_lib_subset_printing]{printing methods}
-#' @seealso [load_library_for_kernel()]
-#' @seealso [write_kernel_dependency_index()]
+#' @seealso \link[nmathopencl]{load_library_for_kernel}
+#' @seealso \link[nmathopencl]{write_kernel_dependency_index}
 #' @family OpenCL kernel library subsets
 #'
 #' @example inst/examples/Ex_extract_library_subset.R
