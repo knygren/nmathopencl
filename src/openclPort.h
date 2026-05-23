@@ -132,7 +132,7 @@ std::string load_library_for_kernel(
 );
 
 // -------------------------------------------------------------------------
-// Assemble prelude + sliced/full nmath + entry kernel OpenCL sources.
+// Assemble prelude + indexed-slice nmath + entry kernel OpenCL sources.
 // Mirrors glmbayes::opencl::load_likelihood_subgradient_program; entry is
 // identified by path under inst/cl/ (e.g. "src/dnorm_kernel.cl").
 // -------------------------------------------------------------------------
@@ -140,16 +140,18 @@ std::string load_library_for_kernel(
 enum class NmathBundleMode {
   /// Indexed slice via load_library_for_kernel(..., "all_depends_nmath").
   Indexed = 0,
-  /// Full load_kernel_library("nmath", ...).
+  /// Deprecated: same assembly as Indexed (formerly loaded entire `inst/cl/nmath`
+  /// via load_kernel_library("nmath")).
   Full = 1,
-  /// Default wrappers: indexed except when kernel ends with
-  /// norm_rand_kernel.cl (full nmath).
+  /// Default wrappers: indexed @all_depends_nmath slice (same assembly as Indexed).
   Production = 2
 };
 
 std::string build_rmath_opencl_program(
     const std::string& kernel_relative_path,
     const std::string& package                    = "nmathopencl",
+    /// Retained for ABI compatibility; ignored at runtime. All modes use
+    /// load_library_for_kernel for the nmath slice.
     NmathBundleMode     nmath_bundle              = NmathBundleMode::Production,
     const std::string&  nmath_depends_annotation  = "all_depends_nmath");
 

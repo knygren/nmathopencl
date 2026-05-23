@@ -1,30 +1,14 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "documentation": [
-    "src/kernel_loader.cpp (NmathBundleMode::Production: full nmath only for norm_rand_kernel.cl)",
-    "src/openclPort.h",
-    "openclport/nmathtools/refresh_src_kernel_nmath_tags.R",
-    "inst/extdata/opencl_full_nmath_stopgap_backup_v1_pre_qDiscrete_removal.json (archived v1; included qDiscrete_search token trigger)"
+    "Schema v3 retires launcher-specific triggers (v2 keyed `norm_rand_kernel.cl` suffix and matched C++/R full-index parity). Assembler always slices nmath via @all_depends_nmath (kernel_loader.cpp).",
+    "inst/extdata/opencl_full_nmath_stopgap_backup_v1_pre_qDiscrete_removal.json (archived v1; qDiscrete_search token trigger)"
   ],
-  "description": "Mirrors C++ behavior for R's load_library_for_kernel(..., depends_tag = \"all_depends_nmath\"): when a launcher matches a trigger, every indexed .cl stem in kernel_dependency_index.rds is concatenated (same as load_kernel_library(\"nmath\") full tree). Schema v2 drops the former @all_depends_nmath token trigger for qDiscrete_search; Production assembly no longer upgrades on that token — use proper @all_depends_nmath transitive lists from attach_cross_library_tags.",
+  "description": "Extension point only: when `triggers` / `entries` are non-empty, R helpers may mirror assembler shortcuts for matching launchers. Schema v3 ships empty arrays; use proper transitive `@all_depends_nmath` lists.",
   "assembler": {
     "function": "build_rmath_opencl_program",
     "source_file_cpp": "src/kernel_loader.cpp"
   },
-  "triggers": [
-    {
-      "id": "norm_rand_kernel_launcher_suffix",
-      "detection_kind": "launcher_relative_path_suffix",
-      "launcher_path_suffix": "norm_rand_kernel.cl",
-      "cause_summary": "Indexed subset omits dependencies such as sunif.cl; device link fails (e.g. R_unif_index on NVPTX). Matches C++ Production: full inst/cl/nmath when the launcher path ends with this suffix."
-    }
-  ],
-  "entries": [
-    {
-      "trigger_ids": ["norm_rand_kernel_launcher_suffix"],
-      "device_kernel_names": ["norm_rand_kernel"],
-      "entry_kernels_package_relative": ["cl/src/norm_rand_kernel.cl"],
-      "r_wrappers_typical": ["norm_rand_opencl"]
-    }
-  ]
+  "triggers": [],
+  "entries": []
 }

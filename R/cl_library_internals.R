@@ -65,7 +65,7 @@
       ""
     },
     "Using every indexed .cl shard in `library_dir`.\n",
-    "See `extdata/opencl_full_nmath_stopgap.json` (assembler parity)."
+    "See `extdata/opencl_full_nmath_stopgap.json`."
   )
   message(msg)
 }

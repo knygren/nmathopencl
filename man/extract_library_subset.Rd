@@ -79,14 +79,10 @@ result <- extract_library_subset(
   depends_tag = "all_depends_nmath")
 }\if{html}{\out{</div>}}
 
-The same assembler stopgap as \code{\link{load_library_for_kernel}}
-(\verb{inst/extdata/opencl_full_nmath_stopgap.json}, schema v2) can apply when
-\code{depends_tag = "all_depends_nmath"} and the library directory basename is
-\verb{nmath}: if any launcher in \code{kernel_paths} triggers it (bundled suffix:
-\verb{norm_rand_kernel.cl}),
-\code{\link{message}(...)} names typical R wrappers (from
-\verb{r_wrappers_typical}, \verb{_opencl} dropped) and every indexed \verb{.cl}
-shard is copied, not only the union of annotated stems. \verb{extract_library_subset()}
+The same optional full-index stopgap as \code{\link{load_library_for_kernel}}
+(\verb{inst/extdata/opencl_full_nmath_stopgap.json}) applies when bundled triggers match;
+schema v3 ships none, so subsets follow only annotated stems. Earlier schemas matched
+specific launchers (e.g. \verb{norm_rand_kernel.cl} suffix in v2). \verb{extract_library_subset()}
 evaluates \verb{inst/extdata/opencl_known_failures.json} against the union of
 \code{depends_tag} annotations and launcher basenames (\code{\link{warning}(...)}
 omits parity with stems implied only by the full-library stopgap).

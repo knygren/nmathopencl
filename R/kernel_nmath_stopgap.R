@@ -1,7 +1,7 @@
 ## Full-nmath stopgap for `load_library_for_kernel()` (see extdata/opencl_full_nmath_stopgap.json).
 ## When a trigger matches and `library_dir` is `cl/nmath`, the R helper concatenates every
-## indexed stem (parity with C++ `load_kernel_library("nmath")` for matching launchers).
-## As of schema v2 only `norm_rand_kernel.cl` suffix is triggered (no `qDiscrete_search` rule).
+## indexed stem (parity with deliberate `load_kernel_library("nmath")`).
+## Schema v3 ships empty `triggers` / `entries` (assembler always uses indexed nmath).
 
 
 .nmath_opencl_stopgap_json_cache <- new.env(parent = emptyenv())
@@ -40,9 +40,9 @@
 
   if (!is.null(sj$schema_version)) {
     sv <- suppressWarnings(as.integer(sj$schema_version)[1])
-    if (!is.na(sv) && !sv %in% c(1L, 2L)) {
+    if (!is.na(sv) && !sv %in% c(1L, 2L, 3L)) {
       warning(
-        "opencl_full_nmath_stopgap.json schema_version is not 1 or 2; ",
+        "opencl_full_nmath_stopgap.json schema_version is not 1, 2, or 3; ",
         "ignored for stopgap routing.",
         call. = FALSE
       )

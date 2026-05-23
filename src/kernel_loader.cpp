@@ -380,39 +380,16 @@ std::string build_rmath_opencl_program(const std::string& kernel_relative_path,
                                        NmathBundleMode      nmath_bundle,
                                        const std::string&   nmath_depends_annotation)
 {
-  std::string nmath_src;
-  switch (nmath_bundle) {
-    case NmathBundleMode::Full:
-      nmath_src = load_kernel_library("nmath", package, false);
-      break;
-    case NmathBundleMode::Indexed:
-      nmath_src = load_library_for_kernel(
-          kernel_relative_path,
-          "nmath",
-          package,
-          nmath_depends_annotation);
-      break;
-    case NmathBundleMode::Production:
-    default: {
-      static const char norm_rand_suf[] = "norm_rand_kernel.cl";
-      const std::size_t nrs           = sizeof(norm_rand_suf) - 1;
-      const bool        norm_rand_launcher =
-          kernel_relative_path.size() >= nrs &&
-          kernel_relative_path.compare(
-              kernel_relative_path.size() - nrs, nrs, norm_rand_suf) == 0;
+  // `nmath_bundle` is retained for API stability (opencl_build_args callers).
+  // Assembler always concatenates indexed @all_depends_nmath shards; there is no
+  // launcher-specific path that loads all of inst/cl/nmath (see opencl_full_nmath_stopgap schema v3).
+  (void)nmath_bundle;
 
-      if (norm_rand_launcher) {
-        nmath_src = load_kernel_library("nmath", package, false);
-      } else {
-        nmath_src = load_library_for_kernel(
-            kernel_relative_path,
-            "nmath",
-            package,
-            nmath_depends_annotation);
-      }
-      break;
-    }
-  }
+  const std::string nmath_src = load_library_for_kernel(
+      kernel_relative_path,
+      "nmath",
+      package,
+      nmath_depends_annotation);
 
   return load_kernel_source("OPENCL.cl", package) +
          "\n" + load_kernel_library("libR_shims", package, false) +
