@@ -32,17 +32,12 @@
 #'   `depends_tag = "all_depends_nmath"`.
 #' @param index Optional RDS list; \code{NULL} triggers lazy reads.
 #'
-#' @details When \code{depends_tag = "all_depends_nmath"} and
-#' \code{basename(normalizePath(library_dir))} is \code{nmath}, a non-empty
-#' trigger set in \verb{inst/extdata/opencl_full_nmath_stopgap.json} may upgrade
-#' loading to every indexed shard (same effect as deliberate
-#' \code{load_kernel_library("nmath", ...)}), with an optional brief
-#' \code{\link{message}} naming symbols from \verb{r_wrappers_typical}.
-#' Bundled schema v3 ships \verb{triggers} / \verb{entries} empty so ordinary loads
-#' use only each launcher file's transitive \code{@all_depends_nmath} annotations (use
-#' \code{\link{attach_cross_library_tags}} where subgraphs span libraries). Earlier schemas
-#' (paths named in JSON \verb{documentation}) matched launchers such as
-#' \verb{norm_rand_kernel.cl} suffix (v2) or \verb{qDiscrete_search} (archived v1).
+#' @details Subsets come only from each launcher file's transitive
+#' \code{@all_depends_nmath}-style annotations (use \code{\link{attach_cross_library_tags}}
+#' where subgraphs span libraries). Deliberately loading every \verb{.cl} under
+#' \verb{cl/nmath} remains available via \code{\link{load_kernel_library}(..., "nmath")}
+#' where appropriate.
+#'
 #' When \verb{inst/extdata/opencl_known_failures.json} matches the launcher path or
 #' the declared / loaded stems, \code{\link{warning}(...)} points to fragile ports.
 #'
@@ -80,11 +75,7 @@ load_library_for_kernel <- function(kernel_path,
   lines <- readLines(kernel_path, warn = FALSE)
   needed <- parse_port_annotation(lines, depends_tag)
 
-  sg_ids <- .cl_nmath_stopgap_matching_trigger_ids(
-    kernel_path, depends_tag, library_dir)
-  use_full_nmath <- .cl_nmath_use_full_library_from_stopgap(sg_ids)
-
-  if (!use_full_nmath && length(needed) == 0L) {
+  if (length(needed) == 0L) {
     .cl_maybe_warn_opencl_known_failures(
       kpath_norm, needed,
       stems_loaded_optional = character(),
@@ -95,30 +86,19 @@ load_library_for_kernel <- function(kernel_path,
     return(invisible(out))
   }
 
-  if (use_full_nmath) {
-    .cl_message_full_nmath_stopgap(.cl_nmath_stopgap_display_symbols(
-      kernel_path, depends_tag, library_dir))
-
-    stems_to_load <- .cl_index_stems_all_ordered(index)
-    stems_to_load <- stems_to_load[!is.na(stems_to_load) & nzchar(stems_to_load)]
-    lo_nm <- names(index$load_order)
-    stems_to_load <- stems_to_load[stems_to_load %in% lo_nm]
-    stems_to_load <- stems_to_load[order(index$load_order[stems_to_load])]
-  } else {
-    stems_to_load <- .cl_filter_stems(needed, index, depends_tag)
-    if (length(stems_to_load) == 0L) {
-      .cl_maybe_warn_opencl_known_failures(
-        kpath_norm, needed,
-        stems_loaded_optional = character(),
-        warn_on_loaded_mesh = TRUE
-      )
-      out <- .cl_concat_result("", needed, character(),
-                               kpath_norm, lib_norm, depends_tag, 0L)
-      return(invisible(out))
-    }
-
-    stems_to_load <- stems_to_load[order(index$load_order[stems_to_load])]
+  stems_to_load <- .cl_filter_stems(needed, index, depends_tag)
+  if (length(stems_to_load) == 0L) {
+    .cl_maybe_warn_opencl_known_failures(
+      kpath_norm, needed,
+      stems_loaded_optional = character(),
+      warn_on_loaded_mesh = TRUE
+    )
+    out <- .cl_concat_result("", needed, character(),
+                             kpath_norm, lib_norm, depends_tag, 0L)
+    return(invisible(out))
   }
+
+  stems_to_load <- stems_to_load[order(index$load_order[stems_to_load])]
 
   .cl_maybe_warn_opencl_known_failures(
     kpath_norm, needed,

@@ -38,39 +38,6 @@
 }
 
 
-## Multi-line `message()` when full bundled `inst/cl/nmath/` is concatenated.
-## `display_symbols` holds short names mapped from bundled JSON (`r_wrappers_typical`).
-.cl_message_full_nmath_stopgap <- function(display_symbols) {
-  lbl <- sort(unique(trimws(as.character(display_symbols))))
-  lbl <- lbl[!is.na(lbl) & nzchar(lbl)]
-  w <- .cl_console_text_width()
-  lines <- if (length(lbl)) {
-    paste(
-      .cl_wrap_comma_separated(lbl, w, first_prefix = "  ", cont_prefix = "  "),
-      collapse = "\n"
-    )
-  } else {
-    ""
-  }
-  msg <- paste0(
-    "Note: full `nmath` library stopgap.\n",
-    if (nzchar(lines)) {
-      paste0(
-        ## Match spirit of fragile-port warnings (base names, no `_opencl` / `.cl`).
-        "Symbols prompting this load:\n",
-        lines,
-        "\n"
-      )
-    } else {
-      ""
-    },
-    "Using every indexed .cl shard in `library_dir`.\n",
-    "See `extdata/opencl_full_nmath_stopgap.json`."
-  )
-  message(msg)
-}
-
-
 ## Multi-line `warning()` body when annotated stems are absent from the dependency index.
 .cl_format_unknown_stems_warning <- function(unknown, depends_tag) {
   unk <- sort(unique(as.character(unknown)))

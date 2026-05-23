@@ -50,8 +50,9 @@ dependency tags (`@depends_nmath`, `@all_depends_nmath`, broader `@depends`/`@pr
 where applicable), then:
 
 1. **Validate** --- **`load_library_for_kernel(..., depends_tag = "all_depends_nmath")`** concatenates
-   the inferred minimal set of ported `inst/cl/nmath/` shards for a launcher. Related **`message()`** /
-   **`warning()`** output may reflect optional stopgap bundles (**`inst/extdata/opencl_full_nmath_stopgap.json`**, schema **v3** ships empty triggers — use transitive **`@all_depends_nmath`**) and curated fragile subgraphs (**`inst/extdata/opencl_known_failures.json`**).
+   the inferred minimal set of ported `inst/cl/nmath/` shards for a launcher from transitive
+   **`@all_depends_nmath`** annotations (optional **`warning()` hints** mirror
+   **`inst/extdata/opencl_known_failures.json`** for curated fragile subgraphs).
 
 2. **Optional materialisation** --- **`extract_library_subset()`** writes that subset (and index companions)
    next to kernels you intend to vendor; regenerate **`kernel_dependency_index.rds`** alongside the library

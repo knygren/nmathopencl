@@ -54,17 +54,12 @@ src <- load_library_for_kernel(
   depends_tag = "all_depends_nmath")
 }\if{html}{\out{</div>}}
 
-When \code{depends_tag = "all_depends_nmath"} and
-\code{basename(normalizePath(library_dir))} is \code{nmath}, a non-empty
-trigger set in \verb{inst/extdata/opencl_full_nmath_stopgap.json} may upgrade
-loading to every indexed shard (same effect as deliberate
-\code{load_kernel_library("nmath", ...)}), with an optional brief
-\code{\link{message}} naming symbols from \verb{r_wrappers_typical}.
-Bundled schema v3 ships \verb{triggers} / \verb{entries} empty so ordinary loads
-use only each launcher file's transitive \code{@all_depends_nmath} annotations (use
-\code{\link{attach_cross_library_tags}} where subgraphs span libraries). Earlier schemas
-(paths named in JSON \verb{documentation}) matched launchers such as
-\verb{norm_rand_kernel.cl} suffix (v2) or \verb{qDiscrete_search} (archived v1).
+Subsets come only from each launcher file's transitive
+\code{@all_depends_nmath}-style annotations (use \code{\link{attach_cross_library_tags}}
+where subgraphs span libraries). Deliberately loading every \verb{.cl} under
+\verb{cl/nmath} remains available via \code{\link{load_kernel_library}(..., "nmath")}
+where appropriate.
+
 When \verb{inst/extdata/opencl_known_failures.json} matches the launcher path or
 the declared / loaded stems, \code{\link{warning}(...)} points to fragile ports.
 }

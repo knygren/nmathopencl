@@ -79,13 +79,9 @@ result <- extract_library_subset(
   depends_tag = "all_depends_nmath")
 }\if{html}{\out{</div>}}
 
-The same optional full-index stopgap as \code{\link{load_library_for_kernel}}
-(\verb{inst/extdata/opencl_full_nmath_stopgap.json}) applies when bundled triggers match;
-schema v3 ships none, so subsets follow only annotated stems. Earlier schemas matched
-specific launchers (e.g. \verb{norm_rand_kernel.cl} suffix in v2). \verb{extract_library_subset()}
-evaluates \verb{inst/extdata/opencl_known_failures.json} against the union of
-\code{depends_tag} annotations and launcher basenames (\code{\link{warning}(...)}
-omits parity with stems implied only by the full-library stopgap).
+\verb{extract_library_subset()} evaluates
+\verb{inst/extdata/opencl_known_failures.json} against the union of
+\code{depends_tag} annotations and launcher paths.
 }
 \examples{
 ############################ Start of extract_library_subset example #########################

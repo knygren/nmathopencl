@@ -382,7 +382,7 @@ std::string build_rmath_opencl_program(const std::string& kernel_relative_path,
 {
   // `nmath_bundle` is retained for API stability (opencl_build_args callers).
   // Assembler always concatenates indexed @all_depends_nmath shards; there is no
-  // launcher-specific path that loads all of inst/cl/nmath (see opencl_full_nmath_stopgap schema v3).
+  // No launcher upgrades to concatenating all of inst/cl/nmath automatically.
   (void)nmath_bundle;
 
   const std::string nmath_src = load_library_for_kernel(
