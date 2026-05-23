@@ -55,12 +55,17 @@ src <- load_library_for_kernel(
 }\if{html}{\out{</div>}}
 
 When \code{depends_tag = "all_depends_nmath"} and
-\code{basename(normalizePath(library_dir))} is \code{nmath}, some launchers match
-assembler rules in \verb{inst/extdata/opencl_full_nmath_stopgap.json}: a brief
-\code{\link{message}} names the involved R symbols (from
-\verb{r_wrappers_typical} in that JSON, with the \verb{_opencl} suffix dropped)
-and every indexed \verb{.cl} shard listed in the library index is concatenated,
-not only the stems from the kernel's annotations.
+\code{basename(normalizePath(library_dir))} is \code{nmath}, launchers listed in
+\verb{inst/extdata/opencl_full_nmath_stopgap.json} may match triggers that mirror
+C++ Production assembly: a brief \code{\link{message}} names typical R wrappers
+(from \verb{r_wrappers_typical}; \verb{_opencl} suffix dropped) and every indexed
+\verb{.cl} shard in the library dependency index is concatenated instead of using
+only the stems from the launcher file's \code{@all_depends_nmath} annotation. As of
+JSON schema v2, the only bundled trigger is a path suffix matching
+\verb{norm_rand_kernel.cl}; discrete quantile launchers rely on
+\code{\link{attach_cross_library_tags}} for transitive \code{@all_depends_nmath} lists.
+An archived schema v1 JSON (filename in the v2 bundle documentation field) previously
+keyed on the \verb{qDiscrete_search} token and is retired.
 When \verb{inst/extdata/opencl_known_failures.json} matches the launcher path or
 the declared / loaded stems, \code{\link{warning}(...)} points to fragile ports.
 }

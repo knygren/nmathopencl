@@ -47,13 +47,13 @@
 #'   returned data frame.
 #'
 #' @details The same assembler stopgap as \code{\link{load_library_for_kernel}}
-#' (\verb{inst/extdata/opencl_full_nmath_stopgap.json}) can apply when
+#' (\verb{inst/extdata/opencl_full_nmath_stopgap.json}, schema v2) can apply when
 #' \code{depends_tag = "all_depends_nmath"} and the library directory basename is
-#' \verb{nmath}: if any launcher in \code{kernel_paths} triggers it,
-#' \code{\link{message}(...)} names the involved R symbols (from
-#' \verb{r_wrappers_typical} in \verb{opencl_full_nmath_stopgap.json}, with
-#' \verb{_opencl} dropped) and every indexed \verb{.cl} shard is copied,
-#' not only the union of annotated stems. \verb{extract_library_subset()}
+#' \verb{nmath}: if any launcher in \code{kernel_paths} triggers it (bundled suffix:
+#' \verb{norm_rand_kernel.cl}),
+#' \code{\link{message}(...)} names typical R wrappers (from
+#' \verb{r_wrappers_typical}, \verb{_opencl} dropped) and every indexed \verb{.cl}
+#' shard is copied, not only the union of annotated stems. \verb{extract_library_subset()}
 #' evaluates \verb{inst/extdata/opencl_known_failures.json} against the union of
 #' \code{depends_tag} annotations and launcher basenames (\code{\link{warning}(...)}
 #' omits parity with stems implied only by the full-library stopgap).

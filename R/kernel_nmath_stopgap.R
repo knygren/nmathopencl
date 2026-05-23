@@ -1,6 +1,7 @@
-## Full-nmath assembler stopgap (see inst/extdata/opencl_full_nmath_stopgap.json).
-## When triggers match and library_dir looks like bundled cl/nmath, subset loaders
-## use every stem in kernel_dependency_index.rds rather than annotations alone.
+## Full-nmath stopgap for `load_library_for_kernel()` (see extdata/opencl_full_nmath_stopgap.json).
+## When a trigger matches and `library_dir` is `cl/nmath`, the R helper concatenates every
+## indexed stem (parity with C++ `load_kernel_library("nmath")` for matching launchers).
+## As of schema v2 only `norm_rand_kernel.cl` suffix is triggered (no `qDiscrete_search` rule).
 
 
 .nmath_opencl_stopgap_json_cache <- new.env(parent = emptyenv())
@@ -39,9 +40,9 @@
 
   if (!is.null(sj$schema_version)) {
     sv <- suppressWarnings(as.integer(sj$schema_version)[1])
-    if (!is.na(sv) && sv != 1L) {
+    if (!is.na(sv) && !sv %in% c(1L, 2L)) {
       warning(
-        "opencl_full_nmath_stopgap.json schema_version is not 1; ",
+        "opencl_full_nmath_stopgap.json schema_version is not 1 or 2; ",
         "ignored for stopgap routing.",
         call. = FALSE
       )
@@ -178,7 +179,7 @@
 }
 
 
-## Matching trigger IDs for any launcher in kernel_paths (path suffix or token stems).
+## Matching trigger IDs for any launcher in kernel_paths (bundled JSON triggers; v2: suffix only).
 .cl_nmath_stopgap_matching_trigger_ids <- function(kernel_paths,
                                                     depends_tag,
                                                     library_dir) {
@@ -219,21 +220,8 @@
       next
     }
 
-    if (identical(kind, "all_depends_nmath_token")) {
-      tok <- trg$token[[i]]
-      if (is.na(tok) || !nzchar(as.character(tok)))
-        next
-      tok <- as.character(tok)[1L]
-      for (j in seq_along(kernel_paths)) {
-        kp <- as.character(kernel_paths[[j]])[1]
-        if (!nzchar(kp))
-          next
-        lines <- readLines(kp, warn = FALSE)
-        need <- parse_port_annotation(lines, depends_tag)
-        if (tok %in% need)
-          ids <- c(ids, idv)
-      }
-    }
+    ## Other `detection_kind` values (e.g. legacy `all_depends_nmath_token`) require
+    ## explicit handlers; schema v2 uses only launcher suffix matching.
   }
 
   unique(ids[!is.na(ids) & nzchar(ids)])

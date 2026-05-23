@@ -51,8 +51,8 @@ where applicable), then:
 
 1. **Validate** --- **`load_library_for_kernel(..., depends_tag = "all_depends_nmath")`** concatenates
    the inferred minimal set of ported `inst/cl/nmath/` shards for a launcher. Related **`message()`** /
-   **`warning()`** output documents assembler parity (**`inst/extdata/opencl_full_nmath_stopgap.json`**)
-   and curated fragile subgraphs (**`inst/extdata/opencl_known_failures.json`**).
+   **`warning()`** output may document full-index stopgap rules (**`inst/extdata/opencl_full_nmath_stopgap.json`**, v2: **`norm_rand_kernel.cl`**
+   suffix only) and curated fragile subgraphs (**`inst/extdata/opencl_known_failures.json`**).
 
 2. **Optional materialisation** --- **`extract_library_subset()`** writes that subset (and index companions)
    next to kernels you intend to vendor; regenerate **`kernel_dependency_index.rds`** alongside the library
