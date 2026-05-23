@@ -1,11 +1,11 @@
 // @source_type: c
 // @source_origin: qpois.c
 // @includes: nmath.h, dpq.h, qDiscrete_search.h
-// @depends: fmax2, nmath, dpq, qDiscrete_search
+// @depends: dpq, fmax2, nmath, ppois, qDiscrete_search, qnorm, r_check_user_interrupt
 // @provides: qpois
-// @all_depends_count: 8
-// @all_depends: dpq, Rmath, nmath, chebyshev, fmax2, log1p, qnorm, qDiscrete_search
-// @load_order: 71
+// @all_depends_count: 26
+// @all_depends: dpq, qDiscrete_search, refactored, Rmath, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, gammalims, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois, pgamma, ppois
+// @load_order: 94
 // @local_macros: R_DBG_printf, R_DBG_printf, _thisDIST_, _dist_PARS_DECL_, _dist_PARS_, DO_SEARCH_
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

@@ -5,7 +5,7 @@
 // @provides: dpois, dpois_raw
 // @all_depends_count: 17
 // @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr
-// @load_order: 94
+// @load_order: 88
 // @local_macros: M_SQRT_2PI, x_LRG
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

@@ -1,11 +1,11 @@
 // @source_type: c
 // @source_origin: qnbinom_mu.c
 // @includes: nmath.h, dpq.h, qDiscrete_search.h
-// @depends: fmax2, qpois, nmath, dpq, qDiscrete_search
+// @depends: dpq, fmax2, nmath, pnbinom, qDiscrete_search, qnorm, qpois, r_check_user_interrupt
 // @provides: qnbinom_mu
-// @all_depends_count: 9
-// @all_depends: dpq, Rmath, nmath, chebyshev, fmax2, log1p, qnorm, qDiscrete_search, qpois
-// @load_order: 81
+// @all_depends_count: 34
+// @all_depends: dpq, qDiscrete_search, refactored, Rmath, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, gammalims, i1mach, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, ppois, qpois, toms708, pbeta, pnbinom
+// @load_order: 112
 // @local_macros: R_DBG_printf, R_DBG_printf, _thisDIST_, _dist_PARS_DECL_, _dist_PARS_, DO_SEARCH_
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

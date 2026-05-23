@@ -5,7 +5,7 @@
 // @provides: dwilcox, pwilcox, qwilcox, rwilcox, wilcox_free
 // @all_depends_count: 18
 // @all_depends: dpq, refactored, Rmath, sunif, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, imax2, lgammacor, log1p, gamma, lgamma, lbeta, choose
-// @load_order: 103
+// @load_order: 97
 
 /*
   Mathlib : A C Library of Special Functions

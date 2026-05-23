@@ -5,7 +5,7 @@
 // @provides: qnbeta
 // @all_depends_count: 29
 // @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, fmin2, gammalims, i1mach, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, toms708, pnbeta
-// @load_order: 115
+// @load_order: 110
 
 /*
  *  R : A Computer Language for Statistical Data Analysis

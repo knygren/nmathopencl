@@ -5,7 +5,7 @@
 // @provides: qbeta
 // @all_depends_count: 29
 // @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, fmin2, gammalims, i1mach, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, toms708, pbeta
-// @load_order: 113
+// @load_order: 107
 // @local_macros: R_ifDEBUG_printf, R_ifDEBUG_printf, USE_LOG_X_CUTOFF, n_NEWTON_FREE, fpu, acu_min, p_lo, p_hi, const1, const2, const3, const4, return_q_0, return_q_1, return_q_half
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

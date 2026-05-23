@@ -5,7 +5,7 @@
 // @provides: qt
 // @all_depends_count: 32
 // @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, fmin2, gammalims, i1mach, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, dt, pgamma, toms708, pbeta, pt
-// @load_order: 116
+// @load_order: 113
 
 /*
  *  Mathlib : A C Library of Special Functions

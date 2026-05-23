@@ -5,7 +5,7 @@
 // @provides: dnbinom, dnbinom_mu
 // @all_depends_count: 19
 // @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom, dpois
-// @load_order: 107
+// @load_order: 101
 
 /*
  *  AUTHOR

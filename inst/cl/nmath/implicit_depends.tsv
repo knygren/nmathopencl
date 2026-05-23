@@ -1,0 +1,5 @@
+stem	implicit_depends	this_dist	p_macro	note
+qbinom	fmax2, pbinom, qnorm, r_check_user_interrupt	binom	pbinom	
+qnbinom	fmax2, pnbinom, qnorm, r_check_user_interrupt	nbinom	pnbinom	
+qnbinom_mu	fmax2, pnbinom, qnorm, r_check_user_interrupt	nbinom_mu	pnbinom_mu	
+qpois	fmax2, ppois, qnorm, r_check_user_interrupt	pois	ppois	

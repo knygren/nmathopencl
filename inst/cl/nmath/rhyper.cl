@@ -3,9 +3,9 @@
 // @includes: nmath.h, dpq.h, limits.h
 // @depends: dt, imax2, imin2, qhyper, rbinom, sunif, nmath, dpq
 // @provides: rhyper
-// @all_depends_count: 30
-// @all_depends: dpq, refactored, Rmath, sunif, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, fmin2, gammalims, imax2, imin2, lgammacor, log1p, qnorm, gamma, lgamma, pgamma_utils, qDiscrete_search, stirlerr_cycle_dependent, bd0, lbeta, qbinom, rbinom, stirlerr, choose, dt, qhyper
-// @load_order: 101
+// @all_depends_count: 41
+// @all_depends: dpq, qDiscrete_search, refactored, Rmath, sunif, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, fmin2, gammalims, i1mach, imax2, imin2, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, choose, dpois, dt, pgamma, qhyper, toms708, pbeta, pbinom, qbinom, rbinom
+// @load_order: 115
 
 /*
  *  Mathlib : A C Library of Special Functions

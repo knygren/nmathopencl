@@ -5,7 +5,7 @@
 // @provides: bratio, fpser, rexpm1
 // @all_depends_count: 26
 // @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, gammalims, i1mach, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma
-// @load_order: 102
+// @load_order: 96
 // @local_macros: min, max, R_ifDEBUG_printf, R_ifDEBUG_printf, TOMS708_Log1_Exp, SET_0_noswap, SET_0_swap, bfrac_MAXIT, n_terms_bgrat, num_IT
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

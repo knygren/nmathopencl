@@ -5,7 +5,7 @@
 // @provides: qhyper
 // @all_depends_count: 16
 // @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, fmin2, gammalims, lgammacor, log1p, gamma, lgamma, lbeta, choose
-// @load_order: 99
+// @load_order: 93
 
 /*
  *  Mathlib : A C Library of Special Functions

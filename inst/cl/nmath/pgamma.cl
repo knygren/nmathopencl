@@ -5,7 +5,7 @@
 // @provides: logspace_add, logspace_sub, logspace_sum, pgamma, pgamma_raw
 // @all_depends_count: 21
 // @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, gammalims, lgammacor, log1p, pnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois
-// @load_order: 96
+// @load_order: 90
 // @local_macros: EXP, LOG, EXP, LOG, NEEDED_SCALE, max_it
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

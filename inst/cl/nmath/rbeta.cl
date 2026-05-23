@@ -5,7 +5,7 @@
 // @provides: rbeta
 // @all_depends_count: 16
 // @all_depends: refactored, Rmath, sunif, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, fmin2, gammalims, lgammacor, log1p, gamma, lgamma, lbeta, beta
-// @load_order: 100
+// @load_order: 95
 // @local_macros: expmax, v_w_from__u1_bet
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

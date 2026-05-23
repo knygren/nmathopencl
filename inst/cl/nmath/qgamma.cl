@@ -5,7 +5,7 @@
 // @provides: qchisq_appr, qgamma
 // @all_depends_count: 24
 // @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, gammalims, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois, pgamma, dgamma
-// @load_order: 114
+// @load_order: 109
 // @local_macros: DEBUG_q, C7, C8, C9, C10, EPS1, EPS2, EPS_N, LN_EPS, MAXIT, pMIN, pMAX
 
 // openclport: macro hygiene pre-clean for concatenated translation units.

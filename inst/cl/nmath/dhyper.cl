@@ -5,7 +5,7 @@
 // @provides: dhyper
 // @all_depends_count: 18
 // @all_depends: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom
-// @load_order: 93
+// @load_order: 87
 
 /*
  *  AUTHOR

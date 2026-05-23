@@ -2,10 +2,10 @@
 // @source_origin: nmath.h
 // @includes: config.h, math.h, float.h, Rconfig.h, Rmath.h, RS.h, Print.h, Error.h, Arith.h, libintl.h
 // @depends: Rmath
-// @provides: MATHLIB_PRIVATE_H, LDOUBLE, __STDC_WANT_IEC_60559_FUNCS_EXT__, R_forceint, R_nonint, MATHLIB_ERROR, MATHLIB_WARNING, MATHLIB_WARNING2, MATHLIB_WARNING3, MATHLIB_WARNING4, MATHLIB_WARNING5, MATHLIB_WARNING6, ML_POSINF, ML_NEGINF, ML_NAN, calloc, free, _, ML_VALID, ME_NONE, ME_DOMAIN, ME_RANGE, ME_NOCONV, ME_PRECISION, ME_UNDERFLOW, ML_WARNING, ML_WARN_return_NAN, WILCOX_MAX, attribute_hidden, bd0, ebd0, chebyshev_eval, chebyshev_init, gammalims, lfastchoose, lgammacor, stirlerr, pnchisq_raw, pgamma_raw, pnbeta_raw, pnbeta2, bratio, Rf_d1mach, Rf_gamma_cody, R_CheckUserInterrupt, lgammacor , stirlerr  , log1pmx, lgamma1p, pbeta_raw, qchisq_appr, Rf_i1mach
+// @provides: _, __STDC_WANT_IEC_60559_FUNCS_EXT__, attribute_hidden, bd0, bratio, calloc, chebyshev_eval, chebyshev_init, ebd0, free, gammalims, LDOUBLE, lfastchoose, lgamma1p, lgammacor, lgammacor , log1pmx, MATHLIB_ERROR, MATHLIB_PRIVATE_H, MATHLIB_WARNING, MATHLIB_WARNING2, MATHLIB_WARNING3, MATHLIB_WARNING4, MATHLIB_WARNING5, MATHLIB_WARNING6, ME_DOMAIN, ME_NOCONV, ME_NONE, ME_PRECISION, ME_RANGE, ME_UNDERFLOW, ML_NAN, ML_NEGINF, ML_POSINF, ML_VALID, ML_WARN_return_NAN, ML_WARNING, pbeta_raw, pgamma_raw, pnbeta_raw, pnbeta2, pnchisq_raw, qchisq_appr, R_CheckUserInterrupt, R_forceint, R_nonint, Rf_d1mach, Rf_gamma_cody, Rf_i1mach, stirlerr, stirlerr  , WILCOX_MAX
 // @all_depends_count: 1
 // @all_depends: Rmath
-// @load_order: 7
+// @load_order: 8
 
 /*
  *  Mathlib : A C Library of Special Functions
@@ -132,12 +132,11 @@ void R_CheckUserInterrupt(void);
 /*	and underflow occurred (important for IEEE)*/
 
 
-/* Device-only ports: string literals live in __constant address space, so the
- * host nmath.h pattern (char *msg = _("...")) is ill-formed in OpenCL C.  Some
- * implementations also compile device programs without defining
- * __OPENCL_VERSION__ / __OPENCL_C_VERSION__, which would incorrectly select the
- * host branch—always use no-op warnings here (matching R's ML_WARNING for
- * ME_DOMAIN anyway). */
+/* Device-only OpenCL ports: string literals live in __constant address space;
+ * the upstream Mathlib ML_WARNING macro (char * + _("...")) is ill-formed here.
+ * Toolchains sometimes omit __OPENCL_VERSION__, so branch on it is unreliable.
+ * No-op warnings + ML_NAN-only return matches archived working packaged kernels.
+ * Do not replicate this tweak in `<openclport>/nmath/` — only in this refactor tree. */
 #define ML_WARNING(x, s) ((void)0)
 #define ML_WARN_return_NAN { return ML_NAN; }
 
