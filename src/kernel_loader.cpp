@@ -377,14 +377,8 @@ std::string load_library_for_kernel(
 
 std::string build_rmath_opencl_program(const std::string& kernel_relative_path,
                                        const std::string& package,
-                                       NmathBundleMode      nmath_bundle,
-                                       const std::string&   nmath_depends_annotation)
+                                       const std::string& nmath_depends_annotation)
 {
-  // `nmath_bundle` is retained for API stability (opencl_build_args callers).
-  // Assembler always concatenates indexed @all_depends_nmath shards (no launcher
-  // shortcut that concatenates all of inst/cl/nmath).
-  (void)nmath_bundle;
-
   const std::string nmath_src = load_library_for_kernel(
       kernel_relative_path,
       "nmath",
@@ -425,12 +419,10 @@ std::string load_library_for_kernel(
 
 std::string build_rmath_opencl_program(const std::string& kernel_relative_path,
                                        const std::string& package,
-                                       NmathBundleMode      nmath_bundle,
-                                       const std::string&   nmath_depends_annotation)
+                                       const std::string& nmath_depends_annotation)
 {
   (void)kernel_relative_path;
   (void)package;
-  (void)nmath_bundle;
   (void)nmath_depends_annotation;
   return "";
 }

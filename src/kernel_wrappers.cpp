@@ -187,7 +187,8 @@ static void opencl_serial_scalar_draws(
 ) {
   if (n_out <= 0) return;
   try {
-    const std::string all_src = build_rmath_opencl_program(kernel_rel_path);
+    const std::string all_src = build_rmath_opencl_program(
+        kernel_rel_path, "nmathopencl", "all_depends_nmath");
     /*
     Legacy path: one GPU session + compile + enqueue per scalar draw (slow).
     for (int i = 0; i < n_out; ++i) {
@@ -238,7 +239,8 @@ static void pq_tail_ndrange_kernel_fill(
   std::vector<int> lp(log_p.begin(), log_p.end());
   std::vector<double> out_flat;
   opencl_pq_tail_kernel_runner(
-      build_rmath_opencl_program(kernel_rel_path),
+      build_rmath_opencl_program(
+          kernel_rel_path, "nmathopencl", "all_depends_nmath"),
       kernel_name,
       len,
       arg_cols,
@@ -265,7 +267,8 @@ static void d_givelog_ndrange_kernel_fill(
   std::vector<int> gl(give_log.begin(), give_log.end());
   std::vector<double> out_flat;
   opencl_d_givelog_kernel_runner(
-      build_rmath_opencl_program(kernel_rel_path),
+      build_rmath_opencl_program(
+          kernel_rel_path, "nmathopencl", "all_depends_nmath"),
       kernel_name,
       len,
       arg_cols,
@@ -289,7 +292,8 @@ static void numeric_cols_ndrange_kernel_fill(
         pq_pack_numeric_cols_for_tail(numeric_args);
     std::vector<double> out_flat;
     opencl_numeric_cols_kernel_runner(
-        build_rmath_opencl_program(kernel_rel_path),
+        build_rmath_opencl_program(
+            kernel_rel_path, "nmathopencl", "all_depends_nmath"),
         kernel_name,
         len,
         arg_cols,

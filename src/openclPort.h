@@ -137,23 +137,11 @@ std::string load_library_for_kernel(
 // identified by path under inst/cl/ (e.g. "src/dnorm_kernel.cl").
 // -------------------------------------------------------------------------
 
-enum class NmathBundleMode {
-  /// Indexed slice via load_library_for_kernel(..., "all_depends_nmath").
-  Indexed = 0,
-  /// Deprecated: same assembly as Indexed (formerly loaded entire `inst/cl/nmath`
-  /// via load_kernel_library("nmath")).
-  Full = 1,
-  /// Default wrappers: indexed @all_depends_nmath slice (same assembly as Indexed).
-  Production = 2
-};
-
+/// Assembles prelude + shim layers + indexed @all_depends_nmath nmath slice + entry kernel.
 std::string build_rmath_opencl_program(
     const std::string& kernel_relative_path,
-    const std::string& package                    = "nmathopencl",
-    /// Retained for ABI compatibility; ignored at runtime. All modes use
-    /// load_library_for_kernel for the nmath slice.
-    NmathBundleMode     nmath_bundle              = NmathBundleMode::Production,
-    const std::string&  nmath_depends_annotation  = "all_depends_nmath");
+    const std::string& package,
+    const std::string& nmath_depends_annotation);
 
 // -------------------------------------------------------------------------
 // fp64-capable OpenCL device selection (cached). Implemented in
