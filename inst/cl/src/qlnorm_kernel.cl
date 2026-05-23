@@ -1,7 +1,7 @@
 // @library_deps: nmath
 // @depends_nmath: qlnorm
-// @all_depends_nmath_count: 20
-// @all_depends_nmath: dpq, Rmath, nmath, chebyshev, dnorm, fmax2, log1p, pnorm, qnorm, qlnorm
+// @all_depends_nmath_count: 7
+// @all_depends_nmath: dpq, Rmath, nmath, chebyshev, log1p, qnorm, qlnorm
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 

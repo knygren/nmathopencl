@@ -1,7 +1,7 @@
 // @library_deps: nmath
 // @depends_nmath: qgamma
-// @all_depends_nmath_count: 39
-// @all_depends_nmath: dpq, refactored, Rmath, nmath, chebyshev, cospi, dnorm, expm1, fmax2, fmin2, gammalims, lgammacor, log1p, pnorm, qnorm, gamma, lgamma, pgamma_utils, bd0, stirlerr_cycle_dependent, stirlerr, dbinom, dpois, pgamma, dgamma, gamma, lgammacor, pchisq, qchisq, qgamma
+// @all_depends_nmath_count: 25
+// @all_depends_nmath: dpq, refactored, Rmath, nmath, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, gammalims, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois, pgamma, dgamma, qgamma
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 

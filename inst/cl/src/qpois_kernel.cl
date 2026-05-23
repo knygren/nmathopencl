@@ -1,7 +1,7 @@
 // @library_deps: nmath
 // @depends_nmath: qpois
-// @all_depends_nmath_count: 9
-// @all_depends_nmath: dpq, Rmath, nmath, chebyshev, fmax2, log1p, qnorm, qDiscrete_search, qpois
+// @all_depends_nmath_count: 27
+// @all_depends_nmath: dpq, qDiscrete_search, refactored, Rmath, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, dnorm, fmax2, gammalims, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dpois, pgamma, ppois, qpois
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 

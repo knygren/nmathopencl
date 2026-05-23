@@ -1,7 +1,7 @@
 // @library_deps: nmath
 // @depends_nmath: qweibull
-// @all_depends_nmath_count: 18
-// @all_depends_nmath: dpq, Rmath, nmath, stirlerr_cycle_free, chebyshev, dnorm, fmax2, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgammacor, pgamma_utils, pchisq, qgamma, qweibull
+// @all_depends_nmath_count: 4
+// @all_depends_nmath: dpq, Rmath, nmath, qweibull
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 

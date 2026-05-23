@@ -131,12 +131,6 @@ std::string load_library_for_kernel(
     const std::string& depends_tag = "depends_nmath"
 );
 
-// True when the kernel's @all_depends_nmath: line lists qDiscrete_search
-// (full nmath bundle required vs indexed slice).
-bool kernel_all_depends_nmath_includes_qDiscrete_search(
-    const std::string& kernel_relative_path,
-    const std::string& package = "nmathopencl");
-
 // -------------------------------------------------------------------------
 // Assemble prelude + sliced/full nmath + entry kernel OpenCL sources.
 // Mirrors glmbayes::opencl::load_likelihood_subgradient_program; entry is
@@ -148,8 +142,8 @@ enum class NmathBundleMode {
   Indexed = 0,
   /// Full load_kernel_library("nmath", ...).
   Full = 1,
-  /// Default wrappers: indexed except when @all_depends_nmath lists
-  /// qDiscrete_search or kernel ends with norm_rand_kernel.cl (full nmath).
+  /// Default wrappers: indexed except when kernel ends with
+  /// norm_rand_kernel.cl (full nmath).
   Production = 2
 };
 

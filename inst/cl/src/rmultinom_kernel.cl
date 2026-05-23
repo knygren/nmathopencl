@@ -1,7 +1,7 @@
 // @library_deps: nmath
 // @depends_nmath: rmultinom
-// @all_depends_nmath_count: 13
-// @all_depends_nmath: dpq, Rmath, sunif, nmath, chebyshev, fmax2, fmin2, log1p, qnorm, qDiscrete_search, qbinom, rbinom, rmultinom
+// @all_depends_nmath_count: 37
+// @all_depends_nmath: dpq, qDiscrete_search, refactored, Rmath, sunif, nmath, r_check_user_interrupt, stirlerr_cycle_free, chebyshev, cospi, d1mach, dnorm, fmax2, fmin2, gammalims, i1mach, lgammacor, log1p, pnorm, qnorm, expm1, gamma, lgamma, pgamma_utils, stirlerr_cycle_dependent, bd0, lbeta, stirlerr, beta, dpois, pgamma, toms708, pbeta, pbinom, qbinom, rbinom, rmultinom
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 

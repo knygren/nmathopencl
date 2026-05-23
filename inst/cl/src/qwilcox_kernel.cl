@@ -1,7 +1,6 @@
 // @library_deps: nmath
 // @depends_nmath: qwilcox
-// @all_depends_nmath_count: 37
-// @all_depends_nmath: dpq, refactored, Rmath, sunif, nmath, stirlerr_cycle_free, chebyshev, fprec, fround, dnorm, fmax2, fmin2, lgamma_sim, pchisq, qnorm, stirlerr, dt, pchisq, pt, qwilcox, wilcox_free
+// @all_depends_nmath_count: 0
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
