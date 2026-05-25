@@ -2079,16 +2079,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// gpu_names_cpp_export
-Rcpp::CharacterVector gpu_names_cpp_export();
-RcppExport SEXP _nmathopencl_gpu_names_cpp_export() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(gpu_names_cpp_export());
-    return rcpp_result_gen;
-END_RCPP
-}
 // opencl_device_info_cpp_export
 Rcpp::List opencl_device_info_cpp_export(bool force, bool details);
 RcppExport SEXP _nmathopencl_opencl_device_info_cpp_export(SEXP forceSEXP, SEXP detailsSEXP) {
@@ -2263,7 +2253,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_nmathopencl_load_kernel_library_wrapper_cpp_export", (DL_FUNC) &_nmathopencl_load_kernel_library_wrapper_cpp_export, 3},
     {"_nmathopencl_has_opencl_cpp_export", (DL_FUNC) &_nmathopencl_has_opencl_cpp_export, 0},
     {"_nmathopencl_get_opencl_core_count_cpp_export", (DL_FUNC) &_nmathopencl_get_opencl_core_count_cpp_export, 0},
-    {"_nmathopencl_gpu_names_cpp_export", (DL_FUNC) &_nmathopencl_gpu_names_cpp_export, 0},
     {"_nmathopencl_opencl_device_info_cpp_export", (DL_FUNC) &_nmathopencl_opencl_device_info_cpp_export, 2},
     {"_nmathopencl_opencl_fp64_available_cpp_export", (DL_FUNC) &_nmathopencl_opencl_fp64_available_cpp_export, 1},
     {"_nmathopencl_opencl_reset_device_selection_cpp_export", (DL_FUNC) &_nmathopencl_opencl_reset_device_selection_cpp_export, 0},

@@ -81,7 +81,6 @@ std::vector<double> copyVector(const Rcpp::NumericVector& vec);
 // -------------------------------------------------------------------------
 // Device / OpenCL utilities
 // -------------------------------------------------------------------------
-Rcpp::CharacterVector gpu_names();
 
 // Internal-only GPU detection (used by envelope scaling)
 int detect_num_gpus_internal();

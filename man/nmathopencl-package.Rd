@@ -39,6 +39,19 @@ The simulation theory underlying the envelope construction is described in
 GPU/OpenCL topics are covered in
 \insertCite{glmbayesChapter12,glmbayesChapterA10}{nmathopencl}.
 }
+\section{OpenCL startup checks}{
+
+In interactive sessions, attaching the package with \code{library(nmathopencl)}
+may emit a \code{\link{packageStartupMessage}}
+comparing compile-time OpenCL support in \pkg{nmathopencl} and
+\pkg{opencltools}, noting that CPU fallbacks remain available, and
+summarizing whether an OpenCL runtime appears available on the host.
+Messages point to \code{?gpu_diagnostics}, \code{vignette("Chapter-12")}
+(GPU setup), and this help page.
+Set \code{options(nmathopencl.quiet_opencl_startup = TRUE)} to suppress
+these notes (recommended for CI and \command{R CMD check}).
+}
+
 \references{
 \insertAllCited{}
 }

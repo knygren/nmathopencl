@@ -63,7 +63,7 @@
 # =============================================================================
 #  Tier 4: OpenCL / GPU
 #  Callers: load_kernel_source, load_kernel_library, has_opencl,
-#           get_opencl_core_count, gpu_names
+#           get_opencl_core_count
 #  User:    Advanced users - GPU diagnostics, kernel loading for use_opencl
 # =============================================================================
 
@@ -89,12 +89,6 @@
 #' @keywords internal
 .get_opencl_core_count_cpp <- function() {
   .Call("_nmathopencl_get_opencl_core_count_cpp_export")
-}
-
-#' @noRd
-#' @keywords internal
-.gpu_names_cpp <- function() {
-  .Call("_nmathopencl_gpu_names_cpp_export")
 }
 
 #' @noRd

@@ -1,4 +1,4 @@
-﻿#include "RcppArmadillo.h"
+#include "RcppArmadillo.h"
 #include "openclPort.h"
 #include "nmathopencl.h"
 
@@ -18,7 +18,7 @@ using namespace openclPort;
 // =============================================================================
 // Tier 5: OpenCL / GPU
 // Callers: load_kernel_source, load_kernel_library, has_opencl,
-//          get_opencl_core_count, gpu_names
+//          get_opencl_core_count
 // User:    Advanced users - GPU diagnostics, kernel loading for use_opencl
 // =============================================================================
 
@@ -2250,11 +2250,6 @@ bool has_opencl_cpp_export() {
 // [[Rcpp::export]]
 int get_opencl_core_count_cpp_export() {
   return get_opencl_core_count();
-}
-
-// [[Rcpp::export]]
-Rcpp::CharacterVector gpu_names_cpp_export() {
-  return gpu_names();
 }
 
 // [[Rcpp::export]]

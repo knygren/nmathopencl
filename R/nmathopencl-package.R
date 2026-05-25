@@ -36,6 +36,17 @@
 #' GPU/OpenCL topics are covered in
 #' \insertCite{glmbayesChapter12,glmbayesChapterA10}{nmathopencl}.
 #'
+#' @section OpenCL startup checks:
+#' In interactive sessions, attaching the package with \code{library(nmathopencl)}
+#' may emit a \code{\link{packageStartupMessage}}
+#' comparing compile-time OpenCL support in \pkg{nmathopencl} and
+#' \pkg{opencltools}, noting that CPU fallbacks remain available, and
+#' summarizing whether an OpenCL runtime appears available on the host.
+#' Messages point to \code{?gpu_diagnostics}, \code{vignette("Chapter-12")}
+#' (GPU setup), and this help page.
+#' Set \code{options(nmathopencl.quiet_opencl_startup = TRUE)} to suppress
+#' these notes (recommended for CI and \command{R CMD check}).
+#'
 #' @seealso
 #' Key developer entry points:
 #' \itemize{
@@ -67,7 +78,7 @@
 #' @importFrom opencltools load_kernel_source load_kernel_library load_library_for_kernel
 #' @importFrom opencltools extract_library_subset write_kernel_dependency_index
 #' @importFrom opencltools stage_kernel_dependency_sort attach_kernel_dependency_tags
-#' @importFrom opencltools attach_cross_library_tags
+#' @importFrom opencltools attach_kernel_call_tags attach_cross_library_tags
 #' @importFrom opencltools has_opencl opencl_device_info opencl_fp64_available
 #' @importFrom opencltools opencl_reset_device_selection get_opencl_core_count
 #' @importFrom opencltools gpu_names verify_opencl_runtime check_runtime_env

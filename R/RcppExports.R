@@ -561,10 +561,6 @@ get_opencl_core_count_cpp_export <- function() {
     .Call(`_nmathopencl_get_opencl_core_count_cpp_export`)
 }
 
-gpu_names_cpp_export <- function() {
-    .Call(`_nmathopencl_gpu_names_cpp_export`)
-}
-
 opencl_device_info_cpp_export <- function(force = FALSE, details = FALSE) {
     .Call(`_nmathopencl_opencl_device_info_cpp_export`, force, details)
 }
