@@ -1,4 +1,6 @@
-# nmathopencl 0.1.0 (development)
+# nmathopencl 0.2.0 (development)
+
+# nmathopencl 0.1.0
 
 ### Documentation and distribution
 
