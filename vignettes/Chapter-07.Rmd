@@ -233,7 +233,11 @@ contiguous) `std::vector<double>` suitable for passing as a device buffer.
 `copyVector` does the same for a numeric vector. Both are implemented in
 `OpenCL_helper.cpp`.
 
-### Device probing
+### Device probing (C++ / `openclPort`)
+
+At the R prompt, host GPU inventory uses **`opencltools::gpu_names()`** (see
+Chapters 00--01). Inside the package DLL, **`openclPort`** exposes related
+C++ helpers for kernel runners:
 
 ```cpp
 Rcpp::CharacterVector openclPort::gpu_names();
@@ -242,14 +246,11 @@ bool                  openclPort::has_opencl();
 int                   openclPort::get_opencl_core_count();
 ```
 
-- `gpu_names()` --- returns the `CL_DEVICE_NAME` of every GPU device found
-  by iterating over all platforms and devices.
-- `detect_num_gpus_internal()` --- returns the count of GPU devices;
-  used by envelope construction routines to decide whether to use OpenCL.
-- `has_opencl()` --- returns `true` if compiled with `USE_OPENCL` and at
-  least one GPU device is found at runtime.
-- `get_opencl_core_count()` --- queries `CL_DEVICE_MAX_COMPUTE_UNITS` on
-  the first GPU and returns the core count.
+- `openclPort::gpu_names()` --- OpenCL device names from the runtime linked
+  into this package (distinct from `opencltools::gpu_names()` R helper).
+- `detect_num_gpus_internal()` --- GPU device count for envelope-style runners.
+- `has_opencl()` --- compile-time `USE_OPENCL` flag in this DLL.
+- `get_opencl_core_count()` --- `CL_DEVICE_MAX_COMPUTE_UNITS` on the selected device.
 
 ### OpenCL build configuration
 

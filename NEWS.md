@@ -1,5 +1,13 @@
 # nmathopencl 0.2.0 (development)
 
+### OpenCL tooling
+
+- Tier 3 host/runtime diagnostics (`detect_*`, `verify_opencl_runtime`,
+  `gpu_names`, `add_to_path_*`, etc.) are no longer re-exported from
+  **nmathopencl**; use **opencltools** directly. **nmathopencl** keeps
+  `diagnose_glmbayes()` (includes this package's compile-time `has_opencl()`
+  check), `has_opencl()`, and device-selection helpers.
+
 # nmathopencl 0.1.0
 
 ### Documentation and distribution

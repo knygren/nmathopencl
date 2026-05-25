@@ -14,8 +14,8 @@
 .opencl_runtime_sniff <- function() {
   tryCatch(
     {
-      info <- detect_environment_and_gpus()
-      rt_list <- detect_compute_runtimes(info)
+      info <- opencltools::detect_environment_and_gpus()
+      rt_list <- opencltools::detect_compute_runtimes(info)
       gpu <- isTRUE(info$nvidia$present) ||
         isTRUE(info$amd$present) ||
         isTRUE(info$intel$present)

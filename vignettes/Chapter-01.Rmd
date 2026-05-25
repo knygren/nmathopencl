@@ -145,33 +145,29 @@ a message indicating whether `USE_OPENCL` was activated.
 ```{r, eval = FALSE}
 library(nmathopencl)
 
-# 1. Quick check
+# 1. Quick check (nmathopencl compile-time OpenCL support)
 has_opencl()
-#> [1] TRUE  (if compiled with USE_OPENCL and a device is available)
+#> [1] TRUE  (if compiled with USE_OPENCL)
 
-# 2. List detected GPU devices
-gpu_names()
+# 2. List detected GPU devices (opencltools --- host inventory, not compile flag)
+opencltools::gpu_names()
 #> [1] "NVIDIA GeForce RTX 4090"
 
-# 3. Full diagnostic report
+# 3. Full diagnostic report (opencltools checks + nmathopencl has_opencl())
 diagnose_glmbayes()
 ```
 
-`diagnose_glmbayes()` runs a layered check:
+`diagnose_glmbayes()` (exported from **nmathopencl**) runs a layered check:
 
-1. Detects the OS environment (Windows / Linux / WSL2 / MSYS2).
-2. Identifies GPU vendors (NVIDIA / AMD / Intel) via `nvidia-smi`,
-   `lspci`, or WMI (`Win32_VideoController`).
-3. Checks whether the GPU driver is installed.
-4. Verifies that `CL/cl.h` (compile-time header) is present.
-5. Verifies that the OpenCL ICD loader / runtime DLL is present.
-6. On Linux/WSL2, compiles and runs a minimal OpenCL probe program to
-   confirm that a platform is actually callable.
-7. Checks PATH and `LD_LIBRARY_PATH` for required directories.
-8. Reports the compile-time `has_opencl()` status.
+Steps 1--7 use **opencltools** (environment, GPU vendors, drivers,
+OpenCL headers and ICD, Linux/WSL runtime probe, PATH / `LD_LIBRARY_PATH`).
+Step 8 reports compile-time **`has_opencl()`** for this **nmathopencl** build.
 
-On Windows, step 6 is skipped because platform-creation probes are less
-reliable there; rely on the driver and ICD checks instead.
+For individual opencltools steps without the nmathopencl compile-time line, use
+`opencltools::diagnose_glmbayes()` after `library(opencltools)`.
+
+On Windows, the Linux/WSL OpenCL runtime probe (opencltools step 6) is skipped;
+rely on driver and ICD checks instead.
 
 ## Troubleshooting common failures
 
@@ -202,8 +198,8 @@ Check:
 
 On Windows, the CUDA Toolkit bin directory (e.g.,
 `C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.9/bin`) must be in
-`PATH` so that `OpenCL.dll` is found at runtime. `diagnose_glmbayes()` will
-offer to add missing entries permanently.
+`PATH` so that `OpenCL.dll` is found at runtime. `diagnose_glmbayes()` may
+offer to add missing entries permanently (via **opencltools** PATH helpers).
 
 ## After a successful setup
 

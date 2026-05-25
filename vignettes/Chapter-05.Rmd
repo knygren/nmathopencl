@@ -33,11 +33,11 @@ All exported functions share three common arguments:
 ```{r, eval = FALSE}
 library(nmathopencl)
 
-# TRUE only if compiled with USE_OPENCL and a device is found at runtime
+# TRUE if this nmathopencl build was compiled with USE_OPENCL
 has_opencl()
 
-# List GPU device names recognized by the OpenCL platform
-gpu_names()
+# GPU device names on the host (opencltools --- system inventory)
+opencltools::gpu_names()
 ```
 
 If OpenCL is not available (`has_opencl()` returns `FALSE`), calls use the CPU

@@ -99,31 +99,36 @@ is unavailable or fails.
 ```{r, eval = FALSE}
 library(nmathopencl)
 
-# Quick boolean check
+# Quick boolean check (compile-time OpenCL support in this build)
 has_opencl()
 
-# Full diagnostic report (hardware, drivers, paths, runtime probe)
+# Full diagnostic report: opencltools host/runtime checks plus
+# nmathopencl compile-time has_opencl() status
 diagnose_glmbayes()
 ```
 
-`has_opencl()` returns `TRUE` only when the package was compiled with
-`-DUSE_OPENCL` **and** a functional OpenCL platform is detected at runtime.
-All exported wrappers branch on `has_opencl()` first; `fallback` then controls
+`has_opencl()` reports whether **nmathopencl** was built with OpenCL (`USE_OPENCL`).
+Host and driver inventory (`detect_environment_and_gpus()`, `verify_opencl_runtime()`,
+PATH helpers, and related probes) live in **`opencltools`** --- use
+`opencltools::…` or `library(opencltools)` when calling them directly.
+All exported `*_opencl` wrappers branch on `has_opencl()` first; `fallback` then controls
 whether a failed OpenCL call is replaced with the CPU path (ignored when OpenCL is absent).
 
 ## Roadmap and phased release
 
 `nmathopencl` is the first package in a planned suite:
 
-1. **`nmathopencl`** (this package) --- released on R-universe/CRAN first.
-   It temporarily hosts some generic OpenCL infrastructure (`openclPort`
-   namespace) that will later migrate to a dedicated package.
-2. **`glmbayes`** (already on CRAN) --- will be updated to import
-   `nmathopencl` for its OpenCL math dependencies, replacing its current
-   bundled copy of the nmath OpenCL files.
-3. **`openclPort`** (in development) --- will become a standalone CRAN
-   package providing the generic OpenCL porting framework. At that point,
-   the `openclPort` namespace content will migrate out of `nmathopencl`.
+1. **`nmathopencl`** (this package) --- OpenCL-ported Mathlib, kernel loaders, and
+   package-specific device selection (`opencl_device_info`, `has_opencl`).
+2. **`opencltools`** --- shared host/runtime diagnostics, kernel-library tooling,
+   and PATH helpers (Tier 3 probes such as `detect_environment_and_gpus()` and
+   `verify_opencl_runtime()` are **not** re-exported from `nmathopencl`; call
+   `opencltools::…` directly).
+3. **`glmbayes`** (already on CRAN) --- end-user Bayesian GLMs; imports
+   `opencltools` and uses OpenCL math via its own kernels and optional GPU paths.
+4. **`openclPort`** (C++ layer in development) --- generic OpenCL porting helpers
+   still partially embedded in package DLLs; long-term extraction to a dedicated
+   package remains a goal.
 
 ## Vignette guide
 

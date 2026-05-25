@@ -204,7 +204,11 @@ To enable OpenCL:
 - Build the package from source with OpenCL enabled (configure script detects OpenCL).
 - Ensure an OpenCL runtime (ICD loader, vendor driver) is available at runtime.
 
-Use `has_opencl()` to check availability and `diagnose_glmbayes()` for a full diagnostic report. See Chapter 12 for platform-specific installation instructions (Windows, Linux, macOS) and AMD ROCm notes.
+Use `has_opencl()` to check **nmathopencl** compile-time support and
+`diagnose_glmbayes()` for a combined report (opencltools host checks plus this
+build's OpenCL flag). Host-only diagnostics live in **`opencltools`**. See
+Chapter 12 for platform-specific installation (Windows, Linux, macOS) and AMD
+ROCm notes.
 
 
 ## 10. Cross-References
@@ -212,7 +216,7 @@ Use `has_opencl()` to check availability and `diagnose_glmbayes()` for a full di
 - **Chapter A05** --- Simulation pipeline (optimization, standardization, envelope build, sampling)
 - **Chapter A08** --- Envelope-related functions
 - **Chapter A09** --- Parallel sampling (pilot pattern, 5-minute safeguard)
-- **Chapter 12** --- GPU acceleration: installation, `has_opencl`, `diagnose_glmbayes`
+- **Chapter 12** --- GPU acceleration: installation, `has_opencl`, `diagnose_glmbayes`, **opencltools** host probes
 - **`?EnvelopeBuild`**, **`?EnvelopeEval`** --- use_opencl argument
 - **`?load_kernel_library`**, **`?load_kernel_source`** --- Program assembly
 - **`?glmb`**, **`?rglmb`** --- use_opencl argument

@@ -109,7 +109,7 @@ OpenCL header files (such as `CL/cl.h`) required to compile `glmbayes` from sour
 
 On Windows, installing the CUDA Toolkit or Intel OpenCL SDK is sufficient; no additional OpenCL runtime or development packages are required.
 
-AMD's Windows driver package includes the OpenCL runtime and ICD components automatically. No additional installation or PATH configuration is required. If OpenCL is not detected, updating to the latest AMD Software (Adrenalin Edition) typically resolves the issue. The `diagnose_glmbayes()` function will report whether the AMD OpenCL components are correctly installed.
+AMD's Windows driver package includes the OpenCL runtime and ICD components automatically. No additional installation or PATH configuration is required. If OpenCL is not detected, updating to the latest AMD Software (Adrenalin Edition) typically resolves the issue. Use `diagnose_glmbayes()` (**nmathopencl** or **glmbayes**, each reporting that package's compile-time status) or **opencltools** host probes to confirm AMD OpenCL components.
 
 ### **2.2 Linux**
 
@@ -224,7 +224,7 @@ If only `libOpenCL.so.1` is present, install the development package.
 
 #### **2.2.5 Verify OpenCL platforms with `clinfo` (Linux, recommended)**
 
-Having headers and `libOpenCL` installed does **not** guarantee that a **vendor** OpenCL implementation registers a **platform**. The `glmbayes` configure script and `diagnose_glmbayes()` both probe for a usable platform (e.g. `clGetPlatformIDs()`). On Linux---especially **remote GPU VMs**---it helps to check this **outside R** first.
+Having headers and `libOpenCL` installed does **not** guarantee that a **vendor** OpenCL implementation registers a **platform**. Source builds of **glmbayes** / **nmathopencl** and **`opencltools::verify_opencl_runtime()`** probe for a usable platform (e.g. `clGetPlatformIDs()`). On Linux---especially **remote GPU VMs**---it helps to check this **outside R** first.
 
 Install the **`clinfo`** utility:
 
@@ -248,7 +248,7 @@ clinfo
 
 You should see **`Number of platforms` >= 1** and at least one **GPU** device (for NVIDIA, typically under the NVIDIA platform). If **`Number of platforms` is 0**, the ICD loader is present but **no vendor runtime** is visible. Install your vendor's OpenCL ICD (on Ubuntu/Debian with NVIDIA GPUs, `sudo apt-get install nvidia-opencl-icd` is often required in minimal images) and run **`clinfo`** again.
 
-**Note:** `clinfo` is a system diagnostic, not part of R. It complements `diagnose_glmbayes()` when debugging **cloud or container** setups where the NVIDIA driver looks fine (`nvidia-smi` works) but OpenCL still reports no platform.
+**Note:** `clinfo` is a system diagnostic, not part of R. It complements `diagnose_glmbayes()` and **opencltools** runtime probes when debugging **cloud or container** setups where the NVIDIA driver looks fine (`nvidia-smi` works) but OpenCL still reports no platform.
 
 ### **2.3 macOS**
 
@@ -280,18 +280,24 @@ On **Linux**, if you have shell access (including **Jupyter Terminal** on a clou
 has_opencl()
 ```
 
-- Returns TRUE if OpenCL is available and detected.  
-- Returns FALSE if OpenCL is not available.
+- Returns `TRUE` if **nmathopencl** was built with OpenCL compile support.
+- Returns `FALSE` on typical CRAN/prebuilt binaries without `USE_OPENCL`.
 
 ### **5.1 If FALSE, follow helper functions for next steps**
 
-If `has_opencl()` returns FALSE, run:
+If `has_opencl()` returns `FALSE`, run:
 
 ```r
 diagnose_glmbayes()
 ```
 
-This function performs a full OpenCL environment check and reports whether your system is correctly configured for GPU acceleration.
+This **nmathopencl** report combines **opencltools** host/runtime checks with
+this package's compile-time status. For opencltools-only inventory (no
+nmathopencl compile line), use `opencltools::diagnose_glmbayes()` after
+`library(opencltools)`. Lower-level probes include
+`opencltools::detect_environment_and_gpus()`,
+`opencltools::detect_compute_runtimes()`, and
+`opencltools::verify_opencl_runtime()`.
 
 A clean diagnostic on Linux looks like:
 

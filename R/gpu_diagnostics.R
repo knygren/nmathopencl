@@ -1,124 +1,52 @@
-#' GPU and OpenCL Diagnostics for glmbayes
+#' GPU and OpenCL diagnostics for \pkg{nmathopencl}
 #'
 #' @description
-#' A collection of tools for detecting GPU hardware, verifying OpenCL
-#' availability, checking driver installation, validating environment
-#' configuration, and diagnosing whether \pkg{glmbayes} can use GPU
-#' acceleration. These functions provide both high-level diagnostic
-#' summaries and low-level checks of system components such as PATH,
-#' library directories, OpenCL headers, and the ICD loader.
+#' Compile-time and device-selection probes for \pkg{nmathopencl}, plus
+#' \code{diagnose_glmbayes()} --- a readable report that combines
+#' \pkg{opencltools} host/runtime checks with this package's OpenCL build
+#' status (\code{\link{has_opencl}}).
 #'
-#' The diagnostic workflow is centered around
-#' \code{diagnose_glmbayes()}, which orchestrates all other checks and
-#' prints a detailed, human-readable report. Lower-level helpers can be
-#' called individually for programmatic inspection or automated testing.
-#' @param info A list returned by `detect_environment_and_gpus()`. The list must
-#'   contain the following elements:
-#'   \describe{
-#'     \item{environment}{One of "windows", "msys2", "linux", "wsl", or "unknown".}
-#'     \item{nvidia}{A list with elements `present` (logical) and `names` (character).}
-#'     \item{amd}{A list with elements `present` (logical) and `names` (character).}
-#'     \item{intel}{A list with elements `present` (logical) and `names` (character).}
-#'   }
-#' @param lib_dirs A list of OpenCL directories
-#' @param runtime_info The structured list returned by \code{detect_compute_runtimes()}.
-#' @return A structured list with diagnostics for each runtime, including:
-#'   \itemize{
-#'     \item installed: whether the runtime was detected
-#'     \item found_path_dirs: directories already present in PATH
-#'     \item missing_path_dirs: directories that should be added to PATH
-#'     \item found_lib_dirs: directories already present in LD_LIBRARY_PATH
-#'     \item missing_lib_dirs: directories that should be added to LD_LIBRARY_PATH
-#'     \item include_dirs: include directories detected for headers
-#'   }
-#' @section High-level diagnostic:
+#' Low-level workstation probes (GPU vendor detection, driver and ICD checks,
+#' PATH validation, \code{verify_opencl_runtime()}, PATH helpers, etc.) live in
+#' \pkg{opencltools}; call them as \code{opencltools::detect_environment_and_gpus()},
+#' \code{opencltools::diagnose_glmbayes()} (opencltools-only report), and related
+#' topics documented under \code{?opencltools}.
+#'
+#' @section Diagnostics exported from \pkg{nmathopencl}:
 #' \itemize{
-#'   \item \code{diagnose_glmbayes()} --- full GPU/OpenCL diagnostic report.
+#'   \item \code{\link{diagnose_glmbayes}()} --- full report including
+#'     \pkg{nmathopencl} compile-time OpenCL status.
+#'   \item \code{\link{has_opencl}()} --- \code{TRUE} if this build was compiled
+#'     with OpenCL support.
+#'   \item \code{\link{opencl_device_info}()}, \code{\link{opencl_fp64_available}()} ---
+#'     cached double-precision device selection for kernels.
+#'   \item \code{\link{opencl_reset_device_selection}()} --- clear device cache.
 #' }
 #'
-#' @section Environment and hardware detection:
+#' @section Host / runtime checks (\pkg{opencltools}):
 #' \itemize{
-#'   \item \code{detect_environment_and_gpus()} --- detect OS and GPU vendor.
-#'   \item \code{gpu_names()} --- enumerate available GPU device names.
-#'   \item \code{detect_compute_runtimes()} --- detect CUDA/OpenCL runtimes.
-#' }
-#'
-#' @section OpenCL availability and runtime checks:
-#' \itemize{
-#'   \item \code{has_opencl()} --- quick check for OpenCL support.
-#'   \item \code{opencl_fp64_available()}, \code{opencl_device_info()} ---
-#'     double-precision OpenCL device selection (cached probe).
-#'   \item \code{verify_opencl_runtime()} --- probe OpenCL platform/device availability.
-#'   \item \code{check_runtime_env()} --- validate PATH and library directories.
-#' }
-#'
-#' @section Driver installation helpers:
-#' \itemize{
-#'   \item \code{detect_or_install_gpu_drivers()} --- detect driver presence and issues.
-#' }
-#'
-#' @section PATH and library path utilities:
-#' These are optional helpers used by the diagnostic pipeline.
-#' \itemize{
-#'   \item \code{add_to_path_windows()}
-#'   \item \code{add_to_path_linux()}
-#'   \item \code{add_to_libpath_linux()}
+#'   \item \code{\link[opencltools:gpu_diagnostics]{detect_environment_and_gpus}()}
+#'   \item \code{\link[opencltools:gpu_diagnostics]{detect_compute_runtimes}()}
+#'   \item \code{\link[opencltools:gpu_diagnostics]{verify_opencl_runtime}()}
+#'   \item \code{\link[opencltools:gpu_diagnostics]{check_runtime_env}()}
+#'   \item \code{\link[opencltools:add_to_path]{add_to_path_windows}()} and related PATH helpers
 #' }
 #'
 #' @details
-#' GPU acceleration speeds up **envelope construction and grid evaluation**
-#' (e.g. large \eqn{3^p} grids or many tangency evaluations) when you pass
-#' \code{use_opencl = TRUE} in modeling and envelope functions such as
-#' \code{\link{Ex_EnvelopeEval}} and related envelope functions. OpenCL is **vendor-neutral**
-#' (NVIDIA, AMD, Intel); CPU-only builds remain valid and are often used when
-#' no OpenCL stack is present.
-#'
-#' **Practical setup (summary).** Prebuilt binaries from CRAN or R-Universe
-#' are typically built **without** OpenCL GPU support; enabling the GPU path
-#' usually requires installing \pkg{glmbayes} **from source** on a machine
-#' with OpenCL **headers**, a linkable **OpenCL library / ICD loader**, and
-#' a working **vendor runtime** (GPU driver). You need a normal C/C++
-#' toolchain (e.g. Rtools on Windows, \code{build-essential} and
-#' \code{r-base-dev} on Linux, Xcode CLT plus GCC on macOS for source installs).
-#' Vendor-specific notes (CUDA Toolkit vs Intel SDK vs Khronos headers on
-#' Windows, \code{opencl-headers} and \code{ocl-icd} packages on Linux, etc.)
-#' are spelled out in \insertCite{glmbayesChapter12}{nmathopencl}.
-#'
-#' **What this help page checks.** A usable OpenCL environment requires:
-#' \enumerate{
-#'   \item OpenCL headers (e.g., \code{CL/cl.h}) at compile time,
-#'   \item the OpenCL ICD loader (e.g., \code{libOpenCL.so.1}) at runtime,
-#'   \item correct PATH and library search paths (especially on Linux/WSL),
-#'   \item a functional OpenCL platform and device (driver installed).
-#' }
-#' The functions here inspect these pieces. On Linux and WSL,
-#' \code{verify_opencl_runtime()} tries to create a platform, device, context,
-#' queue, and compile a minimal kernel. On Windows, that probe is skipped
-#' because platform-creation failures are often uninformative; rely on
-#' \code{diagnose_glmbayes()} and driver/runtime detection instead.
+#' GPU acceleration uses OpenCL kernels and \code{*_opencl} wrappers when
+#' \code{\link{has_opencl}()} is \code{TRUE} and a suitable device is available.
+#' CPU fallbacks apply for many routines when OpenCL is absent at compile time
+#' or runtime.
 #'
 #' Start with \code{\link{diagnose_glmbayes}()} for a single readable report;
-#' use \code{\link{has_opencl}()} for a quick boolean when scripting.
-#'
-#' @return
-#' Most functions return structured lists describing detected hardware,
-#' drivers, runtimes, or environment issues. \code{diagnose_glmbayes()}
-#' prints a formatted report and invisibly returns a named list containing
-#' all intermediate diagnostic results.
+#' use \code{\link{has_opencl}()} for a quick boolean when scripting. Full
+#' install notes: \code{vignette("Chapter-12", package = "nmathopencl")}
+#' (\insertCite{glmbayesChapter12}{nmathopencl}).
 #'
 #' @seealso
-#' \code{\link{diagnose_glmbayes}},
-#' \code{\link{detect_environment_and_gpus}},
-#' \code{\link{detect_compute_runtimes}},
-#' \code{\link{verify_opencl_runtime}},
-#' \code{\link{has_opencl}}.
+#' \code{\link{diagnose_glmbayes}}, \code{\link{has_opencl}},
+#' \code{\link{opencl_device_info}}, \pkg{opencltools}.
 #'
-#' Envelope construction with \code{use_opencl}: \code{\link{Ex_EnvelopeEval}}.
-#' Envelope helpers: \code{\link{Ex_EnvelopeEval}}.
-#'
-#' Full install and troubleshooting: \code{vignette("Chapter-12", package = "nmathopencl")}
-#' (\insertCite{glmbayesChapter12}{nmathopencl}); implementation notes:
-#' \insertCite{glmbayesChapterA10}{nmathopencl}.
 #' @references
 #' \insertAllCited{}
 #' @importFrom Rdpack reprompt
@@ -131,13 +59,13 @@ NULL
 #' @rdname gpu_diagnostics
 #' @order 1
 diagnose_glmbayes <- function() {
-  cat("=== glmbayes Diagnostic Report ===\n")
+  cat("=== nmathopencl OpenCL Diagnostic Report ===\n")
 
   # Step 1: Environment + GPU detection (opencltools)
-  info     <- detect_environment_and_gpus()
-  drivers  <- detect_or_install_gpu_drivers(info)
-  runtimes <- detect_compute_runtimes(info)
-  env_diag <- check_runtime_env(runtimes)
+  info     <- opencltools::detect_environment_and_gpus()
+  drivers  <- opencltools::detect_or_install_gpu_drivers(info)
+  runtimes <- opencltools::detect_compute_runtimes(info)
+  env_diag <- opencltools::check_runtime_env(runtimes)
 
   cat("Environment:", info$environment, "\n\n")
 
@@ -156,7 +84,6 @@ diagnose_glmbayes <- function() {
     rt   <- runtimes$runtimes[[gpu_vendor]]
     diag <- env_diag$diagnostics[[gpu_vendor]]
 
-    # 1. Driver check
     if (drv$installed) {
       cat("  [OK] Driver installed\n")
     } else {
@@ -165,7 +92,6 @@ diagnose_glmbayes <- function() {
         cat("    Issues:", paste(drv$issues, collapse=", "), "\n")
     }
 
-    # 2. OpenCL header/runtime presence
     hdr <- rt$opencl$headers_present
     rtm <- rt$opencl$runtime_present
     inst <- rt$opencl$installed
@@ -188,7 +114,6 @@ diagnose_glmbayes <- function() {
       cat("  [FAIL] OpenCL incomplete (missing headers or runtime)\n")
     }
 
-    # 3. PATH/lib environment validation
     paths_ok <- (length(diag$opencl$missing_path_dirs) == 0 &&
                    length(diag$opencl$missing_lib_dirs) == 0)
 
@@ -203,9 +128,8 @@ diagnose_glmbayes <- function() {
             paste(diag$opencl$missing_lib_dirs, collapse=", "), "\n")
     }
 
-    # 4. Runtime probe (Linux/WSL only)
     if (paths_ok && tolower(info$environment) %in% c("linux", "wsl")) {
-      runtime_ok <- verify_opencl_runtime(rt$opencl$lib_dirs)
+      runtime_ok <- opencltools::verify_opencl_runtime(rt$opencl$lib_dirs)
       if (runtime_ok) {
         cat("  [OK] OpenCL runtime probe succeeded (platform available)\n")
       } else {
@@ -218,7 +142,7 @@ diagnose_glmbayes <- function() {
     }
 
   } else {
-    cat("[FAIL] No supported GPU detected. glmbayes will run in CPU-only mode.\n")
+    cat("[FAIL] No supported GPU detected. CPU fallbacks remain available.\n")
   }
 
   # Step 3: Report compile-time OpenCL status (nmathopencl build)
@@ -243,9 +167,9 @@ diagnose_glmbayes <- function() {
       ans <- readline("Would you like to permanently add missing PATH dirs? [y/N]: ")
       if (tolower(ans) == "y") {
         if (tolower(info$environment) == "windows") {
-          add_to_path_windows(diag$opencl$missing_path_dirs)
+          opencltools::add_to_path_windows(diag$opencl$missing_path_dirs)
         } else {
-          add_to_path_linux(diag$opencl$missing_path_dirs)
+          opencltools::add_to_path_linux(diag$opencl$missing_path_dirs)
         }
       }
     }
@@ -256,7 +180,7 @@ diagnose_glmbayes <- function() {
       cat("   -", paste(diag$opencl$missing_lib_dirs, collapse="\n   - "), "\n")
       ans_lib <- readline("Would you like to permanently add missing library dirs to LD_LIBRARY_PATH? [y/N]: ")
       if (tolower(ans_lib) == "y") {
-        add_to_libpath_linux(diag$opencl$missing_lib_dirs)
+        opencltools::add_to_libpath_linux(diag$opencl$missing_lib_dirs)
       }
     }
   }
@@ -276,10 +200,11 @@ diagnose_glmbayes <- function() {
 
 #' @export
 #' @rdname gpu_diagnostics
-#' @order 6
+#' @order 2
 has_opencl <- function() {
   .has_opencl_cpp()
 }
+
 
 #' @describeIn gpu_diagnostics Cached OpenCL device selection for double-precision
 #'   (\code{cl_khr_fp64}) kernels: enumerates platforms and devices, prefers GPU,
@@ -299,7 +224,7 @@ has_opencl <- function() {
 #'   and optionally \code{candidates}.
 #'
 #' @export
-#' @order 7
+#' @order 3
 opencl_device_info <- function(force = FALSE, details = FALSE) {
   opencl_device_info_cpp_export(as.logical(force)[[1L]], as.logical(details)[[1L]])
 }
@@ -308,7 +233,7 @@ opencl_device_info <- function(force = FALSE, details = FALSE) {
 #'   the \code{cl_khr_fp64} extension check and build probe used for double kernels.
 #'
 #' @export
-#' @order 8
+#' @order 4
 opencl_fp64_available <- function(force = FALSE) {
   opencl_fp64_available_cpp_export(as.logical(force)[[1L]])
 }
@@ -317,7 +242,7 @@ opencl_fp64_available <- function(force = FALSE) {
 #'   so the next kernel or \code{\link{opencl_device_info}()} run re-enumerates devices.
 #'
 #' @export
-#' @order 9
+#' @order 5
 opencl_reset_device_selection <- function() {
   invisible(opencl_reset_device_selection_cpp_export())
 }
