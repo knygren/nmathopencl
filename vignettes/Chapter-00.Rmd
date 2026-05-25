@@ -104,7 +104,7 @@ the internal runner layer is documented in Chapter 09.
 |---------|------|----------------------|
 | **`nmathopencl`** (this package) | OpenCL-ported Mathlib, `*_opencl` validation API, kernel loaders, package-local device selection | `has_opencl()`, `load_kernel_*`, `diagnose_glmbayes()`, `dnorm_opencl()` |
 | **`opencltools`** ([CRAN](https://CRAN.R-project.org/package=opencltools)) | Host/runtime diagnostics and kernel-library authoring tools | `detect_environment_and_gpus()`, `verify_opencl_runtime()`, `load_library_for_kernel()`, `diagnose_glmbayes()` (opencltools-only report) |
-| **`glmbayes`** ([CRAN](https://CRAN.R-project.org/package=glmbayes)) | End-user Bayesian GLMs with optional GPU paths | `glmb()`, `use_opencl = TRUE`; see **Chapter 12** |
+| **`glmbayes`** ([CRAN](https://CRAN.R-project.org/package=glmbayes)) | End-user Bayesian GLMs with optional GPU paths | `glmb()`, `use_opencl = TRUE` |
 
 **`nmathopencl` Imports `opencltools` (>= 0.8.0).** Host inventory, driver/ICD
 checks, and PATH validation are delegated to **opencltools**; compile-time OpenCL
@@ -176,19 +176,40 @@ opencltools first, then source reinstall of nmathopencl).
 
 ## Vignette guide
 
+**Part 0: Overview**
+
 | Vignette | Topic |
 |----------|-------|
 | Chapter 00 (this document) | Package overview and architecture |
-| Chapter 01 | OpenCL enablement for nmathopencl (attach messages, opencltools dependency, source reinstall) |
-| Chapter 02 | Adding `USE_OPENCL` and `has_opencl()` to your own package (developer porting guide) |
-| Chapter 03 | Structure of nmath kernel programs: the four-layer assembly model |
-| Chapter 04 | Kernels, kernel runners, and kernel wrappers: roles and interaction |
-| Chapter 05 | The `nmath` OpenCL library (`inst/cl/nmath/`) |
-| Chapter 06 | Kernels: writing and using `__kernel` functions |
-| Chapter 07 | The `nmathopencl` R API: distribution functions on the GPU |
+
+**Part I: Getting Started**
+
+| Vignette | Topic |
+|----------|-------|
+| Chapter 01 | OpenCL enablement for `nmathopencl` (attach messages, `opencltools` dependency, source reinstall) |
+| Chapter 02 | Adding `USE_OPENCL` and `has_opencl()` to your package: `configure` scripts, `opencltools` runtime relationship |
+
+**Part II: The Library and Program Model**
+
+| Vignette | Topic |
+|----------|-------|
+| Chapter 03 | Structure of `nmath` kernel programs: the four-layer assembly model |
+| Chapter 04 | The `nmath` OpenCL library (`inst/cl/nmath/`): cycles, shims, and annotation |
+
+**Part III: Developer Guide**
+
+| Vignette | Topic |
+|----------|-------|
+| Chapter 05 | Kernels, kernel runners, and kernel wrappers: roles and interaction |
+| Chapter 06 | Integrating kernel wrappers into your codebase: CPU fallbacks and R interfaces |
+| Chapter 07 | Writing and annotating `__kernel` functions |
 | Chapter 08 | Kernel loading: `load_kernel_source` and `load_kernel_library` |
-| Chapter 09 | Internal generic OpenCL kernel runners (C++ infrastructure) |
+| Chapter 09 | Generic OpenCL kernel runners: the `openclPort` C++ infrastructure |
 | Chapter 10 | Case study: building custom GLM kernels (`ex_glmbayes`) |
-| Chapter 12 | GPU acceleration in `glmbayes` (end-user setup guide) |
-| Chapter A08 | Envelope-related functions (glmbayes example internals) |
-| Chapter A10 | Accelerated EnvelopeBuild with OpenCL |
+| Chapter 11 | Testing, debugging, and benchmarking GPU kernels |
+
+**Part IV: The R API**
+
+| Vignette | Topic |
+|----------|-------|
+| Chapter 12 | The `nmathopencl` R API: distribution functions on the GPU |

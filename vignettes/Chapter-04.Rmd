@@ -1,1046 +1,223 @@
 ---
-title: "Chapter 04: Kernels, Kernel Runners, and Kernel Wrappers"
+title: "Chapter 04: The nmath OpenCL Library"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 04: Kernels, Kernel Runners, and Kernel Wrappers}
+  %\VignetteIndexEntry{Chapter 04: The nmath OpenCL Library}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-## Introduction
+## What is `inst/cl/nmath/`?
 
-When an R package uses `nmathopencl` to accelerate a computation on the GPU,
-the work is divided among three distinct kinds of source file.  This chapter
-introduces them in the order that makes the design easiest to understand:
-starting with the part that looks most like ordinary C++ code and moving
-toward the part that is furthest from it.
+The `nmath/` subdirectory under `inst/cl/` contains a complete OpenCL C
+port of R's `nmath` (Mathlib) library --- approximately 180 `.cl` files,
+one per source file in R's `src/nmath/`. Together they implement the full
+suite of statistical distribution functions (densities, CDFs, quantiles,
+random-variate generators) and supporting mathematical helpers that make up
+R's statistical computing core.
 
-| Role | File type | Compiled by | Conditional guard | Visible to R |
-|---|---|---|---|---|
-| Kernel wrapper | `*.cpp` | Host C++ compiler, at install time | Internal `#ifdef USE_OPENCL` block | Yes (directly or via a calling function) |
-| Kernel runner | `*.cpp` | Host C++ compiler, at install time | Entire body inside `#ifdef USE_OPENCL` | No |
-| Kernel | `*.cl` | GPU driver, *at runtime* | None needed | No |
+The port is designed so that any downstream package can load a **subset** of
+this library --- just the functions it actually needs --- without pulling in the
+entire collection. The annotation scheme and dependency resolver (described
+in Chapter 08) make this automatic.
 
-Three design goals shape this structure:
+## Annotation scheme
 
-1. **CRAN safety.**  CRAN's build servers have no OpenCL SDK.  Any package
-   submitted to CRAN must compile cleanly without it.  Wrapping runner bodies
-   entirely in `#ifdef USE_OPENCL` means those functions simply do not exist
-   in a CPU-only build — there are no unresolved OpenCL symbols for the
-   linker to complain about.
-
-2. **Clean type boundaries.**  R and OpenCL use entirely different type
-   systems and memory models.  Explicit conversion at each boundary — from
-   C++ input types (including Rcpp wrapper types) to plain C++ types the
-   runner accepts, to OpenCL device buffers, and back — makes those
-   differences explicit and testable, rather than hiding them behind casts.
-
-3. **Separation of concerns.**  The wrapper owns the R interface and type
-   conversion.  The runner owns the OpenCL bookkeeping.  The kernel owns the
-   mathematical computation.  None of the three needs to know the internal
-   details of the other two.
-
-### How this chapter is organised
-
-Each of the three sections below follows the same pattern:
-
-1. A **general description** of what that role does and what varies between
-   implementations.
-2. A concrete **example** drawn from the `ex_glmbayes` component of
-   `nmathopencl`, which evaluates the GLM log-posterior and its gradient over
-   a grid of candidate coefficient vectors.  This is labelled clearly as an
-   example throughout.
-3. Commentary on **what you would change** when writing your own version.
-
-`ex_glmbayes` is used as the example rather than a simpler function because
-it involves inputs of several different shapes, a two-dimensional parallel
-structure, and two different output types.  That richness makes the
-type-conversion and parallelism stories concrete.  A simpler computation would
-follow the same pattern with fewer inputs and a simpler output.
-
----
-
-## The computation in the example: GLM log-posterior over a grid
-
-A Bayesian GLM sampler such as `glmbayes` needs to evaluate, at each MCMC
-step, a function `f2_f3(B)` for a grid of candidate coefficient vectors
-`B[1], …, B[m1]`.  For each grid point `j`, `f2_f3` returns:
-
-- `qf[j]` — a scalar: the negative log-posterior (quadratic prior term plus
-  the binomial negative log-likelihood summed over all `l1` observations).
-- `grad[, j]` — a vector of length `l2`: the gradient of `qf[j]` with respect
-  to the coefficients.
-
-The grid points are completely independent of each other, which makes the
-problem ideal for the GPU.  Three dimension integers — `l1` (observations),
-`l2` (coefficients), `m1` (grid points) — appear in all three layers and must
-be consistent throughout.
-
----
-
-## Serial vs. parallel execution: the fundamental concept
-
-Before examining the three layers in detail it is worth being precise about
-what "parallel" means here, because it is the reason the whole architecture
-exists.
-
-### The serial (CPU) mental model
-
-On a CPU, evaluating `f2_f3` over `m1` grid points looks like an ordinary
-loop:
-
-```cpp
-// CPU serial execution — one grid point at a time
-for (int j = 0; j < m1; ++j) {
-    qf[j]      = compute_neg_log_posterior(B[j], X, y, wt, mu, P, alpha);
-    grad[:, j] = compute_gradient(B[j], X, y, wt, mu, P, alpha);
-}
-```
-
-The iterations execute one after the other.  Each call to
-`compute_neg_log_posterior` must finish before the next begins.  With `m1 =
-500` and `l1 = 300`, that is 150,000 observation-level computations done
-sequentially.
-
-### The parallel (GPU) mental model
-
-OpenCL replaces the loop with a single API call that *launches all `m1`
-iterations simultaneously*:
-
-```cpp
-// GPU parallel execution — all m1 grid points launched at once
-size_t global = (size_t) m1;
-clEnqueueNDRangeKernel(queue, kernel, 1, nullptr, &global, nullptr,
-                       0, nullptr, nullptr);
-```
-
-This one call enqueues `m1` independent *work-items*.  Each work-item is an
-independent execution of the `__kernel` function, distinguished only by its
-unique index:
+Every `.cl` file in `nmath/` begins with a standard metadata block:
 
 ```c
-int j = get_global_id(0);   // 0, 1, 2, ..., m1-1 — one per work-item
+// @source_type: c
+// @source_origin: dnorm.c
+// @includes: nmath.h, dpq.h
+// @depends: nmath, dpq
+// @provides: dnorm4
+// @all_depends_count: 3
+// @all_depends: dpq, Rmath, nmath
+// @load_order: 36
 ```
 
-The GPU driver maps these work-items onto the GPU's physical compute units.
-A modern GPU has dozens to hundreds of compute units, each capable of running
-multiple work-items simultaneously.  With `m1 = 500`, several hundred grid
-points can genuinely execute at the same time, not just interleaved.
-
-The work-items are organised internally into *work-groups* for scheduling
-purposes.  When the local work-group size is set to `nullptr` (as in the
-runner), the driver chooses a group size that fits the hardware.  Work-items
-within a work-group can share fast local memory, but the `ex_glmbayes` kernels
-do not use local memory — each work-item is fully independent.
-
-### When OpenCL is not available
-
-If the package was built without `USE_OPENCL`, or if `has_opencl()` returns
-`FALSE` at runtime, the wrapper returns zero-filled output vectors.  There is
-no serial CPU fallback that computes the actual values.
-
-This is a deliberate design choice.  Implementing a correct CPU fallback that
-matches the GPU computation would mean maintaining two versions of the same
-mathematical code.  In practice, `glmbayes` calls `f2_f3_opencl` only after
-checking `has_opencl()`, and falls back to its own pure-R implementation when
-OpenCL is not available.  The zero-return convention signals clearly that the
-GPU path was not executed, rather than silently returning potentially stale or
-incorrect results.
-
-When implementing your own wrapper, you face the same choice: return zeros
-(safe, unambiguous), throw an error, or call a CPU implementation of the same
-computation.  Whatever you choose, make it explicit in the `#else` branch.
-
-### Summary
-
-| Mode | Execution | Result |
-|---|---|---|
-| GPU available (`USE_OPENCL` + `has_opencl()`) | `m1` work-items launched simultaneously via `clEnqueueNDRangeKernel` | GPU-computed values |
-| CPU-only build or no GPU at runtime | `#ifdef`/`has_opencl()` guard triggers | Zero-filled outputs (or your chosen fallback) |
-
----
-
-## The kernel wrapper
-
-### General description
-
-A kernel wrapper is an ordinary C++ function — always compiled, always
-callable — that serves as the boundary between the calling code and the GPU
-acceleration path.  It is the right place to start because it is the most
-familiar-looking of the three roles.
-
-Every kernel wrapper does the same four things, regardless of the specific
-computation:
-
-1. **Converts its C++ input types** to the plain `std::vector` types the
-   runner requires and the OpenCL API can handle.  The exact conversions
-   depend on the types in the function signature.
-2. **Allocates output storage** for the runner to write into.
-3. **Conditionally dispatches** to the runner if `USE_OPENCL` was defined at
-   build time.  If not, the function returns the zero-initialised outputs.
-4. **Converts the runner's output** from plain C++ back to the types the
-   caller expects.
-
-What varies between implementations is the **function signature** (the
-specific C++ types coming in and going out), the **conversion steps** (which
-helpers are needed), and the **output restructuring** (how flat C++ vectors
-become the return types the caller needs).  The four-step structure, and the
-`#ifdef USE_OPENCL` placement, are the same everywhere.
-
-### Example: `f2_f3_opencl` from `ex_glmbayes`
-
-The following is the kernel wrapper for the binomial-logit GLM gradient
-computation.  Read it as one concrete instance of the general pattern
-described above.
-
-```cpp
-// ── EXAMPLE: src/ex_glmbayes_kernel_wrappers.cpp ────────────────────────────
-// This wrapper is specific to the GLM log-posterior computation.
-// Your own wrapper will have a different name, a different signature,
-// and different conversion and output steps.
-// ────────────────────────────────────────────────────────────────────────────
-
-#include <RcppArmadillo.h>
-#include "openclPort.h"
-#include "ex_glmbayes_opencl.h"
-
-using namespace openclPort;
-using namespace ex_glmbayes::opencl;
-
-namespace ex_glmbayes { namespace opencl {
-
-Rcpp::List f2_f3_opencl(
-    std::string          family,   // "binomial", "poisson", etc.
-    std::string          link,     // "logit", "probit", etc.
-    Rcpp::NumericMatrix  b,        // coefficient grid, l2 × m1
-    Rcpp::NumericVector  y,        // response, length l1
-    Rcpp::NumericMatrix  x,        // design matrix, l1 × l2
-    Rcpp::NumericMatrix  mu,       // prior mean
-    Rcpp::NumericMatrix  P,        // prior precision, l2 × l2
-    Rcpp::NumericVector  alpha,    // offsets, length l1
-    Rcpp::NumericVector  wt,       // weights / trial counts, length l1
-    int                  progbar
-    // Your wrapper's parameters will reflect your own computation's
-    // inputs. A simpler function might take just one or two vectors.
-) {
-  int l1 = x.nrow(), l2 = x.ncol(), m1 = b.ncol();
-  // Your dimension variables will match your own inputs.
-```
-
-#### Step 1 — Convert C++ input types to flat `std::vector<double>`
-
-```cpp
-  // ── EXAMPLE: input conversion specific to this GLM computation ──────────
-  // The C++ types coming in (Rcpp::NumericMatrix, Rcpp::NumericVector)
-  // reflect what this particular function signature requires.
-  // Your wrapper will have different input types and will apply whichever
-  // combination of flattenMatrix / copyVector / manual conversion matches
-  // your own function signature.
-
-  auto X_flat     = flattenMatrix(x);
-  auto B_flat     = flattenMatrix(b);
-  auto mu_flat    = flattenMatrix(mu);
-  auto P_flat     = flattenMatrix(P);
-  auto alpha_flat = copyVector(alpha);
-  auto y_flat     = copyVector(y);
-  auto wt_flat    = copyVector(wt);
-```
-
-This conversion step, and the output vectors allocated next, all appear
-*outside* any `#ifdef USE_OPENCL` block.  The reason is that the output
-vectors (`qf_flat`, `grad_flat`) must be in scope after `#endif` when the
-wrapper constructs the return value from them.  Keeping all the conversions
-together, before the conditional block, makes the scoping unambiguous.
-
-**Why not pass the Rcpp objects directly to the runner?**  A
-`Rcpp::NumericMatrix` is a C++ object whose data lives in R's
-garbage-collected heap (as an R SEXP).  Passing a raw pointer into that
-storage to the OpenCL API is unsafe: the driver requires a stable, contiguous
-memory region for the duration of the `clCreateBuffer` copy, and R's GC can
-move or invalidate heap objects when control returns to R.  A
-`std::vector<double>` provides the required guarantee: it owns its memory,
-controls its lifetime through ordinary C++ scope rules, and will not move or
-be freed until the vector itself goes out of scope.
-
-**Why `double` and not `float`?**  The function signature uses `double`
-throughout because that is the native precision of `Rcpp::NumericMatrix` and
-`Rcpp::NumericVector` — and of the `double*` arrays they wrap.  Using 32-bit
-`float` inside a kernel would require explicit downcast on every input and
-upcast on every output, and each round-trip introduces rounding error that
-makes GPU results diverge from the CPU reference computation.  Using `double`
-throughout keeps the two paths numerically equivalent, at the cost of
-requiring the `cl_khr_fp64` extension on the device (supported on all current
-discrete GPUs and AMD APUs).
-
-**Memory layout.**  `Rcpp::NumericMatrix` stores its data in column-major
-order internally (matching R's own convention).  `flattenMatrix` preserves
-that order: it traverses the matrix column-by-column, so the resulting flat
-vector has the same layout.  The kernel indexes the design matrix as
-`X[col * l1 + row]` — column-major indexing — so the flat vector and the
-kernel's index arithmetic agree.  If the flat vector were row-major, every
-off-diagonal access would silently return the wrong value.
-
-```cpp
-// openclPort helpers used above (defined in OpenCL_helper.cpp):
-
-std::vector<double> flattenMatrix(const Rcpp::NumericMatrix& mat) {
-  int nrow = mat.nrow(), ncol = mat.ncol();
-  std::vector<double> out;
-  out.reserve(static_cast<size_t>(nrow) * ncol);
-  for (int j = 0; j < ncol; ++j)       // outer: columns
-    for (int i = 0; i < nrow; ++i)     // inner: rows within column
-      out.push_back(mat(i, j));
-  return out;
-}
-
-std::vector<double> copyVector(const Rcpp::NumericVector& vec) {
-  return std::vector<double>(vec.begin(), vec.end());
-}
-// For IntegerVector: std::vector<int>(v.begin(), v.end())
-```
-
-#### Step 2 — Allocate output buffers
-
-```cpp
-  // ── EXAMPLE: output sizes specific to this computation ──────────────────
-  // Your output buffers will match your kernel's output parameters.
-  // A simpler kernel writing one output vector would need only one
-  // std::vector here.
-
-  std::vector<double> qf_flat(m1);                      // scalar per grid point
-  std::vector<double> grad_flat(static_cast<size_t>(m1) * l2);  // gradient matrix
-  Rcpp::NumericVector qf(m1);   // zero-initialised; returned as-is on CPU-only build
-```
-
-`std::vector<double>` zero-initialises its elements by default.  If
-`USE_OPENCL` was not defined, the wrapper returns these zero-filled objects —
-a predictable, testable result on any machine without a GPU.  The
-`static_cast<size_t>` prevents integer overflow in `m1 * l2` on 32-bit
-platforms.
-
-#### Step 3 — Select the kernel and assemble the program string
-
-```cpp
-#ifdef USE_OPENCL
-
-  // ── EXAMPLE: family/link dispatch specific to GLM ────────────────────────
-  // This dispatch is needed here because one wrapper covers multiple
-  // GLM families. Your wrapper may call a single fixed kernel, in which
-  // case kernel_name and kernel_file are constants, not variables.
-
-  std::string kernel_name, kernel_file;
-
-  if (family == "binomial" || family == "quasibinomial") {
-    if (link == "logit") {
-      kernel_name = "f2_f3_binomial_logit";
-      kernel_file = "ex_glmbayes_src/f2_f3_binomial_logit.cl";
-    } else if (link == "probit") {
-      kernel_name = "f2_f3_binomial_probit";
-      kernel_file = "ex_glmbayes_src/f2_f3_binomial_probit.cl";
-    }
-    /* ... other link functions ... */
-  } else if (family == "poisson" || family == "quasipoisson") {
-    kernel_name = "f2_f3_poisson";
-    kernel_file = "ex_glmbayes_src/f2_f3_poisson.cl";
-  }
-  /* ... other families ... */
-
-  // ── Program string assembly (same pattern for all wrappers) ─────────────
-  // The shim libraries are always the same. What changes is the nmath
-  // subset (driven by your kernel's @all_depends_nmath annotation) and
-  // the kernel source file itself.
-
-  std::string all_src =
-      load_kernel_source("OPENCL.cl") +
-      "\n" + load_kernel_library("libR_shims",      "nmathopencl", false) +
-      "\n" + load_kernel_library("R_ext_types",     "nmathopencl", false) +
-      "\n" + load_kernel_library("R_shims",         "nmathopencl", false) +
-      "\n" + load_kernel_library("R_ext_runtime",   "nmathopencl", false) +
-      "\n" + load_kernel_library("R_ext_internals", "nmathopencl", false) +
-      "\n" + load_kernel_library("System",          "nmathopencl", false) +
-      "\n" + load_library_for_kernel(
-                 kernel_file, "ex_glmbayes_nmath", "nmathopencl",
-                 "all_depends_nmath") +
-      "\n" + load_kernel_source(kernel_file);
-```
-
-OpenCL has no `#include` directive, so the wrapper must concatenate every
-source file the kernel depends on into one string before calling the runner.
-The layers are assembled in dependency order (Chapter 03 explains each layer):
-platform definitions, R compatibility shims, the nmath subset the kernel
-needs, and finally the kernel source itself.  `load_library_for_kernel` reads
-the `@all_depends_nmath` annotation from the kernel file and loads only those
-nmath files in topological order, rather than loading all 137.
-
-#### Step 4 — Dispatch to the runner
-
-```cpp
-  // ── EXAMPLE: runner call specific to this computation ───────────────────
-  // Your call site will name your own runner function and pass your
-  // own flat vectors. The pattern — pass the assembled string, the
-  // kernel name, the dimensions, all inputs, and the output buffers —
-  // is the same.
-
-  f2_f3_kernel_runner(
-      all_src, kernel_name.c_str(),
-      l1, l2, m1,
-      X_flat, B_flat, mu_flat, P_flat, alpha_flat, y_flat, wt_flat,
-      qf_flat, grad_flat);    // filled in by the runner
-
-  for (int j = 0; j < m1; ++j)
-    qf[j] = qf_flat[j];      // copy scalar outputs into the Rcpp output vector
-
-#else
-  Rcpp::Rcout << "[INFO] OpenCL not available — returning zeros.\n";
-#endif
-```
-
-#### Step 5 — Convert outputs from plain C++ back to the required return types
-
-```cpp
-  // ── EXAMPLE: two output conversion patterns ──────────────────────────────
-  // qf   uses an element-by-element copy (clear, zero overhead for small m1).
-  // grad uses a zero-copy Armadillo wrap to avoid copying a large matrix.
-  //
-  // Your wrapper will use whichever conversion pattern matches its own
-  // return type: a copy loop or Rcpp::NumericVector(...) for a vector result,
-  // arma::mat for a matrix, or a Rcpp::List assembling multiple outputs.
-
-  arma::mat grad_arma(
-      grad_flat.data(),   // pointer to existing flat storage — not copied
-      m1,                 // number of rows
-      l2,                 // number of columns
-      false,              // copy_aux_mem = false: borrow the memory
-      false               // strict = false
-  );
-
-  return Rcpp::List::create(
-      Rcpp::Named("qf")   = qf,
-      Rcpp::Named("grad") = grad_arma
-  );
-}
-
-}} // namespace ex_glmbayes::opencl
-```
-
-**Two output conversion strategies are shown here.**
-
-*Element-by-element copy (`qf`):* the runner writes results into the plain
-`std::vector<double> qf_flat`.  After the runner returns, each element is
-copied into the `Rcpp::NumericVector qf` that was pre-allocated before the
-`#ifdef` block.  This is the clearest pattern and is effectively free when
-`m1` is small.  For larger outputs, `Rcpp::NumericVector(v.begin(), v.end())`
-achieves the same conversion in one line.
-
-*Zero-copy Armadillo wrap (`grad`):* the runner writes into
-`std::vector<double> grad_flat`.  Rather than copying all `m1 × l2` elements
-into a new matrix object, an `arma::mat` is constructed over `grad_flat`'s
-existing memory using Armadillo's `(ptr, nrow, ncol, copy_aux_mem, strict)`
-constructor.  Setting `copy_aux_mem = false` tells Armadillo to use the
-existing memory directly.  The matrix is valid until `grad_flat` is destroyed,
-which happens after `Rcpp::List::create` serialises the result — so the
-lifetime is safe.  For typical MCMC grid sizes the gradient matrix can be
-several hundred kilobytes; avoiding the copy measurably reduces per-call
-overhead.
-
-Your own wrapper will use whichever conversion matches its return type: a copy
-loop or `Rcpp::NumericVector(...)` for a vector result, an `arma::mat` wrap
-for a large matrix, or a `Rcpp::List` assembling multiple outputs.
-
----
-
-## The kernel runner
-
-### General description
-
-A kernel runner is a C++ function whose entire body is enclosed in
-`#ifdef USE_OPENCL … #endif`.  It literally does not exist in a CPU-only
-build: no prototype visible to the linker, no symbols in the object file, no
-`CL/cl.h` ever seen by the preprocessor.
-
-Every kernel runner follows the same **eight-step lifecycle**, regardless of
-what computation it performs:
-
-1. Select a device.
-2. Create a context and command queue.
-3. Compile the program on-device.
-4. Allocate device buffers and copy input data to the GPU.
-5. Bind kernel arguments.
-6. Launch the kernel.
-7. Read results back to the host (blocking).
-8. Release all resources.
-
-What varies between implementations is the **function signature** (the specific
-`std::vector` and `int` parameters matching your computation), the **number
-and arrangement of device buffers** (one `cl_mem` per kernel parameter), and
-the **number of `clSetKernelArg` calls** (one per kernel parameter, in the
-same order as the kernel's `__kernel` signature).  The eight steps and their
-sequence are the same for every runner.
-
-The runner's interface uses only plain C++ types — `std::vector<double>`,
-`int`, `std::string`, `const char*`.  It has no Rcpp dependencies and no
-knowledge of R's memory model.  This makes the runner the easiest of the
-three layers to test in isolation.
-
-### Example: `f2_f3_kernel_runner` from `ex_glmbayes`
-
-```cpp
-// ── EXAMPLE: src/ex_glmbayes_kernel_runners.cpp ─────────────────────────────
-// This runner is specific to the GLM gradient computation, which has
-// seven input matrices/vectors and two output buffers.
-// Your runner will have a different name, a different parameter list,
-// and a different number of clCreateBuffer / clSetKernelArg calls,
-// but the eight lifecycle steps will be the same.
-// ────────────────────────────────────────────────────────────────────────────
-
-#ifdef USE_OPENCL
-
-#define CL_TARGET_OPENCL_VERSION 300
-#include <CL/cl.h>
-
-#include "openclPort.h"
-using namespace openclPort;
-
-namespace ex_glmbayes { namespace opencl {
-
-void f2_f3_kernel_runner(
-    const std::string&         kernel_source,  // fully assembled program text
-    const char*                kernel_name,    // e.g. "f2_f3_binomial_logit"
-    int l1, int l2, int m1,
-    // ── EXAMPLE: seven input vectors specific to the GLM computation ────────
-    // Your runner will have whatever std::vector parameters your kernel needs.
-    // A simpler kernel might take just one or two input vectors.
-    const std::vector<double>& X_flat,
-    const std::vector<double>& B_flat,
-    const std::vector<double>& mu_flat,
-    const std::vector<double>& P_flat,
-    const std::vector<double>& alpha_flat,
-    const std::vector<double>& y_flat,
-    const std::vector<double>& wt_flat,
-    // ── EXAMPLE: two output vectors specific to this computation ────────────
-    std::vector<double>&       qf_flat,        // written back on return
-    std::vector<double>&       grad_flat       // written back on return
-) {
-```
-
-#### Step 1 — Select a device
-
-```cpp
-  cl_platform_id platform = nullptr;
-  cl_device_id   device   = nullptr;
-  opencl_bind_selected_fp64_device_or_throw(platform, device);
-  // This call is the same in every runner. It selects the device the
-  // user chose via opencltools::set_opencl_device() and verifies that
-  // it supports 64-bit floating point.
-```
-
-#### Step 2 — Create a context and command queue
-
-```cpp
-  cl_context context =
-      clCreateContext(nullptr, 1, &device, nullptr, nullptr, &status);
-
-  cl_queue_properties props[] = {0};
-  cl_command_queue queue =
-      clCreateCommandQueueWithProperties(context, device, props, &status);
-  // These two calls are identical in every runner.
-```
-
-An OpenCL *context* is the environment within which all subsequent objects
-live — buffers, programs, kernels, and queues all belong to a context and
-share access to the same device memory.  A *command queue* is the channel
-through which the host issues instructions to the device.  Commands are placed
-in the queue and the device executes them in order, asynchronously with the
-host CPU.
-
-#### Step 3 — Compile the program on-device
-
-```cpp
-  const char* src_ptr = kernel_source.c_str();
-  size_t      src_len = kernel_source.size();
-  cl_program  program =
-      clCreateProgramWithSource(context, 1, &src_ptr, &src_len, &status);
-
-  status = clBuildProgram(program, 0, nullptr, nullptr, nullptr, nullptr);
-  // These calls are identical in every runner. If compilation fails,
-  // the runner retrieves the build log from the driver and throws a
-  // std::runtime_error with the full diagnostic.
-
-  cl_kernel kernel = clCreateKernel(program, kernel_name, &status);
-  // kernel_name is the C-string name of the __kernel function in the
-  // .cl file — passed in from the wrapper.
-```
-
-`clBuildProgram` triggers on-device compilation: the GPU driver parses the
-OpenCL C source, optimises it, and produces GPU-native machine code specific
-to the selected device.  This is analogous to `R CMD SHLIB` but happens at
-runtime inside the GPU driver process.  `clCreateKernel` then extracts the
-specific `__kernel` function by name from the compiled program.
-
-#### Step 4 — Allocate device buffers and transfer input data
-
-```cpp
-  // ── EXAMPLE: nine buffers specific to this computation ──────────────────
-  // Your runner will have one cl_mem per kernel parameter (excluding
-  // scalar integers, which are passed directly in Step 5).
-  // The split between READ_ONLY and WRITE_ONLY reflects the kernel's
-  // use of each buffer.
-
-  // Input buffers: allocate and copy from host in one call
-  cl_mem bufX = clCreateBuffer(
-      context,
-      CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-      sizeof(double) * X_flat.size(),
-      (void*) X_flat.data(),
-      &status);
-  // ... similarly for bufB, bufMu, bufP, bufA, bufY, bufW ...
-
-  // Output buffers: allocate uninitialized device memory
-  cl_mem bufQF = clCreateBuffer(
-      context,
-      CL_MEM_WRITE_ONLY,
-      sizeof(double) * m1,
-      nullptr,     // no initial data — the kernel will write here
-      &status);
-
-  cl_mem bufGrad = clCreateBuffer(
-      context,
-      CL_MEM_WRITE_ONLY,
-      sizeof(double) * l2 * m1,
-      nullptr,
-      &status);
-```
-
-For *input* buffers, `CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR` allocates
-device memory and immediately copies the flat vector's data into it.  After
-this call returns, the device buffer is fully populated and the host-side
-vector is no longer needed by the driver.
-
-For *output* buffers, `CL_MEM_WRITE_ONLY` with a `nullptr` host pointer
-allocates uninitialised device memory that the kernel will write into.  The
-results are read back to the host after execution.
-
-#### Step 5 — Bind kernel arguments
-
-```cpp
-  // ── EXAMPLE: twelve arguments for this kernel ────────────────────────────
-  // Your runner will have one clSetKernelArg call per kernel parameter,
-  // in the exact same order as the parameters appear in the __kernel
-  // function signature. Mismatched order causes a runtime error.
-
-  int arg = 0;
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufX);
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufB);
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufMu);
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufP);
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufA);
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufY);
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufW);
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufQF);
-  clSetKernelArg(kernel, arg++, sizeof(cl_mem), &bufGrad);
-  // Scalar integers are passed by value, not as cl_mem handles:
-  clSetKernelArg(kernel, arg++, sizeof(int),    &l1);
-  clSetKernelArg(kernel, arg++, sizeof(int),    &l2);
-  clSetKernelArg(kernel, arg++, sizeof(int),    &m1);
-```
-
-`clSetKernelArg` connects a host-side value to a positional parameter in the
-kernel's `__kernel` signature.  The second argument is the zero-based
-parameter index.  Buffer arguments (`cl_mem`) are passed by address; scalar
-arguments (`int`, `double`) are also passed by address and the driver copies
-the value.  The count and order of calls here must exactly mirror the count
-and order of parameters in the `.cl` file.
-
-#### Step 6 — Launch the kernel
-
-```cpp
-  // The global work size is the total number of work-items to launch.
-  // For this computation it is m1: one independent instance of the kernel
-  // function per grid point. All m1 instances are launched simultaneously
-  // (see "Serial vs. parallel execution" earlier in this chapter).
-  // Your kernel may use a different global size reflecting its own
-  // parallelism structure — e.g. the number of output elements.
-
-  size_t global = (size_t) m1;
-  clEnqueueNDRangeKernel(
-      queue, kernel,
-      1,          // one-dimensional work space (indexed by j = 0..m1-1)
-      nullptr,    // global offset: start from index 0
-      &global,    // total work-items: m1
-      nullptr,    // local work-group size: let the driver choose
-      0, nullptr, nullptr);
-  // This call places the launch command in the queue and returns immediately.
-  // The GPU executes the m1 work-items asynchronously with the host CPU.
-  // The blocking clEnqueueReadBuffer in Step 7 is what forces the host to
-  // wait until all work-items have finished before reading the results.
-```
-
-#### Step 7 — Read results back to the host (blocking)
-
-```cpp
-  // ── EXAMPLE: two read-backs for this computation ─────────────────────────
-  // Your runner will have one clEnqueueReadBuffer call per output buffer.
-
-  clEnqueueReadBuffer(
-      queue, bufQF,
-      CL_TRUE,                              // blocking: wait until done
-      0,
-      sizeof(double) * qf_flat.size(),
-      qf_flat.data(),
-      0, nullptr, nullptr);
-
-  clEnqueueReadBuffer(
-      queue, bufGrad,
-      CL_TRUE,
-      0,
-      sizeof(double) * grad_flat.size(),
-      grad_flat.data(),
-      0, nullptr, nullptr);
-  // After these calls, qf_flat and grad_flat contain GPU-computed results.
-```
-
-`CL_TRUE` makes each call blocking: it waits until the data transfer from
-device to host is complete.  Because commands execute in queue order, this
-also guarantees that the kernel has finished.
-
-#### Step 8 — Release all resources
-
-```cpp
-  // Release in reverse order of creation.
-  // Every runner must release every cl_mem, cl_kernel, cl_program,
-  // cl_command_queue, and cl_context it creates. Omissions leak GPU VRAM.
-
-  clReleaseMemObject(bufGrad);
-  clReleaseMemObject(bufQF);
-  clReleaseMemObject(bufW);
-  clReleaseMemObject(bufY);
-  clReleaseMemObject(bufA);
-  clReleaseMemObject(bufP);
-  clReleaseMemObject(bufMu);
-  clReleaseMemObject(bufB);
-  clReleaseMemObject(bufX);
-  clReleaseKernel(kernel);
-  clReleaseProgram(program);
-  clReleaseCommandQueue(queue);
-  clReleaseContext(context);
-}
-
-}} // namespace ex_glmbayes::opencl
-
-#endif // USE_OPENCL
-// Everything from the opening #ifdef to this #endif is invisible to the
-// preprocessor on a machine without OpenCL.
-```
-
----
-
-## The kernel (`*.cl`)
-
-### General description
-
-A kernel is an OpenCL C source file that contains the actual computation to
-be run on the GPU.  It is the innermost piece: pure math, with no knowledge
-of R, no knowledge of the runner's bookkeeping, and no access to host memory.
-Its only interface with the outside world is the set of `__global` pointer
-and scalar arguments the runner hands to it via `clSetKernelArg`.
-
-Every kernel file has the same basic structure, regardless of the
-computation:
-
-1. **Annotation header** — comment lines with `@all_depends_nmath` (and
-   optionally `@depends`, `@provides`) that the wrapper's program assembler
-   reads to determine which nmath files to prepend.  If your kernel does not
-   call any nmath functions, this section can be omitted.
-2. **Extension pragmas** — at minimum `#pragma OPENCL EXTENSION cl_khr_fp64 :
-   enable` if the kernel uses `double`.
-3. **Helper functions** — any `static inline` device-side functions called
-   by the `__kernel` entry point, including nmath functions that will be
-   prepended by the assembler.
-4. **`__kernel` entry point** — the function the runner calls via
-   `clCreateKernel`.
-
-What varies between kernels is the **`__kernel` signature** (one `__global`
-parameter per device buffer allocated in the runner), the **scalar parameters**
-(dimension integers and other constants), and the **computation itself**.
-
-A kernel is never compiled when the R package is installed.  Instead, the
-source text is assembled into a string by the wrapper, passed to the runner,
-and handed to `clCreateProgramWithSource`.  The GPU driver compiles it to
-native machine code at runtime.  This *on-device compilation* allows a single
-source file to run on any GPU without vendor-specific binaries.
-
-### Example: `f2_f3_binomial_logit` from `ex_glmbayes`
-
-```c
-// ── EXAMPLE: inst/cl/ex_glmbayes_src/f2_f3_binomial_logit.cl ───────────────
-// This kernel is specific to the binomial-logit GLM gradient computation.
-// Your kernel will have a different name, a different parameter list
-// (matching the device buffers your runner allocates), and a different
-// computation. The file structure — annotations, pragma, helpers,
-// __kernel entry point — is the same.
-// ────────────────────────────────────────────────────────────────────────────
-
-// @all_depends_nmath: dpq, refactored, Rmath, nmath, stirlerr_cycle_free,
-//   chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma,
-//   pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom
-// If your kernel calls no nmath functions, omit this annotation entirely.
-
-#pragma OPENCL EXTENSION cl_khr_fp64 : enable
-// Required whenever the kernel uses 'double'. Always include this.
-
-#pragma OPENCL EXTENSION cl_khr_printf : enable
-// Optional; enables printf() for debugging inside the kernel.
-
-// ── EXAMPLE: compile-time constant specific to this computation ─────────────
-// MAX_L2 bounds the size of the per-work-item private array g_loc[].
-// GPU private memory is fixed at compile time, so a maximum is needed.
-// Your kernel may need a similar constant if it uses fixed-size local arrays,
-// or may not need one at all if its private storage is scalar.
-#define MAX_L2 64
-```
-
-**`@all_depends_nmath`** lists the nmath files whose source must be prepended
-before this kernel when the program string is assembled.  The wrapper's
-`load_library_for_kernel` reads this annotation and loads exactly those files
-in topological order.  Chapter 03 explains the annotation scheme and the
-dependency graph in detail.
-
-**`MAX_L2`** bounds the size of a per-work-item stack array.  Each work-item
-allocates `double g_loc[MAX_L2]` in *private memory* — the GPU equivalent of
-a register file — whose size must be known at compile time.  A maximum
-coefficient count of 64 is sufficient for the GLM use case.  Your kernel may
-need a similar constant, or may not require any fixed-size private arrays at
-all.
-
-#### The kernel signature
-
-```c
-// ── EXAMPLE: parameter list matching the nine buffers allocated in the runner
-// Your kernel's __global parameters must exactly correspond (in number,
-// type, and order) to the cl_mem buffers created by clCreateBuffer in the
-// runner and bound by clSetKernelArg.
-
-__kernel void f2_f3_binomial_logit(
-    __global const double* X,      // design matrix, l1 × l2, column-major
-    __global const double* B,      // coefficient grid, m1 × l2
-    __global const double* mu,     // prior mean vector, length l2
-    __global const double* P,      // prior precision matrix, l2 × l2
-    __global const double* alpha,  // offsets, length l1
-    __global const double* y,      // response (success proportions), length l1
-    __global const double* wt,     // trial counts / weights, length l1
-    __global double*       qf,     // OUTPUT: neg log-posterior, length m1
-    __global double*       grad,   // OUTPUT: gradient, m1 × l2
-    const int l1,
-    const int l2,
-    const int m1
-    // Scalar integers are passed by value; no __global qualifier.
-) {
-```
-
-**`__kernel`** marks this function as a GPU entry point that `clCreateKernel`
-can look up by name.
-
-**`__global`** is an OpenCL address-space qualifier.  It marks a pointer as
-pointing into *global device memory* — the GPU's main VRAM — which all
-work-items can access.  Pointers without an address-space qualifier point into
-the work-item's private memory, which is invisible to other work-items and
-cannot be mapped from the host.  Every `cl_mem` buffer created in the runner
-corresponds to exactly one `__global` pointer in the kernel signature.
-
-**`const int l1, l2, m1`** are scalar values set via `clSetKernelArg` with
-`sizeof(int)` and passed by value.  Scalar kernel arguments do not use
-`__global`.
-
-#### The parallel execution body
-
-```c
-    int j = get_global_id(0);   // which grid point is this work-item?
-    if (j >= m1) return;        // guard: don't process out-of-range indices
-    // Your kernel's first line will also call get_global_id(0) to determine
-    // which element or slice this work-item is responsible for.
-```
-
-`get_global_id(0)` returns the unique index of this work-item within the
-one-dimensional work space.  When the runner enqueues the kernel with a global
-size of `m1`, the GPU launches `m1` work-items simultaneously, each receiving
-a different value of `j`.  Each work-item executes the function body
-independently for its own grid point.  This is the GPU's answer to the CPU's
-outer `for (j = 0; j < m1; j++)` loop.
-
-The `if (j >= m1) return` guard handles the case where the GPU rounds up the
-number of work-items to a multiple of the hardware's work-group size.  Without
-this guard, extra work-items would write past the end of the output buffers.
-
-```c
-    // ── EXAMPLE: GLM log-posterior and gradient ───────────────────────────
-    // The computation below is specific to the binomial-logit model.
-    // Your kernel body will contain whatever computation you are
-    // accelerating, reading from __global input pointers and writing
-    // to __global output pointers.
-
-    double g_loc[MAX_L2];   // private (per-work-item) working storage
-
-    // 1. Quadratic prior term: 0.5 × (B[j,] − μ)ᵀ P (B[j,] − μ)
-    // 2. Binomial likelihood loop over l1 observations
-    // 3. Write results
-
-    qf[j] = res_acc;
-
-    for (int k = 0; k < l2; ++k)
-        grad[k * m1 + j] = g_loc[k];
-    // grad is stored as grad[col * m1 + row] — column-major — so that
-    // the wrapper's arma::mat(ptr, m1, l2) interprets it correctly.
-    // Your output layout should match how your wrapper will read it back.
-```
-
-The gradient is written in column-major order (`grad[col * m1 + row]`) so
-that the `arma::mat(grad_flat.data(), m1, l2)` construction in the wrapper
-produces an `m1 × l2` matrix in the layout R expects.  The decision about
-output memory layout is made in the kernel and must be consistent with how
-the wrapper reads the data back.
-
----
-
-## The complete call chain
+| Tag | Meaning |
+|-----|---------|
+| `@source_type` | Always `c` for nmath ports |
+| `@source_origin` | The original C source file in R's `src/nmath/` |
+| `@includes` | Headers included in the original C file |
+| `@depends` | **Direct** file dependencies (`.cl` filenames without extension) |
+| `@provides` | Functions defined in this file |
+| `@all_depends` | Full transitive closure of dependencies (union over the DAG) |
+| `@all_depends_count` | Number of entries in `@all_depends` |
+| `@load_order` | Pre-computed position in the topologically sorted order |
+
+The `@depends` tag is what `load_kernel_library()` uses to sort files. The
+`@all_depends` tag is informational --- it documents the complete dependency
+set so that a developer extracting a minimal subset knows exactly which files
+to include.
+
+## File families
+
+The ~180 files are organized by function family. The table below shows
+representative entries for the main families.
+
+### Infrastructure / header files
+
+| File | Provides |
+|------|----------|
+| `nmath.cl` | Library header: constants, macros, error codes |
+| `Rmath.cl` | Forward declarations for all Mathlib functions |
+| `dpq.cl` | `R_D__0`, `R_D__1`, `R_DT_0`, `R_DT_1`, `R_D_Lval`, ... (log-prob helpers) |
+| `refactored.cl` | Forward declarations for cycle-broken functions |
+
+### Core math helpers
+
+| File | Provides |
+|------|----------|
+| `chebyshev.cl` | `chebyshev_init`, `chebyshev_eval` |
+| `cospi.cl` | `cospi`, `sinpi`, `tanpi` |
+| `fmax2.cl` | `fmax2` |
+| `fmin2.cl` | `fmin2` |
+| `gammalims.cl` | `gammalims` |
+| `lgammacor.cl` | `lgammacor` |
+| `lgamma.cl` | `lgammafn`, `lgammafn_sign` |
+| `gamma.cl` | `gammafn` |
+| `stirlerr.cl` | `stirlerr` |
+| `bd0.cl` | `bd0`, `ebd0` |
+| `pgamma_utils.cl` | `log1pmx`, `lgamma1p` |
+| `mlutils.cl` | `log1pexp`, `log1mexp`, `logspace_add`, `logspace_sub` |
+| `expm1.cl` | `expm1` (if not an OpenCL built-in) |
+| `log1p.cl` | `log1p` (if not an OpenCL built-in) |
+
+### Density functions (`d*`)
+
+| File | Provides |
+|------|----------|
+| `dnorm.cl` | `dnorm4` |
+| `dgamma.cl` | `dgamma` |
+| `dbinom.cl` | `dbinom_raw`, `dbinom` |
+| `dpois.cl` | `dpois_raw`, `dpois` |
+| `dbeta.cl` | `dbeta` |
+| `dt.cl` | `dt` |
+| `df.cl` | `df` |
+| `dnbinom.cl` | `dnbinom`, `dnbinom_mu` |
+| `dchisq.cl` | `dchisq` |
+| `dexp.cl` | `dexp` |
+| `dweibull.cl` | `dweibull` |
+| `dlnorm.cl` | `dlnorm` |
+| `dlogis.cl` | `dlogis` |
+| `dcauchy.cl` | `dcauchy` |
+| `dunif.cl` | `dunif` |
+| `dhyper.cl` | `dhyper` |
+| `dgeom.cl` | `dgeom` |
+| `dnt.cl` | `dnt` (noncentral t) |
+| `dnf.cl` | `dnf` (noncentral F) |
+| `dnchisq.cl` | `dnchisq` (noncentral chi-sq) |
+| `dnbeta.cl` | `dnbeta` (noncentral beta) |
+
+### CDF functions (`p*`)
+
+Similar coverage for `pnorm.cl`, `pgamma.cl`, `pbinom.cl`, `ppois.cl`,
+`pbeta.cl`, `pt.cl`, `pf.cl`, etc. Each file ports the corresponding
+`p<dist>.c` from R's source.
+
+### Quantile functions (`q*`)
+
+`qnorm.cl`, `qgamma.cl`, `qbinom.cl`, `qpois.cl`, `qbeta.cl`, `qt.cl`,
+`qf.cl`, etc. Discrete quantile functions use a shared binary-search
+helper in `qDiscrete_search.cl`.
+
+### Random-variate generators (`r*`)
+
+`rnorm.cl`, `rgamma.cl`, `rbinom.cl`, `rpois.cl`, `rbeta.cl`, `rt.cl`,
+`runif.cl`, etc. These files define the device-side generator logic; the
+actual RNG seed and state management is handled by the host-side kernel
+runner.
+
+### Special functions
+
+| File | Provides |
+|------|----------|
+| `beta.cl` | `beta` (beta function) |
+| `lbeta.cl` | `lbeta` |
+| `choose.cl` | `choose`, `lchoose` |
+| `polygamma.cl` | `psigamma`, `digamma`, `trigamma`, ... |
+| `toms708.cl` | Incomplete beta (TOMS 708 algorithm) |
+| `bessel.cl` | `bessel_i`, `bessel_j`, `bessel_k`, `bessel_y` |
+| `signrank.cl` | `dsignrank`, `psignrank`, `qsignrank`, `rsignrank` |
+| `wilcox.cl` | `dwilcox`, `pwilcox`, `qwilcox`, `rwilcox` |
+
+### Additional utilities
+
+| File | Provides |
+|------|----------|
+| `fprec.cl`, `fround.cl`, `ftrunc.cl`, `fsign.cl` | Rounding/truncation |
+| `imax2.cl`, `imin2.cl` | Integer min/max |
+| `sign.cl` | `sign` |
+| `d1mach.cl`, `i1mach.cl` | Machine constants (BLAS-era helpers) |
+| `r_check_user_interrupt.cl` | Stub for interrupt checking |
+| `sexp.cl`, `snorm.cl`, `sunif.cl` | Alternative RNG implementations |
+
+## Cycle-breaking artifacts
+
+OpenCL compiles a program as a **single translation unit**: every function
+must be defined before it is called (no forward-declaration headers, no
+separate compilation). A handful of the nmath C files are mutually
+recursive in ways that C handles via separate compilation but OpenCL cannot.
+
+`nmathopencl` resolves these cycles by splitting the offending source file
+into two `.cl` files:
 
 ```
-R:  f2_f3_opencl("binomial", "logit", b, y, x, mu, P, alpha, wt)
-      │
-      ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Kernel wrapper  (always compiled, always callable)             │
-│                                                                 │
-│  1. Read dimensions                                             │
-│  2. Convert Rcpp inputs → std::vector<double>                   │
-│     (flattenMatrix for matrices, copyVector for vectors)        │
-│  3. Allocate zero-filled output vectors                         │
-│  4. Select kernel name + file (family/link dispatch)            │
-│  5. Assemble program string                                     │
-│     (OPENCL.cl + shims + nmath subset + kernel source)          │
-│                                                                 │
-│  ── #ifdef USE_OPENCL ──────────────────────────────────────── │
-│  6. Call f2_f3_kernel_runner(all_src, kernel_name, ...)         │
-│  7. Copy qf_flat → NumericVector qf                             │
-│  ── #endif ─────────────────────────────────────────────────── │
-│                                                                 │
-│  8. Wrap grad_flat → arma::mat (zero-copy)                      │
-│  9. Return List(qf = ..., grad = ...)                           │
-└─────────────────────────────────────────────────────────────────┘
-      │  std::vector<double>: flat, contiguous, R-free, device-safe
-      │  (only reached when USE_OPENCL is defined)
-      ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Kernel runner  (compiled only when USE_OPENCL is defined)      │
-│                                                                 │
-│  1. Bind device (fp64-capable GPU)                              │
-│  2. Create context + command queue                              │
-│  3. clCreateProgramWithSource + clBuildProgram                  │
-│     → GPU driver compiles the assembled string on-device        │
-│  4. clCreateKernel("f2_f3_binomial_logit")                      │
-│  5. clCreateBuffer × 9                                          │
-│     inputs:  READ_ONLY | COPY_HOST_PTR → data copied to VRAM   │
-│     outputs: WRITE_ONLY, nullptr → uninitialised device memory  │
-│  6. clSetKernelArg × 12  (9 buffers + l1, l2, m1)              │
-│  7. clEnqueueNDRangeKernel(global_size = m1)                    │
-│     → queues the launch; GPU executes asynchronously            │
-│  8. clEnqueueReadBuffer × 2 (blocking)                          │
-│     → waits for GPU; copies results to qf_flat, grad_flat       │
-│  9. clRelease* for all objects                                  │
-└─────────────────────────────────────────────────────────────────┘
-      │  clEnqueueNDRangeKernel(global = m1):
-      │  ALL m1 work-items launched simultaneously — not a loop
-      ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Kernel  (compiled on-device; m1 instances run in parallel)     │
-│                                                                 │
-│  Each work-item  j = get_global_id(0)  independently:           │
-│    • quadratic prior term  qf[j] += 0.5 × (B[j,]−μ)ᵀP(B[j,]−μ)│
-│    • for i in 0..l1:  sigmoid → p                               │
-│                        nll_binomial_glmb_ocl(y[i], wt[i], p)    │
-│                        gradient accumulation → g_loc[k]          │
-│    • qf[j] = res_acc                                            │
-│    • grad[k*m1 + j] = g_loc[k]  for k in 0..l2                 │
-└─────────────────────────────────────────────────────────────────┘
-      │
-      └─► qf_flat, grad_flat  ←  runner  ←  wrapper  ←  R
+stirlerr.c  ->  stirlerr_cycle_free.cl      (no forward references)
+               stirlerr_cycle_dependent.cl  (calls the forward-declared part)
+               refactored.cl               (forward declarations only)
 ```
 
----
+`refactored.cl` contains `extern`-style forward declarations so that the
+cycle-dependent portion can reference symbols that appear later in the
+concatenated source. The `@depends` tags ensure the three files are loaded
+in the correct order: `refactored` -> `stirlerr_cycle_free` ->
+`stirlerr_cycle_dependent` -> `stirlerr`.
 
-## CRAN safety: how the architecture prevents build failures
+Similarly, `bessel_j` and `bessel_y` are each split into `*_cycle_free.cl`
+and `*_cycle_dependent.cl` for the same reason.
 
-CRAN's build servers have no OpenCL SDK installed.  A package that includes
-`CL/cl.h` or links against `-lOpenCL` on a CRAN server will fail to build
-and be rejected.
+## The `ex_glmbayes_nmath/` subset
 
-The runner being entirely absent from CPU-only builds is the critical property:
-
-- `#include <CL/cl.h>` appears only at the top of the runner file, inside
-  `#ifdef USE_OPENCL`.  On a CRAN build the preprocessor never reaches that
-  line.
-- Every `cl_*` type and every `clCreate*` / `clEnqueue*` call lives inside
-  the same `#ifdef` block.  None of them generate any object-code symbols.
-- The linker therefore never looks for `-lOpenCL` and the build succeeds on
-  any machine.
-
-The wrapper being unconditionally compiled means the full C++ API surface is
-present on every build.  On a CPU-only build, `f2_f3_opencl` returns a list
-with `qf` and `grad` both zero — the same structure the caller expects, with
-zero values instead of GPU-computed values — making it straightforward to test
-the function's existence and return shape without a GPU.
-
----
-
-## Applying the pattern in your package
-
-### File layout
+Because the full `nmath/` library is large (~180 files), the package also
+ships a pre-curated minimal subset in `inst/cl/ex_glmbayes_nmath/` ---
+exactly the 20 files needed by the six `glmbayes` kernels:
 
 ```
-src/
-  mypkg_kernel_wrappers.cpp   # always compiled; internal #ifdef USE_OPENCL
-  mypkg_kernel_runners.cpp    # all function bodies inside #ifdef USE_OPENCL
-inst/cl/
-  mypkg_src/
-    myfunction_kernel.cl      # __kernel + @all_depends_nmath annotation
+Rmath.cl, nmath.cl, refactored.cl,
+chebyshev.cl, cospi.cl, fmax2.cl, gammalims.cl, lgammacor.cl,
+gamma.cl, lgamma.cl,
+stirlerr_cycle_free.cl, pgamma_utils.cl, stirlerr_cycle_dependent.cl,
+stirlerr.cl, bd0.cl,
+dpois.cl, dgamma.cl, dnorm.cl, pnorm.cl, dbinom.cl
 ```
 
-### Type conversion reference
+This subset is determined by the `@all_depends` metadata in the six kernel
+files. Chapter 10 shows how to perform this extraction for a new downstream
+package.
 
-For inputs (wrapper converts C++ input types → `std::vector` before calling
-the runner):
+## Porting fidelity
 
-| C++ input type | Conversion | Runner argument type |
-|---|---|---|
-| `Rcpp::NumericVector` | `copyVector(v)` | `const std::vector<double>&` |
-| `Rcpp::NumericMatrix` | `flattenMatrix(m)` | `const std::vector<double>&` |
-| `Rcpp::IntegerVector` | `std::vector<int>(v.begin(), v.end())` | `const std::vector<int>&` |
+The port aims for bit-for-bit equivalence with the CPU nmath results on
+IEEE 754 hardware. The main sources of deviation are:
 
-For outputs (wrapper converts `std::vector` → required return types after the
-runner returns):
-
-| Return type needed | Conversion from `std::vector<double>` | When to use |
-|---|---|---|
-| `Rcpp::NumericVector` (small) | `for (j) out[j] = flat[j]` | Clarity |
-| `Rcpp::NumericVector` (large) | `Rcpp::NumericVector(v.begin(), v.end())` | Conciseness |
-| `arma::mat` / `Rcpp::NumericMatrix` | `arma::mat(ptr, nrow, ncol, false, false)` | Avoid large copy |
-
-### Headers and `DESCRIPTION`
-
-- **Wrapper files:** include `openclPort.h` (for `load_kernel_source`,
-  `load_library_for_kernel`, `flattenMatrix`, `copyVector`) and
-  `RcppArmadillo.h` if returning matrices.
-- **Runner files:** include `openclPort.h` unconditionally; include
-  `CL/cl.h` inside `#ifdef USE_OPENCL`.
-- **`DESCRIPTION`:** add `nmathopencl` to `LinkingTo`; add
-  `Imports: Rcpp, RcppArmadillo` as appropriate.
-
-Chapter 09 covers the generic `openclPort` runner infrastructure — device
-selection, scalar and matrix runner templates, and error handling — in detail.
-Chapter 10 applies this full three-role pattern end-to-end for all five
-`ex_glmbayes` gradient kernels.
+1. **Compiler flags**: the OpenCL compiler may reorder floating-point
+   operations unless `-cl-fp64-round-to-nearest` is specified. The
+   `OpenCLConfig` struct in `openclPort.h` probes the device and sets
+   appropriate build flags.
+2. **Built-in precision**: some OpenCL devices implement `sqrt`, `exp`, and
+   `log` with 1 ULP error (IEEE 754 guarantees exactly rounded); others
+   allow slightly more. In practice, deviations are below numerical
+   tolerance for all statistical applications.
+3. **OpenCL built-ins**: functions like `lgamma`, `tgamma`, `expm1`, and
+   `log1p` are part of the OpenCL 1.1+ specification and do **not** need to
+   be ported. The corresponding `.cl` files include `#ifndef` guards so
+   that the ported version is only compiled if the built-in is absent.

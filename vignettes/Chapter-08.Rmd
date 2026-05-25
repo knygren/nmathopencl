@@ -153,7 +153,7 @@ The standard fix is to split one of the mutually dependent files into two:
 - A `refactored.cl` that provides forward declarations for any symbols
   referenced before they are defined.
 
-Chapter 05 describes the three specific cycles in the nmath library and how
+Chapter 04 describes the three specific cycles in the nmath library and how
 they are resolved.
 
 ## Assembling a complete program

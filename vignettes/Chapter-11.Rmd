@@ -1,0 +1,74 @@
+---
+title: "Chapter 11: Testing, Debugging, and Benchmarking GPU Kernels"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Chapter 11: Testing, Debugging, and Benchmarking GPU Kernels}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This chapter covers strategies for verifying correctness, diagnosing failures,
+and measuring performance of OpenCL kernel code developed on top of
+`nmathopencl`.
+
+## Correctness testing
+
+Because every kernel wrapper contains a CPU fallback path, the most reliable
+testing strategy compares the OpenCL output against the CPU reference
+output on the same inputs.  Standard R unit-test frameworks (`testthat`,
+`tinytest`) work directly --- write tests that call the wrapper function and
+assert numerical agreement within an appropriate tolerance (typically
+`.Machine$double.eps^0.5` for `double`-precision kernels).
+
+Key points:
+
+* Always run the full test suite with **OpenCL disabled** (no driver, or
+  `has_opencl() == FALSE`) as well as with it enabled.  This ensures the
+  fallback path is also covered.
+* Use `opencltools::verify_opencl_runtime()` as a pre-condition guard in
+  any test that requires an active OpenCL device.
+* Numerical differences between GPU and CPU results arise from non-associative
+  floating-point reduction order and from `float` vs `double` precision.
+  Document your tolerance assumptions.
+
+## Debugging kernel failures
+
+When a kernel fails to compile or execute, the OpenCL runtime reports an error
+code.  `nmathopencl` propagates these as R errors via `stop()`.  Common
+causes:
+
+* **Build failure** --- syntax error in the `.cl` source.  Inspect the build
+  log returned by `clGetProgramBuildInfo`; `nmathopencl` includes it in the
+  error message.
+* **Device not found** --- no ICD-registered device matches the requested
+  type.  Call `opencltools::gpu_names()` to list available devices.
+* **Buffer size mismatch** --- the NDRange size does not match the buffer
+  allocation.  Check that global work size equals the number of output
+  elements.
+* **Precision loss** --- intermediate results computed in `float` instead of
+  `double`.  Verify that the `cl_khr_fp64` pragma is present and that all
+  literals are written as `1.0` (not `1.0f`).
+
+## Benchmarking
+
+Use `bench::mark()` or `microbenchmark::microbenchmark()` to compare the
+GPU path against the CPU fallback.  A few guidelines:
+
+* **Warm up** --- the first call to any kernel incurs compilation overhead
+  (`clBuildProgram`).  Exclude the first iteration or run a warm-up call
+  before timing.
+* **Problem size** --- GPU parallelism pays off only for large work sizes
+  (typically $N \gtrsim 10^4$).  Benchmark across a range of $N$ values.
+* **Transfer cost** --- host-to-device and device-to-host buffer copies
+  (`clEnqueueWriteBuffer` / `clEnqueueReadBuffer`) are included in the
+  wrapper timing.  For latency-sensitive use cases, consider whether the
+  data can remain on the device between calls.
+* **Baseline** --- compare against both the `nmathopencl` CPU fallback and
+  the upstream `stats::` function to understand relative overheads.

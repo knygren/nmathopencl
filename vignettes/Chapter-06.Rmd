@@ -1,201 +1,422 @@
 ---
-title: "Chapter 06: Kernels --- Writing and Using OpenCL Kernel Files"
+title: "Chapter 06: Integrating Kernel Wrappers into Your Codebase"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 06: Kernels --- Writing and Using OpenCL Kernel Files}
+  %\VignetteIndexEntry{Chapter 06: Integrating Kernel Wrappers into Your Codebase}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## What is a kernel?
+## Introduction
 
-An OpenCL **kernel** is the entry point that executes on the GPU. It is
-declared with the `__kernel` qualifier and is compiled at runtime (by the
-OpenCL driver) from a source string assembled by the host program. Each
-invocation of the kernel processes one work-item --- typically one element of
-an output array --- in parallel with all other work-items.
+Chapter 05 described the internal structure of a kernel wrapper: how inputs
+are converted, how the runner is dispatched, and how results are converted
+back.  This chapter takes a step back and looks at how kernel wrappers fit
+into the broader codebase of a package.
 
-In `nmathopencl`, kernels live in `inst/cl/src/`. Each file defines exactly
-one `__kernel void` function. The file name follows the pattern
-`<function>_kernel.cl`; for example, `dnorm_kernel.cl` implements the
-vectorized density computation for the normal distribution.
+Two questions arise immediately:
 
-## Anatomy of a simple kernel
+1. **What happens when OpenCL is not available?**  Every kernel wrapper must
+   have a CPU path.  A wrapper that simply returns zeros is safe but
+   unhelpful; most real wrappers need to fall back to a correct CPU
+   computation.
 
-```c
-// dnorm_kernel.cl
-// Vectorized wrapper kernel for the public Mathlib dnorm interface.
+2. **How is the wrapper exposed?**  Some kernel wrappers have a direct
+   interface into R (callable from R code).  Others are purely internal C++
+   components, called by other C++ functions that hold the R-facing API.
+   The choice depends on whether the computation has a natural direct R use.
 
-#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+`nmathopencl` contains examples of both patterns.  The distribution-function
+wrappers (`dnorm_opencl`, `pnorm_opencl`, etc.) are exported R functions with
+rich CPU fallback logic.  The GLM gradient wrapper (`f2_f3_opencl`) is a
+purely internal C++ component, called by a C++ dispatcher that also has a
+separate CPU implementation (`f2_f3_non_opencl`).  Both patterns are explored
+in detail below.
 
-__kernel void dnorm_kernel(
-    __global const double* x,
-    const double mu,
-    const double sigma,
-    const int give_log,
-    __global double* out,
-    const int n
-) {
-    int i = get_global_id(0);
-    if (i >= n) return;
+---
 
-    out[i] = dnorm4(x[i], mu, sigma, give_log);
+## The two integration patterns
+
+### Pattern 1: wrapper with a direct R interface
+
+In this pattern the kernel wrapper (or a thin R function that calls it)
+is exported and callable directly from R.  The CPU fallback is the equivalent
+computation using standard R or C functions — in `nmathopencl`'s case, the
+`stats::` distribution functions.
+
+```
+R caller
+  │
+  ▼
+R wrapper function  (exported, input validation, recycling)
+  │  if inputs are non-finite, sd == 0, etc. → fallback_full()
+  │
+  ▼
+.opencl_try_or_fallback()
+  │  if !has_opencl()           → fallback_expr()  (CPU path)
+  │  if OpenCL call succeeds    → return GPU result
+  │  if OpenCL call fails
+  │    and fallback = TRUE      → fallback_expr()  (CPU path)
+  │    and fallback = FALSE     → propagate error
+  ▼
+C++ kernel wrapper  (internal, not exported)
+  │  #ifdef USE_OPENCL + has_opencl() guard
+  │  type conversion + program assembly + runner dispatch
+  ▼
+GPU result
+```
+
+The fallback can be triggered at two separate levels:
+
+- **R level** (before the C++ call): when input validation detects a
+  condition the GPU path cannot handle (e.g. `sd == 0`, non-finite values).
+  `fallback_full()` calls `stats::dnorm(x, mean, sd, log = log)` directly.
+
+- **C++ / runtime level**: `.opencl_try_or_fallback()` checks `has_opencl()`
+  before attempting the GPU path.  If OpenCL is not available it calls
+  `fallback_expr()` without ever touching the C++ kernel wrapper.  If a
+  GPU call throws an exception and `fallback = TRUE`, it catches the error
+  and calls `fallback_expr()`.
+
+### Pattern 2: wrapper as an internal C++ component
+
+In this pattern the kernel wrapper has no direct R interface.  It is called
+from within a C++ dispatcher function alongside a CPU counterpart.  The R
+interface belongs to a higher-level function that selects between the two
+based on a `use_opencl` flag passed in by the caller.
+
+```
+R caller
+  │
+  ▼
+Exported R function  (e.g. Ex_EnvelopeEval)
+  │  validates inputs, passes use_opencl flag
+  ▼
+.EnvelopeEval_cpp()   (internal R → C++ bridge, [[Rcpp::export]])
+  ▼
+EnvelopeEval_cpp()    (C++ dispatcher)
+  │  if use_opencl && has_opencl()
+  │    → f2_f3_opencl()     (OpenCL kernel wrapper)
+  │  else
+  │    → f2_f3_non_opencl() (pure C++ CPU implementation)
+  ▼
+Result (qf, grad) returned regardless of path taken
+```
+
+The two implementations — `f2_f3_opencl` and `f2_f3_non_opencl` — share the
+same function signature and return the same data structure.  The caller cannot
+tell from the return value which path was taken.
+
+---
+
+## Pattern 1 in detail: `dnorm_opencl`
+
+### The R wrapper
+
+`dnorm_opencl` in `R/normal_opencl.R` is the user-facing function.  It
+mirrors the interface of `stats::dnorm` and adds `opencl_parallel`,
+`fallback`, and `verbose` arguments.
+
+```r
+# R/normal_opencl.R  (simplified)
+
+#' @export
+dnorm_opencl <- function(x, mean = 0, sd = 1, log = FALSE,
+                         opencl_parallel = NA, fallback = FALSE,
+                         verbose = FALSE) {
+
+  # ── Input validation ──────────────────────────────────────────────────────
+  # These checks mirror stats::dnorm behaviour.
+  if (!is.numeric(x))    stop("`x` must be numeric.")
+  if (!is.numeric(mean)) stop("`mean` must be numeric.")
+  if (!is.numeric(sd))   stop("`sd` must be numeric.")
+  if (length(x) == 0L)   return(numeric(0))
+
+  # ── Recycling (like stats::dnorm) ─────────────────────────────────────────
+  len  <- max(length(x), length(mean), length(sd))
+  xv   <- rep_len(as.double(x),    len)
+  mv   <- rep_len(as.double(mean), len)
+  sv   <- rep_len(as.double(sd),   len)
+  logv <- rep_len(log,             len)
+
+  # ── R-level fallback function ─────────────────────────────────────────────
+  # Called when inputs contain conditions the GPU path cannot handle,
+  # or when OpenCL is unavailable and fallback = TRUE.
+  fallback_full <- function() {
+    stats::dnorm(x, mean = mean, sd = sd, log = log)
+  }
+
+  # ── R-level conditions that force the CPU path ────────────────────────────
+  if (any(!is.finite(xv) | !is.finite(mv) | !is.finite(sv))) {
+    return(fallback_full())   # stats::dnorm handles NaN, Inf, NA
+  }
+  if (any(sv < 0)) {
+    stop("`sd` must be non-negative.", call. = FALSE)
+  }
+  if (any(sv == 0)) {
+    return(fallback_full())   # degenerate case; stats::dnorm handles it
+  }
+
+  # ── Dispatch: try GPU, fall back to CPU on failure if fallback = TRUE ─────
+  log_int <- as.integer(logv)
+  opc     <- .encode_opencl_parallel(opencl_parallel)
+
+  .opencl_try_or_fallback(
+    opencl_expr  = function() .dnorm_opencl(xv, mv, sv, log_int, opc, verbose),
+    fallback_expr = fallback_full,
+    fallback      = fallback,
+    verbose       = verbose,
+    fn_name       = "dnorm_opencl"
+  )
 }
 ```
 
-Key elements:
+`.dnorm_opencl` (dot-prefixed) is the internal Rcpp-exported symbol for the
+C++ kernel wrapper.  It is not part of the public API; it exists only to make
+the C++ function callable from R.
 
-| Element | Purpose |
-|---------|---------|
-| `#pragma OPENCL EXTENSION cl_khr_fp64 : enable` | Activates double-precision arithmetic (required for all `nmathopencl` kernels) |
-| `__kernel void` | Marks this function as a GPU entry point |
-| `__global const double* x` | Input buffer in device (global) memory |
-| `const double mu` | Scalar parameter passed by value |
-| `__global double* out` | Output buffer in device (global) memory |
-| `const int n` | Work-item count guard |
-| `get_global_id(0)` | Returns this work-item's index in the first dimension |
-| `dnorm4(...)` | Calls the nmath library function, defined in the concatenated library source |
+### The `.opencl_try_or_fallback` helper
 
-The `if (i >= n) return;` guard handles the case where the global work size
-is rounded up to a multiple of the local work-group size, leaving excess
-work-items that must not write out-of-bounds.
+This helper encapsulates the runtime dispatch logic that every Pattern 1
+wrapper shares:
 
-## Standard argument layout
+```r
+# R/opencl_linkage_utils.R
 
-All kernels in `inst/cl/src/` follow a consistent argument layout designed
-to work with `openclPort::opencl_dbl_scalar_kernel_runner`:
+.opencl_try_or_fallback <- function(opencl_expr, fallback_expr,
+                                    fallback, verbose, fn_name) {
+  if (!has_opencl()) {
+    # OpenCL not available in this build or session — go straight to CPU.
+    if (verbose)
+      message(sprintf("[%s] OpenCL unavailable; using CPU fallback.", fn_name))
+    return(fallback_expr())
+  }
+
+  # OpenCL available: try the GPU path.
+  out <- tryCatch(opencl_expr(), error = function(e) e)
+
+  if (inherits(out, "error")) {
+    if (fallback) {
+      # GPU call failed and the caller requested a fallback.
+      if (verbose) {
+        message(sprintf("[%s] OpenCL call failed; using CPU fallback.", fn_name))
+        message(out$message)
+      }
+      return(fallback_expr())
+    }
+    stop(out$message, call. = FALSE)  # no fallback requested — propagate error
+  }
+
+  out  # GPU call succeeded
+}
+```
+
+The design makes the fallback behaviour explicit and controllable:
+
+- `fallback = FALSE` (default): if the GPU call fails, the error propagates
+  to the caller.  The caller sees an actual error rather than silently
+  receiving CPU results.
+- `fallback = TRUE`: if the GPU call fails, the CPU path is used
+  transparently.  Useful in batch workflows where any result is better than
+  an error.
+
+### The C++ kernel wrapper
+
+The C++ kernel wrapper `.dnorm_opencl` is exported to R via
+`// [[Rcpp::export(name = ".dnorm_opencl")]]`.  It is the minimal C++ entry
+point: it converts inputs, runs the GPU path if available, and returns zeros
+if not.
+
+```cpp
+// src/kernel_wrappers.cpp  (within nmathopencl namespace)
+
+// [[Rcpp::export(name = ".dnorm_opencl")]]
+Rcpp::NumericVector dnorm_opencl(
+    const Rcpp::NumericVector& x,
+    const Rcpp::NumericVector& mean,
+    const Rcpp::NumericVector& sd,
+    const Rcpp::IntegerVector& give_log,
+    int                        opencl_parallel_code,
+    bool                       verbose
+) {
+  const int len = x.size();
+  Rcpp::NumericVector out(len);   // zero-initialised
+
+#ifdef USE_OPENCL
+  if (!has_opencl() || len == 0) return out;
+
+  try {
+    d_givelog_ndrange_kernel_fill(
+        "src/dnorm_kernel.cl", "dnorm_kernel",
+        len, {&x, &mean, &sd}, give_log, out, verbose);
+  } catch (const std::exception& e) {
+    if (verbose) Rcpp::Rcout << e.what() << "\n";
+    throw;
+  }
+#endif
+
+  return out;
+}
+```
+
+Note that the C++ wrapper itself returns zeros when `!has_opencl()`.  It does
+**not** call `stats::dnorm`.  The R wrapper is responsible for the fallback
+to `stats::dnorm`; the C++ wrapper simply reports "no GPU result" via zeros.
+This keeps the C++ layer free of any R evaluation machinery.
+
+---
+
+## Pattern 2 in detail: `f2_f3_opencl`
+
+### The exported R function
+
+`Ex_EnvelopeEval` (in `R/ex_glmbayes.R`) is the user-facing function.  It
+accepts a `use_opencl` flag and delegates entirely to the C++ dispatcher:
+
+```r
+# R/ex_glmbayes.R
+
+#' @export
+Ex_EnvelopeEval <- function(G4, y, x, mu, P, alpha, wt,
+                            family, link,
+                            use_opencl = FALSE,
+                            verbose    = FALSE) {
+  # Input validation (matrix/vector type checks) ...
+
+  .EnvelopeEval_cpp(G4, y, x, mu, P, alpha, wt,
+                    family, link, use_opencl, verbose)
+}
+```
+
+There is no R-level fallback function here.  The fallback is handled entirely
+inside the C++ dispatcher.
+
+### The C++ dispatcher
+
+`EnvelopeEval_cpp` (inside `src/`) receives `use_opencl` and decides which
+C++ implementation to call:
+
+```cpp
+// src/ (conceptual structure — details in actual source)
+
+Rcpp::List EnvelopeEval_cpp(
+    Rcpp::NumericMatrix G4, Rcpp::NumericVector y,
+    Rcpp::NumericMatrix x,  Rcpp::NumericMatrix mu,
+    Rcpp::NumericMatrix P,  Rcpp::NumericVector alpha,
+    Rcpp::NumericVector wt,
+    std::string family, std::string link,
+    bool use_opencl, bool verbose
+) {
+  // Prepare shared inputs (common to both paths) ...
+
+  if (use_opencl && has_opencl()) {
+    // GPU path: call the OpenCL kernel wrapper
+    return ex_glmbayes::opencl::f2_f3_opencl(
+        family, link, b, y, x, mu, P, alpha, wt, verbose);
+  } else {
+    // CPU path: call the pure C++ implementation
+    return ex_glmbayes::f2_f3_non_opencl(
+        family, link, b, y, x, mu, P, alpha, wt);
+  }
+}
+```
+
+Both `f2_f3_opencl` and `f2_f3_non_opencl` return a `Rcpp::List` with
+identical structure: `list(qf = numeric(m1), grad = matrix(m1, l2))`.  The
+dispatcher's caller cannot tell from the return value which path was used.
+
+### Why a dedicated CPU implementation?
+
+For Pattern 1 (distribution functions), the CPU fallback is an existing
+well-tested function from `stats::`.  No separate CPU implementation is
+needed.
+
+For the GLM gradient computation, no equivalent off-the-shelf CPU function
+exists.  `f2_f3_non_opencl` is a pure C++ implementation of the same
+mathematical computation, written without any OpenCL dependency.  It compiles
+on every platform and produces bit-for-bit equivalent results to the GPU path
+(within double-precision rounding).
+
+Having both implementations under explicit control also makes it possible to
+benchmark them directly: `use_opencl = FALSE` forces the CPU path even on a
+GPU-equipped machine.
+
+---
+
+## Choosing between the two patterns
+
+The choice between Pattern 1 and Pattern 2 comes down to whether there is a
+natural existing CPU computation to fall back to.
+
+| Criterion | Pattern 1 (R interface + R fallback) | Pattern 2 (C++ dispatch + CPU implementation) |
+|---|---|---|
+| Existing CPU function available? | Yes (`stats::`, `base::`, etc.) | No; need to write the CPU implementation |
+| Does the computation have a direct R use? | Yes (called directly from R) | Often not (called from a C++ simulation loop) |
+| Where does fallback live? | R level (`fallback_full()`) + runtime (`has_opencl()`) | C++ level (`use_opencl && has_opencl()`) |
+| Caller can request optional fallback? | Yes (`fallback = TRUE/FALSE` argument) | Caller controls via `use_opencl` flag |
+| Wrapper directly R-callable? | Yes (exported via `[[Rcpp::export]]`) | Not necessarily — may be purely internal C++ |
+
+Both patterns guarantee that the package compiles and runs correctly on
+any machine.  The GPU path is always optional; the CPU path always produces
+a valid (if unaccelerated) result.
+
+---
+
+## Naming conventions
+
+`nmathopencl` uses a consistent naming scheme to make the role of each
+function clear:
+
+| Name | Type | Role |
+|---|---|---|
+| `dnorm_opencl` | Exported R function | User-facing API; validates inputs; manages fallback |
+| `.dnorm_opencl` | Internal R → C++ bridge | Rcpp export; positional R → C++ call only |
+| `nmathopencl::dnorm_opencl` | C++ kernel wrapper | `#ifdef` guard; type conversion; runner dispatch |
+| `nmathopencl::dnorm_kernel_runner` | C++ kernel runner | Full OpenCL lifecycle; `#ifdef USE_OPENCL` only |
+| `Ex_EnvelopeEval` | Exported R function | User-facing API; passes `use_opencl` flag |
+| `.EnvelopeEval_cpp` | Internal R → C++ bridge | Positional R → C++ call only |
+| `f2_f3_opencl` | C++ kernel wrapper | OpenCL path; used inside dispatcher |
+| `f2_f3_non_opencl` | C++ CPU implementation | CPU path; used inside same dispatcher |
+
+The `.dot` prefix on internal R functions signals that they are not part of
+the public API and will not appear in `?help` search or autocompletion.
+
+For your own package, a consistent analogous scheme might be:
 
 ```
-kernel(double arg0, double arg1, ..., double argN,
-       __global double* out, int n_out)
+myfunc_opencl()        # exported R function  (if direct R use)
+.myfunc_opencl()       # internal R → C++ bridge
+mypkg::myfunc_opencl() # C++ kernel wrapper (in namespace)
+mypkg::myfunc_runner() # C++ kernel runner   (in namespace, #ifdef only)
+mypkg::myfunc_cpu()    # C++ CPU fallback    (if Pattern 2)
 ```
 
-Scalar `double` parameters come first (in any order needed by the
-underlying nmath function), followed by the output buffer and its length.
-Input **vectors** are also represented as `__global const double*` and
-precede the scalar arguments when present.
+---
 
-## The `*_ex_kernel.cl` variants
+## Summary
 
-Some distributions expose a secondary interface. The `bessel_*_ex_kernel.cl`
-files, for example, provide a version that returns both the function value
-and a sign/exponent component simultaneously. These exist to mirror the
-extended interfaces in nmath (`bessel_i` vs `bessel_i` with `expo`
-argument) and are distinguished by the `_ex_` infix.
+Every kernel wrapper needs a CPU path.  The two patterns differ in where that
+path lives and who controls the dispatch:
 
-## Kernel file index
+- **Pattern 1** puts the fallback logic in R, using the existing `stats::`
+  ecosystem.  It is the right choice when the computation mirrors an existing
+  R function and has direct R users.
 
-The ~130 kernel files in `inst/cl/src/` cover every function exposed by
-the `nmathopencl` R API:
+- **Pattern 2** puts the fallback logic in C++, alongside a dedicated CPU
+  implementation.  It is the right choice when the computation is novel,
+  when it is called from a C++ simulation loop rather than directly from R,
+  or when benchmarking between the two paths is important.
 
-### Density kernels
+In both patterns the OpenCL infrastructure — the runner and the kernel — is
+identical.  What differs is only how the wrapper is wired into the rest of
+the package.
 
-`dbeta_kernel.cl`, `dbinom_kernel.cl`, `dbinom_raw_kernel.cl`,
-`dcauchy_kernel.cl`, `dchisq_kernel.cl`, `dexp_kernel.cl`, `df_kernel.cl`,
-`dgamma_kernel.cl`, `dgeom_kernel.cl`, `dhyper_kernel.cl`,
-`dlnorm_kernel.cl`, `dlogis_kernel.cl`, `dnbeta_kernel.cl`,
-`dnbinom_kernel.cl`, `dnbinom_mu_kernel.cl`, `dnchisq_kernel.cl`,
-`dnf_kernel.cl`, `dnorm_kernel.cl`, `dnt_kernel.cl`, `dpois_kernel.cl`,
-`dpois_raw_kernel.cl`, `dsignrank_kernel.cl`, `dt_kernel.cl`,
-`dunif_kernel.cl`, `dweibull_kernel.cl`, `dwilcox_kernel.cl`
-
-### CDF kernels
-
-`pbeta_kernel.cl`, `pbinom_kernel.cl`, `pcauchy_kernel.cl`,
-`pchisq_kernel.cl`, `pexp_kernel.cl`, `pf_kernel.cl`, `pgamma_kernel.cl`,
-`pgeom_kernel.cl`, `phyper_kernel.cl`, `plnorm_kernel.cl`,
-`plogis_kernel.cl`, `pnbeta_kernel.cl`, `pnbinom_kernel.cl`,
-`pnbinom_mu_kernel.cl`, `pnchisq_kernel.cl`, `pnf_kernel.cl`,
-`pnorm_kernel.cl`, `pnt_kernel.cl`, `ppois_kernel.cl`, `psignrank_kernel.cl`,
-`pt_kernel.cl`, `ptukey_kernel.cl`, `punif_kernel.cl`, `pweibull_kernel.cl`,
-`pwilcox_kernel.cl`
-
-### Quantile kernels
-
-`qbeta_kernel.cl`, `qbinom_kernel.cl`, `qcauchy_kernel.cl`,
-`qchisq_kernel.cl`, `qexp_kernel.cl`, `qf_kernel.cl`, `qgamma_kernel.cl`,
-`qgeom_kernel.cl`, `qhyper_kernel.cl`, `qlnorm_kernel.cl`,
-`qlogis_kernel.cl`, `qnbeta_kernel.cl`, `qnbinom_kernel.cl`,
-`qnbinom_mu_kernel.cl`, `qnchisq_kernel.cl`, `qnf_kernel.cl`,
-`qnorm_kernel.cl`, `qnt_kernel.cl`, `qpois_kernel.cl`, `qsignrank_kernel.cl`,
-`qt_kernel.cl`, `qtukey_kernel.cl`, `qunif_kernel.cl`, `qweibull_kernel.cl`,
-`qwilcox_kernel.cl`
-
-### Random-variate kernels
-
-`rbeta_kernel.cl`, `rbinom_kernel.cl`, `rcauchy_kernel.cl`,
-`rchisq_kernel.cl`, `rexp_kernel.cl`, `rf_kernel.cl`, `rgamma_kernel.cl`,
-`rgeom_kernel.cl`, `rhyper_kernel.cl`, `rlnorm_kernel.cl`,
-`rlogis_kernel.cl`, `rmultinom_kernel.cl`, `rnbinom_kernel.cl`,
-`rnbinom_mu_kernel.cl`, `rnchisq_kernel.cl`, `rnorm_kernel.cl`,
-`rpois_kernel.cl`, `rsignrank_kernel.cl`, `rt_kernel.cl`, `runif_kernel.cl`,
-`rweibull_kernel.cl`, `rwilcox_kernel.cl`
-
-### Special function kernels
-
-`beta_special_kernel.cl`, `choose_special_kernel.cl`,
-`lbeta_special_kernel.cl`, `lchoose_special_kernel.cl`,
-`gammafn_kernel.cl`, `lgammafn_kernel.cl`, `lgammafn_sign_kernel.cl`,
-`lgamma1p_kernel.cl`, `digamma_kernel.cl`, `trigamma_kernel.cl`,
-`psigamma_kernel.cl`, `pentagamma_kernel.cl`, `tetragamma_kernel.cl`,
-`dpsifn_kernel.cl`
-
-### Math support kernels
-
-`fmax2_kernel.cl`, `fmin2_kernel.cl`, `fprec_kernel.cl`, `fround_kernel.cl`,
-`fsign_kernel.cl`, `ftrunc_kernel.cl`, `imax2_kernel.cl`, `imin2_kernel.cl`,
-`sign_kernel.cl`, `r_pow_kernel.cl`, `r_pow_di_kernel.cl`,
-`pow1p_kernel.cl`, `log1pmx_kernel.cl`, `log1pexp_kernel.cl`,
-`log1mexp_kernel.cl`, `logspace_add_kernel.cl`, `logspace_sub_kernel.cl`,
-`logspace_sum_kernel.cl`
-
-### RNG core kernels
-
-`norm_rand_kernel.cl`, `unif_rand_kernel.cl`, `exp_rand_kernel.cl`,
-`r_unif_index_kernel.cl`
-
-### Utility kernels
-
-`r_check_user_interrupt_kernel.cl`, `r_check_stack_kernel.cl`
-
-### Bessel kernels (standard and extended)
-
-`bessel_i_kernel.cl`, `bessel_i_ex_kernel.cl`,
-`bessel_j_kernel.cl`, `bessel_j_ex_kernel.cl`,
-`bessel_k_kernel.cl`, `bessel_k_ex_kernel.cl`,
-`bessel_y_kernel.cl`, `bessel_y_ex_kernel.cl`
-
-## Program assembly
-
-Kernels are **never compiled in isolation**. The host-side runner assembles
-a complete OpenCL program string by concatenating:
-
-1. The nmath library source (via `load_kernel_library("nmath")`)
-2. The kernel file (via `load_kernel_source("src/<name>_kernel.cl")`)
-
-This concatenated string is then passed to `clBuildProgram`. Because
-`load_kernel_library()` performs topological sorting, the library functions
-are always defined before the kernel refers to them. Chapter 08 covers this
-assembly process in detail.
-
-## Writing a custom kernel
-
-To write a kernel that calls an `nmathopencl` nmath function:
-
-1. Identify the nmath function you need (e.g., `dgamma`).
-2. Check its `@provides` tag in the corresponding `.cl` file to confirm
-   the exact C signature.
-3. Write a `__kernel void` function following the standard layout.
-4. Load the nmath library subset your function needs using the
-   `@all_depends` metadata as a guide (see Chapter 08).
-5. Append your kernel source after the library source in the assembled
-   program string.
-
-Chapter 10 works through this process end-to-end for the `glmbayes`
-GLM log-posterior kernels.
+Chapter 12 describes the `nmathopencl` R API in full, showing how the
+distribution-function wrappers are documented and organised.  Chapter 10
+works through the `ex_glmbayes` pattern end-to-end.

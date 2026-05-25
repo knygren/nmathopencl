@@ -315,5 +315,5 @@ The downstream developer's responsibilities are:
 3. **Write the C++ runner** that calls `build_rmath_opencl_program()` (or the
    equivalent chain), dispatches work-items, and transfers results.
 
-Chapter 06 covers how to write and annotate kernel functions.  Chapter 10
+Chapter 07 covers how to write and annotate kernel functions.  Chapter 10
 walks through all three steps end-to-end for the `ex_glmbayes` example.

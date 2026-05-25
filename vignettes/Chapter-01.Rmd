@@ -33,7 +33,7 @@ This vignette describes how to read the attach-time advisory, understand the
 **`opencltools`** dependency, and enable OpenCL specifically for
 **`nmathopencl`**. Detailed per-OS driver, header, and ICD instructions are
 maintained in **`opencltools`** vignette **Chapter 01**; end-user GPU setup
-notes also appear in **Chapter 12**.
+notes also appear in **Chapter 02**.
 
 ## When you load nmathopencl
 

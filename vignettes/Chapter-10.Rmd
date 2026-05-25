@@ -15,7 +15,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 ## Overview
 
-Chapters 03-09 describe the infrastructure of `nmathopencl`: the shim layer,
+Chapters 03-10 describe the infrastructure of `nmathopencl`: the shim layer,
 the `nmath` library, the kernel format, and the runner API. This chapter
 shows how to put all of it together by walking through a concrete downstream
 use-case: the `ex_glmbayes` example built into the package.
