@@ -7,6 +7,7 @@
 .opencl_doc_hint <- function() {
   paste0(
     "  Documentation: ?gpu_diagnostics, ",
+    "vignette(\"Chapter-01\", \"nmathopencl\"), ",
     "vignette(\"Chapter-12\", \"nmathopencl\"), ?nmathopencl-package."
   )
 }

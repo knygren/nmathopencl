@@ -46,7 +46,8 @@ may emit a \code{\link{packageStartupMessage}}
 comparing compile-time OpenCL support in \pkg{nmathopencl} and
 \pkg{opencltools}, noting that CPU fallbacks remain available, and
 summarizing whether an OpenCL runtime appears available on the host.
-Messages point to \code{?gpu_diagnostics}, \code{vignette("Chapter-12")}
+Messages point to \code{?gpu_diagnostics}, \code{vignette("Chapter-01")}
+(OpenCL enablement for \pkg{nmathopencl}), \code{vignette("Chapter-12")}
 (GPU setup), and this help page.
 Set \code{options(nmathopencl.quiet_opencl_startup = TRUE)} to suppress
 these notes (recommended for CI and \command{R CMD check}).
