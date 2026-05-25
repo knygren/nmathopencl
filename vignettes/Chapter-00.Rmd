@@ -81,16 +81,20 @@ own OpenCL programs using `load_kernel_library()`. They own the kernel
 runners, R wrappers, and compilation lifecycle; `nmathopencl` simply provides
 the portable math library they build on.
 
+See **Chapter 03** for the detailed assembly model, including how the four
+components of a complete kernel program (global configuration header, shims,
+nmath subset, and kernel function) are concatenated and compiled at runtime.
+
 ## C++ layout inside the package DLL
 
 | Layer | Location | Purpose |
 |-------|----------|---------|
 | **`nmathopencl`** | `nmathopencl.h`, `kernel_runners.cpp`, `kernel_wrappers.cpp` | Distribution-specific kernel runners and R-facing wrappers for all nmath functions |
-| **Internal OpenCL infrastructure** | `openclPort.h`, `opencl_kernel_runners.cpp` | Generic kernel runner, error helpers, device probing, and kernel loading inside the DLL --- see **Chapter 07** |
+| **Internal OpenCL infrastructure** | `openclPort.h`, `opencl_kernel_runners.cpp` | Generic kernel runner, error helpers, device probing, and kernel loading inside the DLL --- see **Chapter 09** |
 | **`ex_glmbayes`** | `ex_glmbayes_*.cpp/.h` | Self-contained example showing how a downstream package (`glmbayes`) builds custom GLM kernels on top of the layers above |
 
 Kernel authors who `LinkingTo: nmathopencl` may include `openclPort.h` directly;
-the internal runner layer is documented in Chapter 07.
+the internal runner layer is documented in Chapter 09.
 
 ## Related packages
 
@@ -176,13 +180,15 @@ opencltools first, then source reinstall of nmathopencl).
 |----------|-------|
 | Chapter 00 (this document) | Package overview and architecture |
 | Chapter 01 | OpenCL enablement for nmathopencl (attach messages, opencltools dependency, source reinstall) |
-| Chapter 02 | Upstream shims: porting C headers to OpenCL C |
-| Chapter 03 | The `nmath` OpenCL library (`inst/cl/nmath/`) |
-| Chapter 04 | Kernels: writing and using `__kernel` functions |
-| Chapter 05 | The `nmathopencl` R API: distribution functions on the GPU |
-| Chapter 06 | Kernel loading: `load_kernel_source` and `load_kernel_library` |
-| Chapter 07 | Internal generic OpenCL kernel runners (C++ infrastructure) |
-| Chapter 08 | Case study: building custom GLM kernels (`ex_glmbayes`) |
+| Chapter 02 | Adding `USE_OPENCL` and `has_opencl()` to your own package (developer porting guide) |
+| Chapter 03 | Structure of nmath kernel programs: the four-layer assembly model |
+| Chapter 04 | Kernels, kernel runners, and kernel wrappers: roles and interaction |
+| Chapter 05 | The `nmath` OpenCL library (`inst/cl/nmath/`) |
+| Chapter 06 | Kernels: writing and using `__kernel` functions |
+| Chapter 07 | The `nmathopencl` R API: distribution functions on the GPU |
+| Chapter 08 | Kernel loading: `load_kernel_source` and `load_kernel_library` |
+| Chapter 09 | Internal generic OpenCL kernel runners (C++ infrastructure) |
+| Chapter 10 | Case study: building custom GLM kernels (`ex_glmbayes`) |
 | Chapter 12 | GPU acceleration in `glmbayes` (end-user setup guide) |
 | Chapter A08 | Envelope-related functions (glmbayes example internals) |
 | Chapter A10 | Accelerated EnvelopeBuild with OpenCL |

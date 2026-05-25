@@ -256,3 +256,11 @@ On Windows, the CUDA Toolkit bin directory may need to be in **`PATH`** so that
 entries; fixing them via system settings or your shell profile is the
 recommended approach. Advanced developers may use `opencltools::add_to_path_windows()`
 and related helpers directly --- see `?opencltools::add_to_path`.
+
+## For package developers: next steps
+
+Once OpenCL is working for **`nmathopencl`** itself, the next step is
+adding `USE_OPENCL` and `has_opencl()` to your own downstream package so
+that it also builds cleanly on CRAN. See
+**`vignette("Chapter-02", package = "nmathopencl")`** for the
+`use_opencl_configure()` / `port_to_opencl_configure()` workflow.

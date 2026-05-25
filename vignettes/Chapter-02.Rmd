@@ -1,10 +1,10 @@
 ---
-title: "Chapter 02: Upstream Shims --- Porting C Headers to OpenCL C"
+title: "Chapter 02: Adding USE_OPENCL and has_opencl() to Your Package"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 02: Upstream Shims --- Porting C Headers to OpenCL C}
+  %\VignetteIndexEntry{Chapter 02: Adding USE_OPENCL and has_opencl() to Your Package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,207 +13,288 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-## The porting problem
+## Overview
 
-R's internal math library (`nmath`) is written in C99 and depends on a
-chain of headers: `Rmath.h`, `nmath.h`, `R_ext/Arith.h`, `R_ext/Random.h`,
-and many more from the `R_ext/` family. These headers use features that
-OpenCL C simply does not support:
+Chapter 01 covers getting OpenCL working for `nmathopencl` itself. This chapter
+covers the natural next step for **package developers**: adding `USE_OPENCL` and
+`has_opencl()` to a package of your own so that it can call OpenCL kernels
+(possibly using the `nmathopencl` kernel library) while still building cleanly
+on CRAN and on machines without a GPU SDK.
 
-- `#include` directives (OpenCL kernels are concatenated strings, not
-  separately compiled translation units with a file system).
-- Standard C library types such as `FILE *`, `size_t` from `<stddef.h>`,
-  and integer types from `<stdint.h>`.
-- R-specific runtime types (`SEXP`, `Rboolean`, `R_xlen_t`).
-- Error and warning hooks (`warning()`, `error()`) that call back into
-  the R runtime.
-- Preprocessor symbols (`HAVE_EXPM1`, `HAVE_LOG1P`) probed by `configure`.
+The two helper functions in this chapter are:
 
-The **upstream shim** layer in `nmathopencl` replaces all of these with
-OpenCL C-compatible equivalents that can be concatenated verbatim into a
-GPU program string.
+| Function | When to use |
+|----------|-------------|
+| `use_opencl_configure()` | New package, or package with no existing `src/Makevars` |
+| `port_to_opencl_configure()` | Package that already has a committed static `src/Makevars` |
 
-## Directory layout
+Both produce a `configure` script (Linux/macOS) and a `configure.win` script
+(Windows) that generate `src/Makevars` dynamically at install time.
 
-```
-inst/cl/
-??? System/
-|   ??? stdint.cl          # Portable integer types (<stdint.h> replacement)
-??? R_shims/
-|   ??? Rconfig.cl         # Platform capabilities (HAVE_*, IEEE_754)
-|   ??? Rdefines.cl        # R-level macros (LOGICAL, INTEGER, ...)
-|   ??? Rinternals.cl      # Core R type stubs (SEXP, Rboolean, SEXPREC)
-??? R_ext/                 # Complete R_ext/ header family
-|   ??? Arith.cl           # R_FINITE, ISNAN, ML_NAN, ML_POSINF, ...
-|   ??? Boolean.cl         # Rboolean
-|   ??? Complex.cl         # Rcomplex
-|   ??? Constants.cl       # M_PI, M_E, M_SQRT2, ...
-|   ??? Error.cl           # error()/warning() -> no-op stubs
-|   ??? Memory.cl          # R_alloc -> no-op stubs
-|   ??? MathThreads.cl     # Thread-safe math stubs
-|   ??? Parse.cl           # Parser stubs
-|   ??? Print.cl           # Rprintf -> no-op stub
-|   ??? Random.cl          # unif_rand, norm_rand, exp_rand declarations
-|   ??? Riconv.cl          # Encoding stubs
-|   ??? RS.cl              # R/S compatibility macros
-|   ??? Utils.cl           # Various utility stubs
-|   ??? Visibility.cl      # SEXP visibility macros
-|   ??? stats_package.cl   # Stats package type stubs
-??? R_ext_types/           # Type-only subset (no function bodies)
-|   ??? Boolean.cl
-|   ??? Complex.cl
-|   ??? Constants.cl
-|   ??? libextern.cl       # LibExtern macro
-|   ??? Visibility.cl
-??? R_ext_runtime/         # Runtime-only subset (function declarations)
-|   ??? Arith.cl
-|   ??? Error.cl
-|   ??? Memory.cl
-|   ??? MathThreads.cl
-|   ??? Print.cl
-|   ??? Random.cl
-|   ??? Riconv.cl
-|   ??? RS.cl
-|   ??? Utils.cl
-??? libR_shims/
-|   ??? libR.cl            # libR.so symbol stubs
-??? nmath/
-    ??? Rmath.cl           # Port of Rmath.h (declarations, constants)
-    ??? nmath.cl           # Port of nmath.h (macros, error codes, helpers)
+## Why a static `src/Makevars` breaks CRAN
+
+Most Rcpp packages have a static committed `src/Makevars` along the lines of:
+
+```makefile
+PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
+PKG_LIBS     = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 ```
 
-## What each shim does
+If you add OpenCL references directly to this file:
 
-### `System/stdint.cl`
-
-OpenCL C defines `int`, `uint`, `long`, `ulong` etc., but not the
-`<stdint.h>` typedefs (`int32_t`, `uint64_t`, ...) that some nmath functions
-rely on. This shim provides those typedefs using the OpenCL built-in integer
-types.
-
-### `R_shims/Rconfig.cl`
-
-Defines the preprocessor symbols that R's `configure` script would normally
-probe and write into `config.h`, such as:
-
-```c
-#define HAVE_EXPM1 1
-#define HAVE_LOG1P 1
-#define IEEE_754   1
+```makefile
+PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -DUSE_OPENCL -I/usr/include
+PKG_LIBS     = $(SHLIB_OPENMP_CXXFLAGS) -lOpenCL $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 ```
 
-These control conditional compilation branches inside nmath. The shim sets
-them to the values appropriate for a modern OpenCL device (IEEE 754
-double-precision arithmetic is always assumed).
+your package **will fail to compile** on any machine without an OpenCL SDK --
+including CRAN's build machines, which have no GPU SDK installed. The build
+aborts and no binary is produced.
 
-### `R_shims/Rinternals.cl`
+The fix is a pair of configure scripts that **probe for the SDK at install time**
+and generate a CPU-only `Makevars` when no SDK is found. The package always
+compiles, and the GPU path is activated only where the SDK is genuinely present.
 
-Provides skeletal type definitions for `SEXP`, `SEXPREC`, `Rboolean`, and
-the SEXPTYPE enum. Most of these types are never actually used inside the
-nmath math functions themselves; the shim exists so that headers that
-transitively include `<Rinternals.h>` compile without errors.
+## The configure → USE_OPENCL → has_opencl() chain
 
-### `R_ext/Arith.cl`
-
-The most heavily used shim. It provides:
-
-- `R_FINITE(x)` --- maps to OpenCL's `isfinite(x)`.
-- `ISNAN(x)` --- maps to OpenCL's `isnan(x)`.
-- `ML_NAN`, `ML_POSINF`, `ML_NEGINF` --- IEEE special values via OpenCL
-  arithmetic (`0.0/0.0`, `1.0/0.0`, `-1.0/0.0`).
-- `R_D__0`, `R_D__1`, `R_DT_0`, `R_DT_1` --- log-probability helper macros.
-
-### `R_ext/Error.cl`
-
-R's `error()` and `warning()` are host-side functions that longjmp into the
-R runtime. On the GPU these become no-ops:
-
-```c
-#define error(...)   /* no-op */
-#define warning(...) /* no-op */
-```
-
-Mathematical error codes (`ME_DOMAIN`, `ME_RANGE`, etc.) and the
-`ML_ERROR()` macro are also stubbed so that nmath error-reporting paths
-compile without modification.
-
-### `R_ext/Memory.cl`
-
-`R_alloc()` and friends are replaced by no-ops or trivial stubs. The nmath
-functions used by `nmathopencl` do not actually call memory allocation
-routines in their hot paths; these stubs exist purely to satisfy the
-preprocessor.
-
-### `R_ext/Random.cl`
-
-Declares the RNG functions (`unif_rand`, `norm_rand`, `exp_rand`) that the
-nmath random-variate generators call. On the GPU, these are implemented by
-the device-side RNG kernels in `inst/cl/nmath/` rather than by the host R
-RNG.
-
-### `nmath/Rmath.cl`
-
-A port of `Rmath.h` restricted to what is needed inside a single OpenCL
-translation unit:
-
-- Forward declarations of all Mathlib functions that appear in nmath.
-- Mathematical constants (`M_PI`, `M_LN2`, `M_LOG10_2`, etc.) as `#define`
-  macros rather than `extern const double` (which OpenCL C cannot express).
-- The `give_log`, `lower_tail` parameter encoding conventions.
-
-### `nmath/nmath.cl`
-
-The central configuration header for the nmath OpenCL library (analogous to
-`nmath.h` in the C source). It defines:
-
-- Numerical special values and IEEE constants.
-- Error codes (`ME_DOMAIN = 1`, `ME_RANGE = 2`, ...).
-- Validation macros (`ISNAN`, `R_FINITE`, `R_D_*`).
-- Library-wide error-handling macros (`ML_ERR_return_NAN`,
-  `ML_WARN_return_NAN`, `MATHLIB_ERROR`).
-- Library-wide constants (`WILCOX_MAX`, etc.).
-
-Every function-level `.cl` file in `inst/cl/nmath/` lists `nmath` in its
-`@depends` tag, ensuring this header is always loaded first.
-
-## Load order
-
-The shims must be concatenated in a specific order so that each one sees
-the definitions established by its predecessors. The standard prefix for any
-`nmathopencl` GPU program is:
+Three entities cooperate to give you CRAN-safe optional GPU acceleration:
 
 ```
-System/stdint.cl
-R_shims/Rconfig.cl
-R_ext_types/Boolean.cl
-R_ext_types/Complex.cl
-R_ext_types/Constants.cl
-R_ext_types/libextern.cl
-R_ext_types/Visibility.cl
-R_shims/Rinternals.cl
-R_ext_runtime/Arith.cl
-R_ext_runtime/Error.cl
-... (remaining R_ext_runtime files)
-nmath/Rmath.cl
-nmath/nmath.cl
+configure / configure.win          (run by R CMD INSTALL)
+  |
+  |-- detects CL/cl.h + libOpenCL (+ runtime platform probe on Linux)
+  |
+  v
+src/Makevars / src/Makevars.win    (generated; never committed)
+  |
+  |-- PKG_CXXFLAGS = ...  [ -DUSE_OPENCL ... ]
+  |
+  v
+#ifdef USE_OPENCL                  (in your C++ source)
+  |
+  |-- guards all GPU code; package compiles cleanly either way
+  |
+  v
+has_opencl()                       (in your R code)
+  |
+  `-- calls a compiled-in bool that mirrors the compile-time flag;
+      returns TRUE only if -DUSE_OPENCL was set at install time
 ```
 
-In practice, `load_kernel_library()` reads the `@depends` / `@provides`
-annotations embedded in each file and assembles this order automatically via
-a topological sort (see Chapter 06).
+On Linux, the configure script goes one step further: it runs a small C probe
+(`clGetPlatformIDs`) to verify that at least one OpenCL platform is actually
+registered in `/etc/OpenCL/vendors/`, not just that the ICD loader is
+installed. `configure.win` (Windows) relies on header detection alone -- the
+GPU driver installs the ICD (`OpenCL.dll`) together with itself.
 
-## Design principle
+## Adding `has_opencl()` to your package
 
-The shims are written to be **minimally intrusive**: they define only what
-the nmath math functions actually need, stubbing out the rest. This means:
+### C++ side
 
-- No function ever calls back into the R runtime from device code.
-- No dynamic memory allocation occurs on the device.
-- Error and warning paths become silent no-ops, consistent with the
-  expectation that GPU kernels do not throw exceptions.
+Add a thin wrapper that exposes the compile-time flag at runtime. If you are
+using `Rcpp::export` attributes (the standard Rcpp workflow), add:
 
-When porting additional C libraries to OpenCL, the same shim approach
-applies: identify which host-side headers are included, write a `.cl`
-replacement for each, and prepend them to the concatenated program string.
-Chapter 08 walks through this process concretely for the `glmbayes`
-example.
+```cpp
+// src/opencl_status.cpp
+#include <Rcpp.h>
+
+// [[Rcpp::export]]
+bool _mypkg_has_opencl_cpp() {
+#ifdef USE_OPENCL
+  return true;
+#else
+  return false;
+#endif
+}
+```
+
+`compileAttributes()` (run automatically during `devtools::document()`) will
+generate the required SEXP wrapper in `RcppExports.cpp`.
+
+If you prefer a plain `.Call()` without Rcpp attributes, the `nmathopencl`
+source in `src/nmathopencl_exports.cpp` shows the equivalent plain-C form.
+
+### R side
+
+```r
+# R/opencl_status.R
+
+#' Check whether this package was built with OpenCL support
+#'
+#' @return Logical scalar: \code{TRUE} if the package was installed from source
+#'   with an OpenCL SDK detected by the configure script; \code{FALSE} for
+#'   prebuilt CRAN/R-Universe binaries and CPU-only source installs.
+#' @export
+has_opencl <- function() {
+  .Call("_mypkg_has_opencl_cpp", PACKAGE = "mypkg")
+}
+```
+
+Replace `mypkg` with your package name. The function costs nothing at runtime
+(one compiled-in bool comparison) and lets R code branch between GPU and CPU
+paths without any dynamic linking to OpenCL.
+
+## Case 1: New package with no existing `src/Makevars`
+
+```{r, eval = FALSE}
+# From the root of your package:
+use_opencl_configure()
+```
+
+This writes `configure` and `configure.win` to the package root, sets
+`configure` executable on Unix, and prints a setup checklist. Both scripts
+always succeed: when no OpenCL SDK is found they write a CPU-only Makevars.
+
+Add the generated files to `.gitignore` (they are build artefacts):
+
+```
+src/Makevars
+src/Makevars.win
+```
+
+## Case 2: Existing package with a static `src/Makevars`
+
+If your package already has a **committed static** `src/Makevars`, use:
+
+```{r, eval = FALSE}
+port_to_opencl_configure()
+```
+
+The function:
+
+1. Reads your existing `src/Makevars` and extracts the values of
+   `PKG_CPPFLAGS`, `PKG_CXXFLAGS`, `PKG_CFLAGS`, and `PKG_LIBS`.
+2. Renames `src/Makevars` → `src/Makevars.in` (the maintained source
+   template; commit this file).
+3. Generates `configure` (Linux/macOS) and `configure.win` (Windows) that
+   read `src/Makevars.in` at install time, run OpenCL detection, and write
+   the final `src/Makevars` with the OpenCL flags merged in (or omitted for
+   CPU-only).
+4. Similarly handles `src/Makevars.win` → `src/Makevars.win.in` if present;
+   otherwise copies the generic `configure.win` template.
+5. Suggests `.gitignore` entries for the generated `src/Makevars` files.
+
+**After porting, maintain `src/Makevars.in` instead of `src/Makevars`.**
+`src/Makevars` is generated at install time and should not be committed.
+
+### What is preserved
+
+All content in `src/Makevars.in` that is not one of the four `PKG_*` key
+variables is passed through verbatim (comments, blank lines, and any other
+make variables you have defined). The four key variables are rebuilt by the
+configure script, incorporating your original base values plus the conditional
+OpenCL additions.
+
+For example, if your `src/Makevars.in` contains:
+
+```makefile
+# Package uses OpenMP and RcppParallel
+PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -I"$(R_LIBRARY_DIR)/RcppParallel/include"
+PKG_LIBS     = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) \
+               -L"$(R_LIBRARY_DIR)/RcppParallel/lib" -ltbb
+```
+
+The generated `src/Makevars` on an OpenCL-enabled machine will be:
+
+```makefile
+# Package uses OpenMP and RcppParallel
+PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -I"$(R_LIBRARY_DIR)/RcppParallel/include" -DUSE_OPENCL -I/usr/include
+PKG_LIBS     = -L/usr/lib/x86_64-linux-gnu -lOpenCL $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -L"$(R_LIBRARY_DIR)/RcppParallel/lib" -ltbb
+```
+
+And on a CPU-only machine `src/Makevars.in` is copied verbatim as
+`src/Makevars`, preserving the original flags exactly.
+
+### Caveats
+
+- **`+=` assignments:** If your `src/Makevars` uses append assignments
+  (`PKG_LIBS += -lm`), the function warns and you should review the generated
+  configure before use.
+- **Generated files:** Do not run `port_to_opencl_configure()` on a
+  machine-generated `src/Makevars` (one containing absolute paths or
+  `-lOpenCL`). The function checks for these patterns and warns. Run it on the
+  static source-controlled file.
+- **Existing configure scripts:** If `configure` or `configure.win` already
+  exists, the function refuses to overwrite without `overwrite = TRUE`. Users
+  who already have configure scripts should integrate the OpenCL detection
+  block manually; see
+  `system.file("configure-templates", "README.md", package = "nmathopencl")`.
+
+## Guarding OpenCL code in C++
+
+All code that depends on OpenCL headers or the OpenCL runtime must be wrapped
+in `#ifdef USE_OPENCL`:
+
+```cpp
+#include <Rcpp.h>
+
+#ifdef USE_OPENCL
+#include <CL/cl.h>
+// ... OpenCL device setup, kernel compilation, dispatch ...
+#endif
+
+// [[Rcpp::export]]
+Rcpp::NumericVector my_gpu_function(Rcpp::NumericVector x) {
+#ifdef USE_OPENCL
+  // GPU path
+  return run_on_gpu(x);
+#else
+  // CPU fallback
+  return run_on_cpu(x);
+#endif
+}
+```
+
+This is the same pattern used throughout `nmathopencl` and `glmbayes`. The
+preprocessor guards ensure the package compiles cleanly in both configurations
+from a single codebase.
+
+## Testing the CPU-only path before CRAN submission
+
+Always verify the CPU-only build before submitting to CRAN:
+
+```bash
+# Linux / macOS: temporarily disable the configure script
+mv configure configure.disabled
+R CMD INSTALL --preclean .
+Rscript -e "library(mypkg); stopifnot(!has_opencl())"
+mv configure.disabled configure
+
+# Restore the GPU-enabled build
+R CMD INSTALL --preclean .
+```
+
+On Windows, rename `configure.win` similarly. This simulates what CRAN's build
+machines experience and will expose any `#ifdef USE_OPENCL` guards you may have
+missed.
+
+## DESCRIPTION dependencies
+
+If your package uses `nmathopencl`'s kernel-loading infrastructure or
+`openclPort.h`, add the following to `DESCRIPTION`:
+
+```
+LinkingTo: nmathopencl, Rcpp
+Imports: nmathopencl
+```
+
+`LinkingTo` makes `openclPort.h` available at compile time for your C++ code.
+`Imports` makes the R-level functions (`load_kernel_library`, etc.) available
+at runtime. If you only use `nmathopencl` at the R level (not via `LinkingTo`),
+`Imports` alone is sufficient.
+
+## Migration note
+
+`use_opencl_configure()` and `port_to_opencl_configure()` are currently in
+`nmathopencl` while `opencltools` completes its initial CRAN review. Once
+`opencltools` is available on CRAN, both functions will move there and
+`nmathopencl` will re-export them -- the same pattern used for the Tier 4
+kernel-authoring tools. The function signatures will not change; no action is
+required from downstream package authors.
+
+For the full configure template source, detailed environment-variable
+documentation, and the migration plan, see:
+
+```{r, eval = FALSE}
+system.file("configure-templates", "README.md", package = "nmathopencl")
+```

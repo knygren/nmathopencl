@@ -1,10 +1,10 @@
 ---
-title: "Chapter 03: The nmath OpenCL Library"
+title: "Chapter 03: Structure of nmath Kernel Programs"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 03: The nmath OpenCL Library}
+  %\VignetteIndexEntry{Chapter 03: Structure of nmath Kernel Programs}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,211 +13,307 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-## What is `inst/cl/nmath/`?
+## Why "programs" rather than compiled objects
 
-The `nmath/` subdirectory under `inst/cl/` contains a complete OpenCL C
-port of R's `nmath` (Mathlib) library --- approximately 180 `.cl` files,
-one per source file in R's `src/nmath/`. Together they implement the full
-suite of statistical distribution functions (densities, CDFs, quantiles,
-random-variate generators) and supporting mathematical helpers that make up
-R's statistical computing core.
+Normal C++ code in an R package is compiled ahead of time by the package build
+toolchain and linked into a DLL/`.so`. OpenCL device code works differently:
+the GPU source is compiled **at runtime**, on the device, by the GPU driver.
+This means there is no offline linker for device code --- all GPU code that will
+run together must be collected into a single source string before the driver
+sees it.
 
-The port is designed so that any downstream package can load a **subset** of
-this library --- just the functions it actually needs --- without pulling in the
-entire collection. The annotation scheme and dependency resolver (described
-in Chapter 06) make this automatic.
+In OpenCL terms, that string is a **program**. The C++ call sequence is:
 
-## Annotation scheme
+```cpp
+// kernel_source is one big string containing all device code
+program = clCreateProgramWithSource(context, 1, &src_ptr, &src_len, &status);
+clBuildProgram(program, 0, nullptr, nullptr, nullptr, nullptr);
+kernel  = clCreateKernel(program, "dnorm_kernel", &status);
+```
 
-Every `.cl` file in `nmath/` begins with a standard metadata block:
+`clBuildProgram` invokes the vendor GPU compiler on `kernel_source` and
+produces a device binary.  A build failure here is equivalent to a C++
+compilation error, except it happens at the moment of first use, not at `R CMD
+INSTALL` time.
+
+## No `#include` on the device
+
+OpenCL C is a restricted dialect of C99.  There is no file system visible to
+device code: `#include` is simply not available inside an OpenCL program string.
+Every declaration or definition that a kernel function needs must appear
+**earlier in the same string**.
+
+This creates the fundamental porting challenge for `nmathopencl`.  R's `nmath`
+library is written as standard C99 and relies on a chain of `#include`
+directives:
 
 ```c
-// @source_type: c
+#include "nmath.h"       /* includes R_ext/Arith.h, R_ext/Error.h, ... */
+#include "dpq.h"
+```
+
+Those headers pull in standard C types (`FILE*`, `size_t`, `int32_t`),
+R-specific runtime types (`SEXP`, `Rboolean`), and R callbacks
+(`error()`, `warning()`, `R_alloc()`).  None of these concepts exist on a GPU.
+
+The solution is to assemble the program string in layers, prepending
+OpenCL-compatible replacements for everything the nmath sources expect to find
+via `#include`.
+
+## The four-layer program structure
+
+A complete `nmathopencl` kernel program is a concatenation of four layers:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Layer 0 – OPENCL.cl                                         │
+│  Global configuration: fp64 pragma, HAVE_* macros, ML_NAN   │
+├─────────────────────────────────────────────────────────────┤
+│  Layer 1 – Upstream shims  (inst/cl/R_ext_types/, R_shims/, │
+│                              R_ext_runtime/, System/, ...)   │
+│  OpenCL-C replacements for C headers the nmath sources need  │
+├─────────────────────────────────────────────────────────────┤
+│  Layer 2 – nmath library  (inst/cl/nmath/)                   │
+│  The ported Mathlib functions, exactly the subset required   │
+│  by this kernel (determined by @all_depends_nmath)           │
+├─────────────────────────────────────────────────────────────┤
+│  Layer 3 – Kernel function  (inst/cl/src/)                   │
+│  The __kernel entry point: GPU-parallel version of a CPU     │
+│  loop over the nmath function                                │
+└─────────────────────────────────────────────────────────────┘
+```
+
+Each layer is a plain text block that is physically concatenated (in order)
+to form the final string passed to `clCreateProgramWithSource`.
+
+## Layer 0: `OPENCL.cl` --- the global configuration header
+
+`inst/cl/OPENCL.cl` is always placed at the very top.  It sets the conditions
+under which the rest of the program will compile:
+
+```c
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable   /* require 64-bit floats */
+
+/* Enable expm1/log1p built-ins on OpenCL >= 1.2 */
+#if defined(__OPENCL_C_VERSION__) && (__OPENCL_C_VERSION__ >= 120)
+  #define HAVE_EXPM1 1
+  #define HAVE_LOG1P 1
+#endif
+#undef HAVE_LONG_DOUBLE      /* no long double on GPU */
+
+#define ML_NAN   (0.0/0.0)
+#define ML_POSINF INFINITY
+#define ML_NEGINF -INFINITY
+#define INLINE static inline
+```
+
+This one file handles the biggest portability concern: double-precision support
+(`cl_khr_fp64`) must be declared before any `double` variable appears in device
+code, and the `HAVE_*` macros tell the nmath sources which C99 math built-ins
+are available.
+
+## Layer 1: The upstream shim layer
+
+R's nmath sources transitively include a long chain of headers.  The shim layer
+provides OpenCL C replacements, grouped by what they replace:
+
+### Type stubs
+
+| Files | What they replace |
+|-------|-------------------|
+| `System/stdint.cl` | `<stdint.h>`: `int32_t`, `uint64_t`, ... using OpenCL built-in integer types |
+| `R_ext_types/Boolean.cl`, `Complex.cl`, `Constants.cl`, etc. | Type-only parts of `<R_ext/Boolean.h>`, `<R_ext/Complex.h>`, etc. |
+| `R_shims/Rinternals.cl` | Skeletal `SEXP`, `SEXPREC`, `Rboolean` so transitively included headers compile |
+
+None of these types are *used* by the nmath math logic; the stubs exist so the
+preprocessor does not abort on an unrecognised identifier.
+
+### Capability macros
+
+`R_shims/Rconfig.cl` reproduces what R's `configure` script writes into
+`config.h`:
+
+```c
+#define HAVE_EXPM1 1
+#define HAVE_LOG1P 1
+#define IEEE_754   1
+```
+
+Without this, conditional compilation branches inside nmath would take the
+wrong path (e.g., falling back to a Taylor series instead of calling the
+built-in `expm1`).
+
+### Runtime no-ops
+
+R's `error()` and `warning()` are host-side callbacks that `longjmp` into the R
+runtime --- they cannot exist on the GPU.  `R_ext_runtime/Error.cl` replaces
+them with silent macros:
+
+```c
+#define error(...)   /* no-op */
+#define warning(...) /* no-op */
+```
+
+Similarly, `R_ext_runtime/Memory.cl` stubs `R_alloc()` and friends (nmath's hot
+paths do not actually allocate, so these stubs satisfy the preprocessor without
+ever executing), and `R_ext_runtime/Print.cl` stubs `Rprintf`.
+
+### Math declarations
+
+`R_ext_runtime/Arith.cl` is the most actively *used* shim.  It maps R's
+numeric predicates to their OpenCL equivalents:
+
+```c
+#define R_FINITE(x)  isfinite(x)
+#define ISNAN(x)     isnan(x)
+```
+
+`nmath/Rmath.cl` and `nmath/nmath.cl` close out the shim layer by providing the
+forward declarations, mathematical constants, and error-code macros that the
+nmath function files expect to find in `Rmath.h` / `nmath.h`.
+
+### The design principle
+
+Every shim is **minimally intrusive**: it defines only what the nmath math logic
+actually needs, and stubs or silences everything else.  The goal is that the
+nmath `.cl` files are as close to verbatim copies of the C sources as possible;
+the shims carry all the differences.
+
+## Layer 2: The nmath library and its annotation scheme
+
+`inst/cl/nmath/` contains approximately 180 `.cl` files, one per source file
+in R's `src/nmath/`.  They implement the full suite of Mathlib functions in
+OpenCL C.
+
+### `@provides` and `@depends` annotations
+
+Because the program is assembled at runtime, the loader must know the
+correct concatenation order.  Each nmath file declares what it provides
+and what it depends on:
+
+```c
+// From inst/cl/nmath/dnorm.cl
 // @source_origin: dnorm.c
-// @includes: nmath.h, dpq.h
-// @depends: nmath, dpq
-// @provides: dnorm4
-// @all_depends_count: 3
+// @depends:  nmath, dpq
+// @provides: dnorm, dnorm4
 // @all_depends: dpq, Rmath, nmath
-// @load_order: 36
+// @load_order: 31
 ```
 
-| Tag | Meaning |
-|-----|---------|
-| `@source_type` | Always `c` for nmath ports |
-| `@source_origin` | The original C source file in R's `src/nmath/` |
-| `@includes` | Headers included in the original C file |
-| `@depends` | **Direct** file dependencies (`.cl` filenames without extension) |
-| `@provides` | Functions defined in this file |
-| `@all_depends` | Full transitive closure of dependencies (union over the DAG) |
-| `@all_depends_count` | Number of entries in `@all_depends` |
-| `@load_order` | Pre-computed position in the topologically sorted order |
+`load_kernel_library()` reads these tags, builds a dependency graph, and
+performs a topological sort --- files with no unsatisfied dependencies are
+emitted first, then files whose dependencies have been emitted, and so on.
+The result is a load order in which every function is declared before it is
+called.
 
-The `@depends` tag is what `load_kernel_library()` uses to sort files. The
-`@all_depends` tag is informational --- it documents the complete dependency
-set so that a developer extracting a minimal subset knows exactly which files
-to include.
+### Only the required subset is loaded
 
-## File families
+A kernel that calls `dnorm` needs only 4 nmath files.  A kernel that calls
+`dbinom` needs 18.  Loading all ~180 files for every kernel would be wasteful
+and slow to compile.  Instead, each kernel file carries a pre-computed
+`@all_depends_nmath` annotation listing the exact transitive closure:
 
-The ~180 files are organized by function family. The table below shows
-representative entries for the main families.
+```c
+// dnorm_kernel.cl  -- needs 4 files
+// @all_depends_nmath: dpq, Rmath, nmath, dnorm
 
-### Infrastructure / header files
-
-| File | Provides |
-|------|----------|
-| `nmath.cl` | Library header: constants, macros, error codes |
-| `Rmath.cl` | Forward declarations for all Mathlib functions |
-| `dpq.cl` | `R_D__0`, `R_D__1`, `R_DT_0`, `R_DT_1`, `R_D_Lval`, ... (log-prob helpers) |
-| `refactored.cl` | Forward declarations for cycle-broken functions |
-
-### Core math helpers
-
-| File | Provides |
-|------|----------|
-| `chebyshev.cl` | `chebyshev_init`, `chebyshev_eval` |
-| `cospi.cl` | `cospi`, `sinpi`, `tanpi` |
-| `fmax2.cl` | `fmax2` |
-| `fmin2.cl` | `fmin2` |
-| `gammalims.cl` | `gammalims` |
-| `lgammacor.cl` | `lgammacor` |
-| `lgamma.cl` | `lgammafn`, `lgammafn_sign` |
-| `gamma.cl` | `gammafn` |
-| `stirlerr.cl` | `stirlerr` |
-| `bd0.cl` | `bd0`, `ebd0` |
-| `pgamma_utils.cl` | `log1pmx`, `lgamma1p` |
-| `mlutils.cl` | `log1pexp`, `log1mexp`, `logspace_add`, `logspace_sub` |
-| `expm1.cl` | `expm1` (if not an OpenCL built-in) |
-| `log1p.cl` | `log1p` (if not an OpenCL built-in) |
-
-### Density functions (`d*`)
-
-| File | Provides |
-|------|----------|
-| `dnorm.cl` | `dnorm4` |
-| `dgamma.cl` | `dgamma` |
-| `dbinom.cl` | `dbinom_raw`, `dbinom` |
-| `dpois.cl` | `dpois_raw`, `dpois` |
-| `dbeta.cl` | `dbeta` |
-| `dt.cl` | `dt` |
-| `df.cl` | `df` |
-| `dnbinom.cl` | `dnbinom`, `dnbinom_mu` |
-| `dchisq.cl` | `dchisq` |
-| `dexp.cl` | `dexp` |
-| `dweibull.cl` | `dweibull` |
-| `dlnorm.cl` | `dlnorm` |
-| `dlogis.cl` | `dlogis` |
-| `dcauchy.cl` | `dcauchy` |
-| `dunif.cl` | `dunif` |
-| `dhyper.cl` | `dhyper` |
-| `dgeom.cl` | `dgeom` |
-| `dnt.cl` | `dnt` (noncentral t) |
-| `dnf.cl` | `dnf` (noncentral F) |
-| `dnchisq.cl` | `dnchisq` (noncentral chi-sq) |
-| `dnbeta.cl` | `dnbeta` (noncentral beta) |
-
-### CDF functions (`p*`)
-
-Similar coverage for `pnorm.cl`, `pgamma.cl`, `pbinom.cl`, `ppois.cl`,
-`pbeta.cl`, `pt.cl`, `pf.cl`, etc. Each file ports the corresponding
-`p<dist>.c` from R's source.
-
-### Quantile functions (`q*`)
-
-`qnorm.cl`, `qgamma.cl`, `qbinom.cl`, `qpois.cl`, `qbeta.cl`, `qt.cl`,
-`qf.cl`, etc. Discrete quantile functions use a shared binary-search
-helper in `qDiscrete_search.cl`.
-
-### Random-variate generators (`r*`)
-
-`rnorm.cl`, `rgamma.cl`, `rbinom.cl`, `rpois.cl`, `rbeta.cl`, `rt.cl`,
-`runif.cl`, etc. These files define the device-side generator logic; the
-actual RNG seed and state management is handled by the host-side kernel
-runner.
-
-### Special functions
-
-| File | Provides |
-|------|----------|
-| `beta.cl` | `beta` (beta function) |
-| `lbeta.cl` | `lbeta` |
-| `choose.cl` | `choose`, `lchoose` |
-| `polygamma.cl` | `psigamma`, `digamma`, `trigamma`, ... |
-| `toms708.cl` | Incomplete beta (TOMS 708 algorithm) |
-| `bessel.cl` | `bessel_i`, `bessel_j`, `bessel_k`, `bessel_y` |
-| `signrank.cl` | `dsignrank`, `psignrank`, `qsignrank`, `rsignrank` |
-| `wilcox.cl` | `dwilcox`, `pwilcox`, `qwilcox`, `rwilcox` |
-
-### Additional utilities
-
-| File | Provides |
-|------|----------|
-| `fprec.cl`, `fround.cl`, `ftrunc.cl`, `fsign.cl` | Rounding/truncation |
-| `imax2.cl`, `imin2.cl` | Integer min/max |
-| `sign.cl` | `sign` |
-| `d1mach.cl`, `i1mach.cl` | Machine constants (BLAS-era helpers) |
-| `r_check_user_interrupt.cl` | Stub for interrupt checking |
-| `sexp.cl`, `snorm.cl`, `sunif.cl` | Alternative RNG implementations |
-
-## Cycle-breaking artifacts
-
-OpenCL compiles a program as a **single translation unit**: every function
-must be defined before it is called (no forward-declaration headers, no
-separate compilation). A handful of the nmath C files are mutually
-recursive in ways that C handles via separate compilation but OpenCL cannot.
-
-`nmathopencl` resolves these cycles by splitting the offending source file
-into two `.cl` files:
-
-```
-stirlerr.c  ->  stirlerr_cycle_free.cl      (no forward references)
-               stirlerr_cycle_dependent.cl  (calls the forward-declared part)
-               refactored.cl               (forward declarations only)
+// dbinom_kernel.cl -- needs 18 files
+// @all_depends_nmath: dpq, refactored, Rmath, nmath, stirlerr_cycle_free,
+//   chebyshev, cospi, fmax2, gammalims, lgammacor, log1p, gamma, lgamma,
+//   pgamma_utils, stirlerr_cycle_dependent, bd0, stirlerr, dbinom
 ```
 
-`refactored.cl` contains `extern`-style forward declarations so that the
-cycle-dependent portion can reference symbols that appear later in the
-concatenated source. The `@depends` tags ensure the three files are loaded
-in the correct order: `refactored` -> `stirlerr_cycle_free` ->
-`stirlerr_cycle_dependent` -> `stirlerr`.
+`load_library_for_kernel()` reads `@all_depends_nmath`, looks up each stem in
+a pre-built index (`kernel_dependency_index.tsv`) to get the global load order,
+and concatenates exactly those files in the correct sequence.  No topological
+sort is computed at install time --- the sort was done once when the index was
+built.
 
-Similarly, `bessel_j` and `bessel_y` are each split into `*_cycle_free.cl`
-and `*_cycle_dependent.cl` for the same reason.
+## Layer 3: The kernel function
 
-## The `ex_glmbayes_nmath/` subset
+The `__kernel` function is the entry point that the GPU driver exposes.
+Conceptually it is a **GPU-parallel version of a CPU `for` loop**:
 
-Because the full `nmath/` library is large (~180 files), the package also
-ships a pre-curated minimal subset in `inst/cl/ex_glmbayes_nmath/` ---
-exactly the 20 files needed by the six `glmbayes` kernels:
+```c
+/* CPU equivalent:
+   for (int i = 0; i < n; i++) out[i] = dnorm(x[i], mu[i], sigma[i], gl); */
 
+__kernel void dnorm_kernel(
+    __global const double* x,
+    __global const double* mu,
+    __global const double* sigma,
+    __global const int*    give_log,
+    __global double*       out,
+    const int              len
+) {
+    int i = get_global_id(0);    /* this work-item handles element i */
+    if (i >= len) return;
+    int gl = (give_log[i] != 0) ? 1 : 0;
+    out[i] = dnorm(x[i], mu[i], sigma[i], gl);   /* same nmath call */
+}
 ```
-Rmath.cl, nmath.cl, refactored.cl,
-chebyshev.cl, cospi.cl, fmax2.cl, gammalims.cl, lgammacor.cl,
-gamma.cl, lgamma.cl,
-stirlerr_cycle_free.cl, pgamma_utils.cl, stirlerr_cycle_dependent.cl,
-stirlerr.cl, bd0.cl,
-dpois.cl, dgamma.cl, dnorm.cl, pnorm.cl, dbinom.cl
+
+`get_global_id(0)` returns the index of the current work-item in the first
+dimension of the work grid.  The host launches exactly `n` work-items so each
+element of the input vector is handled by one work-item in parallel.
+
+The kernel calls `dnorm` --- the same function name as in the C source.  All
+the layers below it (shims + nmath files) ensure that `dnorm` is defined and
+reachable in the same program string.
+
+## Assembling the program in C++
+
+`build_rmath_opencl_program()` in `src/kernel_loader.cpp` shows precisely how
+the four layers are concatenated:
+
+```cpp
+std::string build_rmath_opencl_program(
+    const std::string& kernel_relative_path,
+    const std::string& package,
+    const std::string& nmath_depends_annotation)
+{
+  // Load exactly the nmath subset this kernel needs (via @all_depends_nmath)
+  const std::string nmath_src = load_library_for_kernel(
+      kernel_relative_path, "nmath", package, nmath_depends_annotation);
+
+  return
+    load_kernel_source("OPENCL.cl",      package)        + "\n"  // Layer 0
+    + load_kernel_library("libR_shims",  package, false) + "\n"  // Layer 1
+    + load_kernel_library("R_ext_types", package, false) + "\n"
+    + load_kernel_library("R_shims",     package, false) + "\n"
+    + load_kernel_library("R_ext_runtime", package, false) + "\n"
+    + load_kernel_library("R_ext_internals", package, false) + "\n"
+    + load_kernel_library("System",      package, false) + "\n"
+    + nmath_src                                          + "\n"  // Layer 2
+    + load_kernel_source(kernel_relative_path, package);         // Layer 3
+}
 ```
 
-This subset is determined by the `@all_depends` metadata in the six kernel
-files. Chapter 08 shows how to perform this extraction for a new downstream
-package.
+The returned string is passed directly to `clCreateProgramWithSource` and then
+compiled by the device driver.  At that point the GPU can execute the kernel
+function.
 
-## Porting fidelity
+Note the dual guard: each loader function itself is compiled to a no-op when
+`USE_OPENCL` is absent (see Chapter 02), so `build_rmath_opencl_program` is
+always callable but returns an empty string on CPU-only builds.  Callers
+check `has_opencl()` before dispatching to the GPU path.
 
-The port aims for bit-for-bit equivalence with the CPU nmath results on
-IEEE 754 hardware. The main sources of deviation are:
+## What this means for downstream developers
 
-1. **Compiler flags**: the OpenCL compiler may reorder floating-point
-   operations unless `-cl-fp64-round-to-nearest` is specified. The
-   `OpenCLConfig` struct in `openclPort.h` probes the device and sets
-   appropriate build flags.
-2. **Built-in precision**: some OpenCL devices implement `sqrt`, `exp`, and
-   `log` with 1 ULP error (IEEE 754 guarantees exactly rounded); others
-   allow slightly more. In practice, deviations are below numerical
-   tolerance for all statistical applications.
-3. **OpenCL built-ins**: functions like `lgamma`, `tgamma`, `expm1`, and
-   `log1p` are part of the OpenCL 1.1+ specification and do **not** need to
-   be ported. The corresponding `.cl` files include `#ifndef` guards so
-   that the ported version is only compiled if the built-in is absent.
+A downstream package that builds on `nmathopencl` does not need to replicate
+this assembly machinery.  The key functions --- `load_kernel_source`,
+`load_kernel_library`, and `load_library_for_kernel` --- are exported from
+`nmathopencl` (or available via `LinkingTo: nmathopencl`) and handle all of
+layers 0, 1, and 2 automatically.
+
+The downstream developer's responsibilities are:
+
+1. **Write the `__kernel` function** (Layer 3): call the nmath functions your
+   computation needs.
+2. **Annotate it** with `@depends_nmath` and `@all_depends_nmath` so the loader
+   knows which nmath subset to pull in.
+3. **Write the C++ runner** that calls `build_rmath_opencl_program()` (or the
+   equivalent chain), dispatches work-items, and transfers results.
+
+Chapter 06 covers how to write and annotate kernel functions.  Chapter 10
+walks through all three steps end-to-end for the `ex_glmbayes` example.
