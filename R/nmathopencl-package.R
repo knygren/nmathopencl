@@ -64,5 +64,15 @@
 #' @importFrom MASS mvrnorm
 #' @importFrom Rdpack reprompt
 #' @importFrom RcppParallel RcppParallelLibs
+#' @importFrom opencltools load_kernel_source load_kernel_library load_library_for_kernel
+#' @importFrom opencltools extract_library_subset write_kernel_dependency_index
+#' @importFrom opencltools stage_kernel_dependency_sort attach_kernel_dependency_tags
+#' @importFrom opencltools attach_cross_library_tags
+#' @importFrom opencltools has_opencl opencl_device_info opencl_fp64_available
+#' @importFrom opencltools opencl_reset_device_selection get_opencl_core_count
+#' @importFrom opencltools gpu_names verify_opencl_runtime check_runtime_env
+#' @importFrom opencltools diagnose_glmbayes detect_compute_runtimes
+#' @importFrom opencltools detect_environment_and_gpus detect_or_install_gpu_drivers
+#' @importFrom opencltools add_to_path_windows add_to_path_linux add_to_libpath_linux
 #' @useDynLib nmathopencl, .registration = TRUE
 "_PACKAGE"

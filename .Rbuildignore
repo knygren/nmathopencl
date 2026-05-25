@@ -29,6 +29,7 @@
 ^cran-comments\.md$
 ^R-UNIVERSE\.md$
 ^\.github$
+^\.vscode$
 ^\.positai$
 ^\.claude$
 ^CRAN-SUBMISSION$
