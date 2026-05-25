@@ -501,6 +501,100 @@ automatically if OpenCL is unavailable.
 
 ---
 
+## Next steps: C++ infrastructure consolidation with `opencltools`
+
+The C++ OpenCL infrastructure shared between `nmathopencl` and `opencltools`
+currently exists as duplicate source in both packages. Seven `.cpp` files
+(`opencl_detect.cpp`, `OpenCL_helper.cpp`, `configure_OpenCL.cpp`,
+`glmbayes_getRegisteredNamespace.cpp`, `opencl_device_selection.cpp`,
+`kernel_loader.cpp`, and the infrastructure portion of `export_wrappers.cpp`)
+are either byte-for-byte identical or differ only by a few `nmathopencl`-specific
+additions. Consolidating them into `opencltools` as the single authoritative
+source will eliminate the maintenance burden of applying fixes in two places.
+
+### Current state
+
+> **Note (temporary):** `LinkingTo: opencltools` has been removed from
+> `nmathopencl`'s `DESCRIPTION` pending a fix to the OpenCL headers bundled
+> in `opencltools/inst/include/CL/`. The bundled `cl.h` references
+> `cl_version.h` which is not included alongside it, causing compilation
+> failures in downstream packages. Once `opencltools` is on CRAN and the
+> bundled headers are either completed or removed, `LinkingTo: opencltools`
+> will be reinstated as the first step toward the full C++ consolidation
+> described below.
+
+`opencltools` already has the mechanism in place:
+
+- `inst/include/opencltools/openclPort.h` is the installed public header
+  (note at the top of the file: *"Installed copy for LinkingTo: opencltools"*)
+- `inst/include/CL/cl.h` and `cl_platform.h` are bundled for cross-platform builds
+- `nmathopencl` already carries `LinkingTo: opencltools` in its `DESCRIPTION`
+  (added in preparation for this consolidation)
+
+### What `opencltools` needs to add (post-CRAN-review)
+
+Two small additions to `inst/include/opencltools/openclPort.h`
+(and kept in sync with `src/openclPort.h`):
+
+1. **`opencl_bind_selected_fp64_device_or_throw()`** declaration inside the
+   existing `#ifdef USE_OPENCL` block. This function binds the cached fp64
+   device into a caller-supplied `cl_platform_id` / `cl_device_id` pair and is
+   currently used by `nmathopencl`'s kernel runners.
+
+2. **Three inline error-handling helpers** (`opencl_status_name`,
+   `opencl_status_hint`, `opencl_make_context_error`) that are already
+   `inline` in `nmathopencl/src/openclPort.h` — moving them to the published
+   header makes them available to any downstream package via `LinkingTo`.
+
+3. **An `LdFlags()` R function** (or equivalent) that returns the correct
+   `-l` linker flag for linking against `opencltools`' compiled library.
+   This is the standard mechanism R packages use to expose their compiled
+   symbols to downstream `LinkingTo` consumers (analogous to
+   `RcppArmadillo::RcppArmadillo.package.skeleton()` or `BH::BH.package.skeleton()`).
+
+### What `nmathopencl` will do once `opencltools` is on CRAN
+
+1. **`src/Makevars` / `src/Makevars.win` / `configure`** — add the linker flag
+   returned by `opencltools::LdFlags()` to `PKG_LIBS` so that the
+   `openclPort` symbols are resolved from `opencltools.dll` / `libopencltools.so`
+   at load time.
+
+2. **`src/openclPort.h`** — replace the full standalone header with a thin
+   bridge:
+
+   ```cpp
+   #include <opencltools/openclPort.h>
+
+   // nmathopencl-specific additions only:
+   namespace openclPort {
+     std::string build_rmath_opencl_program(...);   // nmath-specific assembly
+   #ifdef USE_OPENCL
+     void opencl_dbl_scalar_kernel_runner(...);
+     void opencl_pq_tail_kernel_runner(...);
+     void opencl_d_givelog_kernel_runner(...);
+     void opencl_numeric_cols_kernel_runner(...);
+     void opencl_pnorm_kernel_runner(...);
+   #endif
+   } // namespace openclPort
+   ```
+
+3. **Delete from `src/`** — `opencl_detect.cpp`, `OpenCL_helper.cpp`,
+   `configure_OpenCL.cpp`, `glmbayes_getRegisteredNamespace.cpp`, and the
+   shared portions of `opencl_device_selection.cpp` and `kernel_loader.cpp`.
+   The linker will resolve those symbols from `opencltools` instead.
+
+### What stays permanently in `nmathopencl`
+
+- `build_rmath_opencl_program()` — hard-codes the `nmathopencl`-specific layer
+  assembly order (`OPENCL.cl`, `libR_shims`, `R_ext_types`, …, `nmath`) and
+  has no meaning outside this package.
+- All kernel runner infrastructure (`opencl_kernel_runners.cpp`,
+  `kernel_runners.cpp`, `kernel_wrappers.cpp`) — these implement the
+  distribution-function GPU backends.
+- The `ex_glmbayes` example suite.
+
+---
+
 ## nmath dependencies for the glmbayes `f2_f3` kernels
 
 The `f2_f3_*.cl` kernels are the core of the `glmbayes` GPU backend. Each one
