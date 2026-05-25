@@ -71,11 +71,13 @@ Cheap probes before assembling large sources or diagnosing workstation issues:
 
 | Concern | R entry points |
 |---------|----------------|
-| Device present / built with OpenCL | **`has_opencl()`** |
-| Double-precision & device bookkeeping for fp64-heavy nmath kernels | **`opencl_fp64_available()`**, **`opencl_device_info()`**, **`opencl_reset_device_selection()`** |
-| Session sanity / environment | **`verify_opencl_runtime`**, **`check_runtime_env`** |
+| **nmathopencl** compile-time OpenCL / device selection | **`has_opencl()`**, **`opencl_fp64_available()`**, **`opencl_device_info()`**, **`opencl_reset_device_selection()`**, **`get_opencl_core_count()`** |
+| Combined report (host checks + **nmathopencl** build) | **`diagnose_glmbayes()`** |
 
-Optional onboarding / inventory helpers (**`detect_compute_runtimes`**, **`detect_environment_and_gpus`**, **`detect_or_install_gpu_drivers`**, **`get_opencl_core_count`**, **`gpu_names`**).
+Host and workstation inventory --- GPU vendor detection, driver/ICD/PATH probes,
+**`verify_opencl_runtime()`**, PATH helpers, and related Tier 3 tooling --- live in
+**[`opencltools`](https://knygren.r-universe.dev/opencltools)** (`opencltools::…`).
+They are **not** re-exported from **nmathopencl**.
 
 ---
 
@@ -275,13 +277,17 @@ satisfied by the layered shim files in the other subdirectories.
 
 ## R helpers exported for kernel authors (`nmathopencl` vs duplication)
 
-Grouped by typical need for someone following **§ Audience and workflow**. Companion package
-**`openclport`** ultimately owns generic kernel-string assembly tooling; **`nmathopencl`**
-currently exports the overlapping entry points so kernel authors need not wait on every
-satellite hitting CRAN. **`glmbayes`** still ships parallel helpers for transitional
-compatibility --- target **`Imports: nmathopencl`** rather than sustaining duplicate loaders.
+Grouped by typical need for someone following **§ Audience and workflow**. Generic
+OpenCL plumbing (host diagnostics, kernel-library tagging, subset loaders) lives in
+**[`opencltools`](https://knygren.r-universe.dev/opencltools)**; **nmathopencl**
+re-exports **Tier A** (subset loaders) and **Tier D** (annotation plumbing) helpers below and keeps
+package-specific compile-time and device-selection probes (**Tier C**). **`glmbayes`** still ships parallel helpers
+for transitional compatibility --- target **`Imports: nmathopencl`** (and
+**`opencltools`** where needed) rather than sustaining duplicate loaders.
 
 ### Tier A --- Subset authoring (primary CRAN-facing story)
+
+Re-exported from **opencltools** (same function objects as **`opencltools::…`**):
 
 | Function | Purpose |
 |----------|---------|
@@ -291,35 +297,28 @@ compatibility --- target **`Imports: nmathopencl`** rather than sustaining dupli
 
 ### Tier B --- Full-program stacking (mirror `glmbayes`/OpenCL prelude)
 
+Implemented in **nmathopencl** (C++ kernel loaders in this package):
+
 | Function | Purpose |
 |----------|---------|
 | **`load_kernel_library()`** | Recursive dependency-aware concatenation of an `inst/cl/<subdir>/` subtree. |
 | **`load_kernel_source()`** | Load a standalone header/device file (often `OPENCL.cl`-style prelude). |
 
-### Tier C --- Device / fp64 utilities (stay with `nmathopencl`)
+### Tier C --- Compile-time / device utilities (stay with `nmathopencl`)
 
 | Function | Purpose |
 |----------|---------|
-| **`has_opencl()`**, **`opencl_fp64_available()`**, **`opencl_device_info()`**, **`opencl_reset_device_selection()`** | Host-side capability & fp64 probing tied to kernels shipped here. |
+| **`has_opencl()`**, **`opencl_fp64_available()`**, **`opencl_device_info()`**, **`opencl_reset_device_selection()`**, **`get_opencl_core_count()`** | Compile-time flag and fp64/device probing tied to kernels shipped here. |
+| **`diagnose_glmbayes()`** | Readable report: **opencltools** host/runtime checks plus this package's **`has_opencl()`** status. |
 
-### Tier D --- Optional environment / onboarding
+### Tier D --- Maintainer-only port plumbing
 
-| Functions | Purpose |
-|-----------|---------|
-| **`verify_opencl_runtime`**, **`check_runtime_env`**, **`detect_compute_runtimes`**, **`detect_environment_and_gpus`**, **`detect_or_install_gpu_drivers`**, **`get_opencl_core_count`**, **`gpu_names`**, **`diagnose_glmbayes`** | Diagnostics and workstation inventory; overlaps generic tooling slated for tighter consolidation alongside **`openclport`**. |
-
-### Tier E --- Maintainer-only port plumbing
-
-Less common once bundles are annotated; prefer **`openclport`** internals when authoring new subgraphs.
+Re-exported from **opencltools**; less common once bundles are annotated.
 
 | Function | Purpose |
 |----------|---------|
 | **`stage_kernel_dependency_sort()`** | Offline ordering passes for regenerated trees. |
-| **`attach_kernel_dependency_tags()`**, **`attach_cross_library_tags()`** | Batch annotation tooling. |
-
-### Tier F --- POSIX/PATH ergonomics (`glmbayes` overlap)
-
-Developer helpers (**`add_to_path_linux()`**, **`add_to_path_windows()`**, **`add_to_libpath_linux()`**) for workstation PATH / library-path tweaks tied to GPU driver workflows; overlaps **`glmbayes`** until loaders consolidate.
+| **`attach_kernel_call_tags()`**, **`attach_kernel_dependency_tags()`**, **`attach_cross_library_tags()`** | Batch annotation tooling. |
 
 ---
 
@@ -484,8 +483,10 @@ automatically if OpenCL is unavailable.
 
 ## Future plans
 
-- **Consolidated loader ownership.** Migrate overlapping `load_kernel_*` tooling to **`openclport`**
-  on CRAN while **`nmathopencl`** re-exports or thin-wraps until downstream packages switch imports.
+- **Loader consolidation.** Host diagnostics and generic kernel-library tooling live in
+  **`opencltools`**; **`nmathopencl`** re-exports Tier A/D helpers and owns **`load_kernel_*`**
+  plus compile-time device probes. Longer term, C++ **`openclPort`** helpers may still migrate
+  to a dedicated package.
 - **Minimal program assembly.** Dependency analysis to include only the
   source files actually required for each kernel, reducing JIT compilation
   cost on first call.
