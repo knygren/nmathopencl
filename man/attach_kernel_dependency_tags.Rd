@@ -2,7 +2,7 @@
 % Please edit documentation in R/opencltools_reexports.R
 \name{attach_kernel_dependency_tags}
 \alias{attach_kernel_dependency_tags}
-\title{Attach Dependency Tags to a Sortable Kernel Library}
+\title{Attach Dependency Tags to a Dependency-Ordered Kernel Library}
 \usage{
 attach_kernel_dependency_tags(library_dir, dry_run = FALSE)
 }
@@ -27,6 +27,8 @@ A list with:
 declaration signature, \code{define_alias}, and \code{all_depends} for the
 definition file.}
 }
+An S3 class \code{"opencl_dependency_tags"} is attached for use with
+\code{\link[opencltools:print.opencl_dependency_tags]{print()}}.
 }
 \description{
 Compute and attach derived tags to each \code{.cl} file in a library:
@@ -40,12 +42,10 @@ refactoring can be prioritized.
 \examples{
 ############################ Start of attach_kernel_dependency_tags example ########################
 
-\donttest{
 lib_dir <- system.file("cl/ex_glmbayes_nmath", package = "opencltools")
 res <- attach_kernel_dependency_tags(lib_dir, dry_run = TRUE)
 res$ok
 print(res)
-}
 
 ###############################################################################
 ## End of attach_kernel_dependency_tags example

@@ -18,7 +18,6 @@
 #include <stdexcept>
 #include <algorithm>
 #include <R.h>                  // added: for Rprintf
-#include <opencltools/opencltools_capi.h>
 
 namespace fs = std::filesystem;
 using namespace openclPort;
@@ -436,8 +435,11 @@ std::string build_rmath_opencl_program(const std::string& kernel_relative_path,
 namespace openclPort {
 
 int get_opencl_core_count() {
-  // Route through opencltools C API; keep minimum fallback of 1.
-  return std::max(1, opencltools_get_opencl_core_count());
+#ifdef USE_OPENCL
+  return std::max(1, detect_num_gpus_internal());  // ensure at least 1
+#else
+  return 1;  // fallback when OpenCL is not available
+#endif
 }
 
 

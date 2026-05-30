@@ -15,7 +15,15 @@ be written.}
 \item{overwrite}{Logical; remove and recreate \code{output_dir} if it exists.}
 }
 \value{
-A list containing sorted and unresolved data frames.
+A named \code{list} with:
+\describe{
+\item{\code{sorted}}{Data frame of files placed in dependency order
+(\code{order}, \code{pass}, \code{file}, \code{source_type}, \code{depends}).}
+\item{\code{unresolved}}{Data frame of files blocked by missing dependencies.}
+\item{\code{sorted_dir}, \code{unresolved_dir}}{Output directory paths; CSV
+reports \file{sorted_files.csv} and \file{unresolved_files.csv} are written
+under \code{output_dir}.}
+}
 }
 \description{
 Run the file-level \verb{@depends} sort without requiring full success. Files
@@ -25,7 +33,6 @@ dependencies are copied into a separate folder with CSV reports.
 \examples{
 ############################ Start of stage_kernel_dependency_sort example ########################
 
-\donttest{
 lib_dir    <- system.file("cl/ex_glmbayes_nmath", package = "opencltools")
 output_dir <- tempfile("stage_sort")
 on.exit(unlink(output_dir, recursive = TRUE), add = TRUE)
@@ -33,7 +40,6 @@ on.exit(unlink(output_dir, recursive = TRUE), add = TRUE)
 res <- stage_kernel_dependency_sort(lib_dir, output_dir, overwrite = TRUE)
 nrow(res$sorted)
 length(list.files(output_dir, recursive = TRUE))
-}
 
 ###############################################################################
 ## End of stage_kernel_dependency_sort example

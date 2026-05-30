@@ -514,20 +514,13 @@ source will eliminate the maintenance burden of applying fixes in two places.
 
 ### Current state
 
-> **Note (temporary):** `LinkingTo: opencltools` has been removed from
-> `nmathopencl`'s `DESCRIPTION` pending a fix to the OpenCL headers bundled
-> in `opencltools/inst/include/CL/`. The bundled `cl.h` references
-> `cl_version.h` which is not included alongside it, causing compilation
-> failures in downstream packages. Once `opencltools` is on CRAN and the
-> bundled headers are either completed or removed, `LinkingTo: opencltools`
-> will be reinstated as the first step toward the full C++ consolidation
-> described below.
-
 `opencltools` already has the mechanism in place:
 
 - `inst/include/opencltools/openclPort.h` is the installed public header
   (note at the top of the file: *"Installed copy for LinkingTo: opencltools"*)
-- `inst/include/CL/cl.h` and `cl_platform.h` are bundled for cross-platform builds
+- bundled `include/CL` headers were removed to avoid downstream header conflicts;
+  downstream packages must supply OpenCL SDK/system include paths via
+  `configure` or `src/Makevars*`
 - `nmathopencl` already carries `LinkingTo: opencltools` in its `DESCRIPTION`
   (added in preparation for this consolidation)
 
