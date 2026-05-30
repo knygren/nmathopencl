@@ -80,5 +80,6 @@
 #' @importFrom opencltools extract_library_subset write_kernel_dependency_index
 #' @importFrom opencltools stage_kernel_dependency_sort attach_kernel_dependency_tags
 #' @importFrom opencltools attach_kernel_call_tags attach_cross_library_tags
+#' @importFrom opencltools use_opencl_configure port_to_opencl_configure
 #' @useDynLib nmathopencl, .registration = TRUE
 "_PACKAGE"

@@ -206,7 +206,7 @@ kernel.
 
 `nmathopencl` therefore ships a pre-built dependency index alongside every
 curated library subdirectory. The index encodes the full transitive dependency
-map and the global load order, enabling two important optimisations:
+map and the global load order, enabling two important optimizations:
 
 1. **`load_library_for_kernel()` (R)** --- loads only the files required by one
    specific kernel, with no sort at runtime.
@@ -219,7 +219,7 @@ map and the global load order, enabling two important optimisations:
 write_kernel_dependency_index(library_dir, verbose = TRUE)
 ```
 
-This function analyses a library directory, computes the full transitive
+This function analyzes a library directory, computes the full transitive
 dependency closure for every stem, and writes **two companion files** next to
 the `.cl` sources:
 

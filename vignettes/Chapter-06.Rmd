@@ -132,7 +132,7 @@ dnorm_opencl <- function(x, mean = 0, sd = 1, log = FALSE,
                          verbose = FALSE) {
 
   # ── Input validation ──────────────────────────────────────────────────────
-  # These checks mirror stats::dnorm behaviour.
+  # These checks mirror stats::dnorm behavior.
   if (!is.numeric(x))    stop("`x` must be numeric.")
   if (!is.numeric(mean)) stop("`mean` must be numeric.")
   if (!is.numeric(sd))   stop("`sd` must be numeric.")
@@ -217,7 +217,7 @@ wrapper shares:
 }
 ```
 
-The design makes the fallback behaviour explicit and controllable:
+The design makes the fallback behavior explicit and controllable:
 
 - `fallback = FALSE` (default): if the GPU call fails, the error propagates
   to the caller.  The caller sees an actual error rather than silently
@@ -246,7 +246,7 @@ Rcpp::NumericVector dnorm_opencl(
     bool                       verbose
 ) {
   const int len = x.size();
-  Rcpp::NumericVector out(len);   // zero-initialised
+  Rcpp::NumericVector out(len);   // zero-initialized
 
 #ifdef USE_OPENCL
   if (!has_opencl() || len == 0) return out;
@@ -418,5 +418,5 @@ identical.  What differs is only how the wrapper is wired into the rest of
 the package.
 
 Chapter 12 describes the `nmathopencl` R API in full, showing how the
-distribution-function wrappers are documented and organised.  Chapter 10
+distribution-function wrappers are documented and organized.  Chapter 10
 works through the `ex_glmbayes` pattern end-to-end.

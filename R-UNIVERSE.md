@@ -8,7 +8,7 @@ and how that relates to **`packages.json`**.
 
 **Operational trigger (`glmbayes`, `nmathopencl`):** Maintainer practice under **`github.com/knygren`**: pushing an updated **`packages.json` at that package's repo root** (same shorthand **`"pkg":"user/repo"`** map mirrored in **`glmbayes`** and **`nmathopencl`**) has reliably **kick-started / refreshed** builds on **`knygren.r-universe.dev`**, including cases where **`r-universe[bot]`** bumps **`github.com/r-universe/knygren/.ghapp`** **`repositories`** once **`nmathopencl`** is part of your universe lineup. **`R CMD build`** can ignore that file (**`.Rbuildignore`** here); pushes still ship it to GitHub for clones and automation hooks.
 
-Treat the **two** artefacts together: authoritative listing on **`knygren.r-universe.dev`** plus an occasional **repo-root** `packages.json` push whenever you intentionally **signal** fresh universe work---as you've done historically for **`glmbayes`**.
+Treat the **two** artifacts together: authoritative listing on **`knygren.r-universe.dev`** plus an occasional **repo-root** `packages.json` push whenever you intentionally **signal** fresh universe work---as you've done historically for **`glmbayes`**.
 
 ## Canonical R-universe registry (what builders actually read)
 

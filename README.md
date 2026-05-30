@@ -54,7 +54,7 @@ where applicable), then:
    **`@all_depends_nmath`** annotations (optional **`warning()` hints** mirror
    **`inst/extdata/opencl_known_failures.json`** for curated fragile subgraphs).
 
-2. **Optional materialisation** --- **`extract_library_subset()`** writes that subset (and index companions)
+2. **Optional materialization** --- **`extract_library_subset()`** writes that subset (and index companions)
    next to kernels you intend to vendor; regenerate **`kernel_dependency_index.rds`** alongside the library
    with **`write_kernel_dependency_index()`** after substantive port edits.
 
@@ -292,7 +292,7 @@ Re-exported from **opencltools** (same function objects as **`opencltools::…`*
 | Function | Purpose |
 |----------|---------|
 | **`load_library_for_kernel()`** | Minimal concatenated text for **one launcher** respecting **`@all_depends_nmath`**, assembler notes, curated warnings. |
-| **`extract_library_subset()`** | Materialise shards + indexes into another directory for vendoring subset trees. |
+| **`extract_library_subset()`** | Materialize shards + indexes into another directory for vendoring subset trees. |
 | **`write_kernel_dependency_index()`** | Regenerate RDS/TSV index beside `inst/cl/nmath/` after substantive port tooling runs. |
 
 ### Tier B --- Full-program stacking (mirror `glmbayes`/OpenCL prelude)
@@ -345,7 +345,7 @@ dpois_opencl(n = 5e4, x = 3, lambda = 2.5, log = TRUE)
 They double as turnkey batched calculators when GPU dispatch already matches your bottleneck,
 yet the curated workflow remains **assemble your kernel + stitched nmath subgraph**.
 
-Each wrapper honours **`fallback`**, default **`FALSE`** --- GPU faults surface loudly.
+Each wrapper honors **`fallback`**, default **`FALSE`** --- GPU faults surface loudly.
 **`fallback = TRUE`** masks recoverable failures with CPU `stats` analogues whenever OpenCL
 appears available (see **`has_opencl()`**). Machines **without OpenCL support** always follow
 CPU paths regardless of **`fallback`**. Begin runtime probing with **§ Diagnostics and runtime checks**.

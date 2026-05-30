@@ -46,7 +46,7 @@ Three design goals shape this structure:
    mathematical computation.  None of the three needs to know the internal
    details of the other two.
 
-### How this chapter is organised
+### How this chapter is organized
 
 Each of the three sections below follows the same pattern:
 
@@ -54,7 +54,7 @@ Each of the three sections below follows the same pattern:
    implementations.
 2. A concrete **example** drawn from the `ex_glmbayes` component of
    `nmathopencl`, which evaluates the GLM log-posterior and its gradient over
-   a grid of candidate coefficient vectors.  This is labelled clearly as an
+   a grid of candidate coefficient vectors.  This is labeled clearly as an
    example throughout.
 3. Commentary on **what you would change** when writing your own version.
 
@@ -133,7 +133,7 @@ A modern GPU has dozens to hundreds of compute units, each capable of running
 multiple work-items simultaneously.  With `m1 = 500`, several hundred grid
 points can genuinely execute at the same time, not just interleaved.
 
-The work-items are organised internally into *work-groups* for scheduling
+The work-items are organized internally into *work-groups* for scheduling
 purposes.  When the local work-group size is set to `nullptr` (as in the
 runner), the driver chooses a group size that fits the hardware.  Work-items
 within a work-group can share fast local memory, but the `ex_glmbayes` kernels
@@ -183,7 +183,7 @@ computation:
    depend on the types in the function signature.
 2. **Allocates output storage** for the runner to write into.
 3. **Conditionally dispatches** to the runner if `USE_OPENCL` was defined at
-   build time.  If not, the function returns the zero-initialised outputs.
+   build time.  If not, the function returns the zero-initialized outputs.
 4. **Converts the runner's output** from plain C++ back to the types the
    caller expects.
 
@@ -315,10 +315,10 @@ std::vector<double> copyVector(const Rcpp::NumericVector& vec) {
 
   std::vector<double> qf_flat(m1);                      // scalar per grid point
   std::vector<double> grad_flat(static_cast<size_t>(m1) * l2);  // gradient matrix
-  Rcpp::NumericVector qf(m1);   // zero-initialised; returned as-is on CPU-only build
+  Rcpp::NumericVector qf(m1);   // zero-initialized; returned as-is on CPU-only build
 ```
 
-`std::vector<double>` zero-initialises its elements by default.  If
+`std::vector<double>` zero-initializes its elements by default.  If
 `USE_OPENCL` was not defined, the wrapper returns these zero-filled objects —
 a predictable, testable result on any machine without a GPU.  The
 `static_cast<size_t>` prevents integer overflow in `m1 * l2` on 32-bit
@@ -444,7 +444,7 @@ into a new matrix object, an `arma::mat` is constructed over `grad_flat`'s
 existing memory using Armadillo's `(ptr, nrow, ncol, copy_aux_mem, strict)`
 constructor.  Setting `copy_aux_mem = false` tells Armadillo to use the
 existing memory directly.  The matrix is valid until `grad_flat` is destroyed,
-which happens after `Rcpp::List::create` serialises the result — so the
+which happens after `Rcpp::List::create` serializes the result — so the
 lifetime is safe.  For typical MCMC grid sizes the gradient matrix can be
 several hundred kilobytes; avoiding the copy measurably reduces per-call
 overhead.
@@ -578,7 +578,7 @@ host CPU.
 ```
 
 `clBuildProgram` triggers on-device compilation: the GPU driver parses the
-OpenCL C source, optimises it, and produces GPU-native machine code specific
+OpenCL C source, optimizes it, and produces GPU-native machine code specific
 to the selected device.  This is analogous to `R CMD SHLIB` but happens at
 runtime inside the GPU driver process.  `clCreateKernel` then extracts the
 specific `__kernel` function by name from the compiled program.
@@ -623,7 +623,7 @@ this call returns, the device buffer is fully populated and the host-side
 vector is no longer needed by the driver.
 
 For *output* buffers, `CL_MEM_WRITE_ONLY` with a `nullptr` host pointer
-allocates uninitialised device memory that the kernel will write into.  The
+allocates uninitialized device memory that the kernel will write into.  The
 results are read back to the host after execution.
 
 #### Step 5 — Bind kernel arguments
@@ -945,7 +945,7 @@ R:  f2_f3_opencl("binomial", "logit", b, y, x, mu, P, alpha, wt)
 │  4. clCreateKernel("f2_f3_binomial_logit")                      │
 │  5. clCreateBuffer × 9                                          │
 │     inputs:  READ_ONLY | COPY_HOST_PTR → data copied to VRAM   │
-│     outputs: WRITE_ONLY, nullptr → uninitialised device memory  │
+│     outputs: WRITE_ONLY, nullptr → uninitialized device memory  │
 │  6. clSetKernelArg × 12  (9 buffers + l1, l2, m1)              │
 │  7. clEnqueueNDRangeKernel(global_size = m1)                    │
 │     → queues the launch; GPU executes asynchronously            │

@@ -37,7 +37,7 @@ NULL
 #'   \item{\code{f1}}{Neg log-likelihood in coefficients \code{b} (usual data args).}
 #'   \item{\code{f2}}{Neg log-posterior: likelihood plus Normal(\code{mu}, \code{P}) quadratic penalty.}
 #'   \item{\code{f3}}{Gradient of \code{f2} w.r.t.\ \code{b} (argument pattern mirrors \code{f2}).}
-#'   \item{\code{f4}}{Deviance gap vs saturation; honours \code{dispersion};\cr quasi / DIC helper.}
+#'   \item{\code{f4}}{Deviance gap vs saturation; honors \code{dispersion};\cr quasi / DIC helper.}
 #'   \item{\code{f7}}{Weighted curvature / Hessian proxy at \code{b}.\cr}
 #'   }
 #'   Slots \code{f5} and \code{f6} are **not** returned: they were reserved for alternate or

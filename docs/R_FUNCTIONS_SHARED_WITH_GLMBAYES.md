@@ -10,7 +10,7 @@ Sandbox **`Ex_*`** teaching wrappers (*different* exported symbols from **`glmba
 
 ## Exact same exported name (both packages)
 
-These **14** identifiers are **`export(...)`’d by both packages**—typically thin R wrappers duplicated into **nmathopencl** while **glmbayes** retains the originals for modelling workflows.
+These **14** identifiers are **`export(...)`’d by both packages**—typically thin R wrappers duplicated into **nmathopencl** while **glmbayes** retains the originals for modeling workflows.
 
 | Function | `nmathopencl` **`R/`** source | Typical role |
 |----------|------------------------------|----------------|

@@ -11,9 +11,9 @@
 | Export | Role (one line) |
 |--------|-----------------|
 | `Ex_EnvelopeEval` | GPU-capable **`EnvelopeEval`**-style objective evaluation |
-| `Ex_EnvelopeOpt` | Small optimiser layered on envelope losses |
+| `Ex_EnvelopeOpt` | Small optimizer layered on envelope losses |
 | `Ex_EnvelopeSize` | Grid / envelope sizing analogue of **`EnvelopeSize`** |
-| `Ex_glmb_Standardize_Model` | Teaching standardisation helper mirroring **`glmb_Standardize_Model`** |
+| `Ex_glmb_Standardize_Model` | Teaching standardization helper mirroring **`glmb_Standardize_Model`** |
 | `Ex_glmbfamfunc` | Family object analogue of **`glmbfamfunc`** (**`S3`** **`print`** registered) |
 
 ---
@@ -50,7 +50,7 @@
 
 ## `Ex_glmb_Standardize_Model(...)`
 
-**Brief.** Stand-alone **standardisation** helper paralleling **`glmb_Standardize_Model`** for examples.
+**Brief.** Stand-alone **standardization** helper paralleling **`glmb_Standardize_Model`** for examples.
 
 **Why nmathopencl (vs `openclport`).** Model-prep **R** façade unrelated to **`openclport`**.
 

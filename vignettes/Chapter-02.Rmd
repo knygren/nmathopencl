@@ -145,7 +145,7 @@ This writes `configure` and `configure.win` to the package root, sets
 `configure` executable on Unix, and prints a setup checklist. Both scripts
 always succeed: when no OpenCL SDK is found they write a CPU-only Makevars.
 
-Add the generated files to `.gitignore` (they are build artefacts):
+Add the generated files to `.gitignore` (they are build artifacts):
 
 ```
 src/Makevars

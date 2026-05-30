@@ -2,6 +2,9 @@
 
 ### OpenCL tooling
 
+- **`use_opencl_configure()`** and **`port_to_opencl_configure()`** are thin
+  re-exports from **opencltools**; configure templates live in
+  **`opencltools/inst/configure-templates/`**.
 - Tier 3 host/runtime diagnostics (`detect_*`, `verify_opencl_runtime`,
   `gpu_names`, `add_to_path_*`, etc.) are no longer re-exported from
   **nmathopencl**; use **opencltools** directly. **nmathopencl** keeps

@@ -126,7 +126,7 @@ provides OpenCL C replacements, grouped by what they replace:
 | `R_shims/Rinternals.cl` | Skeletal `SEXP`, `SEXPREC`, `Rboolean` so transitively included headers compile |
 
 None of these types are *used* by the nmath math logic; the stubs exist so the
-preprocessor does not abort on an unrecognised identifier.
+preprocessor does not abort on an unrecognized identifier.
 
 ### Capability macros
 

@@ -11,7 +11,7 @@ Those **14** shared identifiers (**`has_opencl`**, **`load_kernel_source`**, **`
 
 **Sandbox `Ex_*`:** **`docs/EXPORTED_EX_GLMBAYES.md`** (full maintainer triples + quick index)—**not** duplicated below.
 
-*(Ignore **`docs/articles/`**, **`reference/`**, …—**`pkgdown`** artefacts.)*
+*(Ignore **`docs/articles/`**, **`reference/`**, …—**`pkgdown`** artifacts.)*
 
 ---
 
@@ -31,7 +31,7 @@ Typical order when **debugging** **`nmathopencl`** GPU paths: **`has_opencl()`**
 
 **Why nmathopencl (vs `openclport`).** Amortises expensive device queries across **`*_opencl`** calls inside this package; **`openclport`** has no parallel runtime cache surface.
 
-**Details.** Use after shared diagnostics prove OpenCL is present but kernels misbehave (platform selection, **`clBuildProgram`** failures). Behaviour is tied to **`nmathopencl`** **`C++`** caching—see **`.Rd`** for return/print contract.
+**Details.** Use after shared diagnostics prove OpenCL is present but kernels misbehave (platform selection, **`clBuildProgram`** failures). Behavior is tied to **`nmathopencl`** **`C++`** caching—see **`.Rd`** for return/print contract.
 
 ### `opencl_fp64_available(force = FALSE)`
 

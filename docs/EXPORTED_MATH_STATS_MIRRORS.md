@@ -1,4 +1,4 @@
-# Exported R functions mirroring **stats** / **math** (CPU) behaviour
+# Exported R functions mirroring **stats** / **math** (CPU) behavior
 
 **Scope:** **User-facing** exports only—the **`*_opencl`** (and related) maths façade names **`export(...)`’d** from **`nmathopencl`** and wired from hand‑authored **`R/*_opencl.R`** (and neighbouring **`R/`** shards listed in the source map).
 
@@ -159,7 +159,7 @@ Grouped by distribution family. Each row lists **R** exports registered in **`NA
 |---|---|---|---|
 | `dbinom_opencl` **`dbinom_raw_opencl`** | `pbinom_opencl` | `qbinom_opencl` | `rbinom_opencl` |
 
-### Negative binomial (`prob` & `mu` parametrisations)
+### Negative binomial (`prob` & `mu` parameterizations)
 
 | d | p | q | r |
 |---|---|---|---|
@@ -225,7 +225,7 @@ Many **`p`/`q`** for **Wilcoxon / Tukey / sign‑rank** exist only where ported 
 |---|---|---|---|
 | `dsignrank_opencl` | `psignrank_opencl` | `qsignrank_opencl` | `rsignrank_opencl` |
 
-### Studentised range (**Tukey**)
+### Studentized range (**Tukey**)
 
 | d | p | q | r |
 |---|---|---|---|

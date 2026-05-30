@@ -28,3 +28,11 @@ extract_library_subset <- opencltools::extract_library_subset
 #' @export
 #' @inherit opencltools::load_library_for_kernel
 load_library_for_kernel <- opencltools::load_library_for_kernel
+
+#' @export
+#' @inherit opencltools::use_opencl_configure
+use_opencl_configure <- opencltools::use_opencl_configure
+
+#' @export
+#' @inherit opencltools::port_to_opencl_configure
+port_to_opencl_configure <- opencltools::port_to_opencl_configure

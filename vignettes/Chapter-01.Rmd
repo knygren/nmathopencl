@@ -214,7 +214,7 @@ system.time(dnorm(x, mean = 0, sd = 1))
 Use large vectors (millions of elements) for this test. For small to
 moderate vectors the GPU will often be *slower* than the CPU due to the
 overhead of kernel compilation and host-to-device data transfer. That is
-expected behaviour, not a bug. The real-world acceleration from using the
+expected behavior, not a bug. The real-world acceleration from using the
 `nmathopencl` nmath library happens when statistical math calls are embedded
 *inside* a downstream package's GPU kernels, where they share device memory
 with the rest of the computation and avoid the round-trip transfer entirely.

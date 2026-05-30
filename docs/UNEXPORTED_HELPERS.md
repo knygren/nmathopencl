@@ -14,7 +14,7 @@ Indented nested functions (for example **`fallback_full`** factories inside **`d
 
 ## OpenCL façade validation & recycle rules
 
-**Brief.** Centralised scalar checks and **OpenCL-vs-CPU** branching so exported **`*_opencl`** functions fail fast before **`.Call`**.
+**Brief.** Centralized scalar checks and **OpenCL-vs-CPU** branching so exported **`*_opencl`** functions fail fast before **`.Call`**.
 
 **Why nmathopencl (vs `openclport`).** This layer is tailored to **`nmathopencl`** distribution mirrors (argument shapes recycled like **`stats`**, RNG defaults, verbosity / **`fallback`**) rather than **`openclport`**, whose focus is authoring and shimming kernels between C/R source trees.
 
@@ -33,11 +33,11 @@ Indented nested functions (for example **`fallback_full`** factories inside **`d
 
 ## Concatenated library & subset introspection
 
-**Brief.** Glue that turns **`kernel_dependency_index.rds`** and annotated **`.cl`** trees into **`nmathopencl_concatenated_lib`** artefacts, **`print`** summaries, optional known-failure warnings, and dataframe attachments for subsets.
+**Brief.** Glue that turns **`kernel_dependency_index.rds`** and annotated **`.cl`** trees into **`nmathopencl_concatenated_lib`** artifacts, **`print`** summaries, optional known-failure warnings, and dataframe attachments for subsets.
 
 **Why nmathopencl (vs `openclport`).** **`openclport`** tackles generic port scaffolding; **`nmathopencl`** must pair that with **`inst/cl/nmath`** library layout, the packaged **`RDS`** shard index (**`write_kernel_dependency_index`**), runtime **`extract_library_subset`** / **`load_library_for_kernel`**, and JSON-based guardrails (**`opencl_known_failures.json`**). Keeping these internals here avoids cyclic dependencies before **`openclport`** is **`Import`**-able while remaining explicit about shim vs header stems.
 
-**Details.** **`cl_library_internals.R`** validates / filters stems against **`load_order`** and header-style exclusions, merges concatenated texts with attribution, and emits narrow warnings (**`.cl_wrap_*`**) identical to **`R CMD`** width expectations. **`kernel_known_failures.R`** parses a versioned **`jsonlite`** bundle once per session, normalises launcher paths and stems against user selections or loaded meshes, then optionally **`warning`**-s users when subsets still expose unported **Rmath/C** names. **`kernel_lib_subset_methods.R`** attaches display metadata so **`extract_library_subset`** results print like first-class summaries without bloating **`NAMESPACE`** with more **`S3`** generics.
+**Details.** **`cl_library_internals.R`** validates / filters stems against **`load_order`** and header-style exclusions, merges concatenated texts with attribution, and emits narrow warnings (**`.cl_wrap_*`**) identical to **`R CMD`** width expectations. **`kernel_known_failures.R`** parses a versioned **`jsonlite`** bundle once per session, normalizes launcher paths and stems against user selections or loaded meshes, then optionally **`warning`**-s users when subsets still expose unported **Rmath/C** names. **`kernel_lib_subset_methods.R`** attaches display metadata so **`extract_library_subset`** results print like first-class summaries without bloating **`NAMESPACE`** with more **`S3`** generics.
 
 **File:** `R/cl_library_internals.R`
 
@@ -83,15 +83,15 @@ Indented nested functions (for example **`fallback_full`** factories inside **`d
 
 **Brief.** Offline + online machinery that reads annotated **`//@`** **`@depends`** metadata on shim **`.cl`** files, topologically sorts libraries, attaches derived **`load_order`** / **`all_depends`** tags (**`attach_kernel_dependency_tags`**), emits CSV staging reports (**`stage_kernel_dependency_sort`**), and writes RDS/TSV indices consumed by **`load_library_for_kernel`**.
 
-**Why nmathopencl (vs `openclport`).** **`openclport`** exposes portable readers/sorters; **`nmathopencl`** folds the same behaviours into **`R`** exports (**`stage_kernel_dependency_sort`**, **`attach_*`**, **`write_kernel_dependency_index`**) that must coexist with **`nmath`** shim annotations, shim classification **`//`** blocks, **`Ex_*`** teaching flows, and the packaged **`extdata`** index—without forcing an **`Imports: openclport`** edge until both packages stabilize.
+**Why nmathopencl (vs `openclport`).** **`openclport`** exposes portable readers/sorters; **`nmathopencl`** folds the same behaviors into **`R`** exports (**`stage_kernel_dependency_sort`**, **`attach_*`**, **`write_kernel_dependency_index`**) that must coexist with **`nmath`** shim annotations, shim classification **`//`** blocks, **`Ex_*`** teaching flows, and the packaged **`extdata`** index—without forcing an **`Imports: openclport`** edge until both packages stabilize.
 
-**Details.** Readers normalise annotated **`//@`**/`@depends`‑style tags, perform iterative layering that repeatedly promotes stems whose prerequisites are satisfied (**`Kahn`**-style layering), annotate blocked stems with **`n`**‑hop neighbourhoods and enumerated cycle paths, optionally copy artefacts into **`sorted/`** / **`unresolved/`** staging trees, splice new **`//@`** lines after shim anchors (**`set_port_annotation`** + **`shim_inference_*`**), compute transitive dependency sets (**`DFS`**‑style closures) sorted by **`load_order`**, deduplicate cycle strings (**`cycle_path_canonical_key`** / **`cycle_min_rotation_key`**), and reuse the infix **`` `%||%` ``** for **`NULL`/`NA`** sentinel defaults beside loader **`R`** code. **`write_kernel_dependency_index`** projects labelled **`attach_*`** tag tables into a versioned RDS list (**`depends`/`all_depends`/`load_order`** plus **`stems_ordered`**) alongside a **`C++`**-friendly **`tsv`**.
+**Details.** Readers normalize annotated **`//@`**/`@depends`‑style tags, perform iterative layering that repeatedly promotes stems whose prerequisites are satisfied (**`Kahn`**-style layering), annotate blocked stems with **`n`**‑hop neighborhoods and enumerated cycle paths, optionally copy artifacts into **`sorted/`** / **`unresolved/`** staging trees, splice new **`//@`** lines after shim anchors (**`set_port_annotation`** + **`shim_inference_*`**), compute transitive dependency sets (**`DFS`**‑style closures) sorted by **`load_order`**, deduplicate cycle strings (**`cycle_path_canonical_key`** / **`cycle_min_rotation_key`**), and reuse the infix **`` `%||%` ``** for **`NULL`/`NA`** sentinel defaults beside loader **`R`** code. **`write_kernel_dependency_index`** projects labeled **`attach_*`** tag tables into a versioned RDS list (**`depends`/`all_depends`/`load_order`** plus **`stems_ordered`**) alongside a **`C++`**-friendly **`tsv`**.
 
 ### **`R/stage_kernel_dependency_sort.R`**
 
 **Brief.** Copy-out workflow + shared sort/parser utilities consumed by **`attach_kernel_dependency_tags`**.
 
-**Why nmathopencl (vs `openclport`).** Same lineage as **`openclport`** metadata conventions, vendored/inlined until **`attach_kernel_dependency_tags`** and **`kernel_dependency_index`** can depend on **`openclport`** as a first-class **`Import`**; **`nmathopencl`** retains hooks for **`sorted/*.cl`** artefacts used in QA diffs/vignettes.
+**Why nmathopencl (vs `openclport`).** Same lineage as **`openclport`** metadata conventions, vendored/inlined until **`attach_kernel_dependency_tags`** and **`kernel_dependency_index`** can depend on **`openclport`** as a first-class **`Import`**; **`nmathopencl`** retains hooks for **`sorted/*.cl`** artifacts used in QA diffs/vignettes.
 
 **Details.** **`stage_kernel_dependency_sort`** is the heavyweight export: **`read_kernel_sort_records`**, **`dependency_sort_prefix`**, file copies, **`utils::write.csv`**. Ancillary parsers (**`parse_port_*`**) and **`set_port_annotation`** splice new **`//@`** lines near shim classifications to keep **`devtools::document`**-safe comment blocks. **`cycle_report_*`** collapse redundant SCC paths for actionable cycle tables surfaced in **`print.opencl_dependency_tags`** failures.
 
@@ -199,7 +199,7 @@ Indented nested functions (for example **`fallback_full`** factories inside **`d
 
 **Why nmathopencl (vs `openclport`).** Until **`openclport`** is a declared **`Imports:`** companion, snippets in **`R/openclport_helpers.R`** follow upstream verbatim so **`stage_*`** and **`attach_*`** stay functional in every **`nmathopencl`** checkout; divergence should merge back consciously, not fork silently.
 
-**Details.** Helpers recognise shim classification **`//`** lines, compute insert anchors after **`source_origin`/`depends`/`provides`** metadata, **`PCRE`**-escape **`@tag`** literals, **`vapply`**-strip **`//`** + **`/**/`** noise before heuristic **C** function-definition **`gregexpr`**, emitting **`storage`/`name`** pairs for **`attribute_hidden`** queries. **`c_identifier_pattern`/`strip_c_strings`** remain unused today but preserved for parity **`openclport`** utilities.
+**Details.** Helpers recognize shim classification **`//`** lines, compute insert anchors after **`source_origin`/`depends`/`provides`** metadata, **`PCRE`**-escape **`@tag`** literals, **`vapply`**-strip **`//`** + **`/**/`** noise before heuristic **C** function-definition **`gregexpr`**, emitting **`storage`/`name`** pairs for **`attribute_hidden`** queries. **`c_identifier_pattern`/`strip_c_strings`** remain unused today but preserved for parity **`openclport`** utilities.
 
 **File:** `R/openclport_helpers.R` *(mirror **`openclport`** when refactoring)*
 
@@ -220,7 +220,7 @@ Indented nested functions (for example **`fallback_full`** factories inside **`d
 
 **Brief.** Internal density helper for **`Envelope*`‑style** pedagogical closures next to **`glmbayes`** teaching exports.
 
-**Why nmathopencl (vs `openclport`).** This is **`stats`/family‑math scaffolding**, not shim port tooling; **`nmathopencl`** bundles **`Ex_*`** exports beside **`*_opencl`** primitives so GPU envelope examples ship without **`Import`**‑ing **`glmbayes`** modelling entry points.
+**Why nmathopencl (vs `openclport`).** This is **`stats`/family‑math scaffolding**, not shim port tooling; **`nmathopencl`** bundles **`Ex_*`** exports beside **`*_opencl`** primitives so GPU envelope examples ship without **`Import`**‑ing **`glmbayes`** modeling entry points.
 
 **Details.** **`dpois2`** evaluates Poisson densities on the **`log`** scale for loss fragments referenced near the bottom of **`ex_glmbayes.R`**, avoiding name clashes with **`stats::dpois`** while keeping **`EnvelopeEval`‑like** pedagogical snippets self-contained. Exported **`Ex_*`** entry points: **`docs/EXPORTED_EX_GLMBAYES.md`**.
 
@@ -236,7 +236,7 @@ Higher‑level **`Ex_*`** entry points: **`docs/EXPORTED_EX_GLMBAYES.md`**.
 
 ## **`R CMD check`** import note
 
-**Brief.** A documented reference to **`RcppParallel`** that exists solely so static analysis recognises **`DESCRIPTION`** **`Imports`** usage.
+**Brief.** A documented reference to **`RcppParallel`** that exists solely so static analysis recognizes **`DESCRIPTION`** **`Imports`** usage.
 
 **Why nmathopencl (vs `openclport`).** Not **`openclport`**-related—it satisfies **`devtools`/`RCMD`** bookkeeping for **`Imports: RcppParallel`**.
 
@@ -288,4 +288,4 @@ Higher‑level **`Ex_*`** entry points: **`docs/EXPORTED_EX_GLMBAYES.md`**.
 After adding top‑level unexported **`R`** functions outside the excluded **`Rcpp`** glue files:
 
 1. Run **`Rscript scripts/list_unexported_helpers.R .`** from the package root.
-2. Update the thematic sections and the consolidated table above so wording matches behaviour.
+2. Update the thematic sections and the consolidated table above so wording matches behavior.

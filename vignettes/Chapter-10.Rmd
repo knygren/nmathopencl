@@ -454,7 +454,7 @@ To build a similar component in your own package:
 
    This writes `configure` and `configure.win` to the current directory,
    sets `configure` as executable (on Linux/macOS), and prints a checklist.
-   The templates honour `OPENCL_HOME` / `OPENCL_SDK` environment variables
+   The templates honor `OPENCL_HOME` / `OPENCL_SDK` environment variables
    so developers with non-standard SDK locations can point to them without
    modifying system paths.
 
@@ -481,7 +481,7 @@ To build a similar component in your own package:
    only; the ICD loader (`OpenCL.dll`) is installed with the GPU driver and
    does not require a separate probe.
 
-   Add the generated files to `.gitignore` --- they are build artefacts,
+   Add the generated files to `.gitignore` --- they are build artifacts,
    not source files:
 
    ```
