@@ -1,7 +1,16 @@
 # nmathopencl 0.2.0 (development)
 
-### OpenCL tooling
+### OpenCL C-callable bridge (opencltools)
 
+- **`load_kernel_source()`**, **`load_kernel_library()`**, and C++
+  **`load_library_for_kernel()`** now delegate to **opencltools** C-callables
+  (`opencltools_load_kernel_*`); redundant loader implementation removed from
+  **`src/kernel_loader.cpp`**. Reading **`.cl`** text no longer requires
+  **`has_opencl()`** guards (aligned with **opencltools**).
+- **`get_opencl_core_count()`**, **`opencl_fp64_available()`**, and
+  **`opencl_reset_device_selection()`** route fp64/core-count probes through
+  the opencltools C API. Local device cache remains for kernel runners until
+  **`opencl_bind_selected_fp64_device_or_throw`** migrates.
 - **`use_opencl_configure()`** and **`port_to_opencl_configure()`** are thin
   re-exports from **opencltools**; configure templates live in
   **`opencltools/inst/configure-templates/`**.

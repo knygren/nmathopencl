@@ -1,6 +1,8 @@
 #include "openclPort.h"
 #include <sstream>
 
+#include <opencltools/opencltools_capi.h>
+
 #ifdef USE_OPENCL
 
 #include <CL/cl.h>
@@ -246,13 +248,14 @@ const OpenCLFp64DeviceCache& opencl_fp64_selection() {
 }
 
 void opencl_reset_fp64_selection() {
+  opencltools_opencl_reset_fp64_selection();
   std::lock_guard<std::mutex> lock(g_fp64_sel_mutex);
   g_fp64_sel_initialized = false;
   clear_cache_to_invalid("reset");
 }
 
 bool opencl_fp64_available_impl(bool force) {
-  return opencl_ensure_fp64_selection(force);
+  return opencltools_opencl_fp64_available(force ? 1 : 0) != 0;
 }
 
 static Rcpp::List details_table() {
@@ -378,10 +381,11 @@ const OpenCLFp64DeviceCache& opencl_fp64_selection() {
 }
 
 void opencl_reset_fp64_selection() {
+  opencltools_opencl_reset_fp64_selection();
 }
 
-bool opencl_fp64_available_impl(bool) {
-  return false;
+bool opencl_fp64_available_impl(bool force) {
+  return opencltools_opencl_fp64_available(force ? 1 : 0) != 0;
 }
 
 Rcpp::List opencl_device_info_rcpp(bool, bool details) {

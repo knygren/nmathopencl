@@ -29,22 +29,15 @@ A character string containing the kernel source code or combined
 kernel library.
 }
 \description{
-These functions provide a user-facing interface for loading OpenCL kernel
-source files and kernel libraries from the package's \verb{cl/} directory.
-They call internal C++ routines that perform file lookup, dependency
-resolution, and concatenation of kernel sources.
+These functions read and concatenate \strong{\code{.cl}} files from a package's
+\strong{\verb{inst/cl/}} tree via \strong{opencltools} (file I/O only; no OpenCL runtime
+calls). They work on CPU-only builds of \strong{nmathopencl}; an empty read
+returns \strong{\code{""}} with a \strong{message}, not an error.
 }
 \details{
-OpenCL support is optional. If the package was built without OpenCL
-(e.g., on systems lacking OpenCL headers or drivers), these functions
-return a clear error message.
+Use \code{\link{has_opencl}} before \strong{dispatching} assembled source to
+\code{clBuildProgram} or GPU kernel runners, not before loading text.
 }
-\section{OpenCL Availability}{
-
-Use \code{\link{has_opencl}} to check whether OpenCL support is available
-in the current build of \pkg{glmbayes}.
-}
-
 \section{How These Functions Assemble an OpenCL Program}{
 
 

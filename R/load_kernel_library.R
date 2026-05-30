@@ -1,17 +1,12 @@
 #' Load OpenCL Kernel Source Files
 #'
-#' These functions provide a user-facing interface for loading OpenCL kernel
-#' source files and kernel libraries from the package's `cl/` directory.
-#' They call internal C++ routines that perform file lookup, dependency
-#' resolution, and concatenation of kernel sources.
+#' These functions read and concatenate **`.cl`** files from a package's
+#' **`inst/cl/`** tree via **opencltools** (file I/O only; no OpenCL runtime
+#' calls). They work on CPU-only builds of **nmathopencl**; an empty read
+#' returns **`""`** with a **message**, not an error.
 #'
-#' OpenCL support is optional. If the package was built without OpenCL
-#' (e.g., on systems lacking OpenCL headers or drivers), these functions
-#' return a clear error message.
-#'
-#' @section OpenCL Availability:
-#' Use \code{\link{has_opencl}} to check whether OpenCL support is available
-#' in the current build of \pkg{glmbayes}.
+#' Use \code{\link{has_opencl}} before **dispatching** assembled source to
+#' \code{clBuildProgram} or GPU kernel runners, not before loading text.
 #'
 #'
 #' @section How These Functions Assemble an OpenCL Program:
@@ -411,17 +406,21 @@
 #'
 #' @export
 load_kernel_source <- function(relative_path, package = "nmathopencl") {
-  if (!has_opencl()) {
-    stop("OpenCL support is not available in this build of nmathopencl.")
-  }
-  .load_kernel_source_wrapper_cpp(relative_path, package)
+  out <- .load_kernel_source_wrapper_cpp(relative_path, package)
+  .message_if_empty_kernel_text(out, "kernel source")
 }
 
 #' @rdname load_kernel_source
 #' @export
 load_kernel_library <- function(subdir, package = "nmathopencl", verbose = FALSE) {
-  if (!has_opencl()) {
-    stop("OpenCL support is not available in this build of nmathopencl.")
+  out <- .load_kernel_library_wrapper_cpp(subdir, package, verbose)
+  .message_if_empty_kernel_text(out, "kernel library")
+}
+
+#' @noRd
+.message_if_empty_kernel_text <- function(out, what) {
+  if (!nzchar(out)) {
+    message("Returning empty ", what, " (no kernel text was read).")
   }
-  .load_kernel_library_wrapper_cpp(subdir, package, verbose)
+  out
 }
