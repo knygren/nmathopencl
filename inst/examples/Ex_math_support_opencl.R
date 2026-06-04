@@ -1,4 +1,5 @@
-if (has_opencl()) {
+# See ?nmathopencl_examples_use_opencl
+if (nmathopencl_examples_use_opencl()) {
   imax2_opencl(x = 7, y = 3, fallback = FALSE, verbose = TRUE)
   imin2_opencl(x = 7, y = 3, fallback = FALSE, verbose = TRUE)
   fmax2_opencl(x = 7.2, y = 3.1, fallback = FALSE, verbose = TRUE)
@@ -9,5 +10,13 @@ if (has_opencl()) {
   fsign_opencl(x = -2.5, y = 4.0, fallback = FALSE, verbose = TRUE)
   ftrunc_opencl(x = 123.456, fallback = FALSE, verbose = TRUE)
 } else {
-  message("OpenCL unavailable; skipping GPU-only example.")
+  as.double(pmax(7L, 3L))
+  as.double(pmin(7L, 3L))
+  pmax(7.2, 3.1)
+  pmin(7.2, 3.1)
+  base::sign(-2.5)
+  signif(123.456, digits = 4)
+  base::round(123.456, digits = 2)
+  base::sign(-2.5) * abs(4.0)
+  base::trunc(123.456)
 }

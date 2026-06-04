@@ -1,4 +1,5 @@
-if (has_opencl()) {
+# See ?nmathopencl_examples_use_opencl
+if (nmathopencl_examples_use_opencl()) {
   # Bessel OpenCL paths currently depend on temporary-workspace allocation
   # behavior (R_alloc/vmax* semantics) not yet fully implemented for device
   # execution. Keep these commented to avoid flaky CI/check failures:
@@ -8,5 +9,8 @@ if (has_opencl()) {
   # besselK_opencl(x = 2.0, nu = 1.5, expon.scaled = FALSE, fallback = FALSE, verbose = TRUE)
   # besselY_opencl(x = 2.0, nu = 1.5, fallback = FALSE, verbose = TRUE)
 } else {
-  message("OpenCL unavailable; skipping GPU-only example.")
+  besselI(2.0, nu = 1.5)
+  besselJ(2.0, nu = 1.5)
+  besselK(2.0, nu = 1.5)
+  besselY(2.0, nu = 1.5)
 }

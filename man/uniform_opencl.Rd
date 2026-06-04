@@ -82,16 +82,16 @@ See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 }
 
 \examples{
-if (has_opencl()) {
-  n <- 5L
-
+# See ?nmathopencl_examples_use_opencl
+n <- 5L
+if (nmathopencl_examples_use_opencl()) {
   dunif_opencl(rep(0.4, n), min = 0, max = 1, fallback = FALSE, verbose = TRUE)
   punif_opencl(q = 0.4, min = 0, max = 1, fallback = FALSE, verbose = TRUE)
-  ## qunif_opencl: disabled — NVPTX/ptxas can fail (unresolved Rf_qunif; Rmath qunif -> Rf_qunif).
-  ##                See inst/OPENCL_KERNEL_KNOWN_FAILURES.md until fixed.
-  # qunif_opencl(rep(0.8, n), min = 0, max = 1, fallback = FALSE, verbose = TRUE)
+  ## qunif_opencl: disabled — see inst/OPENCL_KERNEL_KNOWN_FAILURES.md
   runif_opencl(n, min = 0, max = 1, fallback = FALSE, verbose = TRUE)
 } else {
-  message("OpenCL unavailable; skipping GPU-only example.")
+  stats::dunif(rep(0.4, n), min = 0, max = 1)
+  stats::punif(0.4, min = 0, max = 1)
+  stats::runif(n, min = 0, max = 1)
 }
 }

@@ -76,7 +76,8 @@ device-safe shims are complete.
 }
 
 \examples{
-if (has_opencl()) {
+# See ?nmathopencl_examples_use_opencl
+if (nmathopencl_examples_use_opencl()) {
   # Signed-rank OpenCL kernels are currently known to fail on some GPU stacks
   # due to unresolved runtime allocation symbols (e.g., R_chk_calloc).
   # Keeping these commented avoids flaky check failures:
@@ -86,6 +87,10 @@ if (has_opencl()) {
   # qsignrank_opencl(rep(0.8, n), nsize = 8, fallback = FALSE, verbose = TRUE)
   # rsignrank_opencl(n, nsize = 8, fallback = FALSE, verbose = TRUE)
 } else {
-  message("OpenCL unavailable; skipping GPU-only example.")
+  n <- 5L
+  stats::dsignrank(rep(6, n), n = 8)
+  stats::psignrank(6, n = 8)
+  stats::qsignrank(rep(0.8, n), n = 8)
+  stats::rsignrank(n, n = 8)
 }
 }

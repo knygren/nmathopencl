@@ -88,21 +88,20 @@ non-central settings, with non-central paths typically more fragile.
 }
 
 \examples{
-if (has_opencl()) {
-  n <- 5L
-
+# See ?nmathopencl_examples_use_opencl
+n <- 5L
+if (nmathopencl_examples_use_opencl()) {
   df_opencl(rep(2, n), df1 = 5, df2 = 9, ncp = 0, fallback = FALSE, verbose = TRUE)
   df_opencl(rep(2, n), df1 = 5, df2 = 9, ncp = 1.1, fallback = FALSE, verbose = TRUE)
   pf_opencl(q = 2, df1 = 5, df2 = 9, ncp = 0, fallback = FALSE, verbose = TRUE)
   pf_opencl(q = 2, df1 = 5, df2 = 9, ncp = 1.1, fallback = FALSE, verbose = TRUE)
   rf_opencl(n, df1 = 5, df2 = 9, fallback = FALSE, verbose = TRUE)
-
-  # Known unstable on some GPU/driver stacks (can hit CL_OUT_OF_RESOURCES):
-  # qf_opencl(rep(0.8, n), df1 = 5, df2 = 9, ncp = 0, fallback = FALSE, verbose = TRUE)
-  #
-  # Known especially unstable non-central path:
-  # qf_opencl(rep(0.8, n), df1 = 5, df2 = 9, ncp = 1.1, fallback = FALSE, verbose = TRUE)
+  ## qf_opencl: disabled — see inst/OPENCL_KERNEL_KNOWN_FAILURES.md
 } else {
-  message("OpenCL unavailable; skipping GPU-only example.")
+  stats::df(rep(2, n), df1 = 5, df2 = 9, ncp = 0)
+  stats::df(rep(2, n), df1 = 5, df2 = 9, ncp = 1.1)
+  stats::pf(2, df1 = 5, df2 = 9, ncp = 0)
+  stats::pf(2, df1 = 5, df2 = 9, ncp = 1.1)
+  stats::rf(n, df1 = 5, df2 = 9)
 }
 }

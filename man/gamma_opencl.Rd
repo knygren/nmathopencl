@@ -99,17 +99,17 @@ See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 }
 
 \examples{
-if (has_opencl()) {
-  n <- 5L
-
+# See ?nmathopencl_examples_use_opencl
+n <- 5L
+if (nmathopencl_examples_use_opencl()) {
   dgamma_opencl(rep(1.2, n), shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
   pgamma_opencl(q = 1.2, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
-  ## qgamma_opencl: disabled — OpenCL build can fail with unresolved host symbol stirlerr_cycle_free
-  ##               (NVPTX/ptxas; nmath Stirling tails in qgamma). Do not mask; see
-  ##               inst/OPENCL_KERNEL_KNOWN_FAILURES.md until fixed.
+  ## qgamma_opencl: disabled — see inst/OPENCL_KERNEL_KNOWN_FAILURES.md
   # qgamma_opencl(rep(0.8, n), shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
   rgamma_opencl(n, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
 } else {
-  message("OpenCL unavailable; skipping GPU-only example.")
+  stats::dgamma(rep(1.2, n), shape = 2, scale = 1)
+  stats::pgamma(1.2, shape = 2, scale = 1)
+  stats::rgamma(n, shape = 2, scale = 1)
 }
 }

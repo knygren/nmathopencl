@@ -114,9 +114,9 @@ for the negative binomial distribution, with variants parameterized by
 \code{prob} and by \code{mu}.
 }
 \examples{
-if (has_opencl()) {
-  n <- 5L
-
+# See ?nmathopencl_examples_use_opencl
+n <- 5L
+if (nmathopencl_examples_use_opencl()) {
   dnbinom_opencl(rep(4, n), size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
   pnbinom_opencl(q = 4, size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
   qnbinom_opencl(rep(0.8, n), size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
@@ -127,6 +127,14 @@ if (has_opencl()) {
   qnbinom_mu_opencl(rep(0.8, n), size = 7, mu = 5, fallback = FALSE, verbose = TRUE)
   rnbinom_mu_opencl(n, size = 7, mu = 5, fallback = FALSE, verbose = TRUE)
 } else {
-  message("OpenCL unavailable; skipping GPU-only example.")
+  stats::dnbinom(rep(4, n), size = 7, prob = 0.4)
+  stats::pnbinom(4, size = 7, prob = 0.4)
+  stats::qnbinom(rep(0.8, n), size = 7, prob = 0.4)
+  stats::rnbinom(n, size = 7, prob = 0.4)
+
+  stats::dnbinom(rep(4, n), size = 7, mu = 5)
+  stats::pnbinom(4, size = 7, mu = 5)
+  stats::qnbinom(rep(0.8, n), size = 7, mu = 5)
+  stats::rnbinom(n, size = 7, mu = 5)
 }
 }

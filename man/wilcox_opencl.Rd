@@ -80,7 +80,8 @@ Defaults follow \verb{fallback = FALSE}: OpenCL failures surface unless you pass
 }
 
 \examples{
-if (has_opencl()) {
+# See ?nmathopencl_examples_use_opencl
+if (nmathopencl_examples_use_opencl()) {
   # Wilcoxon OpenCL kernels are currently known to fail on some GPU stacks due
   # to unresolved runtime symbols. Keeping these commented avoids flaky checks:
   # n <- 1L
@@ -91,6 +92,10 @@ if (has_opencl()) {
   # Known allocator/runtime fragility on some stacks:
   # rwilcox_opencl(n, m = 5, nn = 7, fallback = FALSE, verbose = TRUE)
 } else {
-  message("OpenCL unavailable; skipping GPU-only example.")
+  n <- 1L
+  stats::dwilcox(5, m = 5, n = 7)
+  stats::pwilcox(5, m = 5, n = 7)
+  stats::qwilcox(rep(0.8, n), m = 5, n = 7)
+  stats::rwilcox(n, m = 5, n = 7)
 }
 }

@@ -68,10 +68,9 @@ OpenCL-backed density, distribution, quantile, and random generation wrappers
 for the exponential distribution.
 }
 \examples{
-# *_opencl when CPU-only or off CRAN; plain stats on CRAN with OpenCL (timing).
-# Set NOT_CRAN=true locally / on rhub to exercise the OpenCL wrappers.
+# See ?nmathopencl_examples_use_opencl
 n <- 5L
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (nmathopencl_examples_use_opencl()) {
   dexp_opencl(rep(1.2, n), rate = 1, fallback = FALSE, verbose = TRUE)
   pexp_opencl(q = 1.2, rate = 1, fallback = FALSE, verbose = TRUE)
   qexp_opencl(rep(0.8, n), rate = 1, fallback = FALSE, verbose = TRUE)

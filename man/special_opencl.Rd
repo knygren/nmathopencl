@@ -58,7 +58,8 @@ Numeric vector of recycled common length.
 OpenCL-backed wrappers for selected special functions from R Mathlib.
 }
 \examples{
-if (has_opencl()) {
+# See ?nmathopencl_examples_use_opencl
+if (nmathopencl_examples_use_opencl()) {
   gammafn_opencl(x = 2.5, fallback = FALSE, verbose = TRUE)
   lgammafn_opencl(x = 2.5, fallback = FALSE, verbose = TRUE)
   digamma_opencl(x = 2.5, fallback = FALSE, verbose = TRUE)
@@ -72,6 +73,16 @@ if (has_opencl()) {
   choose_opencl(n = 10, k = 4, fallback = FALSE, verbose = TRUE)
   lchoose_opencl(n = 10, k = 4, fallback = FALSE, verbose = TRUE)
 } else {
-  message("OpenCL unavailable; skipping GPU-only example.")
+  base::gamma(2.5)
+  base::lgamma(2.5)
+  base::digamma(2.5)
+  base::trigamma(2.5)
+  base::psigamma(2.5, deriv = 2L)
+  base::psigamma(2.5, deriv = 3L)
+  base::psigamma(2.5, deriv = 1L)
+  base::beta(2.5, 3.0)
+  base::lbeta(2.5, 3.0)
+  base::choose(10, 4)
+  base::lchoose(10, 4)
 }
 }

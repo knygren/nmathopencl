@@ -26,11 +26,11 @@ kernel supports a 2-category multinomial parameterization via scalar
 \code{prob}, and returns a \code{2 x n} count matrix.
 }
 \examples{
-if (has_opencl()) {
-  n <- 5L
-
+# See ?nmathopencl_examples_use_opencl
+n <- 5L
+if (nmathopencl_examples_use_opencl()) {
   rmultinom_opencl(n, size = 12L, prob = 0.4, fallback = FALSE, verbose = TRUE)
 } else {
-  message("OpenCL unavailable; skipping GPU-only example.")
+  stats::rmultinom(n, size = 12L, prob = c(0.4, 0.6))
 }
 }
