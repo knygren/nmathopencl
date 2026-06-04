@@ -25,7 +25,7 @@ functions (\code{Ex_glmbfamfunc}, \code{Ex_glmb_Standardize_Model}, \code{Ex_Env
 worked example of how a downstream package—here the \pkg{glmbayes} Bayesian GLM
 sampler—builds a custom kernel on top of the ported nmath routines. See
 \code{system.file("examples", "Ex_EnvelopeEval.R", package = "nmathopencl")}
-and the vignette \emph{GPU Acceleration} for a complete walkthrough.
+and \code{vignette("Chapter-10")} for a complete walkthrough.
 
 Optional GPU acceleration is available wherever an OpenCL runtime is
 installed. Use \code{\link{has_opencl}} to query compile-time OpenCL support,
@@ -36,8 +36,9 @@ double-precision device selection used by kernels, and
 The simulation theory underlying the envelope construction is described in
 \insertCite{Nygren2006}{nmathopencl}, with implementation details in
 \insertCite{glmbayesSimmethods,glmbayesChapterA08}{nmathopencl}.
-GPU/OpenCL topics are covered in
-\insertCite{glmbayesChapter12,glmbayesChapterA10}{nmathopencl}.
+OpenCL GPU execution follows \insertCite{Stone2010}{nmathopencl}; package
+vignettes also discuss GPU workflows
+(\insertCite{glmbayesChapter12,glmbayesChapterA10}{nmathopencl}).
 }
 \section{OpenCL startup checks}{
 
@@ -47,8 +48,8 @@ comparing compile-time OpenCL support in \pkg{nmathopencl} and
 \pkg{opencltools}, noting that CPU fallbacks remain available, and
 summarizing whether an OpenCL runtime appears available on the host.
 Messages point to \code{?gpu_diagnostics}, \code{vignette("Chapter-01")}
-(OpenCL enablement for \pkg{nmathopencl}), \code{vignette("Chapter-12")}
-(GPU setup), and this help page.
+(OpenCL enablement), \code{vignette("Chapter-12")} (packaged \code{*_opencl}
+API), and this help page. Host-side OpenCL diagnostics use \pkg{opencltools}.
 Set \code{options(nmathopencl.quiet_opencl_startup = TRUE)} to suppress
 these notes (recommended for CI and \command{R CMD check}).
 }
@@ -69,8 +70,9 @@ on the ported nmath routines.
 
 Useful links:
 \itemize{
-\item GitHub: \url{https://github.com/knygren/glmbayes}
-\item R-Universe: \url{https://knygren.r-universe.dev/glmbayes}
+\item GitHub: \url{https://github.com/knygren/nmathopencl}
+\item R-Universe: \url{https://knygren.r-universe.dev/nmathopencl}
+\item Related sampler package (Suggests): \pkg{glmbayes}
 }
 }
 \author{

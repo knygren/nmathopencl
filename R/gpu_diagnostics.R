@@ -34,14 +34,14 @@
 #'
 #' @details
 #' GPU acceleration uses OpenCL kernels and \code{*_opencl} wrappers when
-#' \code{\link{has_opencl}()} is \code{TRUE} and a suitable device is available.
-#' CPU fallbacks apply for many routines when OpenCL is absent at compile time
-#' or runtime.
+#' \code{\link{has_opencl}()} is \code{TRUE} and a suitable device is available
+#' (\insertCite{Stone2010}{nmathopencl}). CPU fallbacks apply for many routines
+#' when OpenCL is absent at compile time or runtime.
 #'
 #' Start with \code{\link{diagnose_glmbayes}()} for a single readable report;
-#' use \code{\link{has_opencl}()} for a quick boolean when scripting. Full
-#' install notes: \code{vignette("Chapter-12", package = "nmathopencl")}
-#' (\insertCite{glmbayesChapter12}{nmathopencl}).
+#' use \code{\link{has_opencl}()} for a quick boolean when scripting. Setup:
+#' \code{vignette("Chapter-01", package = "nmathopencl")}; packaged GPU API:
+#' \code{vignette("Chapter-12", package = "nmathopencl")}.
 #'
 #' @seealso
 #' \code{\link{diagnose_glmbayes}}, \code{\link{has_opencl}},

@@ -1,5 +1,14 @@
 # nmathopencl 0.2.0 (development)
 
+### Citation and copyright metadata
+
+- **`inst/CITATION`** and **`inst/COPYRIGHTS`** now describe **nmathopencl**
+  (replacing leftover **glmbayes** text from the package split).
+- **`?nmathopencl-package`**: repository links and vignette pointers updated
+  for this package (not **glmbayes**).
+- **`inst/CITATION`** / **`inst/REFERENCES.bib`**: add Stone et al. (2010) for
+  OpenCL; co-author remains **Lan M. Nygren** (not Lance).
+
 ### Examples (`inst/examples/Ex_*_opencl.R`)
 
 - Ported stats/Math `*_opencl` examples call OpenCL when CPU-only or

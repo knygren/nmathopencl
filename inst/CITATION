@@ -1,4 +1,12 @@
-citHeader("To cite glmbayes in publications use the first entry for software; cite Nygren and Nygren (2006) for likelihood subgradient methodology.")
+citHeader(
+  paste0(
+    "To cite nmathopencl in publications use the first entry for the OpenCL-ported ",
+    "nmath library. If you report OpenCL GPU execution, cite Stone et al. (2010). ",
+    "Cite Nygren and Nygren (2006) for likelihood subgradient methodology when ",
+    "relevant to envelope-based GLM simulation work. Host/runtime OpenCL tooling ",
+    "is provided by the imported package opencltools (cite separately if used)."
+  )
+)
 
 year <- sub("-.*", "", meta$Date)
 if (!nzchar(year)) {
@@ -8,11 +16,11 @@ if (!nzchar(year)) {
 c(
   bibentry(
     bibtype  = "Manual",
-    title    = "{glmbayes}: Bayesian Generalized Linear Models (IID Samples)",
+    title    = "{nmathopencl}: OpenCL-Ported R Mathlib for GPU-Accelerated Packages",
     author   = person("Kjell", "Nygren"),
     year     = year,
     note     = paste("R package version", meta$Version),
-    url      = "https://github.com/knygren/glmbayes"
+    url      = "https://github.com/knygren/nmathopencl"
   ),
   bibentry(
     bibtype  = "Article",
@@ -27,5 +35,20 @@ c(
     pages    = "1144--1156",
     year     = "2006",
     doi      = "10.1198/016214506000000357"
+  ),
+  bibentry(
+    bibtype  = "Article",
+    title    = "OpenCL: A Parallel Programming Standard for Heterogeneous Computing Systems",
+    author   = c(
+      person("James E.", "Stone"),
+      person("David", "Gohara"),
+      person("Guochun", "Shi")
+    ),
+    journal  = "Computing in Science \\& Engineering",
+    volume   = "12",
+    number   = "3",
+    pages    = "66--72",
+    year     = "2010",
+    doi      = "10.1109/MCSE.2010.69"
   )
 )

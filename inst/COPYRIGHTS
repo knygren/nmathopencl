@@ -1,44 +1,47 @@
-Copyright and Derived Code Notices for glmbayes
+Copyright and Derived Code Notices for nmathopencl
 
-The original glmbayes package code, documentation, examples, and vignettes are
+The original nmathopencl package code, documentation, examples, and vignettes are
 copyright Kjell Nygren, except where otherwise noted below.
 
 R Mathlib and R Source Code
 ---------------------------
 
 The package includes local copies, adaptations, or translations of selected
-portions of R Mathlib and R source code in src/, src/nmath/, and inst/cl/. These
-files retain the original copyright and license notices where present. The
-OpenCL kernels in inst/cl/nmath/, inst/cl/dpq/, and inst/cl/rmath/ are ports or
+portions of R Mathlib and related R extension headers in src/nmath/, src/, and
+inst/cl/. These files retain the original copyright and license notices where
+present. The OpenCL sources in inst/cl/nmath/, inst/cl/src/, and supporting
+shim layers (for example inst/cl/libR_shims/, inst/cl/R_ext_types/,
+inst/cl/R_ext_runtime/, inst/cl/R_shims/, inst/cl/System/) are ports or
 adaptations of relevant R Mathlib distribution routines, probability helper
 code, numerical support code, constants, and related headers.
 
 Relevant copyright holders and contributors include The R Core Team, The R
 Foundation, Ross Ihaka, Robert Gentleman, Morten Welinder, and Martin Maechler.
 The applicable licenses are GPL-2-or-later and/or LGPL-2.1-or-later as
-indicated in the individual source file headers.
+indicated in the individual source file headers, consistent with the package
+LICENSE field (GPL-2).
 
-R stats Modeling Code and Methods
----------------------------------
+Illustrative GLM / Envelope Examples
+------------------------------------
 
-The functions glmb(), lmb(), and several associated methods use R's classical
-lm()/glm() formula interface, model-frame/model-matrix setup, fitted-object
-structure, and method conventions. Portions of the R-level implementation are
-adapted from or closely follow functions and methods in the stats package,
-including glm(), lm(), glm.fit()/lm.fit()-style setup, and related methods for
-prediction, residuals, summaries, influence diagnostics, dummy coefficients,
-log-likelihoods, variance-covariance extraction, confidence intervals, and
-analysis of deviance.
-
-Relevant contributors/copyright holders include The R Core Team, The R
-Foundation, Ross Ihaka, and Simon Davies. The R implementation of glm() was
-originally written by Simon Davies under Ross Ihaka and has since been
-extensively maintained by the R Core Team.
+Functions such as Ex_EnvelopeEval, Ex_glmbfamfunc, and related Ex_* helpers
+demonstrate how downstream packages (for example the suggested package glmbayes)
+may assemble custom OpenCL kernels on top of the ported nmath sources. They are
+original to this package's teaching and integration layer and are not a full
+reimplementation of stats::glm() or stats::lm().
 
 Package Dependencies
 --------------------
 
-The package links to or imports external R packages including Rcpp,
-RcppArmadillo, RcppParallel, MASS, coda, and Rdpack. These packages are not
-bundled in glmbayes; their authorship and copyright are governed by their own
-package metadata and licenses.
+The package links to or imports external R packages including stats, Rcpp,
+RcppArmadillo, RcppParallel, MASS, Rdpack, and opencltools. These packages are
+not bundled in nmathopencl; their authorship and copyright are governed by
+their own package metadata and licenses. Host and workstation OpenCL diagnostics
+beyond compile-time probes in nmathopencl are provided by opencltools.
+
+Suggested Package glmbayes
+--------------------------
+
+Bayesian GLM workflows that consume these OpenCL sources may additionally use
+the glmbayes package (Suggests). glmbayes maintains its own copyright and
+citation metadata; see that package's inst/CITATION and inst/COPYRIGHTS.
