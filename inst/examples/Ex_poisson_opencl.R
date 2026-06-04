@@ -1,5 +1,5 @@
 n <- 5L
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dpois_raw_opencl(rep(4, n), lambda = 4, fallback = FALSE, verbose = TRUE)
   dpois_opencl(rep(4, n), lambda = 4, fallback = FALSE, verbose = TRUE)
   ppois_opencl(q = 4, lambda = 4, fallback = FALSE, verbose = TRUE)

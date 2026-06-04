@@ -314,13 +314,13 @@ The `[[Rcpp::export]]` annotation on `f2_f3_opencl` causes
 - A `.Call` entry in `RcppExports.cpp`
 - An R wrapper in `RcppExports.R`
 
-The R-side convenience function in `ex_glmbayes.R` adds a `has_opencl()`
+The R-side convenience function in `ex_glmbayes.R` adds a `nmathopencl_has_opencl()`
 guard and CPU fallback:
 
 ```{r, eval = FALSE}
 f2_f3_opencl_R <- function(family, link, b, y, x, mu, P, alpha, wt,
                              use_opencl = TRUE) {
-  if (use_opencl && has_opencl()) {
+  if (use_opencl && nmathopencl_has_opencl()) {
     f2_f3_opencl(family, link, b, y, x, mu, P, alpha, wt, progbar = 0L)
   } else {
     f2_f3_non_opencl(family, link, b, y, x, mu, P, alpha, wt)
@@ -430,7 +430,7 @@ To build a similar component in your own package:
 
 5. **Write a CPU fallback** --- implement the same computation using standard
    R math (`<Rmath.h>`) or base-R functions. Guard the GPU path with
-   `has_opencl()`.
+   `nmathopencl_has_opencl()`.
 
 6. **Add `LinkingTo: nmathopencl`** to your `DESCRIPTION` file so that
    `openclPort.h` is found at compile time.
@@ -468,7 +468,7 @@ To build a similar component in your own package:
    #ifdef USE_OPENCL  (in your C++ source)
      -> guards all GPU code; compiles cleanly either way
 
-   has_opencl()  (in your R code)
+   nmathopencl_has_opencl()  (in your R code)
      -> calls a compiled-in bool that mirrors the compile-time decision
      -> TRUE only if -DUSE_OPENCL was set when the package was built
    ```

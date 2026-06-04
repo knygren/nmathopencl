@@ -15,8 +15,9 @@ These **14** identifiers are **`export(...)`’d by both packages**—typically 
 | Function | `nmathopencl` **`R/`** source | Typical role |
 |----------|------------------------------|----------------|
 | `add_to_libpath_linux` · `add_to_path_linux` · `add_to_path_windows` | `R/add_to_path.R` | PATH / LD_LIBRARY‑style diagnostics |
-| `check_runtime_env` · `detect_compute_runtimes` · `detect_environment_and_gpus` · `detect_or_install_gpu_drivers` · `diagnose_glmbayes` · `gpu_names` · `has_opencl` · `verify_opencl_runtime` | `R/gpu_diagnostics.R` | Hardware / ICD / sanity orchestration |
-| `get_opencl_core_count` | `R/get_opencl_core_count.R` | Compute‑unit probe |
+| `check_runtime_env` · `detect_compute_runtimes` · `detect_environment_and_gpus` · `detect_or_install_gpu_drivers` · `diagnose_glmbayes` · `gpu_names` · `verify_opencl_runtime` | **opencltools** only | Hardware / ICD / sanity orchestration |
+| `nmathopencl_has_opencl` · `nmathopencl_opencl_device_info` · `nmathopencl_opencl_fp64_available` · `nmathopencl_opencl_reset_device_selection` | `R/gpu_diagnostics.R` | **nmathopencl**-specific compile flag & fp64 device cache |
+| `get_opencl_core_count` | **opencltools** only (`opencltools::get_opencl_core_count`) | Compute‑unit probe |
 | `load_kernel_library` · `load_kernel_source` | `R/load_kernel_library.R` | Assemble concatenated kernel source for device compilation |
 
 Implementations may diverge over time—`diff` the paired **`R/*.R`** files across clones.

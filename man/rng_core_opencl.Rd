@@ -18,7 +18,7 @@ exp_rand_opencl(n, fallback = FALSE, verbose = FALSE)
 \arguments{
 \item{n}{Number of observations. Non-negative integer scalar.}
 
-\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
+\item{fallback}{When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
@@ -32,7 +32,7 @@ Linkage wrappers for core RNG primitives used by translated Mathlib paths.
 }
 \examples{
 n <- 5L
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   norm_rand_opencl(n, fallback = FALSE, verbose = TRUE)
   unif_rand_opencl(n, fallback = FALSE, verbose = TRUE)
   r_unif_index_opencl(n, dn = 10, fallback = FALSE, verbose = TRUE)

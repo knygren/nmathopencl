@@ -249,8 +249,9 @@ int                   openclPort::get_opencl_core_count();
 - `openclPort::gpu_names()` --- OpenCL device names from the runtime linked
   into this package (distinct from `opencltools::gpu_names()` R helper).
 - `detect_num_gpus_internal()` --- GPU device count for envelope-style runners.
-- `has_opencl()` --- compile-time `USE_OPENCL` flag in this DLL.
-- `get_opencl_core_count()` --- `CL_DEVICE_MAX_COMPUTE_UNITS` on the selected device.
+- `nmathopencl_has_opencl()` --- compile-time `USE_OPENCL` flag in this DLL.
+- `openclPort::get_opencl_core_count()` --- internal C++ helper (delegates to
+  opencltools); at the R prompt use **`opencltools::get_opencl_core_count()`**.
 
 ### OpenCL build configuration
 

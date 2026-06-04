@@ -9,7 +9,7 @@
 #' @param p Numeric vector of probabilities for \code{qlogis_opencl} (like \code{stats::qlogis}).
 #' @param location Location parameter.
 #' @param scale Scale parameter (must be > 0).
-#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
+#' @param fallback When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
 #' Ignored when the runtime reports no OpenCL. See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).

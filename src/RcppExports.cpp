@@ -2034,55 +2034,45 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// has_opencl_cpp_export
-bool has_opencl_cpp_export();
-RcppExport SEXP _nmathopencl_has_opencl_cpp_export() {
+// nmathopencl_has_opencl_cpp_export
+bool nmathopencl_has_opencl_cpp_export();
+RcppExport SEXP _nmathopencl_nmathopencl_has_opencl_cpp_export() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(has_opencl_cpp_export());
+    rcpp_result_gen = Rcpp::wrap(nmathopencl_has_opencl_cpp_export());
     return rcpp_result_gen;
 END_RCPP
 }
-// get_opencl_core_count_cpp_export
-int get_opencl_core_count_cpp_export();
-RcppExport SEXP _nmathopencl_get_opencl_core_count_cpp_export() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(get_opencl_core_count_cpp_export());
-    return rcpp_result_gen;
-END_RCPP
-}
-// opencl_device_info_cpp_export
-Rcpp::List opencl_device_info_cpp_export(bool force, bool details);
-RcppExport SEXP _nmathopencl_opencl_device_info_cpp_export(SEXP forceSEXP, SEXP detailsSEXP) {
+// nmathopencl_opencl_device_info_cpp_export
+Rcpp::List nmathopencl_opencl_device_info_cpp_export(bool force, bool details);
+RcppExport SEXP _nmathopencl_nmathopencl_opencl_device_info_cpp_export(SEXP forceSEXP, SEXP detailsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< bool >::type force(forceSEXP);
     Rcpp::traits::input_parameter< bool >::type details(detailsSEXP);
-    rcpp_result_gen = Rcpp::wrap(opencl_device_info_cpp_export(force, details));
+    rcpp_result_gen = Rcpp::wrap(nmathopencl_opencl_device_info_cpp_export(force, details));
     return rcpp_result_gen;
 END_RCPP
 }
-// opencl_fp64_available_cpp_export
-bool opencl_fp64_available_cpp_export(bool force);
-RcppExport SEXP _nmathopencl_opencl_fp64_available_cpp_export(SEXP forceSEXP) {
+// nmathopencl_opencl_fp64_available_cpp_export
+bool nmathopencl_opencl_fp64_available_cpp_export(bool force);
+RcppExport SEXP _nmathopencl_nmathopencl_opencl_fp64_available_cpp_export(SEXP forceSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< bool >::type force(forceSEXP);
-    rcpp_result_gen = Rcpp::wrap(opencl_fp64_available_cpp_export(force));
+    rcpp_result_gen = Rcpp::wrap(nmathopencl_opencl_fp64_available_cpp_export(force));
     return rcpp_result_gen;
 END_RCPP
 }
-// opencl_reset_device_selection_cpp_export
-void opencl_reset_device_selection_cpp_export();
-RcppExport SEXP _nmathopencl_opencl_reset_device_selection_cpp_export() {
+// nmathopencl_opencl_reset_device_selection_cpp_export
+void nmathopencl_opencl_reset_device_selection_cpp_export();
+RcppExport SEXP _nmathopencl_nmathopencl_opencl_reset_device_selection_cpp_export() {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
-    opencl_reset_device_selection_cpp_export();
+    nmathopencl_opencl_reset_device_selection_cpp_export();
     return R_NilValue;
 END_RCPP
 }
@@ -2233,11 +2223,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_nmathopencl_ftrunc_opencl_cpp_export", (DL_FUNC) &_nmathopencl_ftrunc_opencl_cpp_export, 2},
     {"_nmathopencl_r_check_user_interrupt_opencl_cpp_export", (DL_FUNC) &_nmathopencl_r_check_user_interrupt_opencl_cpp_export, 2},
     {"_nmathopencl_r_check_stack_opencl_cpp_export", (DL_FUNC) &_nmathopencl_r_check_stack_opencl_cpp_export, 2},
-    {"_nmathopencl_has_opencl_cpp_export", (DL_FUNC) &_nmathopencl_has_opencl_cpp_export, 0},
-    {"_nmathopencl_get_opencl_core_count_cpp_export", (DL_FUNC) &_nmathopencl_get_opencl_core_count_cpp_export, 0},
-    {"_nmathopencl_opencl_device_info_cpp_export", (DL_FUNC) &_nmathopencl_opencl_device_info_cpp_export, 2},
-    {"_nmathopencl_opencl_fp64_available_cpp_export", (DL_FUNC) &_nmathopencl_opencl_fp64_available_cpp_export, 1},
-    {"_nmathopencl_opencl_reset_device_selection_cpp_export", (DL_FUNC) &_nmathopencl_opencl_reset_device_selection_cpp_export, 0},
+    {"_nmathopencl_nmathopencl_has_opencl_cpp_export", (DL_FUNC) &_nmathopencl_nmathopencl_has_opencl_cpp_export, 0},
+    {"_nmathopencl_nmathopencl_opencl_device_info_cpp_export", (DL_FUNC) &_nmathopencl_nmathopencl_opencl_device_info_cpp_export, 2},
+    {"_nmathopencl_nmathopencl_opencl_fp64_available_cpp_export", (DL_FUNC) &_nmathopencl_nmathopencl_opencl_fp64_available_cpp_export, 1},
+    {"_nmathopencl_nmathopencl_opencl_reset_device_selection_cpp_export", (DL_FUNC) &_nmathopencl_nmathopencl_opencl_reset_device_selection_cpp_export, 0},
     {"_nmathopencl_register_nmathopencl_ccallables_cpp_export", (DL_FUNC) &_nmathopencl_register_nmathopencl_ccallables_cpp_export, 0},
     {NULL, NULL, 0}
 };

@@ -97,12 +97,12 @@ C++ code is guarded by `#ifdef USE_OPENCL`, so the package compiles cleanly
 without OpenCL headers.
 
 A binary built **without** `USE_OPENCL` is a fully valid CPU-only package.
-**`has_opencl()`** returns `FALSE` and every `*_opencl` wrapper silently uses
+**`nmathopencl_has_opencl()`** returns `FALSE` and every `*_opencl` wrapper silently uses
 its `stats::` fallback.
 
 Because **`nmathopencl` Imports `opencltools`**, both packages must be built
 with OpenCL for the exported `*_opencl` wrappers to dispatch to a GPU. The
-attach message compares `has_opencl()` (nmathopencl) and
+attach message compares `nmathopencl_has_opencl()` (nmathopencl) and
 `opencltools::has_opencl()` (opencltools) and tells you which reinstall is
 needed.
 
@@ -116,27 +116,25 @@ Work through these steps in order.
 library(nmathopencl)
 ```
 
-If attach is silent and `has_opencl()` returns `TRUE`, you are done --- skip
+If attach is silent and `nmathopencl_has_opencl()` returns `TRUE`, you are done --- skip
 to [Verifying the setup](#verifying-the-setup). Otherwise, use the table above
 or continue to Step 2 or 3.
 
 ### Step 2: If OpenCL is not enabled at all
 
-When `opencltools::has_opencl()` and `has_opencl()` are both `FALSE`, the host
+When `opencltools::has_opencl()` and `nmathopencl_has_opencl()` are both `FALSE`, the host
 stack or compile flags are missing for both packages.
 
 ```{r, eval = FALSE}
 opencltools::has_opencl()   # opencltools build flag
-has_opencl()                # nmathopencl build flag
-diagnose_glmbayes()         # combined report (host checks + nmathopencl compile line)
+nmathopencl_has_opencl()                # nmathopencl build flag
+opencltools::diagnose_glmbayes()   # host/runtime report
+nmathopencl_has_opencl()           # nmathopencl compile-time flag
 ```
 
 Follow **`vignette("Chapter-01", package = "opencltools")`** for drivers,
 OpenCL headers, the ICD loader/runtime, and building **opencltools** from
 source until `opencltools::has_opencl()` is `TRUE`.
-
-For a host-only report without the nmathopencl compile-time line, use
-`opencltools::diagnose_glmbayes()` directly.
 
 Enabling GPU acceleration requires three independent host components:
 
@@ -152,7 +150,7 @@ in **opencltools** Chapter 01.
 
 ### Step 3: If opencltools is enabled but nmathopencl is not
 
-When `opencltools::has_opencl()` is `TRUE` but `has_opencl()` is `FALSE`, the
+When `opencltools::has_opencl()` is `TRUE` but `nmathopencl_has_opencl()` is `FALSE`, the
 host environment is likely fine; **nmathopencl** was installed from a CPU binary
 or compiled before the SDK was present. Reinstall **nmathopencl** from source:
 
@@ -165,7 +163,7 @@ The `configure` / `configure.win` script runs automatically and prints whether
 `USE_OPENCL` was activated. Then confirm:
 
 ```{r, eval = FALSE}
-has_opencl()
+nmathopencl_has_opencl()
 #> [1] TRUE
 ```
 
@@ -177,7 +175,7 @@ After Steps 2--3, confirm the full stack:
 library(nmathopencl)
 
 # nmathopencl compile-time flag
-has_opencl()
+nmathopencl_has_opencl()
 #> [1] TRUE
 
 # opencltools compile-time flag (imported dependency)
@@ -188,19 +186,19 @@ opencltools::has_opencl()
 opencltools::gpu_names()
 #> [1] "NVIDIA GeForce RTX 4090"
 
-# Full diagnostic report (opencltools host checks + nmathopencl compile line)
-diagnose_glmbayes()
+# Host/runtime diagnostic report (opencltools)
+opencltools::diagnose_glmbayes()
 ```
 
-`diagnose_glmbayes()` (exported from **nmathopencl**) runs a layered check:
-steps 1--7 use **opencltools** (environment, GPU vendors, drivers, OpenCL
-headers and ICD, Linux/WSL runtime probe, PATH / `LD_LIBRARY_PATH`); the
-final step reports `has_opencl()` for this **nmathopencl** build. On Windows,
-the Linux/WSL runtime probe is skipped; rely on driver and ICD checks instead.
+`opencltools::diagnose_glmbayes()` runs a layered host check (environment, GPU
+vendors, drivers, OpenCL headers and ICD, Linux/WSL runtime probe, PATH /
+`LD_LIBRARY_PATH`). Pair it with `nmathopencl_has_opencl()` for this package's
+compile-time OpenCL build flag. On Windows, the Linux/WSL runtime probe is
+skipped; rely on driver and ICD checks instead.
 
 ### Validating GPU calls with the exported wrappers
 
-Once `has_opencl()` is `TRUE`, the exported `*_opencl` functions dispatch to
+Once `nmathopencl_has_opencl()` is `TRUE`, the exported `*_opencl` functions dispatch to
 the GPU. These are most useful as a **validation tool**: running them on large
 vectors confirms the OpenCL pipeline is working end-to-end before you invest
 time in a downstream package.
@@ -225,7 +223,7 @@ development.
 
 ## Troubleshooting common failures
 
-### `has_opencl()` returns `FALSE` after driver installation
+### `nmathopencl_has_opencl()` returns `FALSE` after driver installation
 
 The package was compiled before the SDK was installed, or from a prebuilt
 binary. If `opencltools::has_opencl()` is already `TRUE`, go to
@@ -249,7 +247,7 @@ Check (details in **opencltools** Chapter 01):
 
 Use `opencltools::verify_opencl_runtime()` for a programmatic probe.
 
-### `PATH` warnings from `diagnose_glmbayes()`
+### `PATH` warnings from `opencltools::diagnose_glmbayes()`
 
 On Windows, the CUDA Toolkit bin directory may need to be in **`PATH`** so that
 `OpenCL.dll` is found at runtime. The diagnostic report lists any missing
@@ -260,7 +258,7 @@ and related helpers directly --- see `?opencltools::add_to_path`.
 ## For package developers: next steps
 
 Once OpenCL is working for **`nmathopencl`** itself, the next step is
-adding `USE_OPENCL` and `has_opencl()` to your own downstream package so
+adding `USE_OPENCL` and `nmathopencl_has_opencl()` to your own downstream package so
 that it also builds cleanly on CRAN. See
 **`vignette("Chapter-02", package = "nmathopencl")`** for the
 `use_opencl_configure()` / `port_to_opencl_configure()` workflow.

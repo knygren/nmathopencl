@@ -17,8 +17,7 @@ using namespace openclPort;
 
 // =============================================================================
 // Tier 5: OpenCL / GPU
-// Callers: has_opencl,
-//          get_opencl_core_count
+// Callers: nmathopencl_has_opencl,
 // User:    Advanced users - GPU diagnostics, kernel loading for use_opencl
 // =============================================================================
 
@@ -2226,26 +2225,22 @@ Rcpp::NumericVector r_check_stack_opencl_cpp_export(
 }
 
 // [[Rcpp::export]]
-bool has_opencl_cpp_export() {
+bool nmathopencl_has_opencl_cpp_export() {
   return has_opencl();
 }
 
 // [[Rcpp::export]]
-int get_opencl_core_count_cpp_export() {
-  return get_opencl_core_count();
-}
-
-// [[Rcpp::export]]
-Rcpp::List opencl_device_info_cpp_export(bool force = false, bool details = false) {
+Rcpp::List nmathopencl_opencl_device_info_cpp_export(bool force = false,
+                                                     bool details = false) {
   return opencl_device_info_rcpp(force, details);
 }
 
 // [[Rcpp::export]]
-bool opencl_fp64_available_cpp_export(bool force = false) {
+bool nmathopencl_opencl_fp64_available_cpp_export(bool force = false) {
   return opencl_fp64_available_impl(force);
 }
 
 // [[Rcpp::export]]
-void opencl_reset_device_selection_cpp_export() {
+void nmathopencl_opencl_reset_device_selection_cpp_export() {
   opencl_reset_fp64_selection();
 }

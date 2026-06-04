@@ -141,14 +141,14 @@ do not use local memory — each work-item is fully independent.
 
 ### When OpenCL is not available
 
-If the package was built without `USE_OPENCL`, or if `has_opencl()` returns
+If the package was built without `USE_OPENCL`, or if `nmathopencl_has_opencl()` returns
 `FALSE` at runtime, the wrapper returns zero-filled output vectors.  There is
 no serial CPU fallback that computes the actual values.
 
 This is a deliberate design choice.  Implementing a correct CPU fallback that
 matches the GPU computation would mean maintaining two versions of the same
 mathematical code.  In practice, `glmbayes` calls `f2_f3_opencl` only after
-checking `has_opencl()`, and falls back to its own pure-R implementation when
+checking `nmathopencl_has_opencl()`, and falls back to its own pure-R implementation when
 OpenCL is not available.  The zero-return convention signals clearly that the
 GPU path was not executed, rather than silently returning potentially stale or
 incorrect results.
@@ -161,8 +161,8 @@ computation.  Whatever you choose, make it explicit in the `#else` branch.
 
 | Mode | Execution | Result |
 |---|---|---|
-| GPU available (`USE_OPENCL` + `has_opencl()`) | `m1` work-items launched simultaneously via `clEnqueueNDRangeKernel` | GPU-computed values |
-| CPU-only build or no GPU at runtime | `#ifdef`/`has_opencl()` guard triggers | Zero-filled outputs (or your chosen fallback) |
+| GPU available (`USE_OPENCL` + `nmathopencl_has_opencl()`) | `m1` work-items launched simultaneously via `clEnqueueNDRangeKernel` | GPU-computed values |
+| CPU-only build or no GPU at runtime | `#ifdef`/`nmathopencl_has_opencl()` guard triggers | Zero-filled outputs (or your chosen fallback) |
 
 ---
 

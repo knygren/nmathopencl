@@ -1,5 +1,5 @@
 test_that("pnorm_opencl matches stats recycling (vary q, mean, sd; scalar tails)", {
-  skip_if_not(nmathopencl::has_opencl(), message = "OpenCL not available")
+  skip_if_not(nmathopencl::nmathopencl_has_opencl(), message = "OpenCL not available")
 
   q <- seq(-2, 2, length.out = 5)
   mu <- seq(0, 0.4, length.out = 5)
@@ -19,7 +19,7 @@ test_that("pnorm_opencl matches stats recycling (vary q, mean, sd; scalar tails)
 })
 
 test_that("pnorm_opencl agrees with stats for zero-length quantiles with scalar defaults", {
-  skip_if_not(nmathopencl::has_opencl(), message = "OpenCL not available")
+  skip_if_not(nmathopencl::nmathopencl_has_opencl(), message = "OpenCL not available")
   q <- numeric(0)
   expect_equal(as.numeric(stats::pnorm(q)), numeric(0))
   expect_equal(as.numeric(nmathopencl::pnorm_opencl(q)), numeric(0))

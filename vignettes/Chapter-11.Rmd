@@ -30,7 +30,7 @@ assert numerical agreement within an appropriate tolerance (typically
 Key points:
 
 * Always run the full test suite with **OpenCL disabled** (no driver, or
-  `has_opencl() == FALSE`) as well as with it enabled.  This ensures the
+  `nmathopencl_has_opencl() == FALSE`) as well as with it enabled.  This ensures the
   fallback path is also covered.
 * Use `opencltools::verify_opencl_runtime()` as a pre-condition guard in
   any test that requires an active OpenCL device.

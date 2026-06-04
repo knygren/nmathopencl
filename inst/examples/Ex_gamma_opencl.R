@@ -1,5 +1,5 @@
 n <- 5L
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dgamma_opencl(rep(1.2, n), shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
   pgamma_opencl(q = 1.2, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
   ## qgamma_opencl: disabled — see inst/OPENCL_KERNEL_KNOWN_FAILURES.md

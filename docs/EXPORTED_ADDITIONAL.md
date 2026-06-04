@@ -5,7 +5,7 @@
 1. **not** catalogued in **`docs/EXPORTED_MATH_STATS_MIRRORS.md`** (**`d*`/`p*`/`q*`/`r*`** mirrors, specials, …), **and**
 2. **not** among the **verbatim duplicate** **`export`** names shared with **`glmbayes`** (see **`docs/R_FUNCTIONS_SHARED_WITH_GLMBAYES.md`**).
 
-Those **14** shared identifiers (**`has_opencl`**, **`load_kernel_source`**, **`load_kernel_library`**, **`gpu_names`**, **`get_opencl_core_count`**, **`verify_opencl_runtime`**, **`diagnose_glmbayes`**, **`detect_*`**, **`check_runtime_env`**, **`add_to_path_*`**, …) are **intentionally omitted** here—they are documented for cross-package refactors in **`R_FUNCTIONS_SHARED_WITH_GLMBAYES.md`** and in **`.Rd`** (e.g. **`?gpu_diagnostics`**, **`?load_kernel_library`**). You still **call** them when using **`nmathopencl`**, but **this** file is reserved for APIs **unique** to this maintainer/story (device cache, RDS subsets, authoring pipeline, **`R_ext`** smoke, **`S3`** printers for **kernel**/subset objects). **Pedagogical **`Ex_*`** sandbox exports** live **only** in **`docs/EXPORTED_EX_GLMBAYES.md`**.
+Those **13+** shared identifiers (**`load_kernel_source`**, **`load_kernel_library`**, **`gpu_names`**, **`verify_opencl_runtime`**, **`detect_*`**, **`check_runtime_env`**, **`add_to_path_*`**, …; use **`opencltools::diagnose_glmbayes()`** and **`opencltools::get_opencl_core_count()`**) are **intentionally omitted** here—they are documented for cross-package refactors in **`R_FUNCTIONS_SHARED_WITH_GLMBAYES.md`** and in **`.Rd`** (e.g. **`?gpu_diagnostics`**, **`?load_kernel_library`**). You still **call** them when using **`nmathopencl`**, but **this** file is reserved for APIs **unique** to this maintainer/story (device cache, RDS subsets, authoring pipeline, **`R_ext`** smoke, **`S3`** printers for **kernel**/subset objects). **Pedagogical **`Ex_*`** sandbox exports** live **only** in **`docs/EXPORTED_EX_GLMBAYES.md`**.
 
 **Authority:** Signatures and **`examples`** live in **`.Rd`**; run **`devtools::document()`** after **`@export`** edits.
 
@@ -17,15 +17,15 @@ Those **14** shared identifiers (**`has_opencl`**, **`load_kernel_source`**, **`
 
 ## 1 · **`glmbayes`**-shared helpers (not duplicated here)
 
-Use this **only** as a **workflow breadcrumb**—for **Brief / Why / Details** prose on **`has_opencl()`**, **`verify_opencl_runtime()`**, diagnostics, **`load_kernel_*`**, PATH utilities, etc., see **`docs/R_FUNCTIONS_SHARED_WITH_GLMBAYES.md`** plus the relevant **`.Rd`** topics.
+Use this **only** as a **workflow breadcrumb**—for **Brief / Why / Details** prose on **`nmathopencl_has_opencl()`**, **`verify_opencl_runtime()`**, diagnostics, **`load_kernel_*`**, PATH utilities, etc., see **`docs/R_FUNCTIONS_SHARED_WITH_GLMBAYES.md`** plus the relevant **`.Rd`** topics.
 
-Typical order when **debugging** **`nmathopencl`** GPU paths: **`has_opencl()`** → **`verify_opencl_runtime()`** → **`detect_environment_and_gpus()`** / **`detect_compute_runtimes()`** → **`check_runtime_env()`** → **`diagnose_glmbayes()`**; use **`load_kernel_source` / `load_kernel_library`** when you need raw **`.cl`** strings from **`inst/cl`**. **RDS-aware** subset loading (**`load_library_for_kernel`**, **§3**) **builds on** the same kernel text but is **peculiar to **`nmathopencl`**** and **is** documented below.
+Typical order when **debugging** **`nmathopencl`** GPU paths: **`nmathopencl_has_opencl()`** → **`opencltools::verify_opencl_runtime()`** → **`opencltools::detect_environment_and_gpus()`** / **`detect_compute_runtimes()`** → **`opencltools::check_runtime_env()`** → **`opencltools::diagnose_glmbayes()`**; use **`load_kernel_source` / `load_kernel_library`** when you need raw **`.cl`** strings from **`inst/cl`**. **RDS-aware** subset loading (**`load_library_for_kernel`**, **§3**) **builds on** the same kernel text but is **peculiar to **`nmathopencl`**** and **is** documented below.
 
 ---
 
 ## 2 · **`nmathopencl`** device cache & precision (**not** verbatim **`glmbayes`** exports)
 
-### `opencl_device_info(force = FALSE, details = FALSE)`
+### `nmathopencl_opencl_device_info(force = FALSE, details = FALSE)`
 
 **Brief.** Prints **cached OpenCL device/driver** metadata (optional **force** re-probe / **details** verbosity).
 
@@ -33,15 +33,15 @@ Typical order when **debugging** **`nmathopencl`** GPU paths: **`has_opencl()`**
 
 **Details.** Use after shared diagnostics prove OpenCL is present but kernels misbehave (platform selection, **`clBuildProgram`** failures). Behavior is tied to **`nmathopencl`** **`C++`** caching—see **`.Rd`** for return/print contract.
 
-### `opencl_fp64_available(force = FALSE)`
+### `nmathopencl_opencl_fp64_available(force = FALSE)`
 
 **Brief.** **Boolean** probe (cached) whether **double-precision** (**`cl_khr_fp64`**) works on the chosen device.
 
 **Why nmathopencl (vs `openclport`).** Many **`nmath`** shims target **fp64**; this is a **`nmathopencl`**-specific guardrail absent from the **`glmbayes`** intersect list.
 
-**Details.** Pair with **`OPENCL.cl`** / kernel extension docs. **`?opencl_fp64_available`** carries exact semantics.
+**Details.** Pair with **`OPENCL.cl`** / kernel extension docs. **`?nmathopencl_opencl_fp64_available`** carries exact semantics.
 
-### `opencl_reset_device_selection()`
+### `nmathopencl_opencl_reset_device_selection()`
 
 **Brief.** Clears **package-local** device / precision cache so the next **`opencl_*`** probe starts clean.
 

@@ -58,7 +58,7 @@ rhyper_opencl(n, m, n_black, k, fallback = FALSE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. \code{dhyper_opencl} defaults \code{FALSE}; \code{phyper_opencl} and \code{rhyper_opencl} default \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md}); \code{qhyper_opencl} defaults \code{FALSE}.}
+\item{fallback}{When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. \code{dhyper_opencl} defaults \code{FALSE}; \code{phyper_opencl} and \code{rhyper_opencl} default \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md}); \code{qhyper_opencl} defaults \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
@@ -79,7 +79,7 @@ for the hypergeometric distribution.
 }
 \examples{
 n <- 5L
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dhyper_opencl(rep(3, n), m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
   phyper_opencl(q = 3, m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
   qhyper_opencl(rep(0.8, n), m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)

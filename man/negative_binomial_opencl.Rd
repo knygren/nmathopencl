@@ -91,7 +91,7 @@ rnbinom_mu_opencl(n, size, mu, fallback = FALSE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. Density wrappers (\code{dnbinom_opencl}, \code{dnbinom_mu_opencl}) default \code{FALSE}; \code{pnbinom_opencl}/\code{pnbinom_mu_opencl} default \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md}); quantiles and random wrappers default \code{FALSE}.}
+\item{fallback}{When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. Density wrappers (\code{dnbinom_opencl}, \code{dnbinom_mu_opencl}) default \code{FALSE}; \code{pnbinom_opencl}/\code{pnbinom_mu_opencl} default \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md}); quantiles and random wrappers default \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
@@ -115,7 +115,7 @@ for the negative binomial distribution, with variants parameterized by
 }
 \examples{
 n <- 5L
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dnbinom_opencl(rep(4, n), size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
   pnbinom_opencl(q = 4, size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)
   qnbinom_opencl(rep(0.8, n), size = 7, prob = 0.4, fallback = FALSE, verbose = TRUE)

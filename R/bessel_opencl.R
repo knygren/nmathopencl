@@ -6,7 +6,7 @@
 #' @param expon.scaled Logical vector recycled with \code{x} and \code{nu} where applicable;
 #'   maps to the \code{expon.scaled} flag in \code{\link[base]{besselI}} /
 #'   \code{\link[base]{besselK}}.
-#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
+#' @param fallback When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #'
 #' @section Known OpenCL limitations:

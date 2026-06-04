@@ -50,7 +50,7 @@
   }
   options(nmathopencl.opencl_startup_checked = TRUE)
 
-  nmath_ok <- isTRUE(tryCatch(has_opencl(), error = function(e) FALSE))
+  nmath_ok <- isTRUE(tryCatch(nmathopencl_has_opencl(), error = function(e) FALSE))
   tools_ok <- isTRUE(tryCatch(opencltools::has_opencl(), error = function(e) FALSE))
 
   if (tools_ok && !nmath_ok) {

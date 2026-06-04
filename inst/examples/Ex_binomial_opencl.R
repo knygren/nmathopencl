@@ -1,5 +1,5 @@
 n <- 5L
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dbinom_raw_opencl(rep(6, n), size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
   dbinom_opencl(rep(6, n), size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)
   pbinom_opencl(q = 6, size = 10, prob = 0.3, fallback = FALSE, verbose = TRUE)

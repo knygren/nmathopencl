@@ -53,7 +53,7 @@ runif_opencl(n, min = 0, max = 1, fallback = FALSE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
+\item{fallback}{When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
 Ignored when the runtime reports no OpenCL. See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.}
 
 \item{verbose}{Logical; print informational fallback messages.}
@@ -83,7 +83,7 @@ See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 
 \examples{
 n <- 5L
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dunif_opencl(rep(0.4, n), min = 0, max = 1, fallback = FALSE, verbose = TRUE)
   punif_opencl(q = 0.4, min = 0, max = 1, fallback = FALSE, verbose = TRUE)
   ## qunif_opencl: disabled — see inst/OPENCL_KERNEL_KNOWN_FAILURES.md

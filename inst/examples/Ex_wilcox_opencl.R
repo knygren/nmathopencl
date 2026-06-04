@@ -1,4 +1,4 @@
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   # Wilcoxon OpenCL kernels are currently known to fail on some GPU stacks due
   # to unresolved runtime symbols. Keeping these commented avoids flaky checks:
   # n <- 1L

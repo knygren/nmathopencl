@@ -1,5 +1,31 @@
 # nmathopencl 0.2.0 (development)
 
+### `diagnose_glmbayes()` removed from exports
+
+- Use **`opencltools::diagnose_glmbayes()`** for host/runtime diagnostic reports.
+
+### Package-specific OpenCL diagnostics renamed
+
+- **`has_opencl()`** → **`nmathopencl_has_opencl()`**; **`opencl_device_info()`** →
+  **`nmathopencl_opencl_device_info()`**; **`opencl_fp64_available()`** →
+  **`nmathopencl_opencl_fp64_available()`**; **`opencl_reset_device_selection()`** →
+  **`nmathopencl_opencl_reset_device_selection()`** (distinct from **opencltools**).
+
+### `get_opencl_core_count()` removed from exports
+
+- No longer exported from **nmathopencl**; use **`opencltools::get_opencl_core_count()`**.
+  C++ code in this package still calls **`opencltools_get_opencl_core_count()`** via
+  `openclPort::get_opencl_core_count()` where needed (e.g. envelope sizing).
+
+### Package-specific fp64 device selection
+
+- **`nmathopencl_opencl_fp64_available()`**, **`nmathopencl_opencl_reset_device_selection()`**, and the
+  device cache used by **`nmathopencl_opencl_device_info()`** now use **nmathopencl's** local
+  probe in `opencl_device_selection.cpp` (not **`opencltools/opencltools_capi.h`**).
+  Kernel loading and core-count helpers still use the opencltools C API from
+  `kernel_loader.cpp`. Results follow **`nmathopencl::nmathopencl_has_opencl()`** and this
+  package's GPU runtime, not the opencltools build flag.
+
 ### Kernel loaders (opencltools only)
 
 - Removed exported **`load_kernel_source()`** and **`load_kernel_library()`** from
@@ -43,19 +69,18 @@
   **`load_library_for_kernel()`** now delegate to **opencltools** C-callables
   (`opencltools_load_kernel_*`); redundant loader implementation removed from
   **`src/kernel_loader.cpp`**. Reading **`.cl`** text no longer requires
-  **`has_opencl()`** guards (aligned with **opencltools**).
-- **`get_opencl_core_count()`**, **`opencl_fp64_available()`**, and
-  **`opencl_reset_device_selection()`** route fp64/core-count probes through
-  the opencltools C API. Local device cache remains for kernel runners until
-  **`opencl_bind_selected_fp64_device_or_throw`** migrates.
+  **`nmathopencl_has_opencl()`** guards (aligned with **opencltools**).
+- Kernel loaders delegate to the opencltools C API. Local fp64 device cache
+  remains for kernel runners until **`opencl_bind_selected_fp64_device_or_throw`**
+  migrates.
 - **`use_opencl_configure()`** and **`port_to_opencl_configure()`** are thin
   re-exports from **opencltools**; configure templates live in
   **`opencltools/inst/configure-templates/`**.
 - Tier 3 host/runtime diagnostics (`detect_*`, `verify_opencl_runtime`,
   `gpu_names`, `add_to_path_*`, etc.) are no longer re-exported from
-  **nmathopencl**; use **opencltools** directly. **nmathopencl** keeps
-  `diagnose_glmbayes()` (includes this package's compile-time `has_opencl()`
-  check), `has_opencl()`, and device-selection helpers.
+  **nmathopencl**; use **opencltools** directly (including
+  **`opencltools::diagnose_glmbayes()`**). **nmathopencl** keeps
+  `nmathopencl_has_opencl()` and package-local device-selection helpers.
 
 # nmathopencl 0.1.0
 

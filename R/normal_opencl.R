@@ -34,7 +34,7 @@
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 #'   wrappers on this page; parallel kernels reserved.
 #' @param log \code{log} flag for \code{dnorm_opencl} (\code{stats} semantics).
-#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
+#' @param fallback When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
 #' @param verbose Logical; print informational fallback messages.
 #'
 #' @return Numeric vector result from the corresponding normal-family operation.

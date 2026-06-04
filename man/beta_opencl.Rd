@@ -67,7 +67,7 @@ rbeta_opencl(n, shape1, shape2, fallback = FALSE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
+\item{fallback}{When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
 Ignored when the runtime reports no OpenCL. All wrappers on this page default \code{FALSE} so OpenCL build/runtime faults surface unless you opt in (\code{fallback = TRUE}). Kernels overlapping \file{inst/cl/nmath/pgamma_utils.cl} can still be brittle on some devices; see \file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md} and \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
@@ -102,7 +102,7 @@ Tracker: \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}}
 
 \examples{
 n <- 5L
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dbeta_opencl(rep(0.6, n), shape1 = 2.5, shape2 = 4, fallback = FALSE, verbose = TRUE)
   dnbeta_opencl(rep(0.6, n), shape1 = 2.5, shape2 = 4, ncp = 0.8, fallback = FALSE, verbose = TRUE)
   pbeta_opencl(q = 0.6, shape1 = 2.5, shape2 = 4, ncp = 0, fallback = FALSE, verbose = TRUE)

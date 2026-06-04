@@ -8,7 +8,7 @@
 #' @param q Numeric vector of quantiles for \code{pgeom_opencl}; recycled like \code{stats::pgeom}.
 #' @param p Numeric vector of probabilities for \code{qgeom_opencl} (like \code{stats::qgeom}).
 #' @param prob Probability of success in \code{[0, 1]}.
-#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. \code{dgeom_opencl} defaults \code{FALSE}. \code{pgeom_opencl}, \code{qgeom_opencl}, and \code{rgeom_opencl} default \code{FALSE}.
+#' @param fallback When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. \code{dgeom_opencl} defaults \code{FALSE}. \code{pgeom_opencl}, \code{qgeom_opencl}, and \code{rgeom_opencl} default \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}

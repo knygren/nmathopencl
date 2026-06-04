@@ -53,7 +53,7 @@ rchisq_opencl(n, df, ncp = 0, fallback = FALSE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. \code{dchisq_opencl} defaults \code{FALSE}; distribution/quantile and \code{rchisq_opencl} remain \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md}); pass explicit \code{fallback} to override.}
+\item{fallback}{When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL. \code{dchisq_opencl} defaults \code{FALSE}; distribution/quantile and \code{rchisq_opencl} remain \code{TRUE} temporarily (\file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md}); pass explicit \code{fallback} to override.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
@@ -75,7 +75,7 @@ for the chi-squared distribution, including non-central paths via \code{ncp}.
 }
 \examples{
 n <- 5L
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dchisq_opencl(rep(4.5, n), df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)
   pchisq_opencl(q = 4.5, df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)
   qchisq_opencl(rep(0.8, n), df = 6, ncp = 0, fallback = FALSE, verbose = TRUE)

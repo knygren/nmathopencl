@@ -8,7 +8,7 @@
 #' @param a,b Parameters for \code{beta_opencl} / \code{lbeta_opencl} (recycled together).
 #' @param n,k Arguments for \code{choose_opencl} / \code{lchoose_opencl}, like
 #'   \code{base::choose(n, k)} (recycled together).
-#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
+#' @param fallback When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #'
 #' @return Numeric vector of recycled common length.

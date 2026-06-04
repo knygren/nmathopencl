@@ -40,7 +40,7 @@ lchoose_opencl(n, k, fallback = FALSE, verbose = FALSE)
 \item{x}{Numeric vector (and additional vectors where listed); arguments are
 recycled to a common length like the corresponding base functions.}
 
-\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
+\item{fallback}{When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
@@ -58,7 +58,7 @@ Numeric vector of recycled common length.
 OpenCL-backed wrappers for selected special functions from R Mathlib.
 }
 \examples{
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   gammafn_opencl(x = 2.5, fallback = FALSE, verbose = TRUE)
   lgammafn_opencl(x = 2.5, fallback = FALSE, verbose = TRUE)
   digamma_opencl(x = 2.5, fallback = FALSE, verbose = TRUE)

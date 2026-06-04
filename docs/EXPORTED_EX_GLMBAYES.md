@@ -24,7 +24,7 @@
 
 **Why nmathopencl (vs `openclport`).** Statistical/GPU pedagogy lives in **`nmathopencl`**; **`openclport`** is porting infrastructure.
 
-**Details.** Uses **`.Rd`** argument contract. For **environment** troubleshooting, call the **shared** **`glmbayes`** diagnostics (**`?diagnose_glmbayes`**—see **`docs/R_FUNCTIONS_SHARED_WITH_GLMBAYES.md`**), not re-documented here.
+**Details.** Uses **`.Rd`** argument contract. For **environment** troubleshooting, call **`opencltools::diagnose_glmbayes()`** (see **`docs/R_FUNCTIONS_SHARED_WITH_GLMBAYES.md`**), not re-documented here.
 
 ---
 

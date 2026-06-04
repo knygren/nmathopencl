@@ -33,7 +33,7 @@ ftrunc_opencl(x, fallback = FALSE, verbose = FALSE)
 \arguments{
 \item{x, y}{Numeric vectors recycled together (where both appear).}
 
-\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
+\item{fallback}{When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
@@ -46,7 +46,7 @@ Numeric vector of recycled common length.
 OpenCL-backed wrappers for miscellaneous scalar support functions.
 }
 \examples{
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   imax2_opencl(x = 7, y = 3, fallback = FALSE, verbose = TRUE)
   imin2_opencl(x = 7, y = 3, fallback = FALSE, verbose = TRUE)
   fmax2_opencl(x = 7.2, y = 3.1, fallback = FALSE, verbose = TRUE)

@@ -22,7 +22,7 @@ besselY_opencl(x, nu, fallback = FALSE, verbose = FALSE)
 maps to the \code{expon.scaled} flag in \code{\link[base]{besselI}} /
 \code{\link[base]{besselK}}.}
 
-\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
+\item{fallback}{When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 }
@@ -41,7 +41,7 @@ tolerate failures until device-side workspace handling is implemented.
 }
 
 \examples{
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   # Bessel OpenCL paths currently depend on temporary-workspace allocation
   # behavior (R_alloc/vmax* semantics) not yet fully implemented for device
   # execution. Keep these commented to avoid flaky CI/check failures:

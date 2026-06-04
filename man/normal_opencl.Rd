@@ -58,7 +58,7 @@ function. The GPU path runs only when every recycled value is strictly positive 
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for \emph{p}/\emph{q}
 wrappers on this page; parallel kernels reserved.}
 
-\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
+\item{fallback}{When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
 
 \item{verbose}{Logical; print informational fallback messages.}
 
@@ -96,7 +96,7 @@ Missing or non-finite values (after recycling), or any \code{sd == 0}, use CPU
 \examples{
 n <- 5L
 x <- c(-1, 0, 1)
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dnorm_opencl(x, mean = 0, sd = 1, fallback = FALSE, verbose = TRUE)
   pnorm_opencl(q = 0.2, mean = 0, sd = 1, fallback = FALSE, verbose = TRUE)
   qnorm_opencl(rep(0.8, n), mean = 0, sd = 1, fallback = FALSE, verbose = TRUE)

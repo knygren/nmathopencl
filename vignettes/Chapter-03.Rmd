@@ -296,7 +296,7 @@ function.
 Note the dual guard: each loader function itself is compiled to a no-op when
 `USE_OPENCL` is absent (see Chapter 02), so `build_rmath_opencl_program` is
 always callable but returns an empty string on CPU-only builds.  Callers
-check `has_opencl()` before dispatching to the GPU path.
+check `nmathopencl_has_opencl()` before dispatching to the GPU path.
 
 ## What this means for downstream developers
 

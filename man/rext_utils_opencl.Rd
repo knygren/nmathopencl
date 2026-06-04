@@ -12,7 +12,7 @@ r_check_stack_opencl(n, fallback = FALSE, verbose = FALSE)
 \arguments{
 \item{n}{Number of observations. Non-negative integer scalar.}
 
-\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
+\item{fallback}{When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
 }
@@ -31,7 +31,7 @@ and keep CPU fallback enabled unless explicitly debugging OpenCL failures.
 
 \examples{
 n <- 5L
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   r_check_user_interrupt_opencl(n, fallback = FALSE, verbose = TRUE)
 
   # Known linkage/runtime gap on some setups (stack hook symbol availability):

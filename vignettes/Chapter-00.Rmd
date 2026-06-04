@@ -102,13 +102,13 @@ the internal runner layer is documented in Chapter 09.
 
 | Package | Role | Typical entry points |
 |---------|------|----------------------|
-| **`nmathopencl`** (this package) | OpenCL-ported Mathlib, `*_opencl` validation API, kernel loaders, package-local device selection | `has_opencl()`, `load_kernel_*`, `diagnose_glmbayes()`, `dnorm_opencl()` |
+| **`nmathopencl`** (this package) | OpenCL-ported Mathlib, `*_opencl` validation API, kernel loaders, package-local device selection | `nmathopencl_has_opencl()`, `load_kernel_*`, `dnorm_opencl()` |
 | **`opencltools`** ([CRAN](https://CRAN.R-project.org/package=opencltools)) | Host/runtime diagnostics and kernel-library authoring tools | `detect_environment_and_gpus()`, `verify_opencl_runtime()`, `load_library_for_kernel()`, `diagnose_glmbayes()` (opencltools-only report) |
 | **`glmbayes`** ([CRAN](https://CRAN.R-project.org/package=glmbayes)) | End-user Bayesian GLMs with optional GPU paths | `glmb()`, `use_opencl = TRUE` |
 
 **`nmathopencl` Imports `opencltools` (>= 0.8.0).** Host inventory, driver/ICD
 checks, and PATH validation are delegated to **opencltools**; compile-time OpenCL
-status for **this** package's DLL stays local via **`has_opencl()`**. Host/runtime
+status for **this** package's DLL stays local via **`nmathopencl_has_opencl()`**. Host/runtime
 probes (`detect_*`, PATH helpers, `gpu_names`, and related functions) are **not**
 re-exported from **nmathopencl** --- call `opencltools::…` directly. Kernel-library
 authoring helpers (`load_library_for_kernel`, `extract_library_subset`, and
@@ -147,27 +147,25 @@ through which downstream packages obtain GPU acceleration.
 library(nmathopencl)
 
 # Compile-time OpenCL support in this nmathopencl build
-has_opencl()
+nmathopencl_has_opencl()
 
 # Same check for the imported opencltools dependency
 opencltools::has_opencl()
 
-# Full diagnostic report: opencltools host/runtime checks plus
-# nmathopencl compile-time status
-diagnose_glmbayes()
+# Host/runtime diagnostic report (opencltools)
+opencltools::diagnose_glmbayes()
 ```
 
-- **`has_opencl()`** (nmathopencl) --- was **this** package built with OpenCL
+- **`nmathopencl_has_opencl()`** (nmathopencl) --- was **this** package built with OpenCL
   (`-DUSE_OPENCL`)?
 - **`opencltools::has_opencl()`** --- was the imported dependency built with
   OpenCL?
-- **`diagnose_glmbayes()`** (nmathopencl) --- combined report: host/runtime
-  steps from **opencltools**, compile-time status from **nmathopencl**.
+- **`opencltools::diagnose_glmbayes()`** --- host/runtime report from **opencltools**.
 
 Host and driver inventory (`detect_environment_and_gpus()`,
 `verify_opencl_runtime()`, and related probes) live in **`opencltools`** --- use
 `opencltools::…` when calling them directly. All exported `*_opencl` wrappers
-branch on `has_opencl()` first; the `fallback` argument then controls whether
+branch on `nmathopencl_has_opencl()` first; the `fallback` argument then controls whether
 a failed OpenCL call is replaced with the CPU path (ignored when OpenCL is
 absent at compile time).
 

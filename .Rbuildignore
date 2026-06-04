@@ -34,3 +34,4 @@
 ^\.claude$
 ^CRAN-SUBMISSION$
 ^tools/.*\.exe$
+^_install_test_lib$

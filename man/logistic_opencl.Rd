@@ -53,7 +53,7 @@ rlogis_opencl(n, location = 0, scale = 1, fallback = FALSE, verbose = FALSE)
 \item{opencl_parallel}{Dispatch hint (\code{TRUE}, \code{FALSE}, \code{NA}) for \code{plogis_opencl}
 and \code{qlogis_opencl}; parallel kernels reserved.}
 
-\item{fallback}{When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
+\item{fallback}{When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
 Ignored when the runtime reports no OpenCL. See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.}
 
 \item{verbose}{Logical; print fallback/error diagnostics.}
@@ -82,7 +82,7 @@ See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 
 \examples{
 n <- 5L
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dlogis_opencl(rep(0.2, n), location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
   plogis_opencl(q = 0.2, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
   ## qlogis_opencl: disabled — see inst/OPENCL_KERNEL_KNOWN_FAILURES.md

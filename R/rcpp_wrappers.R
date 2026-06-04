@@ -62,22 +62,18 @@
 
 # =============================================================================
 #  Tier 4: OpenCL / GPU
-#  Callers: has_opencl, get_opencl_core_count
+#  Callers: nmathopencl_has_opencl
 #  User:    Advanced users - GPU diagnostics (kernel loading: opencltools)
 # =============================================================================
 
 #' @noRd
 #' @keywords internal
-.has_opencl_cpp <- function() {
-  .Call("_nmathopencl_has_opencl_cpp_export")
+.nmathopencl_has_opencl_cpp <- function() {
+  nmathopencl_has_opencl_cpp_export()
 }
 
 #' @noRd
 #' @keywords internal
-.get_opencl_core_count_cpp <- function() {
-  .Call("_nmathopencl_get_opencl_core_count_cpp_export")
-}
-
 #' @noRd
 #' @keywords internal
 .dnorm_opencl <- function(x, mean, sd, log, opencl_parallel_code, verbose = FALSE) {

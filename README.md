@@ -71,8 +71,9 @@ Cheap probes before assembling large sources or diagnosing workstation issues:
 
 | Concern | R entry points |
 |---------|----------------|
-| **nmathopencl** compile-time OpenCL / device selection | **`has_opencl()`**, **`opencl_fp64_available()`**, **`opencl_device_info()`**, **`opencl_reset_device_selection()`**, **`get_opencl_core_count()`** |
-| Combined report (host checks + **nmathopencl** build) | **`diagnose_glmbayes()`** |
+| **nmathopencl** compile-time OpenCL / device selection | **`nmathopencl_has_opencl()`**, **`nmathopencl_opencl_fp64_available()`**, **`nmathopencl_opencl_device_info()`**, **`nmathopencl_opencl_reset_device_selection()`** |
+| **opencltools** compute-unit probe | **`opencltools::get_opencl_core_count()`** |
+| Combined host/runtime report | **`opencltools::diagnose_glmbayes()`** |
 
 Host and workstation inventory --- GPU vendor detection, driver/ICD/PATH probes,
 **`verify_opencl_runtime()`**, PATH helpers, and related Tier 3 tooling --- live in
@@ -308,8 +309,8 @@ Implemented in **nmathopencl** (C++ kernel loaders in this package):
 
 | Function | Purpose |
 |----------|---------|
-| **`has_opencl()`**, **`opencl_fp64_available()`**, **`opencl_device_info()`**, **`opencl_reset_device_selection()`**, **`get_opencl_core_count()`** | Compile-time flag and fp64/device probing tied to kernels shipped here. |
-| **`diagnose_glmbayes()`** | Readable report: **opencltools** host/runtime checks plus this package's **`has_opencl()`** status. |
+| **`nmathopencl_has_opencl()`**, **`nmathopencl_opencl_fp64_available()`**, **`nmathopencl_opencl_device_info()`**, **`nmathopencl_opencl_reset_device_selection()`** | Compile-time flag and fp64/device probing tied to kernels shipped here. |
+| **`opencltools::get_opencl_core_count()`** | OpenCL compute units on the default device (opencltools selection). |
 
 ### Tier D --- Maintainer-only port plumbing
 
@@ -347,7 +348,7 @@ yet the curated workflow remains **assemble your kernel + stitched nmath subgrap
 
 Each wrapper honors **`fallback`**, default **`FALSE`** --- GPU faults surface loudly.
 **`fallback = TRUE`** masks recoverable failures with CPU `stats` analogues whenever OpenCL
-appears available (see **`has_opencl()`**). Machines **without OpenCL support** always follow
+appears available (see **`nmathopencl_has_opencl()`**). Machines **without OpenCL support** always follow
 CPU paths regardless of **`fallback`**. Begin runtime probing with **§ Diagnostics and runtime checks**.
 
 ---

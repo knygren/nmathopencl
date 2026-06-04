@@ -29,10 +29,10 @@ sampler—builds a custom kernel on top of the ported nmath routines. See
 and \code{vignette("Chapter-10")} for a complete walkthrough.
 
 Optional GPU acceleration is available wherever an OpenCL runtime is
-installed. Use \code{\link{has_opencl}} to query compile-time OpenCL support,
-\code{\link{opencl_fp64_available}} / \code{\link{opencl_device_info}} for
-double-precision device selection used by kernels, and
-\code{\link{diagnose_glmbayes}} for detailed device diagnostics.
+installed. Use \code{\link{nmathopencl_has_opencl}} to query compile-time OpenCL support,
+\code{\link{nmathopencl_opencl_fp64_available}} / \code{\link{nmathopencl_opencl_device_info}} for
+double-precision device selection used by kernels. Host/runtime diagnostics use
+\code{\link[opencltools:diagnose_glmbayes]{opencltools::diagnose_glmbayes}()}.
 
 The simulation theory underlying the envelope construction is described in
 \insertCite{Nygren2006}{nmathopencl}, with implementation details in
@@ -73,8 +73,8 @@ Key developer entry points:
 \itemize{
 \item \code{\link[opencltools:load_kernel_library]{opencltools::load_kernel_library}}
 — assemble the nmath \code{.cl} sources (\code{package = "nmathopencl"}).
-\item \code{\link{has_opencl}} — check whether an OpenCL runtime is present.
-\item \code{\link{opencl_device_info}} --- which OpenCL device is used for fp64 kernels.
+\item \code{\link{nmathopencl_has_opencl}} — check whether an OpenCL runtime is present.
+\item \code{\link{nmathopencl_opencl_device_info}} --- which OpenCL device is used for fp64 kernels.
 \item \code{\link{Ex_EnvelopeEval}} — worked example of a custom kernel built
 on the ported nmath routines.
 }

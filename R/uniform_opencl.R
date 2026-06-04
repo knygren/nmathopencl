@@ -13,7 +13,7 @@
 #' @param p Probabilities for \code{qunif_opencl} (\code{stats::qunif} semantics).
 #' @param min Lower limit of the distribution.
 #' @param max Upper limit of the distribution.
-#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
+#' @param fallback When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
 #' Ignored when the runtime reports no OpenCL. See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 #' @param verbose Logical; print informational fallback messages.
 #' @param log \code{log} flag for densities (\code{stats} \emph{d}-family semantics).

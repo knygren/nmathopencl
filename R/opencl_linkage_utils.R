@@ -32,11 +32,11 @@
 # Internal helper for OpenCL call/fallback pattern.
 #
 # Semantics:
-# - If OpenCL runtime is unavailable (has_opencl() is FALSE), always use fallback_expr().
+# - If OpenCL runtime is unavailable (nmathopencl_has_opencl() is FALSE), always use fallback_expr().
 # - If OpenCL is available, evaluate opencl_expr(); on failure, use fallback_expr() only when
 #   fallback is TRUE; otherwise propagate the error.
 .opencl_try_or_fallback <- function(opencl_expr, fallback_expr, fallback, verbose, fn_name) {
-  if (!has_opencl()) {
+  if (!nmathopencl_has_opencl()) {
     if (verbose) {
       message(sprintf("[%s] OpenCL unavailable in this session; using CPU fallback.", fn_name))
     }

@@ -1,5 +1,5 @@
 n <- 5L
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dgeom_opencl(rep(4, n), prob = 0.3, fallback = FALSE, verbose = TRUE)
   pgeom_opencl(q = 4, prob = 0.3, fallback = FALSE, verbose = TRUE)
   qgeom_opencl(rep(0.8, n), prob = 0.3, fallback = FALSE, verbose = TRUE)

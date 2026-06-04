@@ -545,24 +545,20 @@ r_check_stack_opencl_cpp_export <- function(n, verbose = FALSE) {
     .Call(`_nmathopencl_r_check_stack_opencl_cpp_export`, n, verbose)
 }
 
-has_opencl_cpp_export <- function() {
-    .Call(`_nmathopencl_has_opencl_cpp_export`)
+nmathopencl_has_opencl_cpp_export <- function() {
+    .Call(`_nmathopencl_nmathopencl_has_opencl_cpp_export`)
 }
 
-get_opencl_core_count_cpp_export <- function() {
-    .Call(`_nmathopencl_get_opencl_core_count_cpp_export`)
+nmathopencl_opencl_device_info_cpp_export <- function(force = FALSE, details = FALSE) {
+    .Call(`_nmathopencl_nmathopencl_opencl_device_info_cpp_export`, force, details)
 }
 
-opencl_device_info_cpp_export <- function(force = FALSE, details = FALSE) {
-    .Call(`_nmathopencl_opencl_device_info_cpp_export`, force, details)
+nmathopencl_opencl_fp64_available_cpp_export <- function(force = FALSE) {
+    .Call(`_nmathopencl_nmathopencl_opencl_fp64_available_cpp_export`, force)
 }
 
-opencl_fp64_available_cpp_export <- function(force = FALSE) {
-    .Call(`_nmathopencl_opencl_fp64_available_cpp_export`, force)
-}
-
-opencl_reset_device_selection_cpp_export <- function() {
-    invisible(.Call(`_nmathopencl_opencl_reset_device_selection_cpp_export`))
+nmathopencl_opencl_reset_device_selection_cpp_export <- function() {
+    invisible(.Call(`_nmathopencl_nmathopencl_opencl_reset_device_selection_cpp_export`))
 }
 
 register_nmathopencl_ccallables_cpp_export <- function() {

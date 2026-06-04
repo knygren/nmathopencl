@@ -7,7 +7,7 @@
 #' @param n Number of observations. Non-negative integer scalar.
 #' @param size Number of trials per draw (non-negative integer scalar).
 #' @param prob Probability of the first category in \code{[0, 1]}.
-#' @param fallback When \code{TRUE} while \code{\link{has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
+#' @param fallback When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails. Ignored when the runtime reports no OpenCL (CPU path is chosen automatically). Defaults to \code{FALSE}.
 #' @param verbose Logical; print fallback/error diagnostics.
 #'
 #' @return Integer matrix with 2 rows and \code{n} columns.

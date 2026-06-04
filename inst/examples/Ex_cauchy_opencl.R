@@ -1,5 +1,5 @@
 n <- 5L
-if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
+if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dcauchy_opencl(rep(0.2, n), location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
   pcauchy_opencl(q = 0.2, location = 0, scale = 1, fallback = FALSE, verbose = TRUE)
   qcauchy_opencl(rep(0.8, n), location = 0, scale = 1, fallback = FALSE, verbose = TRUE)

@@ -59,14 +59,14 @@ R wrapper function  (exported, input validation, recycling)
   │
   ▼
 .opencl_try_or_fallback()
-  │  if !has_opencl()           → fallback_expr()  (CPU path)
+  │  if !nmathopencl_has_opencl()           → fallback_expr()  (CPU path)
   │  if OpenCL call succeeds    → return GPU result
   │  if OpenCL call fails
   │    and fallback = TRUE      → fallback_expr()  (CPU path)
   │    and fallback = FALSE     → propagate error
   ▼
 C++ kernel wrapper  (internal, not exported)
-  │  #ifdef USE_OPENCL + has_opencl() guard
+  │  #ifdef USE_OPENCL + nmathopencl_has_opencl() guard
   │  type conversion + program assembly + runner dispatch
   ▼
 GPU result
@@ -78,7 +78,7 @@ The fallback can be triggered at two separate levels:
   condition the GPU path cannot handle (e.g. `sd == 0`, non-finite values).
   `fallback_full()` calls `stats::dnorm(x, mean, sd, log = log)` directly.
 
-- **C++ / runtime level**: `.opencl_try_or_fallback()` checks `has_opencl()`
+- **C++ / runtime level**: `.opencl_try_or_fallback()` checks `nmathopencl_has_opencl()`
   before attempting the GPU path.  If OpenCL is not available it calls
   `fallback_expr()` without ever touching the C++ kernel wrapper.  If a
   GPU call throws an exception and `fallback = TRUE`, it catches the error
@@ -101,7 +101,7 @@ Exported R function  (e.g. Ex_EnvelopeEval)
 .EnvelopeEval_cpp()   (internal R → C++ bridge, [[Rcpp::export]])
   ▼
 EnvelopeEval_cpp()    (C++ dispatcher)
-  │  if use_opencl && has_opencl()
+  │  if use_opencl && nmathopencl_has_opencl()
   │    → f2_f3_opencl()     (OpenCL kernel wrapper)
   │  else
   │    → f2_f3_non_opencl() (pure C++ CPU implementation)
@@ -191,7 +191,7 @@ wrapper shares:
 
 .opencl_try_or_fallback <- function(opencl_expr, fallback_expr,
                                     fallback, verbose, fn_name) {
-  if (!has_opencl()) {
+  if (!nmathopencl_has_opencl()) {
     # OpenCL not available in this build or session — go straight to CPU.
     if (verbose)
       message(sprintf("[%s] OpenCL unavailable; using CPU fallback.", fn_name))
@@ -249,7 +249,7 @@ Rcpp::NumericVector dnorm_opencl(
   Rcpp::NumericVector out(len);   // zero-initialized
 
 #ifdef USE_OPENCL
-  if (!has_opencl() || len == 0) return out;
+  if (!nmathopencl_has_opencl() || len == 0) return out;
 
   try {
     d_givelog_ndrange_kernel_fill(
@@ -265,7 +265,7 @@ Rcpp::NumericVector dnorm_opencl(
 }
 ```
 
-Note that the C++ wrapper itself returns zeros when `!has_opencl()`.  It does
+Note that the C++ wrapper itself returns zeros when `!nmathopencl_has_opencl()`.  It does
 **not** call `stats::dnorm`.  The R wrapper is responsible for the fallback
 to `stats::dnorm`; the C++ wrapper simply reports "no GPU result" via zeros.
 This keeps the C++ layer free of any R evaluation machinery.
@@ -315,7 +315,7 @@ Rcpp::List EnvelopeEval_cpp(
 ) {
   // Prepare shared inputs (common to both paths) ...
 
-  if (use_opencl && has_opencl()) {
+  if (use_opencl && nmathopencl_has_opencl()) {
     // GPU path: call the OpenCL kernel wrapper
     return ex_glmbayes::opencl::f2_f3_opencl(
         family, link, b, y, x, mu, P, alpha, wt, verbose);
@@ -358,7 +358,7 @@ natural existing CPU computation to fall back to.
 |---|---|---|
 | Existing CPU function available? | Yes (`stats::`, `base::`, etc.) | No; need to write the CPU implementation |
 | Does the computation have a direct R use? | Yes (called directly from R) | Often not (called from a C++ simulation loop) |
-| Where does fallback live? | R level (`fallback_full()`) + runtime (`has_opencl()`) | C++ level (`use_opencl && has_opencl()`) |
+| Where does fallback live? | R level (`fallback_full()`) + runtime (`nmathopencl_has_opencl()`) | C++ level (`use_opencl && nmathopencl_has_opencl()`) |
 | Caller can request optional fallback? | Yes (`fallback = TRUE/FALSE` argument) | Caller controls via `use_opencl` flag |
 | Wrapper directly R-callable? | Yes (exported via `[[Rcpp::export]]`) | Not necessarily — may be purely internal C++ |
 

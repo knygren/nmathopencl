@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Chapter 12: The nmathopencl R API --- Distribution Functions on the GPU"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
@@ -24,7 +24,7 @@ All exported functions share three common arguments:
 
 | Argument | Type | Default | Meaning |
 |----------|------|---------|---------|
-| `fallback` | logical | `FALSE` | If `TRUE` while `has_opencl()` is `TRUE`, fall back to the `stats::` analogue when the OpenCL call fails; ignored when OpenCL is unavailable (CPU is used anyway) |
+| `fallback` | logical | `FALSE` | If `TRUE` while `nmathopencl_has_opencl()` is `TRUE`, fall back to the `stats::` analogue when the OpenCL call fails; ignored when OpenCL is unavailable (CPU is used anyway) |
 | `verbose` | logical | `FALSE` | Extra diagnostics (including when picking the CPU path with no OpenCL runtime) |
 | `log` / `lower.tail` | logical | distribution-specific | Mirror the `stats::` convention for the same function |
 
@@ -34,13 +34,13 @@ All exported functions share three common arguments:
 library(nmathopencl)
 
 # TRUE if this nmathopencl build was compiled with USE_OPENCL
-has_opencl()
+nmathopencl_has_opencl()
 
 # GPU device names on the host (opencltools --- system inventory)
 opencltools::gpu_names()
 ```
 
-If OpenCL is not available (`has_opencl()` returns `FALSE`), calls use the CPU
+If OpenCL is not available (`nmathopencl_has_opencl()` returns `FALSE`), calls use the CPU
 equivalent unconditionally so examples and CI keep working.
 
 By default `fallback = FALSE`: when OpenCL **is** available but a dispatch fails,
@@ -217,11 +217,11 @@ They are exported via `rng_core_opencl.R`.
 
 ## Fallback behavior in detail
 
-1. **`has_opencl()` is `FALSE`** (no runtime device / not compiled with OpenCL): the wrapper
+1. **`nmathopencl_has_opencl()` is `FALSE`** (no runtime device / not compiled with OpenCL): the wrapper
    always uses the CPU `stats::`/base analogue. The **`fallback` argument does not gate this**;
    it is ignored for this branch.
 
-2. **`has_opencl()` is `TRUE`**, but OpenCL enqueue/compile/bind fails inside the `.Call`: the outer
+2. **`nmathopencl_has_opencl()` is `TRUE`**, but OpenCL enqueue/compile/bind fails inside the `.Call`: the outer
    R shim catches the failure. **`fallback = FALSE` (default):** propagate the error.
    **`fallback = TRUE`:** return the CPU analogue instead (optional masking for fragile stacks).
 
