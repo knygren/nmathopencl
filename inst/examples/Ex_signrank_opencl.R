@@ -1,5 +1,4 @@
-# See ?nmathopencl_examples_use_opencl
-if (nmathopencl_examples_use_opencl()) {
+if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   # Signed-rank OpenCL kernels are currently known to fail on some GPU stacks
   # due to unresolved runtime allocation symbols (e.g., R_chk_calloc).
   # Keeping these commented avoids flaky check failures:

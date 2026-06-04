@@ -83,9 +83,8 @@ See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 }
 
 \examples{
-# See ?nmathopencl_examples_use_opencl
 n <- 5L
-if (nmathopencl_examples_use_opencl()) {
+if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dt_opencl(rep(1.5, n), df = 8, ncp = 0, fallback = FALSE, verbose = TRUE)
   dt_opencl(rep(1.5, n), df = 8, ncp = 1.2, fallback = FALSE, verbose = TRUE)
   pt_opencl(q = 1.5, df = 8, ncp = 0, fallback = FALSE, verbose = TRUE)

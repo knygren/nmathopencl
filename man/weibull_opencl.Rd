@@ -73,9 +73,8 @@ OpenCL-backed density, distribution, quantile, and random generation wrappers
 for the Weibull distribution.
 }
 \examples{
-# See ?nmathopencl_examples_use_opencl
 n <- 5L
-if (nmathopencl_examples_use_opencl()) {
+if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dweibull_opencl(rep(1.2, n), shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
   pweibull_opencl(q = 1.2, shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)
   qweibull_opencl(rep(0.8, n), shape = 2, scale = 1.5, fallback = FALSE, verbose = TRUE)

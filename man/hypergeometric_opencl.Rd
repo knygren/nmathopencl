@@ -78,9 +78,8 @@ OpenCL-backed density, distribution, quantile, and random generation wrappers
 for the hypergeometric distribution.
 }
 \examples{
-# See ?nmathopencl_examples_use_opencl
 n <- 5L
-if (nmathopencl_examples_use_opencl()) {
+if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dhyper_opencl(rep(3, n), m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
   phyper_opencl(q = 3, m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)
   qhyper_opencl(rep(0.8, n), m = 10, n_black = 12, k = 8, fallback = FALSE, verbose = TRUE)

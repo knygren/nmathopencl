@@ -68,9 +68,8 @@ OpenCL-backed density, distribution, quantile, and random generation wrappers
 for the geometric distribution.
 }
 \examples{
-# See ?nmathopencl_examples_use_opencl
 n <- 5L
-if (nmathopencl_examples_use_opencl()) {
+if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dgeom_opencl(rep(4, n), prob = 0.3, fallback = FALSE, verbose = TRUE)
   pgeom_opencl(q = 4, prob = 0.3, fallback = FALSE, verbose = TRUE)
   qgeom_opencl(rep(0.8, n), prob = 0.3, fallback = FALSE, verbose = TRUE)

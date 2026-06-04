@@ -46,8 +46,7 @@ Numeric vector of recycled common length.
 OpenCL-backed wrappers for miscellaneous scalar support functions.
 }
 \examples{
-# See ?nmathopencl_examples_use_opencl
-if (nmathopencl_examples_use_opencl()) {
+if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   imax2_opencl(x = 7, y = 3, fallback = FALSE, verbose = TRUE)
   imin2_opencl(x = 7, y = 3, fallback = FALSE, verbose = TRUE)
   fmax2_opencl(x = 7.2, y = 3.1, fallback = FALSE, verbose = TRUE)

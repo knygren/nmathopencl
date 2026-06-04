@@ -80,8 +80,7 @@ Defaults follow \verb{fallback = FALSE}: OpenCL failures surface unless you pass
 }
 
 \examples{
-# See ?nmathopencl_examples_use_opencl
-if (nmathopencl_examples_use_opencl()) {
+if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   # Wilcoxon OpenCL kernels are currently known to fail on some GPU stacks due
   # to unresolved runtime symbols. Keeping these commented avoids flaky checks:
   # n <- 1L

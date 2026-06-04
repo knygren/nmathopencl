@@ -78,9 +78,8 @@ OpenCL-backed density, distribution, quantile, and random generation wrappers
 for the Poisson distribution.
 }
 \examples{
-# See ?nmathopencl_examples_use_opencl
 n <- 5L
-if (nmathopencl_examples_use_opencl()) {
+if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dpois_raw_opencl(rep(4, n), lambda = 4, fallback = FALSE, verbose = TRUE)
   dpois_opencl(rep(4, n), lambda = 4, fallback = FALSE, verbose = TRUE)
   ppois_opencl(q = 4, lambda = 4, fallback = FALSE, verbose = TRUE)

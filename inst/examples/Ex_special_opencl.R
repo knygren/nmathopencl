@@ -1,5 +1,4 @@
-# See ?nmathopencl_examples_use_opencl
-if (nmathopencl_examples_use_opencl()) {
+if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   gammafn_opencl(x = 2.5, fallback = FALSE, verbose = TRUE)
   lgammafn_opencl(x = 2.5, fallback = FALSE, verbose = TRUE)
   digamma_opencl(x = 2.5, fallback = FALSE, verbose = TRUE)

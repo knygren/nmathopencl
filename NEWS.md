@@ -2,9 +2,8 @@
 
 ### Examples (`inst/examples/Ex_*_opencl.R`)
 
-- All ported stats/Math `*_opencl` example scripts use
-  **`nmathopencl_examples_use_opencl()`**: OpenCL paths when CPU-only or
-  `NOT_CRAN=true`; **`stats::`** / CPU fallbacks during **`R CMD check`** on
+- Ported stats/Math `*_opencl` examples call OpenCL when CPU-only or
+  `NOT_CRAN=true`; otherwise use **`stats::`** during **`R CMD check`** on
   OpenCL builds (avoids repeated `clBuildProgram` during examples).
 
 ### OpenCL C-callable bridge (opencltools)

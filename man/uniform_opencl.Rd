@@ -82,9 +82,8 @@ See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 }
 
 \examples{
-# See ?nmathopencl_examples_use_opencl
 n <- 5L
-if (nmathopencl_examples_use_opencl()) {
+if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dunif_opencl(rep(0.4, n), min = 0, max = 1, fallback = FALSE, verbose = TRUE)
   punif_opencl(q = 0.4, min = 0, max = 1, fallback = FALSE, verbose = TRUE)
   ## qunif_opencl: disabled — see inst/OPENCL_KERNEL_KNOWN_FAILURES.md

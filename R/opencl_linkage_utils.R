@@ -89,23 +89,6 @@
   }
 }
 
-#' Use \code{*_opencl} in package examples (vs calling \code{stats::} directly)
-#'
-#' @description
-#' Example scripts in \code{inst/examples/Ex_*_opencl.R} call \code{*_opencl}
-#' when this returns \code{TRUE}: CPU-only installs (wrappers fall back to
-#' \code{stats} internally) and when \code{NOT_CRAN=true} (local GPU checks).
-#' When \code{has_opencl()} is \code{TRUE} during \command{R CMD check}
-#' (\code{NOT_CRAN} unset), returns \code{FALSE} so examples use \code{stats::}
-#' and avoid repeated \code{clBuildProgram} cost.
-#'
-#' @return Logical scalar.
-#' @keywords internal
-#' @export
-nmathopencl_examples_use_opencl <- function() {
-  !has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")
-}
-
 .p_stage1_recycle_len <- function(lens, stats_help_topic) {
   len <- max(lens)
   if (len == 0L) {

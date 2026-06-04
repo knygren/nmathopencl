@@ -1,6 +1,5 @@
-# See ?nmathopencl_examples_use_opencl
 n <- 5L
-if (nmathopencl_examples_use_opencl()) {
+if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   df_opencl(rep(2, n), df1 = 5, df2 = 9, ncp = 0, fallback = FALSE, verbose = TRUE)
   df_opencl(rep(2, n), df1 = 5, df2 = 9, ncp = 1.1, fallback = FALSE, verbose = TRUE)
   pf_opencl(q = 2, df1 = 5, df2 = 9, ncp = 0, fallback = FALSE, verbose = TRUE)

@@ -1,5 +1,4 @@
-# See ?nmathopencl_examples_use_opencl
-if (nmathopencl_examples_use_opencl()) {
+if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   r_pow_opencl(x = 1.2, y = 2, fallback = FALSE, verbose = TRUE)
   r_pow_di_opencl(x = 1.2, n_exp = 3L, fallback = FALSE, verbose = TRUE)
   log1pmx_opencl(x = 0.2, fallback = FALSE, verbose = TRUE)

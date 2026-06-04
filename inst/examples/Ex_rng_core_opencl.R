@@ -1,6 +1,5 @@
-# See ?nmathopencl_examples_use_opencl
 n <- 5L
-if (nmathopencl_examples_use_opencl()) {
+if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   norm_rand_opencl(n, fallback = FALSE, verbose = TRUE)
   unif_rand_opencl(n, fallback = FALSE, verbose = TRUE)
   r_unif_index_opencl(n, dn = 10, fallback = FALSE, verbose = TRUE)

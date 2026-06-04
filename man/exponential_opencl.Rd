@@ -68,9 +68,8 @@ OpenCL-backed density, distribution, quantile, and random generation wrappers
 for the exponential distribution.
 }
 \examples{
-# See ?nmathopencl_examples_use_opencl
 n <- 5L
-if (nmathopencl_examples_use_opencl()) {
+if (!has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dexp_opencl(rep(1.2, n), rate = 1, fallback = FALSE, verbose = TRUE)
   pexp_opencl(q = 1.2, rate = 1, fallback = FALSE, verbose = TRUE)
   qexp_opencl(rep(0.8, n), rate = 1, fallback = FALSE, verbose = TRUE)
