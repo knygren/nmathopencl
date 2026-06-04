@@ -200,7 +200,7 @@ and what it depends on:
 // @load_order: 31
 ```
 
-`load_kernel_library()` reads these tags, builds a dependency graph, and
+`opencltools::load_kernel_library()` reads these tags, builds a dependency graph, and
 performs a topological sort --- files with no unsatisfied dependencies are
 emitted first, then files whose dependencies have been emitted, and so on.
 The result is a load order in which every function is declared before it is
@@ -301,9 +301,10 @@ check `has_opencl()` before dispatching to the GPU path.
 ## What this means for downstream developers
 
 A downstream package that builds on `nmathopencl` does not need to replicate
-this assembly machinery.  The key functions --- `load_kernel_source`,
-`load_kernel_library`, and `load_library_for_kernel` --- are exported from
-`nmathopencl` (or available via `LinkingTo: nmathopencl`) and handle all of
+this assembly machinery.  Kernel text loading uses **opencltools**
+(`load_kernel_source`, `load_kernel_library` with `package = "nmathopencl"`).
+`load_library_for_kernel` is re-exported from **nmathopencl** (and available via
+`LinkingTo: nmathopencl`) and handles all of
 layers 0, 1, and 2 automatically.
 
 The downstream developer's responsibilities are:

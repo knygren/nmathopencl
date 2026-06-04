@@ -157,7 +157,7 @@ applies to any package that needs statistical math inside an OpenCL kernel.
 
 The assembly of an OpenCL program is done in **C++** using **`load_kernel_source()`**
 and **`load_kernel_library()`**. **`glmbayes`** ships reference call sites (`f2_f3_opencl`, etc.);
-**`nmathopencl`** also exports **`load_kernel_library()`** / **`load_kernel_source()`**
+**Kernel loading** uses **`opencltools::load_kernel_library()`** / **`load_kernel_source()`** with **`package = "nmathopencl"`**
 so sibling packages can **Import** **`nmathopencl`** directly while **`glmbayes` gradually
 drops duplicate loaders. Together they resolve file discovery under **`system.file("cl/", package = "nmathopencl")`**,
 parse **`@provides`** / **`@depends`**, and concatenate each requested subtree in dependency order ---

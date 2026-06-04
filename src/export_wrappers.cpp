@@ -17,7 +17,7 @@ using namespace openclPort;
 
 // =============================================================================
 // Tier 5: OpenCL / GPU
-// Callers: load_kernel_source, load_kernel_library, has_opencl,
+// Callers: has_opencl,
 //          get_opencl_core_count
 // User:    Advanced users - GPU diagnostics, kernel loading for use_opencl
 // =============================================================================
@@ -2223,23 +2223,6 @@ Rcpp::NumericVector r_check_stack_opencl_cpp_export(
     bool verbose = false
 ) {
   return nmathopencl::r_check_stack_opencl(n, verbose);
-}
-
-// [[Rcpp::export]]
-std::string load_kernel_source_wrapper_cpp_export(
-    const std::string& relative_path,
-    const std::string& package = "nmathopencl"
-) {
-  return load_kernel_source_wrapper(relative_path, package);
-}
-
-// [[Rcpp::export]]
-std::string load_kernel_library_wrapper_cpp_export(
-    const std::string& subdir,
-    const std::string& package = "nmathopencl",
-    bool verbose = false
-) {
-  return load_kernel_library_wrapper(subdir, package, verbose);
 }
 
 // [[Rcpp::export]]

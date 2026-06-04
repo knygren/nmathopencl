@@ -18,7 +18,8 @@ The core deliverable is a collection of \code{.cl} files installed under
 \verb{inst/cl/nmath/} that mirror the R \code{nmath} library (density, distribution,
 quantile, and random-variate functions). Downstream packages locate these
 files at runtime with \code{system.file("cl", package = "nmathopencl")} and
-assemble them into an OpenCL program using \code{load_kernel_library()}.
+assemble them into an OpenCL program using
+\code{opencltools::load_kernel_library(..., package = "nmathopencl")}.
 
 The package also ships \code{\link{Ex_EnvelopeEval}} and its supporting
 functions (\code{Ex_glmbfamfunc}, \code{Ex_glmb_Standardize_Model}, \code{Ex_EnvelopeSize}) as a
@@ -70,8 +71,8 @@ these notes (recommended for CI and \command{R CMD check}).
 \seealso{
 Key developer entry points:
 \itemize{
-\item \code{\link{load_kernel_library}} — assemble the nmath \code{.cl} sources
-into an OpenCL program string.
+\item \code{\link[opencltools:load_kernel_library]{opencltools::load_kernel_library}}
+— assemble the nmath \code{.cl} sources (\code{package = "nmathopencl"}).
 \item \code{\link{has_opencl}} — check whether an OpenCL runtime is present.
 \item \code{\link{opencl_device_info}} --- which OpenCL device is used for fp64 kernels.
 \item \code{\link{Ex_EnvelopeEval}} — worked example of a custom kernel built

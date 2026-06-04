@@ -545,14 +545,6 @@ r_check_stack_opencl_cpp_export <- function(n, verbose = FALSE) {
     .Call(`_nmathopencl_r_check_stack_opencl_cpp_export`, n, verbose)
 }
 
-load_kernel_source_wrapper_cpp_export <- function(relative_path, package = "nmathopencl") {
-    .Call(`_nmathopencl_load_kernel_source_wrapper_cpp_export`, relative_path, package)
-}
-
-load_kernel_library_wrapper_cpp_export <- function(subdir, package = "nmathopencl", verbose = FALSE) {
-    .Call(`_nmathopencl_load_kernel_library_wrapper_cpp_export`, subdir, package, verbose)
-}
-
 has_opencl_cpp_export <- function() {
     .Call(`_nmathopencl_has_opencl_cpp_export`)
 }

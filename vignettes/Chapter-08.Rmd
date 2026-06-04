@@ -22,13 +22,14 @@ separate compilation units and no linker.
 
 When a kernel needs `dnorm4`, and `dnorm4` itself needs `R_D__0` and
 `R_finite`, those definitions must precede `dnorm4` in the string, which
-must precede the kernel body. `nmathopencl` solves this with two R
-functions that assemble and sort source components automatically.
+must precede the kernel body. **opencltools** provides two R functions
+that assemble and sort source components; use `package = "nmathopencl"`
+for this package's `inst/cl/` tree.
 
-## `load_kernel_source()`
+## `opencltools::load_kernel_source()`
 
 ```{r, eval = FALSE}
-load_kernel_source(relative_path, package = "nmathopencl")
+opencltools::load_kernel_source(relative_path, package = "nmathopencl")
 ```
 
 Reads and returns the contents of a single `.cl` file from `inst/cl/`
@@ -36,21 +37,21 @@ inside the named package. The `relative_path` is relative to `inst/cl/`:
 
 ```{r, eval = FALSE}
 # Load the dnorm kernel entry-point file
-kernel_src <- load_kernel_source("src/dnorm_kernel.cl")
+kernel_src <- opencltools::load_kernel_source("src/dnorm_kernel.cl",
+                                              package = "nmathopencl")
 
 # Load a custom kernel from another package's inst/cl/
-my_kernel   <- load_kernel_source("ex_glmbayes_src/f2_f3_binomial_logit.cl",
+my_kernel   <- opencltools::load_kernel_source("ex_glmbayes_src/f2_f3_binomial_logit.cl",
                                    package = "nmathopencl")
 ```
 
-The function checks `has_opencl()` and throws an informative error if
-OpenCL is unavailable. The returned character string can be concatenated
+The returned character string can be concatenated
 with a library string and passed to the C++ runner.
 
-## `load_kernel_library()`
+## `opencltools::load_kernel_library()`
 
 ```{r, eval = FALSE}
-load_kernel_library(subdir, package = "nmathopencl", verbose = FALSE)
+opencltools::load_kernel_library(subdir, package = "nmathopencl", verbose = FALSE)
 ```
 
 Reads **all** `.cl` files from `inst/cl/<subdir>/`, parses the
@@ -60,18 +61,21 @@ dependency-correct order.
 
 ```{r, eval = FALSE}
 # Load the complete nmath library (all ~180 files)
-nmath_src <- load_kernel_library("nmath")
+nmath_src <- opencltools::load_kernel_library("nmath", package = "nmathopencl")
 
 # Load a smaller subset pre-curated for glmbayes kernels
-nmath_glm <- load_kernel_library("ex_glmbayes_nmath")
+nmath_glm <- opencltools::load_kernel_library("ex_glmbayes_nmath",
+                                              package = "nmathopencl")
 
 # Load with diagnostic output to trace the sort order
-nmath_src <- load_kernel_library("nmath", verbose = TRUE)
+nmath_src <- opencltools::load_kernel_library("nmath",
+                                              package = "nmathopencl",
+                                              verbose = TRUE)
 ```
 
 ## The annotation format
 
-For `load_kernel_library()` to sort correctly, every `.cl` file in the
+For `opencltools::load_kernel_library()` to sort correctly, every `.cl` file in the
 subdirectory must begin with an annotation block:
 
 ```c
@@ -110,7 +114,7 @@ recursively.
 
 ## The topological sort algorithm
 
-`load_kernel_library()` uses a straightforward iterative topological sort:
+`opencltools::load_kernel_library()` uses a straightforward iterative topological sort:
 
 1. Parse all `.cl` files and extract their `@provides` and `@depends` tags.
 2. Build a set of "unsorted" files. Initialize the "sorted" set to empty.
@@ -165,10 +169,11 @@ and kernel sources in order:
 library(nmathopencl)
 
 # 1. Load the nmath library (sorted automatically)
-nmath_src  <- load_kernel_library("nmath")
+nmath_src  <- opencltools::load_kernel_library("nmath", package = "nmathopencl")
 
 # 2. Load the kernel entry-point
-kernel_src <- load_kernel_source("src/dnorm_kernel.cl")
+kernel_src <- opencltools::load_kernel_source("src/dnorm_kernel.cl",
+                                              package = "nmathopencl")
 
 # 3. Concatenate into a single program string
 program    <- paste(nmath_src, kernel_src, sep = "\n")
@@ -178,17 +183,17 @@ This `program` string is then passed to the C++ runner (see Chapter 09).
 
 ## Using libraries from another package
 
-The `package` argument tells `load_kernel_source()` and
-`load_kernel_library()` which package's `inst/cl/` to look in:
+The `package` argument tells `opencltools::load_kernel_source()` and
+`opencltools::load_kernel_library()` which package's `inst/cl/` to look in:
 
 ```{r, eval = FALSE}
 # Load the curated nmath subset shipped inside nmathopencl
 # for use by a downstream package's kernels
-nmath_sub <- load_kernel_library("ex_glmbayes_nmath",
+nmath_sub <- opencltools::load_kernel_library("ex_glmbayes_nmath",
                                   package = "nmathopencl")
 
 # Load a custom kernel from the same downstream package
-my_kernel <- load_kernel_source("ex_glmbayes_src/f2_f3_binomial_logit.cl",
+my_kernel <- opencltools::load_kernel_source("ex_glmbayes_src/f2_f3_binomial_logit.cl",
                                  package = "nmathopencl")
 
 program <- paste(nmath_sub, my_kernel, sep = "\n")
@@ -199,7 +204,7 @@ example (see Chapter 10).
 
 ## Dependency index --- faster, kernel-specific loading
 
-`load_kernel_library()` always sorts and loads **all** files in the
+`opencltools::load_kernel_library()` always sorts and loads **all** files in the
 subdirectory. For a large library like `nmath` (137 files) this is
 thorough but wasteful when only a small subset is needed for a specific
 kernel.

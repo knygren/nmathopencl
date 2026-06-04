@@ -53,7 +53,7 @@ Every `.cl` file in `nmath/` begins with a standard metadata block:
 | `@all_depends_count` | Number of entries in `@all_depends` |
 | `@load_order` | Pre-computed position in the topologically sorted order |
 
-The `@depends` tag is what `load_kernel_library()` uses to sort files. The
+The `@depends` tag is what `opencltools::load_kernel_library()` uses to sort files. The
 `@all_depends` tag is informational --- it documents the complete dependency
 set so that a developer extracting a minimal subset knows exactly which files
 to include.

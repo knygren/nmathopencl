@@ -176,11 +176,11 @@ the `nmathopencl` R API:
 Kernels are **never compiled in isolation**. The host-side runner assembles
 a complete OpenCL program string by concatenating:
 
-1. The nmath library source (via `load_kernel_library("nmath")`)
-2. The kernel file (via `load_kernel_source("src/<name>_kernel.cl")`)
+1. The nmath library source (via `opencltools::load_kernel_library("nmath", package = "nmathopencl")`)
+2. The kernel file (via `opencltools::load_kernel_source("src/<name>_kernel.cl", package = "nmathopencl")`)
 
 This concatenated string is then passed to `clBuildProgram`. Because
-`load_kernel_library()` performs topological sorting, the library functions
+`opencltools::load_kernel_library()` performs topological sorting, the library functions
 are always defined before the kernel refers to them. Chapter 08 covers this
 assembly process in detail.
 

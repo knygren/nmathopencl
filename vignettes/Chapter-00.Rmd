@@ -77,7 +77,7 @@ appropriate Layer 2 function.
 
 Downstream packages locate the Layer 2 sources at runtime with
 `system.file("cl", package = "nmathopencl")` and assemble them into their
-own OpenCL programs using `load_kernel_library()`. They own the kernel
+own OpenCL programs using `opencltools::load_kernel_library(..., package = "nmathopencl")`. They own the kernel
 runners, R wrappers, and compilation lifecycle; `nmathopencl` simply provides
 the portable math library they build on.
 

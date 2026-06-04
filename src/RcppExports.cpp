@@ -2034,31 +2034,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// load_kernel_source_wrapper_cpp_export
-std::string load_kernel_source_wrapper_cpp_export(const std::string& relative_path, const std::string& package);
-RcppExport SEXP _nmathopencl_load_kernel_source_wrapper_cpp_export(SEXP relative_pathSEXP, SEXP packageSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const std::string& >::type relative_path(relative_pathSEXP);
-    Rcpp::traits::input_parameter< const std::string& >::type package(packageSEXP);
-    rcpp_result_gen = Rcpp::wrap(load_kernel_source_wrapper_cpp_export(relative_path, package));
-    return rcpp_result_gen;
-END_RCPP
-}
-// load_kernel_library_wrapper_cpp_export
-std::string load_kernel_library_wrapper_cpp_export(const std::string& subdir, const std::string& package, bool verbose);
-RcppExport SEXP _nmathopencl_load_kernel_library_wrapper_cpp_export(SEXP subdirSEXP, SEXP packageSEXP, SEXP verboseSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const std::string& >::type subdir(subdirSEXP);
-    Rcpp::traits::input_parameter< const std::string& >::type package(packageSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(load_kernel_library_wrapper_cpp_export(subdir, package, verbose));
-    return rcpp_result_gen;
-END_RCPP
-}
 // has_opencl_cpp_export
 bool has_opencl_cpp_export();
 RcppExport SEXP _nmathopencl_has_opencl_cpp_export() {
@@ -2258,8 +2233,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_nmathopencl_ftrunc_opencl_cpp_export", (DL_FUNC) &_nmathopencl_ftrunc_opencl_cpp_export, 2},
     {"_nmathopencl_r_check_user_interrupt_opencl_cpp_export", (DL_FUNC) &_nmathopencl_r_check_user_interrupt_opencl_cpp_export, 2},
     {"_nmathopencl_r_check_stack_opencl_cpp_export", (DL_FUNC) &_nmathopencl_r_check_stack_opencl_cpp_export, 2},
-    {"_nmathopencl_load_kernel_source_wrapper_cpp_export", (DL_FUNC) &_nmathopencl_load_kernel_source_wrapper_cpp_export, 2},
-    {"_nmathopencl_load_kernel_library_wrapper_cpp_export", (DL_FUNC) &_nmathopencl_load_kernel_library_wrapper_cpp_export, 3},
     {"_nmathopencl_has_opencl_cpp_export", (DL_FUNC) &_nmathopencl_has_opencl_cpp_export, 0},
     {"_nmathopencl_get_opencl_core_count_cpp_export", (DL_FUNC) &_nmathopencl_get_opencl_core_count_cpp_export, 0},
     {"_nmathopencl_opencl_device_info_cpp_export", (DL_FUNC) &_nmathopencl_opencl_device_info_cpp_export, 2},

@@ -279,7 +279,8 @@ Imports: nmathopencl
 ```
 
 `LinkingTo` makes `openclPort.h` available at compile time for your C++ code.
-`Imports` makes the R-level functions (`load_kernel_library`, etc.) available
+`Imports` makes **opencltools** kernel loaders available (`opencltools::load_kernel_library`, etc.;
+pass `package = "nmathopencl"` for this package's `inst/cl`)
 at runtime. If you only use `nmathopencl` at the R level (not via `LinkingTo`),
 `Imports` alone is sufficient.
 

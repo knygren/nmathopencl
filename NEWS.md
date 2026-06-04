@@ -1,5 +1,11 @@
 # nmathopencl 0.2.0 (development)
 
+### Kernel loaders (opencltools only)
+
+- Removed exported **`load_kernel_source()`** and **`load_kernel_library()`** from
+  **nmathopencl**; use **`opencltools::load_kernel_*(..., package = "nmathopencl")`**.
+  **`load_library_for_kernel`** remains re-exported from **opencltools**.
+
 ### C-callable API for downstream packages
 
 - New **`inst/include/nmathopencl/nmathopencl_capi.h`**: `R_GetCCallable` wrappers for

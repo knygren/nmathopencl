@@ -62,22 +62,9 @@
 
 # =============================================================================
 #  Tier 4: OpenCL / GPU
-#  Callers: load_kernel_source, load_kernel_library, has_opencl,
-#           get_opencl_core_count
-#  User:    Advanced users - GPU diagnostics, kernel loading for use_opencl
+#  Callers: has_opencl, get_opencl_core_count
+#  User:    Advanced users - GPU diagnostics (kernel loading: opencltools)
 # =============================================================================
-
-#' @noRd
-#' @keywords internal
-.load_kernel_source_wrapper_cpp <- function(relative_path, package = "nmathopencl") {
-  .Call(`_nmathopencl_load_kernel_source_wrapper_cpp_export`, relative_path, package)
-}
-
-#' @noRd
-#' @keywords internal
-.load_kernel_library_wrapper_cpp <- function(subdir, package = "nmathopencl", verbose = FALSE) {
-  .Call(`_nmathopencl_load_kernel_library_wrapper_cpp_export`, subdir, package, verbose)
-}
 
 #' @noRd
 #' @keywords internal

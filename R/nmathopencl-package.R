@@ -15,7 +15,8 @@
 #' `inst/cl/nmath/` that mirror the R `nmath` library (density, distribution,
 #' quantile, and random-variate functions). Downstream packages locate these
 #' files at runtime with `system.file("cl", package = "nmathopencl")` and
-#' assemble them into an OpenCL program using `load_kernel_library()`.
+#' assemble them into an OpenCL program using
+#' `opencltools::load_kernel_library(..., package = "nmathopencl")`.
 #'
 #' The package also ships \code{\link{Ex_EnvelopeEval}} and its supporting
 #' functions (`Ex_glmbfamfunc`, `Ex_glmb_Standardize_Model`, `Ex_EnvelopeSize`) as a
@@ -60,8 +61,8 @@
 #' @seealso
 #' Key developer entry points:
 #' \itemize{
-#'   \item \code{\link{load_kernel_library}} — assemble the nmath `.cl` sources
-#'     into an OpenCL program string.
+#'   \item \code{\link[opencltools:load_kernel_library]{opencltools::load_kernel_library}}
+#'     — assemble the nmath `.cl` sources (`package = "nmathopencl"`).
 #'   \item \code{\link{has_opencl}} — check whether an OpenCL runtime is present.
 #'   \item \code{\link{opencl_device_info}} --- which OpenCL device is used for fp64 kernels.
 #'   \item \code{\link{Ex_EnvelopeEval}} — worked example of a custom kernel built
@@ -86,7 +87,7 @@
 #' @importFrom MASS mvrnorm
 #' @importFrom Rdpack reprompt
 #' @importFrom RcppParallel RcppParallelLibs
-#' @importFrom opencltools load_kernel_source load_kernel_library load_library_for_kernel
+#' @importFrom opencltools load_library_for_kernel
 #' @importFrom opencltools extract_library_subset write_kernel_dependency_index
 #' @importFrom opencltools stage_kernel_dependency_sort attach_kernel_dependency_tags
 #' @importFrom opencltools attach_kernel_call_tags attach_cross_library_tags
