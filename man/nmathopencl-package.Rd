@@ -40,6 +40,16 @@ OpenCL GPU execution follows \insertCite{Stone2010}{nmathopencl}; package
 vignettes also discuss GPU workflows
 (\insertCite{glmbayesChapter12,glmbayesChapterA10}{nmathopencl}).
 }
+\section{C-callable API (C++ package developers)}{
+
+GPU \code{*_opencl} routines are registered for \code{R_GetCCallable} on load.
+Downstream packages should \code{LinkingTo: nmathopencl}, \code{Imports: nmathopencl, opencltools},
+and \verb{#include <nmathopencl/nmathopencl_capi.h>} (see
+\code{system.file("include/nmathopencl/README.md", package = "nmathopencl")}).
+Call \code{nmathopencl_api_version()} for ABI compatibility. Kernel loading
+remains on \pkg{opencltools} (\code{opencltools_capi.h}).
+}
+
 \section{OpenCL startup checks}{
 
 In interactive sessions, attaching the package with \code{library(nmathopencl)}

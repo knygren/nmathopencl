@@ -2111,6 +2111,15 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// register_nmathopencl_ccallables_cpp_export
+void register_nmathopencl_ccallables_cpp_export();
+RcppExport SEXP _nmathopencl_register_nmathopencl_ccallables_cpp_export() {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    register_nmathopencl_ccallables_cpp_export();
+    return R_NilValue;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_nmathopencl_EnvelopeSize_cpp_export", (DL_FUNC) &_nmathopencl_EnvelopeSize_cpp_export, 7},
@@ -2256,6 +2265,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_nmathopencl_opencl_device_info_cpp_export", (DL_FUNC) &_nmathopencl_opencl_device_info_cpp_export, 2},
     {"_nmathopencl_opencl_fp64_available_cpp_export", (DL_FUNC) &_nmathopencl_opencl_fp64_available_cpp_export, 1},
     {"_nmathopencl_opencl_reset_device_selection_cpp_export", (DL_FUNC) &_nmathopencl_opencl_reset_device_selection_cpp_export, 0},
+    {"_nmathopencl_register_nmathopencl_ccallables_cpp_export", (DL_FUNC) &_nmathopencl_register_nmathopencl_ccallables_cpp_export, 0},
     {NULL, NULL, 0}
 };
 

@@ -573,3 +573,7 @@ opencl_reset_device_selection_cpp_export <- function() {
     invisible(.Call(`_nmathopencl_opencl_reset_device_selection_cpp_export`))
 }
 
+register_nmathopencl_ccallables_cpp_export <- function() {
+    invisible(.Call(`_nmathopencl_register_nmathopencl_ccallables_cpp_export`))
+}
+

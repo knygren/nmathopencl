@@ -1,5 +1,16 @@
 # nmathopencl 0.2.0 (development)
 
+### C-callable API for downstream packages
+
+- New **`inst/include/nmathopencl/nmathopencl_capi.h`**: `R_GetCCallable` wrappers for
+  **133** GPU `*_opencl` routines (SEXP ABI), plus **`nmathopencl_api_version()`** and
+  **`nmathopencl_has_opencl()`**.
+- New **`src/nmathopencl_ccallables.cpp`**: `extern "C"` implementations and
+  **`register_nmathopencl_ccallables_cpp_export()`** (called from **`.onLoad`**).
+- Regenerate with **`Rscript tools/generate_nmathopencl_capi.R`** after changing
+  **`export_wrappers.cpp`** signatures.
+- See **`inst/include/nmathopencl/README.md`** for `Imports` / `LinkingTo` usage.
+
 ### CRAN `DESCRIPTION`
 
 - Single-quote `'OpenCL'` and `'Mathlib'` in Title, Description,

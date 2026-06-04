@@ -1,5 +1,9 @@
 # Package attach hook: OpenCL build / runtime advisory for developer workflows.
 
+.onLoad <- function(libname, pkgname) {
+  register_nmathopencl_ccallables_cpp_export()
+}
+
 .opencl_startup_quiet <- function() {
   isTRUE(getOption("nmathopencl.quiet_opencl_startup", FALSE)) || !interactive()
 }
