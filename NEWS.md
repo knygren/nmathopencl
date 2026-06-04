@@ -1,5 +1,10 @@
 # nmathopencl 0.2.0 (development)
 
+### CRAN `DESCRIPTION`
+
+- Single-quote `'OpenCL'` and `'Mathlib'` in Title, Description,
+  `SystemRequirements`, and `Authors@R` comments (incoming spell-check NOTE).
+
 ### Citation and copyright metadata
 
 - **`inst/CITATION`** and **`inst/COPYRIGHTS`** now describe **nmathopencl**
