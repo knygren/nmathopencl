@@ -26,7 +26,7 @@ Description: Ships statistical and mathematical routines from R internal
     wrappers that use the GPU when 'OpenCL' is available at compile time and
     fall back to 'stats' equivalents otherwise. Aimed at package developers
     building custom kernels (for example Bayesian GLMs via suggested package
-    'glmbayes') using opencltools kernel loaders and related helpers. Contains
+    'glmbayes') using 'opencltools' kernel loaders and related helpers. Contains
     translated shims, an illustrative GLM-related kernel subsystem, vignettes,
     and optional GPU acceleration.
 License: GPL-2
