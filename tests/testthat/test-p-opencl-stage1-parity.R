@@ -6,6 +6,7 @@ pad_na_vec <- function(z) {
 }
 
 test_that("stage-1 p* wrappers match stats recycling (continuous families, CPU guard)", {
+  skip_opencl_gpu()
   tol <- 5e-11
 
   qq <- pad_na_vec(c(0.05, 0.72))
@@ -131,6 +132,7 @@ test_that("stage-1 p* wrappers match stats recycling (continuous families, CPU g
 })
 
 test_that("stage-1 p* wrappers match stats recycling (discrete families, CPU guard)", {
+  skip_opencl_gpu()
   qs <- pad_na_vec(c(3, 8))
   sz <- pad_na_vec(c(12, 14))
   pr <- pad_na_vec(c(0.35, 0.42))

@@ -1,3 +1,15 @@
+# nmathopencl 0.8.1
+
+### CRAN check fixes (OpenCL-enabled builders)
+
+- OpenCL GPU **testthat** tests are skipped during CRAN `R CMD check`
+  (`skip_on_cran()` via `tests/testthat/helper-opencl.R`) when the package is
+  compiled with OpenCL (`USE_OPENCL` / `nmathopencl_has_opencl()` is `TRUE`).
+- **`dbeta_opencl` example**: CPU fallback on CRAN no longer calls
+  `stats::dnbeta()` (not exported from `namespace:stats`).
+- **`NEWS.md`**: version section titles only (CRAN news parser).
+- **`DESCRIPTION`**: `'opencltools'` single-quoted in Description.
+
 # nmathopencl 0.8.0
 
 ### Initial CRAN release
@@ -32,11 +44,7 @@ Host and workstation diagnostics (`opencltools::diagnose_glmbayes()`,
 `detect_environment_and_gpus()`, PATH helpers, etc.) are provided by the
 **opencltools** dependency.
 
----
-
-# Internal development (pre-CRAN)
-
-## nmathopencl 0.2.0 (development)
+# nmathopencl 0.2.0
 
 ### `diagnose_glmbayes()` removed from exports
 
@@ -120,7 +128,7 @@ Host and workstation diagnostics (`opencltools::diagnose_glmbayes()`,
   **`opencltools::diagnose_glmbayes()`**). **nmathopencl** keeps
   `nmathopencl_has_opencl()` and package-local device-selection helpers.
 
-## nmathopencl 0.1.0
+# nmathopencl 0.1.0
 
 ### Documentation and distribution
 

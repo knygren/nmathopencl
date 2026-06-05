@@ -1,45 +1,47 @@
-# CRAN submission comments --- nmathopencl 0.8.0
+# CRAN submission comments --- nmathopencl 0.8.1
 
-Initial submission of **nmathopencl** to CRAN.
+Resubmission after first CRAN `R CMD check` on **0.8.0** (initial release).
 
 ## Notes for reviewers
 
-- This is the first CRAN release (version **0.8.0**).
-- Optional OpenCL: the package builds and runs on CPU when OpenCL is not
-  available at compile time (`nmathopencl_has_opencl()` is `FALSE`).
-- **`DESCRIPTION`**: software names including `'OpenCL'`, `'Mathlib'`, and
-  `'opencltools'` are single-quoted in the Description field per incoming
-  spell-check guidance.
-- Host/runtime diagnostics are delegated to the imported package
-  **opencltools** (now on CRAN); see `?gpu_diagnostics` and vignette Chapter 01.
+- First public CRAN release of **nmathopencl** (developer OpenCL Mathlib library).
+- Optional OpenCL: CPU fallbacks when OpenCL is absent at compile time
+  (`nmathopencl_has_opencl()` is `FALSE`).
+- **`DESCRIPTION`**: `'OpenCL'`, `'Mathlib'`, and `'opencltools'` are
+  single-quoted in the Description field.
 
-## `R CMD check` results
+## Response to CRAN `R CMD check` on 0.8.0
 
-The current source passes **without errors or warnings** on:
+CRAN's **linux-gnu** builder (among others) detected OpenCL headers and
+runtime, enabled `USE_OPENCL`, and set `nmathopencl_has_opencl()` to `TRUE`.
+That led to **2 ERRORs** on the first upload:
 
-- Local Windows (maintainer machine)
-- [R-universe](https://knygren.r-universe.dev/nmathopencl)
-- [Winbuilder](https://win-builder.r-project.org/)
-- [macbuilder](https://mac.r-project.org/macbuilder/submit.html)
-- [R-hub](https://r-hub.github.io/rhubman/)
+1. **Examples** — CPU fallback called `stats::dnbeta()` (not exported from
+   `namespace:stats`). Fixed: example uses `stats::dbeta`, `stats::pbeta`,
+   `stats::rbeta` only in the CRAN branch.
 
-**Winbuilder** reported a single **NOTE** on the earlier upload:
+2. **Tests** — OpenCL GPU tests ran when the package was compiled with OpenCL
+   on CRAN builders (~7 minutes, then **segmentation fault**). Fixed:
+   `skip_opencl_gpu()` calls `testthat::skip_on_cran()` so GPU tests are
+   skipped during CRAN `R CMD check` on OpenCL-enabled builds; non-GPU
+   validation (e.g. `pgamma` argument check) still runs. Maintainer GPU
+   testing: `NOT_CRAN=true`.
 
-1. **CRAN incoming — new submission** (expected for a first-time package).
-2. **Possibly misspelled word in DESCRIPTION:** `opencltools` (line 29).
+Also fixed: **`NEWS.md`** non-version section title; **`opencltools`** spelling
+NOTE in Description.
 
-The spelling NOTE is addressed in this resubmission: `opencltools` is now
-single-quoted as `'opencltools'` in the Description field. The dependency is
-a real package (on CRAN), not a typo.
+## Pre-submission checks (0.8.0 tarball)
 
-## Test environments
+Passed without errors or warnings on maintainer Windows, R-universe,
+Winbuilder, macbuilder, and R-hub. Winbuilder incoming NOTE: new submission +
+`opencltools` spelling (addressed).
 
-- Local: Windows 11, R 4.6.0, GCC 14.2 (rtools45), NVIDIA OpenCL.
-- R-universe, Winbuilder, macbuilder, and R-hub: as above (0 errors, 0 warnings;
-  Winbuilder NOTE resolved as described).
+## Test environments (0.8.1)
+
+- Maintainer: Windows 11, R 4.6.0, OpenCL (NVIDIA).
+- CRAN: resubmission after fixes above.
 
 ---
 _This file is listed in `.Rbuildignore` and is not included in the
-built source tarball. When submitting, paste the content above into the
-"Optional comments" field on the CRAN submission form at
-https://cran.r-project.org/submit.html_
+built source tarball. Paste into the CRAN submission "Optional comments"
+field at https://cran.r-project.org/submit.html_

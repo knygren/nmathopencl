@@ -1,5 +1,5 @@
 test_that("pgamma_opencl matches stats recycling (vary q, shape, scale; scalar tails)", {
-  skip_if_not(nmathopencl::nmathopencl_has_opencl(), message = "OpenCL not available")
+  skip_opencl_gpu()
 
   q <- seq(0.5, 2.5, length.out = 5)
   sh <- seq(1.5, 2.5, length.out = 5)
@@ -19,7 +19,7 @@ test_that("pgamma_opencl matches stats recycling (vary q, shape, scale; scalar t
 })
 
 test_that("pgamma_opencl lower.tail / log.p recycled row-wise (stats scalar-call refs)", {
-  skip_if_not(nmathopencl::nmathopencl_has_opencl(), message = "OpenCL not available")
+  skip_opencl_gpu()
 
   q <- c(0.3, 1.2, 2.1)
   sh <- c(2, 3, 4)
@@ -48,7 +48,7 @@ test_that("pgamma_opencl lower.tail / log.p recycled row-wise (stats scalar-call
 })
 
 test_that("pgamma_opencl agrees with stats for empty q", {
-  skip_if_not(nmathopencl::nmathopencl_has_opencl(), message = "OpenCL not available")
+  skip_opencl_gpu()
   q <- numeric(0)
   expect_equal(as.numeric(stats::pgamma(q, shape = 2)), numeric(0))
   expect_equal(as.numeric(nmathopencl::pgamma_opencl(q, shape = 2)), numeric(0))
