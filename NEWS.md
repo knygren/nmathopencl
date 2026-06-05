@@ -1,4 +1,42 @@
-# nmathopencl 0.2.0 (development)
+# nmathopencl 0.8.0
+
+### Initial CRAN release
+
+First public release of **nmathopencl** as a developer library for GPU-accelerated
+statistical computing in R.
+
+- **OpenCL-ported Mathlib** — R internal `nmath` routines shipped as `.cl` sources
+  under `inst/cl/nmath/` (densities, distributions, quantiles, and random variates),
+  plus supporting `R_ext` shims, for inclusion in custom OpenCL kernels.
+- **Packaged `*_opencl` API** — exported R wrappers mirroring `stats` families
+  (normal, gamma, binomial, Poisson, beta, and many others) that dispatch to GPU
+  kernels when OpenCL is available at compile time and fall back to CPU otherwise.
+- **C-callable GPU API** — `inst/include/nmathopencl/nmathopencl_capi.h` registers
+  **133** `*_opencl` routines for `R_GetCCallable` / downstream C++ packages
+  (`LinkingTo: nmathopencl`).
+- **Package-local OpenCL probes** — `nmathopencl_has_opencl()`,
+  `nmathopencl_opencl_device_info()`, `nmathopencl_opencl_fp64_available()`, and
+  `nmathopencl_opencl_reset_device_selection()` for this package's compile-time
+  build and fp64 device cache (distinct from **opencltools**).
+- **opencltools integration** — kernel assembly via
+  `opencltools::load_kernel_*(..., package = "nmathopencl")`; re-exported subset
+  loaders and configure helpers (`load_library_for_kernel`, dependency tagging,
+  `use_opencl_configure`, …).
+- **Worked GLM envelope example** — `Ex_EnvelopeEval` and related `Ex_*` exports
+  demonstrate building a custom kernel on top of the ported nmath library
+  (pedagogical sandbox; see vignette Chapter 10).
+- **Developer documentation** — vignette series (OpenCL setup, kernel authoring,
+  linkage patterns, packaged API reference) and examples under `inst/examples/`.
+
+Host and workstation diagnostics (`opencltools::diagnose_glmbayes()`,
+`detect_environment_and_gpus()`, PATH helpers, etc.) are provided by the
+**opencltools** dependency.
+
+---
+
+# Internal development (pre-CRAN)
+
+## nmathopencl 0.2.0 (development)
 
 ### `diagnose_glmbayes()` removed from exports
 
@@ -82,7 +120,7 @@
   **`opencltools::diagnose_glmbayes()`**). **nmathopencl** keeps
   `nmathopencl_has_opencl()` and package-local device-selection helpers.
 
-# nmathopencl 0.1.0
+## nmathopencl 0.1.0
 
 ### Documentation and distribution
 
