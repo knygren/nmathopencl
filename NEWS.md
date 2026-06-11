@@ -1,43 +1,58 @@
 # nmathopencl 0.8.2
 
-### CRAN reviewer feedback (examples and unstable exports)
+This release addresses the three items of CRAN reviewer feedback on the 0.8.1
+submission.
 
-- Wrappers with documented OpenCL port failures are no longer exported (now
-  internal-only): `besselI_opencl()`, `besselJ_opencl()`, `besselK_opencl()`,
-  `besselY_opencl()` (device-side workspace allocation), `dwilcox_opencl()`,
-  `pwilcox_opencl()`, `qwilcox_opencl()`, `rwilcox_opencl()`,
-  `dsignrank_opencl()`, `psignrank_opencl()`, `qsignrank_opencl()`,
-  `rsignrank_opencl()` (unresolved runtime allocation symbols),
-  `qbeta_opencl()`, `qgamma_opencl()` (device compile/link failures), and
-  `r_check_stack_opencl()` (missing stack hook symbols). Use the `stats`/`base`
-  equivalents; trackers: `inst/OPENCL_KERNEL_KNOWN_FAILURES.md` and
-  `inst/cl/nmath_old_05_22_26/README.md`.
+### CRAN request 1: method references in the Description field
+
+*"If there are references describing the methods in your package, please add
+these in the description field ... in the form authors (year) <doi:...>."*
+
+- Method references added to the Description field in the requested
+  auto-linking format: R Core Team (2026) for the ported 'nmath'/'Rmath'
+  ('Mathlib') sources, Stone, Gohara, and Shi (2010) for the 'OpenCL'
+  standard, and Nygren and Nygren (2006) for the likelihood subgradient
+  methodology used by the illustrative GLM kernel subsystem.
+- In addition, the algorithm references cited on the corresponding CPU help
+  pages in R (`stats`/`base`) are now mirrored onto the exported `*_opencl`
+  help pages via `Rdpack` (for example Wichura's AS 241 on `normal_opencl`
+  and Didonato & Morris's TOMS 708 on `beta_opencl`).
+
+### CRAN request 2: no commented-out code in examples
+
+*"Some code lines in examples are commented out. Please never do that."
+(flagged: `bessel_opencl.Rd`, `beta_opencl.Rd`, `gamma_opencl.Rd`,
+`rext_utils_opencl.Rd`, `signrank_opencl.Rd`, `wilcox_opencl.Rd`)*
+
+- All commented-out example lines removed; remaining examples are runnable
+  toy examples.
+- The commented-out calls referred to wrappers with documented OpenCL port
+  failures. Rather than re-enable them, those wrappers are no longer exported
+  (internal-only): the Bessel, Wilcoxon rank-sum, and signed-rank families,
+  `qbeta_opencl()`, `qgamma_opencl()`, and `r_check_stack_opencl()`. Use the
+  `stats`/`base` equivalents (see `inst/OPENCL_KERNEL_KNOWN_FAILURES.md`).
 - Help pages `bessel_opencl`, `signrank_opencl`, and `wilcox_opencl` removed
   (no exported functions remain on those pages).
-- Commented-out example code removed from `\examples{}` on the `beta_opencl`,
-  `gamma_opencl`, and `rext_utils_opencl` pages (CRAN policy: examples must be
-  runnable code only).
-- **`DESCRIPTION`**: method references added to the Description field in CRAN
-  auto-linking format — R Core Team (2026) <doi:10.32614/R.manuals> for the
-  ported 'nmath'/'Rmath' ('Mathlib') sources, Stone, Gohara, and Shi (2010)
-  <doi:10.1109/MCSE.2010.69> for the 'OpenCL' standard, and Nygren and Nygren
-  (2006) <doi:10.1198/016214506000000357> for the likelihood subgradient
-  methodology.
-- **`Authors@R` / copyright audit**: all bundled and derived sources audited
-  against their AUTHOR/copyright headers. Added The Khronos Group Inc (`cph`,
-  bundled `inst/include/CL` 'OpenCL' API headers, Apache License 2.0) and
-  `ctb` entries for the individual R 'Mathlib' code authors whose routines are
-  ported here: Catherine Loader (dbinom/bd0/stirlerr density family), Claus
-  Ekstrøm (dnt), Peter Ruckdeschel (dnf), and Alfred H. Morris, Jr. and
-  Armido R. Didonato (ACM TOMS 708 incomplete beta code). Removed a
-  glm-specific contributor entry (no glm code is copied in this package).
-  `inst/COPYRIGHTS` expanded with a per-component map. License widened from
-  `GPL-2` to `GPL (>= 2)` for compatibility with the Apache-2.0 headers.
-- **Help-page references**: the algorithm references cited on the
-  corresponding CPU help pages in R (`stats`/`base`) are now mirrored onto the
-  exported `*_opencl` help pages via `Rdpack` (e.g. Wichura's AS 241 on
-  `normal_opencl`, Didonato & Morris's TOMS 708 on `beta_opencl`, Ahrens &
-  Dieter's samplers on the gamma/Poisson/exponential pages).
+
+### CRAN request 3: all authors, contributors, and copyright holders in Authors@R
+
+*"Please always add all authors, contributors and copyright holders in the
+Authors@R field with the appropriate roles ... e.g.: 'The Khronos Group Inc'
+in cl.h."*
+
+- All bundled and derived sources were audited against their AUTHOR and
+  copyright headers.
+- Added The Khronos Group Inc (`cph`) for the bundled 'OpenCL' API headers in
+  `inst/include/CL` (Apache License 2.0), and `ctb` entries for the
+  individual R 'Mathlib' code authors whose routines are ported here:
+  Catherine Loader, Claus Ekstrøm, Peter Ruckdeschel, Alfred H. Morris, Jr.,
+  and Armido R. Didonato.
+- Removed a glm-specific contributor entry (no glm code is copied in this
+  package).
+- `inst/COPYRIGHTS` expanded with a per-component map of the above; all
+  original notices remain preserved in the source file headers.
+- License widened from `GPL-2` to `GPL (>= 2)` for compatibility with the
+  Apache-2.0-licensed Khronos headers.
 
 # nmathopencl 0.8.1
 
