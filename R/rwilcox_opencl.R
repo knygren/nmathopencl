@@ -22,9 +22,7 @@
 #' Defaults follow \verb{fallback = FALSE}: OpenCL failures surface unless you pass \code{fallback = TRUE}.
 #'
 #' @return Numeric vector result from the corresponding Wilcoxon-family operation.
-#' @example inst/examples/Ex_wilcox_opencl.R
-#' @rdname wilcox_opencl
-#' @export
+#' @noRd
 dwilcox_opencl <- function(
     x,
     m,
@@ -85,8 +83,7 @@ dwilcox_opencl <- function(
   )
 }
 
-#' @rdname wilcox_opencl
-#' @export
+#' @noRd
 pwilcox_opencl <- function(
     q,
     m,
@@ -158,8 +155,7 @@ pwilcox_opencl <- function(
   )
 }
 
-#' @rdname wilcox_opencl
-#' @export
+#' @noRd
 qwilcox_opencl <- function(
     p,
     m,
@@ -225,8 +221,7 @@ qwilcox_opencl <- function(
   )
 }
 
-#' @rdname wilcox_opencl
-#' @export
+#' @noRd
 rwilcox_opencl <- function(n, m, nn, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_scalar_num(m, "m", 0, Inf, open_lower = TRUE)

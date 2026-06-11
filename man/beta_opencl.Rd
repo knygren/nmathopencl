@@ -4,7 +4,6 @@
 \alias{dbeta_opencl}
 \alias{dnbeta_opencl}
 \alias{pbeta_opencl}
-\alias{qbeta_opencl}
 \alias{rbeta_opencl}
 \title{The Beta Distribution (OpenCL)}
 \usage{
@@ -41,18 +40,6 @@ pbeta_opencl(
   verbose = FALSE
 )
 
-qbeta_opencl(
-  p,
-  shape1,
-  shape2,
-  ncp = 0,
-  lower.tail = TRUE,
-  log.p = FALSE,
-  opencl_parallel = NA,
-  fallback = FALSE,
-  verbose = FALSE
-)
-
 rbeta_opencl(n, shape1, shape2, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
@@ -73,13 +60,11 @@ Ignored when the runtime reports no OpenCL. All wrappers on this page default \c
 \item{verbose}{Logical; print fallback/error diagnostics.}
 
 \item{ncp}{Non-centrality parameter (must be >= 0). Used by
-\code{dnbeta_opencl()}, \code{pbeta_opencl()}, and \code{qbeta_opencl()}.}
+\code{dnbeta_opencl()} and \code{pbeta_opencl()}.}
 
 \item{q}{Numeric vector of quantiles for \code{pbeta_opencl}; recycled like \code{stats::pbeta}.}
 
 \item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
-
-\item{p}{Numeric vector of probabilities for \code{qbeta_opencl} (like \code{stats::qbeta}).}
 
 \item{n}{Number of observations (non-negative integer scalar). Used only by \code{rbeta_opencl}.}
 }
@@ -94,9 +79,9 @@ while adding OpenCL dispatch and optional CPU fallback behavior.
 \section{Known OpenCL limitations}{
 
 \describe{
-\item{Non-central tails}{\code{qbeta_opencl} with \code{ncp > 0} may stress devices.}
-\item{Build quirks}{\code{Rf_lbeta} linkage breaks on GPUs; skip GPU demos.\cr
-Tracker: \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}}
+\item{Quantile path}{The beta quantile OpenCL kernel fails at device link
+(\code{Rf_lbeta} unresolved), so no \code{qbeta} wrapper is exported; use
+\code{stats::qbeta()}.\cr Tracker: \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}}
 }
 }
 
@@ -106,8 +91,6 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dbeta_opencl(rep(0.6, n), shape1 = 2.5, shape2 = 4, fallback = FALSE, verbose = TRUE)
   dnbeta_opencl(rep(0.6, n), shape1 = 2.5, shape2 = 4, ncp = 0.8, fallback = FALSE, verbose = TRUE)
   pbeta_opencl(q = 0.6, shape1 = 2.5, shape2 = 4, ncp = 0, fallback = FALSE, verbose = TRUE)
-  ## qbeta_opencl: disabled — see inst/OPENCL_KERNEL_KNOWN_FAILURES.md
-  # qbeta_opencl(rep(0.8, n), shape1 = 2.5, shape2 = 4, ncp = 0, fallback = FALSE, verbose = TRUE)
   rbeta_opencl(n, shape1 = 2.5, shape2 = 4, fallback = FALSE, verbose = TRUE)
 } else {
   stats::dbeta(rep(0.6, n), shape1 = 2.5, shape2 = 4)

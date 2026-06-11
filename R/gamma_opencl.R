@@ -6,7 +6,6 @@
 #'
 #' @param x Numeric vector of quantiles for \code{dgamma_opencl}.
 #' @param q Numeric vector of quantiles for \code{pgamma_opencl} (same role as \code{stats::pgamma}).
-#' @param p Numeric vector of probabilities for \code{qgamma_opencl} (like \code{stats::qgamma}).
 #' @param n Number of observations (non-negative integer scalar). Used only by \code{rgamma_opencl};
 #'   \code{dgamma_opencl} takes vector \code{x} first (like \code{stats::dgamma}).
 #' @param shape Shape parameter (must be > 0).
@@ -16,7 +15,7 @@
 #' @param log \code{log} flag for densities (\code{stats} \emph{d}-family semantics).
 #' @param lower.tail,log.p Tail/log-\emph{p} inputs (\code{stats} meanings).
 #' @param opencl_parallel Dispatch hint \code{(TRUE,FALSE,NA)} for
-#'   \code{pgamma_opencl}/\code{qgamma_opencl}; parallel dispatch reserved.
+#'   \code{pgamma_opencl}; parallel dispatch reserved.
 #' @param fallback When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
 #' Ignored when the runtime reports no OpenCL. \code{dgamma_opencl} defaults \code{FALSE}; distribution/quantile wrappers follow \file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md}. Pass explicit \code{fallback} where needed.
 #' @param verbose Logical; print informational fallback messages.
@@ -34,9 +33,9 @@
 #' \code{shape}/\code{scale}, use row-wise \code{stats::pgamma}.
 #'
 #' @section Known OpenCL limitations:
-#' Compilation of \code{qgamma_kernel} can fail (\code{ptxas}: unresolved \code{stirlerr_cycle_free}).
-#' Runnable examples omit GPU \code{qgamma_opencl} until resolved.
-#' See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
+#' Compilation of \code{qgamma_kernel} can fail (\code{ptxas}: unresolved
+#' \code{stirlerr_cycle_free}), so no \code{qgamma} wrapper is exported; use
+#' \code{stats::qgamma()}. See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 #'
 #' @return Numeric vector result from the corresponding gamma-family operation.
 #' @example inst/examples/Ex_gamma_opencl.R
@@ -221,8 +220,9 @@ pgamma_opencl <- function(
   )
 }
 
-#' @rdname gamma_opencl
-#' @export
+# Internal: OpenCL qgamma kernel fails at device compile (stirlerr_cycle_free
+# unresolved); see inst/OPENCL_KERNEL_KNOWN_FAILURES.md. Not exported.
+#' @noRd
 qgamma_opencl <- function(
     p,
     shape,

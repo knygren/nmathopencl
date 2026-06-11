@@ -16,9 +16,7 @@
 #' tolerate failures until device-side workspace handling is implemented.
 #'
 #' @return Numeric vector of recycled common length.
-#' @example inst/examples/Ex_bessel_opencl.R
-#' @rdname bessel_opencl
-#' @export
+#' @noRd
 besselI_opencl <- function(x, nu, expon.scaled = FALSE, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   if (!is.numeric(nu)) stop("`nu` must be numeric.")
@@ -40,8 +38,7 @@ besselI_opencl <- function(x, nu, expon.scaled = FALSE, fallback = FALSE, verbos
   )
 }
 
-#' @rdname bessel_opencl
-#' @export
+#' @noRd
 besselJ_opencl <- function(x, nu, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   if (!is.numeric(nu)) stop("`nu` must be numeric.")
@@ -58,8 +55,7 @@ besselJ_opencl <- function(x, nu, fallback = FALSE, verbose = FALSE) {
   )
 }
 
-#' @rdname bessel_opencl
-#' @export
+#' @noRd
 besselK_opencl <- function(x, nu, expon.scaled = FALSE, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   if (!is.numeric(nu)) stop("`nu` must be numeric.")
@@ -81,8 +77,7 @@ besselK_opencl <- function(x, nu, expon.scaled = FALSE, fallback = FALSE, verbos
   )
 }
 
-#' @rdname bessel_opencl
-#' @export
+#' @noRd
 besselY_opencl <- function(x, nu, fallback = FALSE, verbose = FALSE) {
   if (!is.numeric(x)) stop("`x` must be numeric.")
   if (!is.numeric(nu)) stop("`nu` must be numeric.")

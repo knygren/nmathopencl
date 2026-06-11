@@ -1,6 +1,22 @@
 # nmathopencl 0.8.2
 
-- Version bump prior to addressing CRAN reviewer feedback.
+### CRAN reviewer feedback (examples and unstable exports)
+
+- Wrappers with documented OpenCL port failures are no longer exported (now
+  internal-only): `besselI_opencl()`, `besselJ_opencl()`, `besselK_opencl()`,
+  `besselY_opencl()` (device-side workspace allocation), `dwilcox_opencl()`,
+  `pwilcox_opencl()`, `qwilcox_opencl()`, `rwilcox_opencl()`,
+  `dsignrank_opencl()`, `psignrank_opencl()`, `qsignrank_opencl()`,
+  `rsignrank_opencl()` (unresolved runtime allocation symbols),
+  `qbeta_opencl()`, `qgamma_opencl()` (device compile/link failures), and
+  `r_check_stack_opencl()` (missing stack hook symbols). Use the `stats`/`base`
+  equivalents; trackers: `inst/OPENCL_KERNEL_KNOWN_FAILURES.md` and
+  `inst/cl/nmath_old_05_22_26/README.md`.
+- Help pages `bessel_opencl`, `signrank_opencl`, and `wilcox_opencl` removed
+  (no exported functions remain on those pages).
+- Commented-out example code removed from `\examples{}` on the `beta_opencl`,
+  `gamma_opencl`, and `rext_utils_opencl` pages (CRAN policy: examples must be
+  runnable code only).
 
 # nmathopencl 0.8.1
 

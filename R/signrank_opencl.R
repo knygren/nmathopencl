@@ -22,9 +22,7 @@
 #' device-safe shims are complete.
 #'
 #' @return Numeric vector result from the corresponding signed-rank operation.
-#' @example inst/examples/Ex_signrank_opencl.R
-#' @rdname signrank_opencl
-#' @export
+#' @noRd
 dsignrank_opencl <- function(
     x,
     nsize,
@@ -80,8 +78,7 @@ dsignrank_opencl <- function(
   )
 }
 
-#' @rdname signrank_opencl
-#' @export
+#' @noRd
 psignrank_opencl <- function(
     q,
     nsize,
@@ -140,8 +137,7 @@ psignrank_opencl <- function(
   )
 }
 
-#' @rdname signrank_opencl
-#' @export
+#' @noRd
 qsignrank_opencl <- function(
     p,
     nsize,
@@ -202,8 +198,7 @@ qsignrank_opencl <- function(
   )
 }
 
-#' @rdname signrank_opencl
-#' @export
+#' @noRd
 rsignrank_opencl <- function(n, nsize, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_scalar_num(nsize, "nsize", 0, Inf, open_lower = TRUE)

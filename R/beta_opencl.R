@@ -6,11 +6,10 @@
 #'
 #' @param n Number of observations (non-negative integer scalar). Used only by \code{rbeta_opencl}.
 #' @param x \code{(0,1)} quantiles for central/non-central densities on this page.
-#' @param p Numeric vector of probabilities for \code{qbeta_opencl} (like \code{stats::qbeta}).
 #' @param shape1 First shape parameter (must be > 0).
 #' @param shape2 Second shape parameter (must be > 0).
 #' @param ncp Non-centrality parameter (must be >= 0). Used by
-#'   \code{dnbeta_opencl()}, \code{pbeta_opencl()}, and \code{qbeta_opencl()}.
+#'   \code{dnbeta_opencl()} and \code{pbeta_opencl()}.
 #' @param fallback When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
 #' Ignored when the runtime reports no OpenCL. All wrappers on this page default \code{FALSE} so OpenCL build/runtime faults surface unless you opt in (\code{fallback = TRUE}). Kernels overlapping \file{inst/cl/nmath/pgamma_utils.cl} can still be brittle on some devices; see \file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md} and \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 #' @param verbose Logical; print fallback/error diagnostics.
@@ -22,9 +21,9 @@
 #'
 #' @section Known OpenCL limitations:
 #' \describe{
-#'   \item{Non-central tails}{\code{qbeta_opencl} with \code{ncp > 0} may stress devices.}
-#'   \item{Build quirks}{\code{Rf_lbeta} linkage breaks on GPUs; skip GPU demos.\cr
-#' Tracker: \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}}
+#'   \item{Quantile path}{The beta quantile OpenCL kernel fails at device link
+#' (\code{Rf_lbeta} unresolved), so no \code{qbeta} wrapper is exported; use
+#' \code{stats::qbeta()}.\cr Tracker: \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}}
 #' }
 #'
 #' @return Numeric vector of length \code{n}.
@@ -259,8 +258,9 @@ pbeta_opencl <- function(
   )
 }
 
-#' @rdname beta_opencl
-#' @export
+# Internal: OpenCL qbeta kernel fails at device link (Rf_lbeta unresolved);
+# see inst/OPENCL_KERNEL_KNOWN_FAILURES.md. Not exported.
+#' @noRd
 qbeta_opencl <- function(
     p,
     shape1,

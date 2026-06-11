@@ -2,12 +2,9 @@
 % Please edit documentation in R/rext_utils_opencl.R
 \name{r_check_user_interrupt_opencl}
 \alias{r_check_user_interrupt_opencl}
-\alias{r_check_stack_opencl}
 \title{OpenCL-backed R_ext runtime utility linkage checks}
 \usage{
 r_check_user_interrupt_opencl(n, fallback = FALSE, verbose = FALSE)
-
-r_check_stack_opencl(n, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{n}{Number of observations. Non-negative integer scalar.}
@@ -24,18 +21,14 @@ Wrappers for utility hooks used by translated R_ext-dependent kernels.
 }
 \section{Known OpenCL limitations}{
 
-On some builds, \code{r_check_stack_opencl()} can fail in device compilation or
-runtime due to missing host/runtime stack symbols. Use as linkage smoke only,
-and keep CPU fallback enabled unless explicitly debugging OpenCL failures.
+The stack-check linkage wrapper can fail in device compilation or runtime
+due to missing host/runtime stack symbols, so it is not exported.
 }
 
 \examples{
 n <- 5L
 if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   r_check_user_interrupt_opencl(n, fallback = FALSE, verbose = TRUE)
-
-  # Known linkage/runtime gap on some setups (stack hook symbol availability):
-  # r_check_stack_opencl(n, fallback = FALSE, verbose = TRUE)
 } else {
   as.numeric(seq_len(n))
 }

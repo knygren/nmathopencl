@@ -7,9 +7,8 @@
 #' @param verbose Logical; print fallback/error diagnostics.
 #'
 #' @section Known OpenCL limitations:
-#' On some builds, \code{r_check_stack_opencl()} can fail in device compilation or
-#' runtime due to missing host/runtime stack symbols. Use as linkage smoke only,
-#' and keep CPU fallback enabled unless explicitly debugging OpenCL failures.
+#' The stack-check linkage wrapper can fail in device compilation or runtime
+#' due to missing host/runtime stack symbols, so it is not exported.
 #'
 #' @return Numeric vector of length \code{n}.
 #' @example inst/examples/Ex_rext_utils_opencl.R
@@ -25,8 +24,9 @@ r_check_user_interrupt_opencl <- function(n, fallback = FALSE, verbose = FALSE) 
   )
 }
 
-#' @rdname rext_utils_opencl
-#' @export
+# Internal: can fail in device compile/runtime (missing host/runtime stack
+# symbols on some builds). Not exported.
+#' @noRd
 r_check_stack_opencl <- function(n, fallback = FALSE, verbose = FALSE) {
   n <- .validate_n_scalar(n)
   .validate_flag(fallback, "fallback"); .validate_flag(verbose, "verbose")

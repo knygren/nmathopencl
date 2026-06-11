@@ -85,8 +85,9 @@ On GPU (when used), each output element runs `pnorm_kernel` once in sequence (hi
 ```{r, eval = FALSE}
 dgamma_opencl(n, x, shape = 2, scale = 1)
 pgamma_opencl(q, shape = 2, rate = 1)
-qgamma_opencl(p, shape = 2, scale = 1)
 rgamma_opencl(n, shape = 2, scale = 1)
+# qgamma: use stats::qgamma(); the OpenCL kernel is internal-only
+# (device compile failure, see inst/OPENCL_KERNEL_KNOWN_FAILURES.md)
 ```
 
 ### Binomial
@@ -112,8 +113,9 @@ rpois_opencl(n, lambda = 3)
 ```{r, eval = FALSE}
 dbeta_opencl(x, shape1 = 2, shape2 = 5)
 pbeta_opencl(q, shape1 = 2, shape2 = 5)
-qbeta_opencl(p, shape1 = 2, shape2 = 5)
 rbeta_opencl(n, shape1 = 2, shape2 = 5)
+# qbeta: use stats::qbeta(); the OpenCL kernel is internal-only
+# (device link failure, see inst/OPENCL_KERNEL_KNOWN_FAILURES.md)
 ```
 
 ### Additional families
@@ -135,11 +137,14 @@ All families below follow the same four-function pattern (`d*`, `p*`, `q*`,
 | t | `t_opencl.R` |
 | Uniform | `uniform_opencl.R` |
 | Weibull | `weibull_opencl.R` |
-| Wilcoxon rank-sum | `rwilcox_opencl.R` |
-| Wilcoxon signed-rank | `signrank_opencl.R` |
 | Multivariate discrete | `multinomial_opencl.R` |
 | Tukey | `tukey_opencl.R` |
-| Bessel | `bessel_opencl.R` |
+
+The Wilcoxon rank-sum (`rwilcox_opencl.R`), Wilcoxon signed-rank
+(`signrank_opencl.R`), and Bessel (`bessel_opencl.R`) wrappers are
+internal-only: their OpenCL ports have documented allocation/runtime
+failures (see `inst/OPENCL_KERNEL_KNOWN_FAILURES.md` and the notes in
+`inst/cl/`). Use the `stats`/`base` equivalents instead.
 
 ### Noncentral distributions
 

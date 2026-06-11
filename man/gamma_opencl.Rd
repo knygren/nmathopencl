@@ -3,7 +3,6 @@
 \name{dgamma_opencl}
 \alias{dgamma_opencl}
 \alias{pgamma_opencl}
-\alias{qgamma_opencl}
 \alias{rgamma_opencl}
 \title{The Gamma Distribution (OpenCL)}
 \usage{
@@ -29,17 +28,6 @@ pgamma_opencl(
   verbose = FALSE
 )
 
-qgamma_opencl(
-  p,
-  shape,
-  scale = 1,
-  lower.tail = TRUE,
-  log.p = FALSE,
-  opencl_parallel = NA,
-  fallback = FALSE,
-  verbose = FALSE
-)
-
 rgamma_opencl(n, shape, scale = 1, fallback = FALSE, verbose = FALSE)
 }
 \arguments{
@@ -53,7 +41,7 @@ like \code{stats::pgamma}.}
 \item{log}{\code{log} flag for densities (\code{stats} \emph{d}-family semantics).}
 
 \item{opencl_parallel}{Dispatch hint \code{(TRUE,FALSE,NA)} for
-\code{pgamma_opencl}/\code{qgamma_opencl}; parallel dispatch reserved.}
+\code{pgamma_opencl}; parallel dispatch reserved.}
 
 \item{fallback}{When \code{TRUE} while \code{\link{nmathopencl_has_opencl}()} reports OpenCL present, recover with CPU if the OpenCL call fails.
 Ignored when the runtime reports no OpenCL. \code{dgamma_opencl} defaults \code{FALSE}; distribution/quantile wrappers follow \file{inst/OPENCL_PGAMMA_UTILS_KERNEL_FALLBACK.md}. Pass explicit \code{fallback} where needed.}
@@ -65,8 +53,6 @@ Ignored when the runtime reports no OpenCL. \code{dgamma_opencl} defaults \code{
 \item{rate}{Optional rate for \code{pgamma_opencl}; see \code{\link[stats]{pgamma}}.}
 
 \item{lower.tail, log.p}{Tail/log-\emph{p} inputs (\code{stats} meanings).}
-
-\item{p}{Numeric vector of probabilities for \code{qgamma_opencl} (like \code{stats::qgamma}).}
 
 \item{n}{Number of observations (non-negative integer scalar). Used only by \code{rgamma_opencl};
 \code{dgamma_opencl} takes vector \code{x} first (like \code{stats::dgamma}).}
@@ -93,9 +79,9 @@ once with \code{n_out = 1}. Missing or non-finite values after recycling, or non
 }
 \section{Known OpenCL limitations}{
 
-Compilation of \code{qgamma_kernel} can fail (\code{ptxas}: unresolved \code{stirlerr_cycle_free}).
-Runnable examples omit GPU \code{qgamma_opencl} until resolved.
-See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
+Compilation of \code{qgamma_kernel} can fail (\code{ptxas}: unresolved
+\code{stirlerr_cycle_free}), so no \code{qgamma} wrapper is exported; use
+\code{stats::qgamma()}. See \file{inst/OPENCL_KERNEL_KNOWN_FAILURES.md}.
 }
 
 \examples{
@@ -103,8 +89,6 @@ n <- 5L
 if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   dgamma_opencl(rep(1.2, n), shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
   pgamma_opencl(q = 1.2, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
-  ## qgamma_opencl: disabled — see inst/OPENCL_KERNEL_KNOWN_FAILURES.md
-  # qgamma_opencl(rep(0.8, n), shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
   rgamma_opencl(n, shape = 2, scale = 1, fallback = FALSE, verbose = TRUE)
 } else {
   stats::dgamma(rep(1.2, n), shape = 2, scale = 1)
