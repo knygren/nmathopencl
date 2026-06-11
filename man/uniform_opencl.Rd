@@ -94,3 +94,6 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   stats::runif(n, min = 0, max = 1)
 }
 }
+\references{
+\insertRef{BeckerChambersWilks1988}{nmathopencl}
+}

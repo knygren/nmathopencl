@@ -25,6 +25,9 @@
 #'
 #' @return Numeric vector result from the corresponding uniform-family operation.
 #' @example inst/examples/Ex_uniform_opencl.R
+#'
+#' @references
+#' \insertRef{BeckerChambersWilks1988}{nmathopencl}
 #' @rdname uniform_opencl
 #' @export
 dunif_opencl <- function(

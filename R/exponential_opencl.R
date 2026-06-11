@@ -17,6 +17,13 @@
 #'
 #' @return Numeric vector result from the corresponding exponential-family operation.
 #' @example inst/examples/Ex_exponential_opencl.R
+#'
+#' @references
+#' \insertRef{AhrensDieter1972}{nmathopencl}
+#'
+#' \insertRef{BeckerChambersWilks1988}{nmathopencl}
+#'
+#' \insertRef{JohnsonKotzBalakrishnan1994}{nmathopencl}
 #' @rdname exponential_opencl
 #' @export
 dexp_opencl <- function(

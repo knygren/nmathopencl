@@ -18,6 +18,9 @@
 #'
 #' @return Numeric vector result from the corresponding Weibull-family operation.
 #' @example inst/examples/Ex_weibull_opencl.R
+#'
+#' @references
+#' \insertRef{JohnsonKotzBalakrishnan1994}{nmathopencl}
 #' @rdname weibull_opencl
 #' @export
 dweibull_opencl <- function(

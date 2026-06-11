@@ -25,6 +25,7 @@
 ^\.RDataTmp$
 ^data-raw$
 ^scripts$
+^dev$
 ^tarballs$
 ^cran-comments\.md$
 ^R-UNIVERSE\.md$

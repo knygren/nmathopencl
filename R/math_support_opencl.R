@@ -9,6 +9,11 @@
 #'
 #' @return Numeric vector of recycled common length.
 #' @example inst/examples/Ex_math_support_opencl.R
+#'
+#' @references
+#' \insertRef{AbramowitzStegun1972}{nmathopencl}
+#'
+#' \insertRef{BeckerChambersWilks1988}{nmathopencl}
 #' @rdname math_support_opencl
 #' @export
 imax2_opencl <- function(x, y, fallback = FALSE, verbose = FALSE) {

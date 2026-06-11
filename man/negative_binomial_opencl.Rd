@@ -137,3 +137,6 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   stats::rnbinom(n, size = 7, mu = 5)
 }
 }
+\references{
+\insertRef{Devroye1986}{nmathopencl}
+}

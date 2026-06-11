@@ -93,3 +93,8 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   stats::rlogis(n, location = 0, scale = 1)
 }
 }
+\references{
+\insertRef{BeckerChambersWilks1988}{nmathopencl}
+
+\insertRef{JohnsonKotzBalakrishnan1995}{nmathopencl}
+}

@@ -19,6 +19,11 @@
 #'
 #' @return Numeric vector result from the corresponding hypergeometric-family operation.
 #' @example inst/examples/Ex_hypergeometric_opencl.R
+#'
+#' @references
+#' \insertRef{JohnsonKotzKemp1993}{nmathopencl}
+#'
+#' \insertRef{KachitvichyanukulSchmeiser1985}{nmathopencl}
 #' @rdname hypergeometric_opencl
 #' @export
 dhyper_opencl <- function(

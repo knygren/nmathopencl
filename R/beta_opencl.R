@@ -28,6 +28,27 @@
 #'
 #' @return Numeric vector of length \code{n}.
 #' @example inst/examples/Ex_beta_opencl.R
+#'
+#' @references
+#' \insertRef{AbramowitzStegun1972}{nmathopencl}
+#'
+#' \insertRef{BeckerChambersWilks1988}{nmathopencl}
+#'
+#' \insertRef{BrownLevy1994}{nmathopencl}
+#'
+#' \insertRef{Cheng1978}{nmathopencl}
+#'
+#' \insertRef{CranMartinThomas1977}{nmathopencl}
+#'
+#' \insertRef{DidonatoMorris1992}{nmathopencl}
+#'
+#' \insertRef{Frick1990}{nmathopencl}
+#'
+#' \insertRef{JohnsonKotzBalakrishnan1995}{nmathopencl}
+#'
+#' \insertRef{Lam1995}{nmathopencl}
+#'
+#' \insertRef{Lenth1987}{nmathopencl}
 #' @rdname beta_opencl
 #' @export
 dbeta_opencl <- function(

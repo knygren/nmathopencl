@@ -19,6 +19,11 @@
 #'
 #' @return Numeric vector result from the corresponding binomial-family operation.
 #' @example inst/examples/Ex_binomial_opencl.R
+#'
+#' @references
+#' \insertRef{KachitvichyanukulSchmeiser1988}{nmathopencl}
+#'
+#' \insertRef{Loader2000}{nmathopencl}
 #' @rdname binomial_opencl
 #' @export
 dbinom_raw_opencl <- function(

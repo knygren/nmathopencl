@@ -40,7 +40,7 @@ c(
     bibtype  = "Article",
     title    = "OpenCL: A Parallel Programming Standard for Heterogeneous Computing Systems",
     author   = c(
-      person("James E.", "Stone"),
+      person("John E.", "Stone"),
       person("David", "Gohara"),
       person("Guochun", "Shi")
     ),

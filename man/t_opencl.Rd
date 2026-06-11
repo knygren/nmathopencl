@@ -99,3 +99,14 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   stats::rt(n, df = 8)
 }
 }
+\references{
+\insertRef{BeckerChambersWilks1988}{nmathopencl}
+
+\insertRef{Hill1970}{nmathopencl}
+
+\insertRef{Hill1981}{nmathopencl}
+
+\insertRef{JohnsonKotzBalakrishnan1995}{nmathopencl}
+
+\insertRef{Lenth1989}{nmathopencl}
+}

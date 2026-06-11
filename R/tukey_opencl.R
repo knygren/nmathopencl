@@ -16,6 +16,11 @@
 #'
 #' @return Numeric vector result from \code{ptukey_opencl} or \code{qtukey_opencl}.
 #' @example inst/examples/Ex_tukey_opencl.R
+#'
+#' @references
+#' \insertRef{CopenhaverHolland1988}{nmathopencl}
+#'
+#' \insertRef{OdehEvans1974}{nmathopencl}
 #' @rdname tukey_opencl
 #' @export
 ptukey_opencl <- function(

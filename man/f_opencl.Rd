@@ -104,3 +104,10 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   stats::rf(n, df1 = 5, df2 = 9)
 }
 }
+\references{
+\insertRef{AbramowitzStegun1972}{nmathopencl}
+
+\insertRef{BeckerChambersWilks1988}{nmathopencl}
+
+\insertRef{JohnsonKotzBalakrishnan1995}{nmathopencl}
+}

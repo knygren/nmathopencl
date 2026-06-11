@@ -28,6 +28,34 @@ Resubmission after first CRAN `R CMD check` on **0.8.0** (initial release).
    on the author surnames (e.g. "Gohara") refers to proper names in these
    references.
 
+3. **Authors, contributors, and copyright holders in `Authors@R`** (e.g. "The
+   Khronos Group Inc" in `cl.h`): we audited every bundled or derived source
+   file (all 137 'OpenCL' routine ports under `inst/cl/nmath/`, the C sources
+   under `src/` and `src/nmath/`, and the bundled headers under
+   `inst/include/`) against the AUTHOR and copyright notices in the file
+   headers. As a result:
+   - `person("The Khronos Group Inc", role = "cph")` added for the bundled
+     'OpenCL' API headers `inst/include/CL/cl.h` and `cl_platform.h`
+     (Apache License 2.0; original notices preserved in the file headers).
+     The `License` field was widened from `GPL-2` to `GPL (>= 2)` so the
+     Apache-2.0-licensed headers are license-compatible.
+   - `ctb` entries added for every individual credited as a code author in
+     the ported R 'Mathlib' sources: Catherine Loader (dbinom/bd0/stirlerr
+     density routines), Claus Ekstrom (dnt), Peter Ruckdeschel (dnf), and
+     Alfred H. Morris, Jr. and Armido R. Didonato (ACM TOMS 708 incomplete
+     beta code). Morten Welinder, Ross Ihaka, Robert Gentleman, Martin
+     Maechler, The R Core Team, and The R Foundation were already listed.
+   - One contributor entry specific to R's glm() implementation was removed:
+     no glm code is copied or derived in this package (its GLM-related
+     example layer is original integration/teaching code).
+   - `inst/COPYRIGHTS` was expanded with a per-component map of the above,
+     and all original AUTHOR/copyright notices remain preserved in the
+     individual source file headers.
+   - The algorithm references from the corresponding CPU help pages in R
+     (stats/base) were additionally mirrored onto the package's help pages
+     via `Rdpack`, so the methodological literature for each ported routine
+     is cited on its 'OpenCL' wrapper page.
+
 ## Response to CRAN `R CMD check` on 0.8.0
 
 CRAN's **linux-gnu** builder (among others) detected OpenCL headers and

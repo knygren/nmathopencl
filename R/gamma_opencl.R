@@ -39,6 +39,21 @@
 #'
 #' @return Numeric vector result from the corresponding gamma-family operation.
 #' @example inst/examples/Ex_gamma_opencl.R
+#'
+#' @references
+#' \insertRef{AbramowitzStegun1972}{nmathopencl}
+#'
+#' \insertRef{AhrensDieter1974}{nmathopencl}
+#'
+#' \insertRef{AhrensDieter1982gamma}{nmathopencl}
+#'
+#' \insertRef{BeckerChambersWilks1988}{nmathopencl}
+#'
+#' \insertRef{BestRoberts1975}{nmathopencl}
+#'
+#' \insertRef{NISTDLMF}{nmathopencl}
+#'
+#' \insertRef{Shea1988}{nmathopencl}
 #' @rdname gamma_opencl
 #' @export
 dgamma_opencl <- function(

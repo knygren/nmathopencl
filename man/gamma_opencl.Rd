@@ -96,3 +96,18 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   stats::rgamma(n, shape = 2, scale = 1)
 }
 }
+\references{
+\insertRef{AbramowitzStegun1972}{nmathopencl}
+
+\insertRef{AhrensDieter1974}{nmathopencl}
+
+\insertRef{AhrensDieter1982gamma}{nmathopencl}
+
+\insertRef{BeckerChambersWilks1988}{nmathopencl}
+
+\insertRef{BestRoberts1975}{nmathopencl}
+
+\insertRef{NISTDLMF}{nmathopencl}
+
+\insertRef{Shea1988}{nmathopencl}
+}

@@ -102,3 +102,8 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   stats::rbinom(n, size = 10, prob = 0.3)
 }
 }
+\references{
+\insertRef{KachitvichyanukulSchmeiser1988}{nmathopencl}
+
+\insertRef{Loader2000}{nmathopencl}
+}

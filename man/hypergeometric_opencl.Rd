@@ -91,3 +91,8 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   stats::rhyper(n, m = 10, n = 12, k = 8)
 }
 }
+\references{
+\insertRef{JohnsonKotzKemp1993}{nmathopencl}
+
+\insertRef{KachitvichyanukulSchmeiser1985}{nmathopencl}
+}

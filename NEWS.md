@@ -23,6 +23,21 @@
   <doi:10.1109/MCSE.2010.69> for the 'OpenCL' standard, and Nygren and Nygren
   (2006) <doi:10.1198/016214506000000357> for the likelihood subgradient
   methodology.
+- **`Authors@R` / copyright audit**: all bundled and derived sources audited
+  against their AUTHOR/copyright headers. Added The Khronos Group Inc (`cph`,
+  bundled `inst/include/CL` 'OpenCL' API headers, Apache License 2.0) and
+  `ctb` entries for the individual R 'Mathlib' code authors whose routines are
+  ported here: Catherine Loader (dbinom/bd0/stirlerr density family), Claus
+  Ekstrøm (dnt), Peter Ruckdeschel (dnf), and Alfred H. Morris, Jr. and
+  Armido R. Didonato (ACM TOMS 708 incomplete beta code). Removed a
+  glm-specific contributor entry (no glm code is copied in this package).
+  `inst/COPYRIGHTS` expanded with a per-component map. License widened from
+  `GPL-2` to `GPL (>= 2)` for compatibility with the Apache-2.0 headers.
+- **Help-page references**: the algorithm references cited on the
+  corresponding CPU help pages in R (`stats`/`base`) are now mirrored onto the
+  exported `*_opencl` help pages via `Rdpack` (e.g. Wichura's AS 241 on
+  `normal_opencl`, Didonato & Morris's TOMS 708 on `beta_opencl`, Ahrens &
+  Dieter's samplers on the gamma/Poisson/exponential pages).
 
 # nmathopencl 0.8.1
 

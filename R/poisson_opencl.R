@@ -17,6 +17,9 @@
 #'
 #' @return Numeric vector result from the corresponding Poisson-family operation.
 #' @example inst/examples/Ex_poisson_opencl.R
+#'
+#' @references
+#' \insertRef{AhrensDieter1982poisson}{nmathopencl}
 #' @rdname poisson_opencl
 #' @export
 dpois_raw_opencl <- function(

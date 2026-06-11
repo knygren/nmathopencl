@@ -68,3 +68,8 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   base::trunc(123.456)
 }
 }
+\references{
+\insertRef{AbramowitzStegun1972}{nmathopencl}
+
+\insertRef{BeckerChambersWilks1988}{nmathopencl}
+}

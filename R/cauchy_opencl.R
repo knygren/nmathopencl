@@ -18,6 +18,11 @@
 #'
 #' @return Numeric vector result from the corresponding Cauchy-family operation.
 #' @example inst/examples/Ex_cauchy_opencl.R
+#'
+#' @references
+#' \insertRef{BeckerChambersWilks1988}{nmathopencl}
+#'
+#' \insertRef{JohnsonKotzBalakrishnan1994}{nmathopencl}
 #' @rdname cauchy_opencl
 #' @export
 dcauchy_opencl <- function(

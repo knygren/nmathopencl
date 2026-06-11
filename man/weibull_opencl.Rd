@@ -86,3 +86,6 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   stats::rweibull(n, shape = 2, scale = 1.5)
 }
 }
+\references{
+\insertRef{JohnsonKotzBalakrishnan1994}{nmathopencl}
+}

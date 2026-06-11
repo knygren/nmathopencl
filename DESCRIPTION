@@ -7,19 +7,29 @@ Authors@R: c(
     person("Kjell", "Nygren", role = c("aut", "cre"),
            email = "kjell.a.nygren@gmail.com"),
     person("The R Core Team", role = c("ctb", "cph"),
-           comment = "R 'Mathlib' sources, R stats modeling code, and derived/adapted routines"),
+           comment = "R 'Mathlib' sources and derived/adapted routines"),
     person("The R Foundation", role = "cph",
            comment = "Portions of R 'Mathlib' and R source code"),
     person("Ross", "Ihaka", role = c("ctb", "cph"),
-           comment = "R 'Mathlib' and original R modeling infrastructure"),
+           comment = "R 'Mathlib'"),
     person("Robert", "Gentleman", role = c("ctb", "cph"),
            comment = "Portions of R 'Mathlib'"),
-    person("Simon", "Davies", role = "ctb",
-           comment = "Original R glm implementation"),
     person("Morten", "Welinder", role = c("ctb", "cph"),
-           comment = "Portions of R 'Mathlib'"),
+           comment = "Portions of R 'Mathlib' (pgamma, phyper, ebd0)"),
     person("Martin", "Maechler", role = "ctb",
-           comment = "Portions of R 'Mathlib'")
+           comment = "Portions of R 'Mathlib'"),
+    person("Catherine", "Loader", role = "ctb",
+           comment = "Author of the dbinom/bd0/stirlerr density routines in R 'Mathlib' ported here"),
+    person("Claus", "Ekstr\u00f8m", role = "ctb",
+           comment = "Author of the noncentral t density (dnt) in R 'Mathlib' ported here"),
+    person("Peter", "Ruckdeschel", role = "ctb",
+           comment = "Author of the noncentral F density (dnf) in R 'Mathlib' ported here"),
+    person("Alfred H.", "Morris, Jr.", role = "ctb",
+           comment = "ACM TOMS 708 incomplete beta code (toms708) ported here"),
+    person("Armido R.", "Didonato", role = "ctb",
+           comment = "ACM TOMS 708 incomplete beta code (toms708) ported here"),
+    person("The Khronos Group Inc", role = "cph",
+           comment = "'OpenCL' API headers in inst/include/CL (Apache License 2.0)")
     )
 Description: Ships statistical and mathematical routines from R internal
     'nmath' ('Mathlib') as 'OpenCL' C sources under directory 'inst/cl/', with R
@@ -36,7 +46,7 @@ Description: Ships statistical and mathematical routines from R internal
     likelihood subgradient simulation methodology implemented by the
     illustrative GLM kernel subsystem is described in Nygren and Nygren (2006)
     <doi:10.1198/016214506000000357>.
-License: GPL-2
+License: GPL (>= 2)
 URL: https://github.com/knygren/nmathopencl, https://knygren.r-universe.dev/nmathopencl
 BugReports: https://github.com/knygren/nmathopencl/issues
 Imports:

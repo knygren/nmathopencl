@@ -19,7 +19,29 @@ Relevant copyright holders and contributors include The R Core Team, The R
 Foundation, Ross Ihaka, Robert Gentleman, Morten Welinder, and Martin Maechler.
 The applicable licenses are GPL-2-or-later and/or LGPL-2.1-or-later as
 indicated in the individual source file headers, consistent with the package
-LICENSE field (GPL-2).
+License field (GPL (>= 2)).
+
+Individual code authors credited in the R Mathlib source headers (and their
+OpenCL ports here):
+
+- Catherine Loader: dbinom, dbeta, dgamma, dpois, dgeom, dhyper, dnbinom,
+  dt, df densities and the bd0/stirlerr support routines.
+- Morten Welinder: ebd0 (bd0.c); copyright holder on pgamma.c and phyper.c.
+- Claus Ekstrom: dnt.c (noncentral t density).
+- Peter Ruckdeschel: dnf.c (noncentral F density).
+- Alfred H. Morris, Jr. and Armido R. Didonato: ACM TOMS Algorithm 708
+  (toms708.c, incomplete beta function ratios underlying pbeta).
+
+All original AUTHOR and copyright notices are preserved in the individual
+source file headers under src/, src/nmath/, and inst/cl/.
+
+OpenCL API Headers
+------------------
+
+The bundled OpenCL API headers inst/include/CL/cl.h and
+inst/include/CL/cl_platform.h are Copyright (c) 2008-2020 The Khronos Group
+Inc. and are licensed under the Apache License, Version 2.0. The original
+copyright and license notices are preserved in the file headers.
 
 Illustrative GLM / Envelope Examples
 ------------------------------------

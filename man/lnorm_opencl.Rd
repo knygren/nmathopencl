@@ -86,3 +86,8 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   stats::rlnorm(n, meanlog = 0.1, sdlog = 0.8)
 }
 }
+\references{
+\insertRef{BeckerChambersWilks1988}{nmathopencl}
+
+\insertRef{JohnsonKotzBalakrishnan1994}{nmathopencl}
+}

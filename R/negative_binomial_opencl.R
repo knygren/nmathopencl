@@ -20,6 +20,9 @@
 #'
 #' @return Numeric vector result from the corresponding negative-binomial operation.
 #' @example inst/examples/Ex_negative_binomial_opencl.R
+#'
+#' @references
+#' \insertRef{Devroye1986}{nmathopencl}
 #' @rdname negative_binomial_opencl
 #' @export
 dnbinom_opencl <- function(

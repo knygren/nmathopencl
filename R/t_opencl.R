@@ -26,6 +26,17 @@
 #' @return For \code{dt_opencl}, \code{qt_opencl}, \code{rt_opencl}: numeric vector result.
 #'   For \code{pt_opencl}: numeric vector of recycled length (see \code{stats::pt}).
 #' @example inst/examples/Ex_t_opencl.R
+#'
+#' @references
+#' \insertRef{BeckerChambersWilks1988}{nmathopencl}
+#'
+#' \insertRef{Hill1970}{nmathopencl}
+#'
+#' \insertRef{Hill1981}{nmathopencl}
+#'
+#' \insertRef{JohnsonKotzBalakrishnan1995}{nmathopencl}
+#'
+#' \insertRef{Lenth1989}{nmathopencl}
 #' @rdname t_opencl
 #' @export
 dt_opencl <- function(

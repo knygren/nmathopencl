@@ -13,6 +13,13 @@
 #'
 #' @return Numeric vector of recycled common length.
 #' @example inst/examples/Ex_special_opencl.R
+#'
+#' @references
+#' \insertRef{AbramowitzStegun1972}{nmathopencl}
+#'
+#' \insertRef{Amos1983}{nmathopencl}
+#'
+#' \insertRef{BeckerChambersWilks1988}{nmathopencl}
 #' @rdname special_opencl
 #' @export
 gammafn_opencl <- function(x, fallback = FALSE, verbose = FALSE) {

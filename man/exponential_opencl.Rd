@@ -81,3 +81,10 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   stats::rexp(n, rate = 1)
 }
 }
+\references{
+\insertRef{AhrensDieter1972}{nmathopencl}
+
+\insertRef{BeckerChambersWilks1988}{nmathopencl}
+
+\insertRef{JohnsonKotzBalakrishnan1994}{nmathopencl}
+}

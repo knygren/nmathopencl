@@ -18,6 +18,11 @@
 #'
 #' @return Numeric vector of length \code{n}.
 #' @example inst/examples/Ex_lnorm_opencl.R
+#'
+#' @references
+#' \insertRef{BeckerChambersWilks1988}{nmathopencl}
+#'
+#' \insertRef{JohnsonKotzBalakrishnan1994}{nmathopencl}
 #' @rdname lnorm_opencl
 #' @export
 dlnorm_opencl <- function(

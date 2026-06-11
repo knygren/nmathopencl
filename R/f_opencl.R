@@ -27,6 +27,13 @@
 #' @return For \code{df_opencl}, \code{qf_opencl}, \code{rf_opencl}: numeric vector result.
 #'   For \code{pf_opencl}: numeric vector of recycled length (see \code{stats::pf}).
 #' @example inst/examples/Ex_f_opencl.R
+#'
+#' @references
+#' \insertRef{AbramowitzStegun1972}{nmathopencl}
+#'
+#' \insertRef{BeckerChambersWilks1988}{nmathopencl}
+#'
+#' \insertRef{JohnsonKotzBalakrishnan1995}{nmathopencl}
 #' @rdname f_opencl
 #' @export
 df_opencl <- function(

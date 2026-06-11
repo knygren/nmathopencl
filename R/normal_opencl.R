@@ -39,6 +39,15 @@
 #'
 #' @return Numeric vector result from the corresponding normal-family operation.
 #' @example inst/examples/Ex_normal_opencl.R
+#'
+#' @references
+#' \insertRef{BeckerChambersWilks1988}{nmathopencl}
+#'
+#' \insertRef{Cody1993}{nmathopencl}
+#'
+#' \insertRef{JohnsonKotzBalakrishnan1994}{nmathopencl}
+#'
+#' \insertRef{Wichura1988}{nmathopencl}
 #' @rdname normal_opencl
 #' @export
 dnorm_opencl <- function(

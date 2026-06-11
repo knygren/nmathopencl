@@ -66,3 +66,8 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   stats::qtukey(rep(0.8, n), nmeans = 5, df = 10, nranges = 1)
 }
 }
+\references{
+\insertRef{CopenhaverHolland1988}{nmathopencl}
+
+\insertRef{OdehEvans1974}{nmathopencl}
+}

@@ -108,3 +108,12 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   stats::rnorm(n, mean = 0, sd = 1)
 }
 }
+\references{
+\insertRef{BeckerChambersWilks1988}{nmathopencl}
+
+\insertRef{Cody1993}{nmathopencl}
+
+\insertRef{JohnsonKotzBalakrishnan1994}{nmathopencl}
+
+\insertRef{Wichura1988}{nmathopencl}
+}

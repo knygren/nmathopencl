@@ -93,3 +93,6 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   stats::rpois(n, lambda = 4)
 }
 }
+\references{
+\insertRef{AhrensDieter1982poisson}{nmathopencl}
+}

@@ -81,3 +81,6 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   stats::rgeom(n, prob = 0.3)
 }
 }
+\references{
+\insertRef{Devroye1986}{nmathopencl}
+}

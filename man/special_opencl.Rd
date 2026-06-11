@@ -85,3 +85,10 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   base::lchoose(10, 4)
 }
 }
+\references{
+\insertRef{AbramowitzStegun1972}{nmathopencl}
+
+\insertRef{Amos1983}{nmathopencl}
+
+\insertRef{BeckerChambersWilks1988}{nmathopencl}
+}

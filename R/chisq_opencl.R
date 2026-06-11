@@ -19,6 +19,15 @@
 #'
 #' @return Numeric vector of length \code{n}.
 #' @example inst/examples/Ex_chisq_opencl.R
+#'
+#' @references
+#' \insertRef{BeckerChambersWilks1988}{nmathopencl}
+#'
+#' \insertRef{Ding1992}{nmathopencl}
+#'
+#' \insertRef{JohnsonKotzBalakrishnan1994}{nmathopencl}
+#'
+#' \insertRef{JohnsonKotzBalakrishnan1995}{nmathopencl}
 #' @rdname chisq_opencl
 #' @export
 dchisq_opencl <- function(

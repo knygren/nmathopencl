@@ -86,3 +86,8 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   stats::rcauchy(n, location = 0, scale = 1)
 }
 }
+\references{
+\insertRef{BeckerChambersWilks1988}{nmathopencl}
+
+\insertRef{JohnsonKotzBalakrishnan1994}{nmathopencl}
+}

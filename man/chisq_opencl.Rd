@@ -87,3 +87,12 @@ if (!nmathopencl_has_opencl() || identical(Sys.getenv("NOT_CRAN"), "true")) {
   stats::rchisq(n, df = 6, ncp = 0)
 }
 }
+\references{
+\insertRef{BeckerChambersWilks1988}{nmathopencl}
+
+\insertRef{Ding1992}{nmathopencl}
+
+\insertRef{JohnsonKotzBalakrishnan1994}{nmathopencl}
+
+\insertRef{JohnsonKotzBalakrishnan1995}{nmathopencl}
+}

@@ -24,6 +24,11 @@
 #'
 #' @return Numeric vector result from the corresponding logistic-family operation.
 #' @example inst/examples/Ex_logistic_opencl.R
+#'
+#' @references
+#' \insertRef{BeckerChambersWilks1988}{nmathopencl}
+#'
+#' \insertRef{JohnsonKotzBalakrishnan1995}{nmathopencl}
 #' @rdname logistic_opencl
 #' @export
 dlogis_opencl <- function(

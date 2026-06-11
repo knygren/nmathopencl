@@ -17,6 +17,9 @@
 #'
 #' @return Numeric vector result from the corresponding geometric-family operation.
 #' @example inst/examples/Ex_geometric_opencl.R
+#'
+#' @references
+#' \insertRef{Devroye1986}{nmathopencl}
 #' @rdname geometric_opencl
 #' @export
 dgeom_opencl <- function(
