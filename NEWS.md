@@ -1,3 +1,7 @@
+# nmathopencl 0.8.2
+
+- Version bump prior to addressing CRAN reviewer feedback.
+
 # nmathopencl 0.8.1
 
 ### CRAN check fixes (OpenCL-enabled builders)

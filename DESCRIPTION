@@ -1,8 +1,8 @@
 Package: nmathopencl
 Type: Package
 Title: 'OpenCL'-Ported R 'Mathlib' for GPU-Accelerated Packages
-Version: 0.8.1
-Date: 2026-05-30
+Version: 0.8.2
+Date: 2026-06-11
 Authors@R: c(
     person("Kjell", "Nygren", role = c("aut", "cre"),
            email = "kjell.a.nygren@gmail.com"),

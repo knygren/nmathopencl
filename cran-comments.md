@@ -1,4 +1,4 @@
-# CRAN submission comments --- nmathopencl 0.8.1
+# CRAN submission comments --- nmathopencl 0.8.2
 
 Resubmission after first CRAN `R CMD check` on **0.8.0** (initial release).
 
@@ -36,7 +36,7 @@ Passed without errors or warnings on maintainer Windows, R-universe,
 Winbuilder, macbuilder, and R-hub. Winbuilder incoming NOTE: new submission +
 `opencltools` spelling (addressed).
 
-## Test environments (0.8.1)
+## Test environments (0.8.2)
 
 - Maintainer: Windows 11, R 4.6.0, OpenCL (NVIDIA).
 - CRAN: resubmission after fixes above.
