@@ -10,6 +10,24 @@ Resubmission after first CRAN `R CMD check` on **0.8.0** (initial release).
 - **`DESCRIPTION`**: `'OpenCL'`, `'Mathlib'`, and `'opencltools'` are
   single-quoted in the Description field.
 
+## Response to CRAN reviewer feedback on 0.8.1
+
+1. **Commented-out code in examples** (`bessel_opencl.Rd`, `beta_opencl.Rd`,
+   `gamma_opencl.Rd`, `rext_utils_opencl.Rd`, `signrank_opencl.Rd`,
+   `wilcox_opencl.Rd`): all commented-out example lines removed. The wrappers
+   those lines referred to have documented OpenCL device failures and are no
+   longer exported (internal-only); their help pages were removed where no
+   exported functions remain. Remaining examples are runnable toy examples.
+
+2. **References in Description**: added in the requested format —
+   R Core Team (2026) <doi:10.32614/R.manuals> for the ported 'nmath'/'Rmath'
+   ('Mathlib') sources, Stone, Gohara, and Shi (2010) <doi:10.1109/MCSE.2010.69>
+   for the 'OpenCL' standard, and Nygren and Nygren (2006)
+   <doi:10.1198/016214506000000357> for the likelihood subgradient methodology
+   used by the illustrative GLM kernel subsystem. Any incoming spell-check NOTE
+   on the author surnames (e.g. "Gohara") refers to proper names in these
+   references.
+
 ## Response to CRAN `R CMD check` on 0.8.0
 
 CRAN's **linux-gnu** builder (among others) detected OpenCL headers and

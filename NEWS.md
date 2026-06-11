@@ -17,6 +17,12 @@
 - Commented-out example code removed from `\examples{}` on the `beta_opencl`,
   `gamma_opencl`, and `rext_utils_opencl` pages (CRAN policy: examples must be
   runnable code only).
+- **`DESCRIPTION`**: method references added to the Description field in CRAN
+  auto-linking format — R Core Team (2026) <doi:10.32614/R.manuals> for the
+  ported 'nmath'/'Rmath' ('Mathlib') sources, Stone, Gohara, and Shi (2010)
+  <doi:10.1109/MCSE.2010.69> for the 'OpenCL' standard, and Nygren and Nygren
+  (2006) <doi:10.1198/016214506000000357> for the likelihood subgradient
+  methodology.
 
 # nmathopencl 0.8.1
 
