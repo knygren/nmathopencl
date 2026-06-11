@@ -43,18 +43,15 @@ For packages with no existing \code{src/Makevars}, use
 }
 \section{src/Makevars.in workflow}{
 
-
 After porting, \strong{maintain \code{src/Makevars.in}} for your base build
-flags (\code{OpenMP}, \pkg{RcppParallel}, LAPACK, etc.).  The configure script reads it
-at install time and appends (or omits) the OpenCL flags.  The generated
-\code{src/Makevars} is a build artifact -- add it to \code{.gitignore} and
-never commit it.  To update base flags, edit \code{src/Makevars.in} and
-reinstall.
-
+flags (\code{OpenMP}, \pkg{RcppParallel}, LAPACK, etc.).  The configure
+script reads it at install time and appends (or omits) the OpenCL flags.
+The generated \code{src/Makevars} is a build artifact -- add it to
+\code{.gitignore} and never commit it.  To update base flags, edit
+\code{src/Makevars.in} and reinstall.
 }
 
-\section{configure → USE_OPENCL → has_opencl()}{
-
+\section{configure -> USE_OPENCL -> has_opencl()}{
 
 \preformatted{
   configure / configure.win
@@ -68,11 +65,9 @@ reinstall.
   has_opencl() in R
     -> mirrors the compile-time flag; TRUE only if USE_OPENCL was set
 }
-
 }
 
 \section{Limitations}{
-
 
 \itemize{
 \item \code{+=} (append) assignments in \code{src/Makevars} are detected
@@ -86,7 +81,6 @@ configure scripts should integrate the OpenCL block manually; see
 \code{system.file("configure-templates", "README.md",
     package = "opencltools")}.
 }
-
 }
 
 \examples{
