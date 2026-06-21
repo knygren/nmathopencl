@@ -1,3 +1,9 @@
+# nmathopencl 0.8.2.9000
+
+### Development version
+
+- Post-CRAN development after release 0.8.2.
+
 # nmathopencl 0.8.2
 
 This release addresses the three items of CRAN reviewer feedback on the 0.8.1
