@@ -1,8 +1,11 @@
 # nmathopencl 0.8.2.9000
 
-### Development version
+### Add program_preload_manifest.tsv file
 
 - Post-CRAN development after release 0.8.2.
+- Ship companion **`program_preload_manifest.rds`** beside the TSV for fast R-side reads.
+- Document prelude loading via **`opencltools::load_program_preload()`** in README and
+  **`inst/examples/Ex_load_program_preload.R`**.
 
 # nmathopencl 0.8.2
 

@@ -75,5 +75,6 @@ idx$n_files
 
 Other OpenCL kernel library subsets: 
 \code{\link[opencltools]{extract_library_subset}()},
-\code{\link[opencltools]{load_library_for_kernel}()}
+\code{\link[opencltools]{load_library_for_kernel}()},
+\code{\link[opencltools]{load_library_for_kernel_cross_package}()}
 }

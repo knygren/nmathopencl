@@ -58,6 +58,12 @@ where applicable), then:
    next to kernels you intend to vendor; regenerate **`kernel_dependency_index.rds`** alongside the library
    with **`write_kernel_dependency_index()`** after substantive port edits.
 
+   The fixed OpenCL prelude (headers, R shims, system stubs) ships as
+   **`inst/cl/program_preload_manifest.tsv`** with companion
+   **`program_preload_manifest.rds`**. Load the concatenated prelude with
+   **`opencltools::load_program_preload(source_package = "nmathopencl")`**; see
+   **`inst/examples/Ex_load_program_preload.R`**.
+
 3. **Integrate** --- either (**a**) remain linked to **`nmathopencl`** via **`system.file(..., package =
    "nmathopencl")`** and concatenate prelude + shim layers + `nmath` + your kernels yourself, or (**b**) ship only
    the extracted shards. **`glmbayes`** shows the reference **runner + caches + host plumbing** atop that stack;

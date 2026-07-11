@@ -137,5 +137,6 @@ sum(df$copied)
 
 Other OpenCL kernel library subsets: 
 \code{\link[opencltools]{load_library_for_kernel}()},
+\code{\link[opencltools]{load_library_for_kernel_cross_package}()},
 \code{\link[opencltools]{write_kernel_dependency_index}()}
 }
