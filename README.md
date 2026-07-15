@@ -1,8 +1,10 @@
-# nmathopencl
+# nmathopencl 0.8.3
 
 ![License: GPL-2](https://img.shields.io/badge/license-GPL--2-blue.svg)
 [![R-universe](https://knygren.r-universe.dev/badges/nmathopencl)](https://knygren.r-universe.dev/nmathopencl)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/knygren/nmathopencl?label=version)
+
+Requires **[`opencltools`](https://knygren.r-universe.dev/opencltools) (>= 0.8.2)** for program preload manifests and cross-package kernel library loading.
 
 `nmathopencl` is an OpenCL port of R's Mathlib (`nmath`) --- the C library
 that powers the statistical and mathematical functions in R. Its primary
@@ -49,25 +51,28 @@ sources, keep **`*.cl` launchers inside their own package**, annotate them with 
 dependency tags (`@depends_nmath`, `@all_depends_nmath`, broader `@depends`/`@provides`
 where applicable), then:
 
-1. **Validate** --- **`load_library_for_kernel(..., depends_tag = "all_depends_nmath")`** concatenates
-   the inferred minimal set of ported `inst/cl/nmath/` shards for a launcher from transitive
-   **`@all_depends_nmath`** annotations (optional **`warning()` hints** mirror
-   **`inst/extdata/opencl_known_failures.json`** for curated fragile subgraphs).
-
-2. **Optional materialization** --- **`extract_library_subset()`** writes that subset (and index companions)
-   next to kernels you intend to vendor; regenerate **`kernel_dependency_index.rds`** alongside the library
-   with **`write_kernel_dependency_index()`** after substantive port edits.
-
-   The fixed OpenCL prelude (headers, R shims, system stubs) ships as
+1. **Prelude** --- the fixed OpenCL prelude (headers, R shims, system stubs) ships as
    **`inst/cl/program_preload_manifest.tsv`** with companion
    **`program_preload_manifest.rds`**. Load the concatenated prelude with
    **`opencltools::load_program_preload(source_package = "nmathopencl")`**; see
    **`inst/examples/Ex_load_program_preload.R`**.
 
-3. **Integrate** --- either (**a**) remain linked to **`nmathopencl`** via **`system.file(..., package =
-   "nmathopencl")`** and concatenate prelude + shim layers + `nmath` + your kernels yourself, or (**b**) ship only
-   the extracted shards. **`glmbayes`** shows the reference **runner + caches + host plumbing** atop that stack;
-   most authors still own compilation lifetimes and R exports until richer automation arrives for trivial launchers.
+2. **Validate nmath subset** --- **`load_library_for_kernel(..., depends_tag = "all_depends_nmath")`**
+   concatenates the inferred minimal set of ported `inst/cl/nmath/` shards for a launcher from transitive
+   **`@all_depends_nmath`** annotations (optional **`warning()` hints** mirror
+   **`inst/extdata/opencl_known_failures.json`** for curated fragile subgraphs). When the launcher
+   **`.cl`** file lives in another installed package, use
+   **`opencltools::load_library_for_kernel_cross_package(..., kernel_package = "yourpkg",
+   library_package = "nmathopencl")`**.
+
+3. **Optional materialization** --- **`extract_library_subset()`** writes that subset (and index companions)
+   next to kernels you intend to vendor; regenerate **`kernel_dependency_index.rds`** alongside the library
+   with **`write_kernel_dependency_index()`** after substantive port edits.
+
+4. **Integrate** --- concatenate **prelude + nmath subset + launcher kernel** (via
+   **`opencltools::load_kernel_source()`**) into one string for **`clBuildProgram`**. Either
+   (**a**) remain linked to **`nmathopencl`** at runtime, or (**b**) ship only the extracted shards.
+   Downstream packages own runners, caches, and host plumbing for their launchers.
 
 ---
 

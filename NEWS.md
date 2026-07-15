@@ -1,11 +1,20 @@
-# nmathopencl 0.8.2.9000
+# nmathopencl 0.8.3
 
-### Add program_preload_manifest.tsv file
+### Program preload manifest and assembly workflow
 
-- Post-CRAN development after release 0.8.2.
-- Ship companion **`program_preload_manifest.rds`** beside the TSV for fast R-side reads.
-- Document prelude loading via **`opencltools::load_program_preload()`** in README and
-  **`inst/examples/Ex_load_program_preload.R`**.
+- Ship **`inst/cl/program_preload_manifest.tsv`** listing the fixed OpenCL prelude
+  (headers, R shims, system stubs) in load order, with companion
+  **`program_preload_manifest.rds`** for fast R-side reads.
+- Regenerate the RDS via **`data-raw/make_program_preload_manifest_rds.R`**
+  (uses **`opencltools::write_program_preload_manifest()`**).
+- Document full program assembly (prelude + nmath subset + launcher kernel) in
+  **`inst/examples/Ex_load_program_preload.R`** and reorder the README workflow
+  accordingly.
+- Update **`inst/examples/Ex_load_library_for_kernel.R`** to use the smaller
+  **`src/dnorm_kernel.cl`** launcher and point to the preload example for the
+  full build sequence.
+- Require **`opencltools (>= 0.8.2)`** for **`load_program_preload()`**,
+  **`load_library_for_kernel_cross_package()`**, and related manifest helpers.
 
 # nmathopencl 0.8.2
 

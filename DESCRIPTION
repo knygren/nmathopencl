@@ -1,8 +1,8 @@
 Package: nmathopencl
 Type: Package
 Title: 'OpenCL'-Ported R 'Mathlib' for GPU-Accelerated Packages
-Version: 0.8.2.9000
-Date: 2026-06-21
+Version: 0.8.3
+Date: 2026-07-15
 Authors@R: c(
     person("Kjell", "Nygren", role = c("aut", "cre"),
            email = "kjell.a.nygren@gmail.com"),
@@ -54,12 +54,12 @@ Imports:
     Rcpp (>= 1.1.1),
     RcppParallel,
     Rdpack (>= 0.11-0),
-    opencltools (>= 0.8.1)
+    opencltools (>= 0.8.2)
 RdMacros: Rdpack
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel, opencltools
 Depends: MASS, R (>= 3.5.0)
 Suggests:
-    glmbayes (>= 0.9.3),
+    glmbayes (>= 0.9.6),
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
