@@ -1,3 +1,16 @@
+# nmathopencl 0.8.4
+
+## Bug fixes
+
+* **Configure:** Removed **`tools/rcpp_include.R`** Rcpp header probing, Function.h
+  branch flags, and **`glmbayes_getRegisteredNamespace`** shim (rely on
+  **`LinkingTo: Rcpp`** and CRAN **Rcpp** instead).
+
+* **`Suggests`:** Removed **`glmbayes`** while that package is off CRAN
+  (avoids CRAN incoming NOTE on non-mainstream repositories).
+
+* **`.Rbuildignore`:** Added **`^\.cursor$`** (hidden directory NOTE).
+
 # nmathopencl 0.8.3
 
 ### Program preload manifest and assembly workflow

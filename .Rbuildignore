@@ -31,6 +31,7 @@
 ^R-UNIVERSE\.md$
 ^\.github$
 ^\.vscode$
+^\.cursor$
 ^\.positai$
 ^\.claude$
 ^CRAN-SUBMISSION$

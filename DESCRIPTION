@@ -1,8 +1,8 @@
 Package: nmathopencl
 Type: Package
 Title: 'OpenCL'-Ported R 'Mathlib' for GPU-Accelerated Packages
-Version: 0.8.3
-Date: 2026-07-15
+Version: 0.8.4
+Date: 2026-07-31
 Authors@R: c(
     person("Kjell", "Nygren", role = c("aut", "cre"),
            email = "kjell.a.nygren@gmail.com"),
@@ -35,7 +35,7 @@ Description: Ships statistical and mathematical routines from R internal
     'nmath' ('Mathlib') as 'OpenCL' C sources under directory 'inst/cl/', with R
     wrappers that use the GPU when 'OpenCL' is available at compile time and
     fall back to 'stats' equivalents otherwise. Aimed at package developers
-    building custom kernels (for example Bayesian GLMs via suggested package
+    building custom kernels (for example Bayesian GLMs such as package
     'glmbayes') using 'opencltools' kernel loaders and related helpers. Contains
     translated shims, an illustrative GLM-related kernel subsystem, vignettes,
     and optional GPU acceleration. The ported routines are translated from the
@@ -59,7 +59,6 @@ RdMacros: Rdpack
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel, opencltools
 Depends: MASS, R (>= 3.5.0)
 Suggests:
-    glmbayes (>= 0.9.6),
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),

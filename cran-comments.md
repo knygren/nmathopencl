@@ -1,19 +1,21 @@
-# CRAN submission comments --- nmathopencl 0.8.3
+# CRAN submission comments — nmathopencl 0.8.4
 
-New submission following CRAN release 0.8.2.
+Patch release following CRAN **0.8.3**.
 
-## Changes since 0.8.2
+## Summary
 
-- Ship **`program_preload_manifest.tsv`** (and companion **`program_preload_manifest.rds`**)
-  listing the fixed OpenCL prelude in load order for
-  **`opencltools::load_program_preload(source_package = "nmathopencl")`**.
-- Document full program assembly (prelude + nmath subset + launcher kernel) in
-  **`inst/examples/Ex_load_program_preload.R`** and README workflow section.
-- Require **`opencltools (>= 0.8.2)`** for the preload manifest and
-  **`load_library_for_kernel_cross_package()`** helpers used by downstream
-  packages assembling OpenCL programs from **nmathopencl** shards.
+* **Configure:** Removed Rcpp header probing / Function.h workaround tooling
+  (`tools/rcpp_include.R`, `tools/patch_rcpp_function_h.R`,
+  `glmbayes_getRegisteredNamespace` shim). Builds use standard **`LinkingTo:
+  Rcpp`**.
 
-## Test environments (0.8.3)
+* **`Suggests`:** Removed **`glmbayes`** while that package is off CRAN.
+
+* **`.Rbuildignore`:** Added **`^\.cursor$`** (hidden directory NOTE).
+
+No other functional or API changes.
+
+## Test environments
 
 - Maintainer: Windows 11, R 4.6.0, OpenCL (NVIDIA).
 - Optional OpenCL: CPU fallbacks via 'stats' when OpenCL is absent at compile
